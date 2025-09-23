@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./output.css" rel="stylesheet">
+</head>
+<body class="h-screen bg-gray-100 flex items-center justify-center relative">
+
+  <!-- Background -->
+  <div class="absolute inset-0">
+    <img src="./src/Pictures/LogoLolasayong2.png" 
+         alt="Background" 
+         class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-white bg-opacity-50"></div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="relative z-10 bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl px-8 py-10 w-[90%] max-w-md text-center">
+    
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+      <img src="./src/Pictures/LogoLolasayong.png" 
+           alt="Lola Sayong Logo" 
+           class="h-[120px] w-auto">
+           <div class="[w-120px]"></div>
+    </div>
+
+    <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+    <p class="text-gray-500 mb-8">Log in to continue your reservation</p>
+
+    <form class="space-y-6 text-left">
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" 
+               class="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-teal-600 focus:outline-none shadow-sm"/>
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+        <input type="password" id="password" placeholder="••••••••" 
+               class="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-teal-600 focus:outline-none shadow-sm"/>
+      </div>
+
+      <!-- Remember & Forgot -->
+      <div class="flex items-center justify-between text-sm">
+        <label class="flex items-center gap-2 text-gray-600">
+          <input type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500"/>
+          Remember me
+        </label>
+        <a href="#" class="text-teal-600 hover:underline">Forgot password?</a>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" 
+              class="w-full bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-teal-700 transition duration-300">
+        Log In
+      </button>
+    </form>
+
+    <!-- Divider -->
+    <div class="flex items-center my-6">
+      <div class="flex-grow border-t border-gray-300"></div>
+      <span class="mx-3 text-gray-500 text-sm">or</span>
+      <div class="flex-grow border-t border-gray-300"></div>
+    </div>
+
+    <!-- Social Logins -->
+    <div class="flex justify-center">
+      <button class="flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2 px-6 hover:bg-gray-100 transition">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5"/> Google
+      </button>
+    </div>
+
+    <!-- Register Link -->
+    <p class="text-center text-gray-600 text-sm mt-6">
+      Don’t have an account? 
+      <a href="#" class="text-teal-600 hover:underline">Sign up</a>
+    </p>
+  </div>
+</body>
+</html>

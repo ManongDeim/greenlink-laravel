@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../output.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  
+  <!-- Tab Icon -->
+  <link rel="icon" type="image/png" href="../src/Pictures/LogoLolasayong2.png">
+
+  <title>Food Order</title>
+</head>
+<body class="bg-white">
+
+  <!-- Header -->
+<header class="flex items-center justify-between px-8 py-3 bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 shadow-md">
+
+  <!-- Left: Logo + Nav -->
+  <div class="flex items-center gap-8">
+    <!-- Logo -->
+     <a href="../index.html">
+    <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo" 
+         class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-lg cursor-pointer">
+      </a>
+    <!-- Navigation -->
+    <nav class="flex gap-6 text-lg font-medium">
+      <a href="../index.html" class="text-white hover:text-gray-200 transition">Home</a>
+      <a onclick="openReserModal()" class="text-white hover:text-gray-200 transition">Booking</a>
+      <a onclick="openOrderModal()" class="text-white hover:text-gray-200 transition">Order</a>
+    </nav>
+  </div>
+
+  <!-- Right: Cart + Login -->
+  <div class="flex items-center gap-8">
+    <!-- Cart -->
+    <div class="relative cursor-pointer" onclick="openModal()">
+      <img src="../src/Pictures/trolley-cart.png" class="h-6 w-auto" alt="Cart">
+      <span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5 shadow">
+        0
+      </span>
+    </div>
+
+    <!-- Google Login -->
+    <button class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-3 py-1.5 text-sm hover:bg-gray-100 transition-shadow shadow-sm">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google">
+      <span>Log-in</span>
+    </button>
+  </div>
+
+</header>
+
+  <!-- Toast Notification -->
+<div id="toast" 
+     class="fixed flex items-center bottom-5 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-4 py-3 rounded-lg shadow-lg hidden transition-opacity duration-500">
+  <span id="toastMessage"></span>
+</div>
+
+  <!-- Best Seller Section -->
+  <section class="py-10 px-6">
+    <h2 class="text-2xl font-bold text-center mb-8">Our Best Sellers</h2>
+<form>
+    <!-- Grid for 6 items -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+      
+      <!-- Smoked Fish -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden w-80 transition hover:shadow-xl">
+        <img src="../src/Pictures/FoodOrder/smoked fish.jpg" alt="Smoked Fish" class="h-48 w-full object-cover">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold">Smoked Fish</h3>
+          <p class="text-gray-500">₱190</p>
+          <div class="flex items-center space-x-4 mt-4">
+            <div class="flex items-center space-x-4">
+              <button type="button" onclick="decrementCounter('counter1')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">−</button>
+              <span id="counter1" class="w-10 text-center text-lg font-semibold bg-gray-100 rounded-lg py-1">0</span>
+              <button type="button" onclick="incrementCounter('counter1')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">+</button>
+            </div>
+            <button type="button" onclick="addItem('Smoked Fish', 'counter1')" class="px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700">Add Item</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deviled Fish -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden w-80 transition hover:shadow-xl">
+        <img src="../src/Pictures/FoodOrder/deviled fish.jpg" alt="deviled fish" class="h-48 w-full object-cover">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold">Deviled Fish</h3>
+          <p class="text-gray-500">₱190</p>
+          <div class="flex items-center space-x-4 mt-4">
+            <div class="flex items-center space-x-4">
+              <button type="button" onclick="decrementCounter('counter2')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">−</button>
+              <span id="counter2" class="w-10 text-center text-lg font-semibold bg-gray-100 rounded-lg py-1">0</span>
+              <button type="button" onclick="incrementCounter('counter2')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">+</button>
+            </div>
+            <button type="button" onclick="addItem('Deviled Fish', 'counter2')" class="px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700">Add Item</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SeaSig -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden w-80 transition hover:shadow-xl">
+        <img src="../src/Pictures/FoodOrder/sea sig.jpg" alt="SeaSig" class="h-48 w-full object-cover">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold">SeaSig</h3>
+          <p class="text-gray-500">₱190</p>
+          <div class="flex items-center space-x-4 mt-4">
+            <div class="flex items-center space-x-4">
+              <button type="button" onclick="decrementCounter('counter3')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">−</button>
+              <span id="counter3" class="w-10 text-center text-lg font-semibold bg-gray-100 rounded-lg py-1">0</span>
+              <button type="button" onclick="incrementCounter('counter3')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">+</button>
+            </div>
+            <button type="button" onclick="addItem('SeaSig', 'counter3')" class="px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700">Add Item</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blue Craze -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden w-80 transition hover:shadow-xl">
+        <img src="../src/Pictures/FoodOrder/blue craze.jpg" alt="Blue Craze" class="h-48 w-full object-cover">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold">Blue Craze</h3>
+          <p class="text-gray-500">₱190</p>
+          <div class="flex items-center space-x-4 mt-4">
+            <div class="flex items-center space-x-4">
+              <button type="button" onclick="decrementCounter('counter4')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">−</button>
+              <span id="counter4" class="w-10 text-center text-lg font-semibold bg-gray-100 rounded-lg py-1">0</span>
+              <button type="button" onclick="incrementCounter('counter4')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">+</button>
+            </div>
+            <button type="button" onclick="addItem('Blue Craze', 'counter4')" class="px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700">Add Item</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chicken Sheet -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden w-80 transition hover:shadow-xl">
+        <img src="../src/Pictures/FoodOrder/chicken sheet.jpg" alt="Chicken sheet" class="h-48 w-full object-cover">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold">Chicken Sheet</h3>
+          <p class="text-gray-500">₱190</p>
+          <div class="flex items-center space-x-4 mt-4">
+            <div class="flex items-center space-x-4">
+              <button type="button" onclick="decrementCounter('counter5')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">−</button>
+              <span id="counter5" class="w-10 text-center text-lg font-semibold bg-gray-100 rounded-lg py-1">0</span>
+              <button type="button" onclick="incrementCounter('counter5')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">+</button>
+            </div>
+            <button type="button" onclick="addItem('Chicken Sheet', 'counter5')" class="px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700">Add Item</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Black Meal -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden w-80 transition hover:shadow-xl">
+        <img src="../src/Pictures/FoodOrder/black meal.jpeg" alt="Black Meal" class="h-48 w-full object-cover">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold">Black Meal</h3>
+          <p class="text-gray-500">₱190</p>
+          <div class="flex items-center space-x-4 mt-4">
+            <div class="flex items-center space-x-4">
+              <button type="button" onclick="decrementCounter('counter6')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">−</button>
+              <span id="counter6" class="w-10 text-center text-lg font-semibold bg-gray-100 rounded-lg py-1">0</span>
+              <button type="button" onclick="incrementCounter('counter6')" class="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full text-lg font-bold hover:bg-teal-600 hover:text-white">+</button>
+            </div>
+            <button type="button" onclick="addItem('Black Meal', 'counter6')" class="px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700">Add Item</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Check-out Button -->
+  <div class="flex justify-center mb-12">
+    <button type="button" onclick="openModal()"
+      class="bg-teal-700 hover:bg-teal-800 text-white font-medium px-10 py-3 rounded-md shadow-md transition">
+      Check-out
+    </button>
+  </div>
+  </form>
+
+  <!-- Modal -->
+  <div id="checkoutModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-[400px] relative">
+      
+      <!-- Close -->
+      <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-500 hover:text-black text-xl">&times;</button>
+      
+      <h2 class="text-2xl font-bold mb-4 text-center">🛒 Order Summary</h2>
+      <div id="cartSummary" class="space-y-3 text-gray-700"></div>
+      
+      <div class="mt-4 flex justify-between font-bold text-lg">
+        <span>Total:</span>
+        <span id="cartTotal">₱0</span>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-4">
+        <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+        <button onclick="confirmOrder()" class="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+ <!-- Reservation Pop-Up -->
+  <div id="reservationModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <!-- Pop-Up Content -->
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Reservation Type</h2>
+
+      <div class="grid gap-4">
+        <button id="roomReser" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Room Reservation
+        </button>
+        <button id="eventReser" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Event Reservation
+        </button>
+      </div>
+
+      <!-- Close Button -->
+      <div class="text-center mt-6">
+        <button onclick="closeReserModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Pop-Up -->
+  <div id="orderModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <!-- Pop-Up Content -->
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Order Type</h2>
+
+      <div class="grid grid-cols-2 gap-6">
+        <button id="foodOrder" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Food Order
+        </button>
+        <button id="farmOrder" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Farm Order
+        </button>
+      </div>
+
+      <!-- Close Button -->
+      <div class="text-center mt-6">
+        <button onclick="closeOrderModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <!-- Content -->
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Payment Method</h2>
+      <div class="grid gap-4">
+
+     <div id="paymentSummary" class="bg-gray-100 p-4 rounded-lg mb-4 text-sm text-gray-800">
+
+     </div>
+    <div class="grid gap-4">
+        </button>
+        <button type="button" id="gcashPayment" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Proceed to payment
+        </button>
+      </div>
+
+      <!-- Close Button -->
+      <div class="text-center mt-6">
+        <button onclick="closePaymentModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alert Modal -->
+
+<div id="alertModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+  <div class="bg-white p-6 rounded-2xl shadow-xl w-80 text-center">
+    <h2 id="alertMessage" class="text-lg font-semibold text-gray-800 mb-4"></h2>
+    <button onclick="closeAlert()" class="px-4 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700">
+      OK
+    </button>
+  </div>
+</div>
+
+
+ <!-- Footer -->
+<footer class="bg-gray-900 text-gray-300 mt-12">
+  <div class="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div>
+      <h3 class="text-lg font-semibold mb-3">About Us</h3>
+      <p class="text-sm leading-relaxed">
+        Lola Sayong Eco Surf-Farm is a community-driven space in Sorsogon where nature,
+  culture, and people come together. We offer eco-friendly venues for celebrations,
+  farm-to-table dining, event booking, and room reservations — giving you a relaxing
+  escape by the sea.
+      </p>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-3">Contact</h3>
+      <p class="text-sm">📍 Brgy. Buenavista, Gubat, Sorsogon</p>
+      <p class="text-sm">📞 +63 939 907 6136</p>
+      <p class="text-sm">✉️ lolasayong.org@gmail.com</p>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-3">Follow Us</h3>
+      <div class="flex gap-3">
+        <a href="https://www.facebook.com/Lola.Sayong.Surf.Camp" class="hover:text-white">Facebook</a>
+        <a href="https://www.instagram.com/lolasayong.and.thesimplethings/" class="hover:text-white">Instagram</a>
+      </div>
+    </div>
+  </div>
+  <div class="text-center text-sm py-4 border-t border-gray-700">
+    © 2025 Lola Sayong Eco-Surf Camp. All rights reserved.
+  </div>
+</footer>
+<script src="../scripts/foodOrderScript.js"></script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../output.css" rel="stylesheet">
+  <title>Rooms & Suites</title>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<!-- Header -->
+<header class="flex items-center justify-between px-8 py-3 bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 shadow-md">
+
+
+  <!-- Left: Logo + Nav -->
+  <div class="flex items-center gap-8">
+    <!-- Logo -->
+     <a href="../index.html">
+    <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo" 
+         class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-lg cursor-pointer">
+      </a>
+
+    <!-- Navigation -->
+    <nav class="flex gap-6 text-lg font-medium">
+      <a href="../index.html" class="text-white hover:text-gray-200 transition">Home</a>
+      <a onclick="openReserModal()" class="text-white hover:text-gray-200 transition">Booking</a>
+      <a onclick="openOrderModal()" class="text-white hover:text-gray-200 transition">Order</a>
+    </nav>
+  </div>
+
+  <!-- Google Login -->
+    <button class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-3 py-1.5 text-sm hover:bg-gray-100 transition-shadow shadow-sm">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google">
+      <span>Log-in</span>
+    </button>
+  </div>
+
+  </header>
+
+  <!-- Page Heading -->
+  <section class="text-center mt-10">
+    <h1 class="text-4xl font-bold text-gray-800">Our Huts & Rooms</h1>
+    <p class="text-gray-600 mt-2">Choose the perfect room for your stay at Lolasayong Resort.</p>
+  </section>
+
+  <!-- Rooms Grid -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mt-10 p-4">
+    
+    <!-- Square Room -->
+    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         onclick="openRoomModal('soloHut')">
+      <img src="../src/Pictures/Room/Square 1-2 pax with or eithout meals/328a158b-bae7-48f0-ae5e-95b28e7b1a3f.PNG" alt="Solo Hut" class="w-full h-56 object-cover">
+      <div class="p-4 text-center">
+        <h2 class="text-xl font-bold text-gray-800">Square Room</h2>
+        <p class="text-gray-600 text-sm mt-2">Cozy and perfect for 1-2 guest/s.</p>
+      </div>
+    </div>
+
+    <!-- Twin Room -->
+    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         onclick="openRoomModal('DuoHut')">
+      <img src="../src/Pictures/Room/Twin room 1-2 pax with or without meals/9f410870-4f54-4573-8bb8-bf3e582c97ca.PNG" alt="TwinRoom" class="w-full h-56 object-cover">
+      <div class="p-4 text-center">
+        <h2 class="text-xl font-bold text-gray-800">Twin Room</h2>
+        <p class="text-gray-600 text-sm mt-2">Cozy and perfect for 2 guests.</p>
+      </div>
+    </div>
+
+    <!-- Bree 2 -->
+    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         onclick="openRoomModal('TrioHut')">
+      <img src="../src/Pictures/Room/Bree 2 without meals/c7bde137-1e79-4dbf-a197-845ec0df24fb.PNG" alt="TrioHut" class="w-full h-56 object-cover">
+      <div class="p-4 text-center">
+        <h2 class="text-xl font-bold text-gray-800">Bree</h2>
+        <p class="text-gray-600 text-sm mt-2">Cozy and perfect for 3 guests.</p>
+      </div>
+    </div>
+
+    <!-- Josie -->
+    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         onclick="openRoomModal('airconCabin1')">
+      <img src="../src/Pictures/Room/Aircon rooms without meals/AC Room Josie 1&2.PNG" alt="AirconCabin1" class="w-full h-56 object-cover">
+      <div class="p-4 text-center">
+        <h2 class="text-xl font-bold text-gray-800">Josie</h2>
+        <p class="text-gray-600 text-sm mt-2">Cozy and perfect for 2-4 guests.</p>
+      </div>
+    </div>
+
+    <!-- Aircon Cabin2 -->
+    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         onclick="openRoomModal('airconCabin2')">
+      <img src="../src/Pictures/VillaVictoria1.jpg" alt="AirconCabin2" class="w-full h-56 object-cover">
+      <div class="p-4 text-center">
+        <h2 class="text-xl font-bold text-gray-800">Aircon Cabin2</h2>
+        <p class="text-gray-600 text-sm mt-2">Cozy and perfect for 3 guests.</p>
+      </div>
+    </div>
+
+    <!-- Aircon Room Cabin -->
+    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         onclick="openRoomModal('airconRoomCabin')">
+      <img src="../src/Pictures/VillaVictoria1.jpg" alt="AirconRoomCabin" class="w-full h-56 object-cover">
+      <div class="p-4 text-center">
+        <h2 class="text-xl font-bold text-gray-800">Aircon Room Cabin</h2>
+        <p class="text-gray-600 text-sm mt-2">Cozy and perfect for 4-6 guests.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Modal for Solo Hut -->
+  <div id="soloHut" class="hidden fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full relative shadow-lg">
+      <button onclick="closeRoomModal('soloHut')" 
+              class="absolute top-3 right-3 text-gray-600 hover:text-gray-900">&times;</button>
+      
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Square Room</h2>
+      <img src="../src/Pictures/Room/Square 1-2 pax with or eithout meals/588c27d0-fa75-4df4-a2a9-7da9f50ddc87.PNG" alt="Deluxe Room" class="rounded-xl mb-4">
+      <p class="text-gray-700 mb-4">
+        Our Deluxe Room features a queen-sized bed, air conditioning, and complimentary breakfast. 
+        Perfect for a relaxing getaway.
+      </p>
+      <ul class="list-disc pl-5 text-gray-700">
+        <li>Free Wi-Fi</li>
+        <li>Air-conditioning</li>
+        <li>Private Bathroom</li>
+        <li>Free Breakfast</li>
+      </ul>
+     <button type="button" id="squareRoom" class=" bg-teal-700 hover:bg-teal-800 absolute bottom-3 right-3 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Book Now!
+        </button>
+    </div>
+  </div>
+
+  <!-- Modal for Duo Hut -->
+  <div id="DuoHut" class="hidden fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full relative shadow-lg">
+      <button onclick="closeRoomModal('DuoHut')" 
+              class="absolute top-3 right-3 text-gray-600 hover:text-gray-900">&times;</button>
+      
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Twin Room</h2>
+      <img src="../src/Pictures/Room/Twin room 1-2 pax with or without meals/a588e95d-d4a7-45fe-8f41-0da07a7b9741.PNG" alt="Twin Room" class="rounded-xl mb-4">
+      <p class="text-gray-700 mb-4">
+        Our Deluxe Room features a queen-sized bed, air conditioning, and complimentary breakfast. 
+        Perfect for a relaxing getaway.
+      </p>
+      <ul class="list-disc pl-5 text-gray-700">
+        <li>Free Wi-Fi</li>
+        <li>Air-conditioning</li>
+        <li>Private Bathroom</li>
+        <li>Free Breakfast</li>
+      </ul>
+      <button id="roomReser" class="bg-teal-700 hover:bg-teal-800 absolute bottom-3 right-3 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Book Now!
+        </button>
+    </div>
+  </div>
+
+  <!-- Modal for Trio Hut -->
+  <div id="TrioHut" class="hidden fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full relative shadow-lg">
+      <button onclick="closeRoomModal('TrioHut')" 
+              class="absolute top-3 right-3 text-gray-600 hover:text-gray-900">&times;</button>
+      
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Bree</h2>
+      <img src="../src/Pictures/Room/Bree 2 without meals/c672b5bb-7508-4f05-ad60-cf16082906f2.PNG" alt="Deluxe Room" class="rounded-xl mb-4">
+      <p class="text-gray-700 mb-4">
+        Our Deluxe Room features a queen-sized bed, air conditioning, and complimentary breakfast. 
+        Perfect for a relaxing getaway.
+      </p>
+      <ul class="list-disc pl-5 text-gray-700">
+        <li>Free Wi-Fi</li>
+        <li>Air-conditioning</li>
+        <li>Private Bathroom</li>
+        <li>Free Breakfast</li>
+      </ul>
+      <button id="roomReser" class="bg-teal-700 hover:bg-teal-800 absolute bottom-3 right-3 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Book Now!
+        </button>
+    </div>
+  </div>
+
+  <!-- Modal for Aircon Cabin1 -->
+  <div id="airconCabin1" class="hidden fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full relative shadow-lg">
+      <button onclick="closeRoomModal('airconCabin1')" 
+              class="absolute top-3 right-3 text-gray-600 hover:text-gray-900">&times;</button>
+      
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Josie</h2>
+      <img src="../src/Pictures/Room/Aircon rooms without meals/AC Room Josie 1&2 bedroom.PNG" alt="Deluxe Room" class="rounded-xl mb-4">
+      <p class="text-gray-700 mb-4">
+        Our Deluxe Room features a queen-sized bed, air conditioning, and complimentary breakfast. 
+        Perfect for a relaxing getaway.
+      </p>
+      <ul class="list-disc pl-5 text-gray-700">
+        <li>Free Wi-Fi</li>
+        <li>Air-conditioning</li>
+        <li>Private Bathroom</li>
+        <li>Free Breakfast</li>
+      </ul>
+      <button id="roomReser" class="bg-teal-700 hover:bg-teal-800 absolute bottom-3 right-3 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Book Now!
+        </button>
+    </div>
+  </div>
+
+  <!-- Modal for Aircon Cabin2 -->
+  <div id="airconCabin2" class="hidden fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full relative shadow-lg">
+      <button onclick="closeRoomModal('airconCabin2')" 
+              class="absolute top-3 right-3 text-gray-600 hover:text-gray-900">&times;</button>
+      
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Aircon Cabin2</h2>
+      <img src="./src/Pictures/VillaVictoria1.jpg" alt="Deluxe Room" class="rounded-xl mb-4">
+      <p class="text-gray-700 mb-4">
+        Our Deluxe Room features a queen-sized bed, air conditioning, and complimentary breakfast. 
+        Perfect for a relaxing getaway.
+      </p>
+      <ul class="list-disc pl-5 text-gray-700">
+        <li>Free Wi-Fi</li>
+        <li>Air-conditioning</li>
+        <li>Private Bathroom</li>
+        <li>Free Breakfast</li>
+      </ul>
+      <button id="roomReser" class="bg-teal-700 hover:bg-teal-800 absolute bottom-3 right-3 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Book Now!
+        </button>
+    </div>
+  </div>
+
+  <!-- Modal for Aircon Room Cabin -->
+  <div id="airconRoomCabin" class="hidden fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full relative shadow-lg">
+      <button onclick="closeRoomModal('airconRoomCabin')" 
+              class="absolute top-3 right-3 text-gray-600 hover:text-gray-900">&times;</button>
+      
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Aircon Room Cabin</h2>
+      <img src="../src/Pictures/VillaVictoria1.jpg" alt="Deluxe Room" class="rounded-xl mb-4">
+      <p class="text-gray-700 mb-4">
+        Our Deluxe Room features a queen-sized bed, air conditioning, and complimentary breakfast. 
+        Perfect for a relaxing getaway.
+      </p>
+      <ul class="list-disc pl-5 text-gray-700">
+        <li>✔ Free Wi-Fi</li>
+        <li>✔ Air-conditioning</li>
+        <li>✔ Private Bathroom</li>
+        <li>✔ Free Breakfast</li>
+      </ul>
+      <button  class="bookNowBtn bg-teal-700 hover:bg-teal-800 absolute bottom-3 right-3 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Book Now!
+        </button>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div id="checkoutModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-[400px] relative">
+      
+      <!-- Close -->
+      <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-500 hover:text-black text-xl">&times;</button>
+      
+      <h2 class="text-2xl font-bold mb-4 text-center">🛒 Order Summary</h2>
+      <div id="cartSummary" class="space-y-3 text-gray-700"></div>
+      
+      <div class="mt-4 flex justify-between font-bold text-lg">
+        <span>Total:</span>
+        <span id="cartTotal">₱0</span>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-4">
+        <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+        <button onclick="confirmOrder()" class="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+ <!-- Reservation Pop-Up -->
+  <div id="reservationModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <!-- Pop-Up Content -->
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Reservation Type</h2>
+
+      <div class="grid gap-4">
+        <button  type="button" id="roomReserPage" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Room Reservation
+        </button>
+        <button  type="button" id="eventReser" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Event Reservation
+        </button>
+      </div>
+
+      <!-- Close Button -->
+      <div class="text-center mt-6">
+        <button onclick="closeReserModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+  <!-- Order Pop-Up -->
+  <div id="orderModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">    
+    <!-- Pop-Up Content -->
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Order Type</h2>
+
+      <div class="grid grid-cols-2 gap-6">
+        <button type="button" id="foodOrder" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Food Order
+        </button>
+        <button type="button " id="farmOrder" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Farm Order
+        </button>
+      </div>
+
+      <!-- Close Button -->
+      <div class="text-center mt-6">
+        <button onclick="closeOrderModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+      <!-- Close Button -->
+      <div class="text-center mt-6">
+        <button onclick="closeOrderModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+<footer class="bg-gray-900 text-gray-300 mt-12">
+  <div class="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div>
+      <h3 class="text-lg font-semibold mb-3">About Us</h3>
+      <p class="text-sm leading-relaxed">
+        Lola Sayong Eco Surf-Farm is a community-driven space in Sorsogon where nature,
+  culture, and people come together. We offer eco-friendly venues for celebrations,
+  farm-to-table dining, event booking, and room reservations — giving you a relaxing
+  escape by the sea.
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-3">Contact</h3>
+      <p class="text-sm">📍 Brgy. Buenavista, Gubat, Sorsogon</p>
+      <p class="text-sm">📞 +63 939 907 6136</p>
+      <p class="text-sm">✉️ lolasayong.org@gmail.com</p>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-3">Follow Us</h3>
+      <div class="flex gap-3">
+        <a href="https://www.facebook.com/Lola.Sayong.Surf.Camp" class="hover:text-white">Facebook</a>
+        <a href="https://www.instagram.com/lolasayong.and.thesimplethings/" class="hover:text-white">Instagram</a>
+      </div>
+    </div>
+  </div>
+  <div class="text-center text-sm py-4 border-t border-gray-700">
+    © 2025 Lola Sayong Eco-Surf Camp. All rights reserved.
+  </div>
+</footer>
+
+  <script src="../scripts/roomConnection.js">
+  </script>
+
+</body>
+</html>

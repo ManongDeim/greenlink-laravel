@@ -1,0 +1,119 @@
+// ✅ Keep your existing incrementCounter and decrementCounter here
+
+let cart = [];
+
+// Add item to cart
+function addItem(itemName, counterId) {
+  event.preventDefault();
+  let qty = parseInt(document.getElementById(counterId).textContent);
+
+  if (qty > 0) {
+    let existing = cart.find(c => c.name === itemName);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      cart.push({ name: itemName, qty: qty });
+    }
+
+    // reset counter
+    document.getElementById(counterId).textContent = 0;
+    updateCartBadge();
+    updateModal();
+  } else {
+    alert("Please select quantity before adding.");
+  }
+}
+
+// Update cart badge count
+function updateCartBadge() {
+  let count = cart.reduce((sum, item) => sum + item.qty, 0);
+  document.getElementById("cartCount").textContent = count;
+}
+
+// Checkout button
+document.querySelector("form").addEventListener("submit", function(e) {
+  e.preventDefault();
+  if (cart.length === 0) {
+    alert("Your cart is empty!");
+    return;
+  }
+  openModal();
+});
+
+// Open modal
+function openModal() {
+  updateModal();
+  document.getElementById("checkoutModal").classList.remove("hidden");
+}
+
+// Close modal
+function closeModal() {
+  document.getElementById("checkoutModal").classList.add("hidden");
+}
+
+// Update modal live
+function updateModal() {
+  let cartSummary = document.getElementById("cartSummary");
+  let cartTotal = document.getElementById("cartTotal");
+  cartSummary.innerHTML = "";
+  let total = 0;
+
+  cart.forEach((item, index) => {
+    let price = getPrice(item.name);
+    let itemTotal = price * item.qty;
+    total += itemTotal;
+
+    cartSummary.innerHTML += `
+      <div class="flex justify-between items-center border-b pb-1">
+        <span>${item.name}</span>
+        <div class="flex items-center gap-2">
+          <button onclick="changeQty(${index}, -1)" class="px-2 bg-gray-300 rounded">-</button>
+          <span>${item.qty}</span>
+          <button onclick="changeQty(${index}, 1)" class="px-2 bg-gray-300 rounded">+</button>
+          <span class="ml-2">₱${itemTotal}</span>
+          <button onclick="removeItem(${index})" class="text-red-600 hover:text-red-800 text-sm ml-2">Remove</button>
+        </div>
+      </div>
+    `;
+  });
+
+  cartTotal.textContent = `₱${total}`;
+}
+
+// Change quantity inside modal
+function changeQty(index, delta) {
+  cart[index].qty += delta;
+  if (cart[index].qty <= 0) {
+    cart.splice(index, 1); // remove if qty 0
+  }
+  updateCartBadge();
+  updateModal();
+}
+
+// Remove item
+function removeItem(index) {
+  cart.splice(index, 1);
+  updateCartBadge();
+  updateModal();
+}
+
+// Confirm order
+function confirmOrder() {
+  alert("✅ Order confirmed! Thank you.");
+  cart = [];
+  updateCartBadge();
+  closeModal();
+}
+
+// Price list
+function getPrice(itemName) {
+  switch(itemName) {
+    case "Bangus": return 200;
+    case "Egg": return 8.5;
+    case "Mud Crab": return 240;
+    case "Native Chicken": return 350;
+    case "Native Pork": return 350;
+    case "Squash": return 100;
+    default: return 0;
+  }
+}

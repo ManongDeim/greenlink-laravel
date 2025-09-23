@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../output.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  
+  
+  <!-- Tab Icon -->
+  <link rel="icon" type="image/png" href="../src/Pictures/LogoLolasayong2.png">
+
+  <title>Event Reservation</title>
+</head>
+<body class="bg-white">
+
+  <!-- Header -->
+  <header class="flex items-center justify-between px-8 py-3 bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 shadow-md relative">
+    <!-- Left: Logo + Navigation -->
+    <div class="flex items-center gap-10">
+      <!-- Logo -->
+     <a href="../index.html">
+    <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo"class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-lg cursor-pointer">
+      </a>
+
+      <!-- Navigation -->
+      <nav class="flex gap-6 text-lg font-medium">
+        <a href="../index.html" class="text-white hover:text-gray-200 transition">Home</a>
+        <a onclick="openReserModal()" class="text-white hover:text-gray-200 transition">Booking</a>
+        <a onclick="openOrderModal()" class="text-white hover:text-gray-200 transition">Order</a>
+      </nav>
+    </div>
+
+    <!-- Right: Google Login -->
+    <div class="flex items-center">
+      <button class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-4 py-2 hover:bg-gray-100 transition shadow-md">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
+        <span class="text-sm font-medium">Log-in</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Event Booking Title -->
+  <section class="px-6 mt-8 text-center">
+    <h1 class="text-3xl font-bold mb-6">Event Booking</h1>
+  </section>
+
+<!-- Booking Form -->
+<form id="eventBookingForm" class="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-6 space-y-6 mt-8">
+  <!-- Date Section -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Start Date -->
+    <div>
+      <label for="start_date" class="block mb-1 text-gray-700 font-medium">Start Date</label>
+      <input type="date" name="start_date" id="startDate"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+    </div>
+
+    <!-- End Date -->
+    <div>
+      <label for="end_date" class="block mb-1 text-gray-700 font-medium">End Date</label>
+      <input type="date" name="end_date" id="endDate"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+    </div>
+  </div>
+
+  <!-- Booking Info -->
+  <section class="space-y-4">
+    <h2 class="text-2xl font-semibold text-center text-green-900">Reservation Details</h2>
+
+    <!-- Full Name -->
+    <div>
+      <label for="fullname" class="block mb-1 text-gray-700 font-medium">Full Name</label>
+      <input type="text" name="full_name" id="fullname" placeholder="Enter your name"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+    </div>
+
+    <!-- Event Type -->
+    <div>
+      <label for="event_type" class="block mb-1 text-gray-700 font-medium">Event Type</label>
+      <select name="event_type" id="event_type"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+        <option value="" disabled selected>Select Event Type</option>
+        <option value="Workshops">Workshops</option>
+        <option value="Wedding">Wedding</option>
+        <option value="Company Outing">Company Outing</option>
+        <option value="Family Gathering">Family Gathering</option>
+        <option value="School Event">School Event</option>
+      </select>
+    </div>
+
+    <!-- Email -->
+    <div>
+      <label for="email" class="block mb-1 text-gray-700 font-medium">E-mail</label>
+      <input type="email" name="email" id="email" placeholder="name@mail.com"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+    </div>
+
+    <!-- Phone No -->
+    <div>
+      <label for="phone" class="block mb-1 text-gray-700 font-medium">Phone No</label>
+      <input type="tel" name="phone_number" id="phone" placeholder="09*********"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+    </div>
+
+    <!-- No of Pax -->
+    <div>
+      <label for="pax" class="block mb-1 text-gray-700 font-medium">No of Pax</label>
+      <input type="number" name="pax" id="pax" placeholder="Pax."
+        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+    </div>
+
+    <!-- Things to be brought -->
+    <div>
+      <label for="things" class="block mb-1 text-gray-700 font-medium">Things to be brought</label>
+      <textarea id="things" name="to_bring" placeholder="Volleyball Net&#10;Banners"
+        class="w-full border border-gray-300 rounded-md px-3 py-2  resize-none text-sm shadow-sm h-24 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition"></textarea>
+    </div>
+  </section>
+
+  <!-- Submit Button -->
+  <div class="flex justify-center">
+    <button type="button" onclick="openConfirmationModal()"
+      class="bg-gradient-to-r from-teal-700 to-teal-600 hover:from-teal-800 hover:to-teal-700 text-white font-semibold text-lg px-10 py-3 rounded-xl shadow-lg transition-transform transform hover:scale-105">
+      Review & Confirm Booking
+    </button>
+  </div>
+
+  <p id="response" class="text-center text-sm mt-2"></p>
+</form>
+
+ <!-- Footer -->
+<footer class="bg-gray-900 text-gray-300 mt-12">
+  <div class="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div>
+      <h3 class="text-lg font-semibold mb-3">About Us</h3>
+      <p class="text-sm leading-relaxed">
+        Lola Sayong Eco Surf-Farm is a community-driven space in Sorsogon where nature,
+  culture, and people come together. We offer eco-friendly venues for celebrations,
+  farm-to-table dining, event booking, and room reservations — giving you a relaxing
+  escape by the sea.
+      </p>
+    </div>
+     <div>
+      <h3 class="text-lg font-semibold mb-3">Contact</h3>
+      <p class="text-sm">📍 Brgy. Buenavista, Gubat, Sorsogon</p>
+      <p class="text-sm">📞 +63 939 907 6136</p>
+      <p class="text-sm">✉️ lolasayong.org@gmail.com</p>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-3">Follow Us</h3>
+      <div class="flex gap-3">
+        <a href="https://www.facebook.com/Lola.Sayong.Surf.Camp" class="hover:text-white">Facebook</a>
+        <a href="https://www.instagram.com/lolasayong.and.thesimplethings/" class="hover:text-white">Instagram</a>
+      </div>
+    </div>
+  </div>
+  <div class="text-center text-sm py-4 border-t border-gray-700">
+    © 2025 Lola Sayong Eco-Surf Camp. All rights reserved.
+  </div>
+</footer>
+
+  <!-- Reservation Pop-Up -->
+  <div id="reservationModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Reservation Type</h2>
+      <div class="grid gap-4">
+        <button id="roomReser"
+          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Room Reservation
+        </button>
+        <button id="eventReser"
+          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Event Reservation
+        </button>
+      </div>
+      <div class="text-center mt-6">
+        <button onclick="closeReserModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Pop-Up -->
+  <div id="orderModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Order Type</h2>
+      <div class="grid grid-cols-2 gap-6">
+        <button id="foodOrder"
+          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Food Order
+        </button>
+        <button id="farmOrder"
+          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Farm Order
+        </button>
+      </div>
+      <div class="text-center mt-6">
+        <button onclick="closeOrderModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+<div id="confirmationModal"
+  class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+  <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+    <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Booking Summary</h2>
+
+    <!-- Summary Box -->
+    <div id="confirmationSummary"
+      class="bg-gray-100 p-4 rounded-lg mb-4 text-sm text-gray-800">
+      <p class="justify-center text-sm text-gray-700">
+        Note: Event Reservations will undergo approval process, check your email for approval results and payment.
+      </p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="grid gap-4">
+      <!-- Single Proper Submit Button -->
+      <button type="submit" id="confirmBtn"
+        class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300 w-full">
+        Submit
+      </button>
+    </div>
+
+    <!-- Close Button -->
+    <div class="text-center mt-6">
+      <button onclick="closeConfirmationModal()" 
+        class="text-gray-500 hover:text-gray-700 font-medium">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+  <!-- Alert Modal -->
+  <div id="alertModal"
+    class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <div class="bg-white p-6 rounded-2xl shadow-xl w-80 text-center">
+      <h2 id="alertMessage" class="text-lg font-semibold text-gray-800 mb-4"></h2>
+      <button onclick="closeAlert()" class="px-4 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700">
+        OK
+      </button>
+    </div>
+  </div>
+
+  <script src="../scripts/eventConnection.js"></script>
+</body>
+</html>

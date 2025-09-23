@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./output.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <!-- Flatpickr CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+  <!-- Tab Icon -->
+  <link rel="icon" type="image/png" href="./src/Pictures/LogoLolasayong2.png">
+
+  <title>Lola Sayong: GreenLink</title>
+</head>
+<body class="bg-white">
+<!-- Header -->
+<header class="flex items-center justify-between px-8 py-3 bg-white shadow-md relative z-50">
+
+  <!-- Left: Logo + Navigation -->
+  <div class="flex items-center gap-10">
+
+    <!-- Logo -->
+     <a href="./index.html">
+    <img src="./src/Pictures/LogoLolasayong2.png" alt="Logo" class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-lg cursor-pointer">
+      </a>
+
+    <!-- Navigation -->
+    <nav class="flex gap-6 text-lg font-medium">
+      <a href="./index.html" class="text-gray-700 hover:text-teal-600 transition">Home</a>
+      <button onclick="openReserModal()" class="text-gray-700 hover:text-teal-600 transition bg-auto">
+        Booking
+      </button>
+      <button onclick="openOrderModal()" class="text-gray-700 hover:text-teal-600 transition">
+        Order
+      </button>
+    </nav>
+  </div> 
+
+  <!-- Right: Google Login -->
+  <div class="flex items-center">
+    <a href="http://127.0.0.1:8000/auth/google" 
+ class="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 hover:bg-gray-100 transition shadow-sm">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
+      <span class="text-sm font-medium">Log-in</span>
+    </span>
+  </a>
+
+</header>
+
+   <!--Front Background-->
+  <section class="relative w-full">
+      <img class="w-full h-auto" src="./src/Pictures/BackgroundFrontPage.png" alt="BackgroundFrontPage"/>
+  </section>
+
+  <!--welcome-->
+  <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center px-4 text-center">
+    <h1 class="text-white text-3xl md:text-5xl font-bold drop-shadow-md mb-4">Welcome to Lola Sayong!</h1>
+    <p class="text-white text-lg md:text-xl font-light drop-shadow-md">A peaceful surf escape tucked along the shores of Gubat, Sorsogon</p>
+    <p class="text-white text-lg md:text-xl font-light drop-shadow-md">where every wave invites adventure, every stay supports the community,</p>
+    <p class="text-white text-lg md:text-xl font-light drop-shadow-md">and every moment brings you closer to nature, simplicity, and home.</p>
+ 
+      <!--Calendar with Date Range Picker-->
+      <div class="backdrop-blur-md bg-transparent/40 rounded-xl p-6 flex flex-wrap gap-4 justify-center shadow-2xl mt-6">
+        <div class="flex flex-col">
+          <label class="text-gray-800 font-medium mb-1">Check-In</label>
+          <input id="checkIn" type="text" readonly placeholder="Select date" 
+                 class="bg-white border px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-gray-800 font-medium mb-1">Check-Out</label>
+          <input id="checkOut" type="text" readonly placeholder="Select date" 
+                 class="bg-white border px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-gray-800 font-medium mb-1">Reservation</label>
+          <select class="bg-white border px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+            <option>Room Reservation</option>
+            <option>Event Reservation</option>
+          </select>
+      </div>
+      <div class="flex items-center">
+        <button class="mt-6 bg-white text-black px-6 py-2 rounded-lg hover:bg-teal-600 hover:text-white shadow-md transition duration-200"> Search</button>
+      </div>
+    </div>
+  </div>
+
+  <!--Events-->
+  <section class="px-6 py-16 bg-white text-gray-800">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Events</h2>
+    <!--Event Content-->
+    <div class="flex flex-col lg:flex-row gap-10 items-start">
+      <div class="lg:w-1/3 w-full pl-20">
+        <img class="rounded-lg shadow-md w-full" src="./src/Pictures/Sky+lantern.png" alt="SkyEvent">
+      </div>
+      <!--1st image Description-->
+      <div class="lg:w-2/3 w-full space-y-4 pr-20 font-light text-justify text-base md:text-lg leading-relaxed">
+        <p>
+          Imagine a serene evening where the sky transforms into a canvas of glowing dreams. The Sky Lantern Parade is a magical event where participants gather to release lanterns, each carrying hopes, dreams, and wishes.
+        </p>
+        <p>
+          Participants light their lanterns, and with a gentle release, the night sky comes alive with floating lights, creating a scene straight out of a fairytale. The lanterns, made from eco-friendly materials, drift upwards, illuminating the darkness with their warm glow. This enchanting spectacle not only symbolizes the release of personal aspirations but also fosters a sense of community and shared experience.
+        </p>
+        <p>
+          The parade is often accompanied by live music, captivating performances, and delicious local food, making it a perfect blend of cultural celebration and personal reflection. Whether you’re seeking a romantic evening, a family adventure, or a moment of peace, the Sky Lantern Parade offers an unforgettable experience that lights up both the sky and the heart.
+        </p>
+      </div>
+    </div>
+
+    <!--Event Highlights-->
+    <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 pl-20">
+      <div>
+        <p class="text-justify text-base md:text-lg font-light leading-relaxed">Join us for an exhilarating surf tour that takes you off the beaten path to some of the most stunning and lesser-known surf spots in our region.</p>
+        <h2 class="text-2xl md:text-3xl font-semibold pt-4 mb-4">Event Highlights</h2>
+          <ul class="list-disc pl-5 space-y-2 text-base md:text-lg leading-relaxed">
+            <li>Explore Hidden Gems: Discover pristine beaches and secret surf spots that only the locals know about. Experience the thrill of surfing in uncrowded waters with breathtaking natural scenery.</li>
+            <li>Expert Guidance: Our experienced surf instructors will be with you every step of the way, providing personalized coaching and ensuring your safety in the water.</li>
+            <li>Eco-Friendly Adventure: Embrace sustainable tourism as we promote eco-friendly practices throughout the tour. Learn about the local marine ecosystem and how we can protect it.</li>
+            <li>Community Connection: Engage with the local community and immerse yourself in the rich culture and traditions of our coastal towns. Enjoy local cuisine and support small businesses.</li>
+          </ul>
+      </div>
+      <div class="flex justify-center">
+          <img class="rounded-md" src="./src/Pictures/surftour.png" alt="surftour"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+<footer class="bg-gray-900 text-gray-300 mt-12">
+  <div class="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div>
+      <h3 class="text-lg font-semibold mb-3">About Us</h3>
+      <p class="text-sm leading-relaxed">
+        Lola Sayong Eco Surf-Farm is a community-driven space in Sorsogon where nature,
+  culture, and people come together. We offer eco-friendly venues for celebrations,
+  farm-to-table dining, event booking, and room reservations — giving you a relaxing
+  escape by the sea.
+      </p>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-3">Contact</h3>
+      <p class="text-sm">📍 Brgy. Buenavista, Gubat, Sorsogon</p>
+      <p class="text-sm">📞 +63 939 907 6136</p>
+      <p class="text-sm">✉️ lolasayong.org@gmail.com</p>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-3">Follow Us</h3>
+      <div class="flex gap-3">
+        <a href="https://www.facebook.com/Lola.Sayong.Surf.Camp" class="hover:text-white">Facebook</a>
+        <a href="https://www.instagram.com/lolasayong.and.thesimplethings/" class="hover:text-white">Instagram</a>
+      </div>
+    </div>
+  </div>
+  <div class="text-center text-sm py-4 border-t border-gray-700">
+    © 2025 Lola Sayong Eco-Surf Camp. All rights reserved.
+  </div>
+</footer>
+
+  <!-- Reservation Pop-Up -->
+  <div id="reservationModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">   
+  <!-- Pop-Up Content -->
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Chooose Reservation Type</h2>
+
+      <div class="grid gap-4">
+        <button id="roomReser" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Room Reservation
+        </button>
+        <button id="eventReser" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Event Reservation
+        </button>
+      </div>
+
+      <!-- Close Button -->
+      <div class="text-center mt-6">
+        <button onclick="closeReserModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Pop-Up -->
+  <div id="orderModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">    
+    <!-- Pop-Up Content -->
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Order Type</h2>
+
+      <div class="grid grid-cols-2 gap-6">
+        <button id="foodOrder" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Food Order
+        </button>
+        <button id="farmOrder" class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Farm Order
+        </button>
+      </div>
+
+      <!-- Close Button -->
+      <div class="text-center mt-6">
+        <button onclick="closeOrderModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link to your JS file -->
+  <script src="./scripts/indexScript.js"></script>
+
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+  </style>
+
+</body>
+</html>
