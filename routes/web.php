@@ -14,7 +14,7 @@ Route::get('/', function () {
 });
 
 Route::get('/', function () {
-    return response()->file(base_path('homePage.html'));
+    return response()->file(public_path('homePage.html'));
 });
 
 require __DIR__.'/auth.php';
