@@ -4,6 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Api\FarmOrderController;
 
+Route::get('/check-key', function () {
+    return env('APP_KEY');
+});
+
+
 Route::get('/', function () {
     return ['Laravel' => app()->version()];
 });
