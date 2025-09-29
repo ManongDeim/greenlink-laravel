@@ -10,7 +10,7 @@ async function sendReservation(paymentMethod){
     form.append("payment_method", paymentMethod);
 
     try {
-        let response = await fetch("http://127.0.0.1:8000/api/cottageReservation", {
+        let response = await fetch("http://greenlinklolasayong.site/laravel/api/cottageReservation", {
             method: "POST",
             body: form
         });

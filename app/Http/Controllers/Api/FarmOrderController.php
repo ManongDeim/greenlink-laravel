@@ -11,11 +11,6 @@ use App\Http\Controllers\Controller;
 class FarmOrderController extends Controller
 {       
 
-   private function getCloudflareDomain()
-{
-    return env('CLOUDFLARE_URL', config('app.url'));
-}
-
 
  public function createPaymentLink(Request $request)
     {
@@ -63,9 +58,6 @@ class FarmOrderController extends Controller
         // Save order to DB
         FarmOrderModel::create($orderData);
 
-         // Detect Cloudflare tunnel dynamically
-        $publicUrl = $this->getCloudflareDomain();
-
         // Call PayMongo API
         $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
             ->post('https://api.paymongo.com/v1/checkout_sessions', [
@@ -79,8 +71,8 @@ class FarmOrderController extends Controller
                         'currency' => 'PHP',
                         'show_line_items' => true,
                         'show_description' => true,
-                        'success_url' =>  $publicUrl . '/farmOrders/payment-success?remarks=' . $refNumber,
-                        'cancel_url' =>  $publicUrl . '/farmOrders/payment-failed?remarks=' . $refNumber,
+                        'success_url' =>  'https://greenlinklolasayong.com/pages/paymentFailed.html',
+                        'cancel_url' => 'https://greenlinklolasayong.com/pages/paymentFailed.html',
                     ]
                 ]
             ]);

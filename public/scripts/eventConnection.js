@@ -49,7 +49,7 @@ async function sendReservation(){
     let form = new FormData(formE1);
 
     try {
-        let response = await fetch("http://127.0.0.1:8000/api/eventReservation", {
+        let response = await fetch("http://greenlinklolasayong.site/laravel/api/eventReservation", {
             method: "POST",
             body: form
         });
