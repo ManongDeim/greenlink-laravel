@@ -183,7 +183,7 @@ function sendOrder(paymentMethod) {
   payment_method: paymentMethod
 });
 
-  fetch("http://127.0.0.1:8000/api/farmOrder/create-link", {
+  fetch("http://greenlinklolasayong.site/laravel/api/farmOrder/create-link", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

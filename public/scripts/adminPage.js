@@ -2,7 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
- fetch("http://127.0.0.1:8000/api/reservations/latest")
+ fetch("https://greenlinklolasayong.site/laravel/api/reservations/latest")
     .then(res => res.json())
     .then(data => {
       console.log("Latest reservation:", data);
