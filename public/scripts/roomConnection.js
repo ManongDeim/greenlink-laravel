@@ -200,6 +200,36 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+//Twin Room Page
+  document.addEventListener("DOMContentLoaded", () => { 
+  const btn = document.getElementById("twinRoom");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "./TwinRoom.html"; // go to another page
+  });
+});
+
+//Bree Room Page
+  document.addEventListener("DOMContentLoaded", () => { 
+  const btn = document.getElementById("breeRoom");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "./Bree.html"; // go to another page
+  });
+});
+
+//Bree Room Page
+  document.addEventListener("DOMContentLoaded", () => { 
+  const btn = document.getElementById("josieRoom");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "./Josie.html"; // go to another page
+  });
+});
+
 
 function openRoomModal(modalId) {
       document.getElementById(modalId).classList.remove('hidden');
