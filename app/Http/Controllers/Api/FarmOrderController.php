@@ -71,8 +71,8 @@ class FarmOrderController extends Controller
                         'currency' => 'PHP',
                         'show_line_items' => true,
                         'show_description' => true,
-                        'success_url' =>  'https://greenlinklolasayong.com/pages/paymentFailed.html',
-                        'cancel_url' => 'https://greenlinklolasayong.com/pages/paymentFailed.html',
+                        'success_url' =>  'https://greenlinklolasayong.site/pages/paymentSuccess.html',
+                        'cancel_url' => 'https://greenlinklolasayong.site/pages/paymentFailed.html',
                     ]
                 ]
             ]);
