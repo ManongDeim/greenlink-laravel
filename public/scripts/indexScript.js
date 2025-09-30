@@ -1,7 +1,7 @@
 // Buttons
 
 document.getElementById("loginBtn").addEventListener("click", () => {
-    window.location.href = "https://greenlinklolasayong.site/auth/google";
+    window.location.href = "/auth/google";
 });
 
 
