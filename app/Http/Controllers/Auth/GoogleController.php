@@ -36,12 +36,9 @@ class GoogleController extends Controller
             'user_id' => $user->id,
         ]);
 
-        $googleUser->fill([
-            'email' => $googleUser->getEmail(),
-            'avatar' => $googleUser->getAvatar(),
-        ]);
-
-        $googleUser->save();
+       $googleUser->email = $googleUser->getEmail();
+       $googleUser->avatar = $googleUser->getAvatar();
+       $googleUser->save();
 
         Auth::login($user);
 
