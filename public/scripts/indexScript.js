@@ -1,3 +1,10 @@
+// Buttons
+
+document.getElementById("loginBtn").addEventListener("click", () => {
+    window.location.href = "/auth/google";
+});
+
+
 // --- Modal Functions ---
 function openReserModal() {
   document.getElementById('reservationModal').classList.remove('hidden');
