@@ -15,14 +15,14 @@
   <!-- Left: Logo + Nav -->
   <div class="flex items-center gap-8">
     <!-- Logo -->
-     <a href="../index.html">
+     <a href="../homePage.html">
     <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo" 
          class="object-contain w-auto h-20 transition-transform duration-300 cursor-pointer hover:scale-105 hover:drop-shadow-lg">
       </a>
 
     <!-- Navigation -->
     <nav class="flex gap-6 text-lg font-medium">
-      <a href="../index.html" class="text-white transition hover:text-gray-200">Home</a>
+      <a href="../homePage.html" class="text-white transition hover:text-gray-200">Home</a>
       <a onclick="openReserModal()" class="text-white transition hover:text-gray-200">Booking</a>
       <a onclick="openOrderModal()" class="text-white transition hover:text-gray-200">Order</a>
     </nav>
@@ -89,7 +89,7 @@
     <!-- Aircon Cabin2 -->
     <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
          onclick="openRoomModal('airconCabin2')">
-      <img src="../src/Pictures/VillaVictoria1.jpg" alt="AirconCabin2" class="object-cover w-full h-56">
+      <img src="../src/Pictures/Room/Aircon rooms without meals/Old MCR.PNG" alt="AirconCabin2" class="object-cover w-full h-56">
       <div class="p-4 text-center">
         <h2 class="text-xl font-bold text-gray-800">Aircon Cabin2</h2>
         <p class="mt-2 text-sm text-gray-600">Cozy and perfect for 3 guests.</p>
@@ -150,7 +150,7 @@
         <li>Private Bathroom</li>
         <li>Free Breakfast</li>
       </ul>
-      <button id="twinRoom" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 bottom-3 right-3 rounded-xl">
+      <button type="button" id="twinRoom" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 bottom-3 right-3 rounded-xl">
           Book Now!
         </button>
     </div>
@@ -174,7 +174,7 @@
         <li>Private Bathroom</li>
         <li>Free Breakfast</li>
       </ul>
-      <button id="breeRoom" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 bottom-3 right-3 rounded-xl">
+      <button type="button" id="breeRoom" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 bottom-3 right-3 rounded-xl">
           Book Now!
         </button>
     </div>
@@ -198,7 +198,7 @@
         <li>Private Bathroom</li>
         <li>Free Breakfast</li>
       </ul>
-      <button id="josieRoom" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 bottom-3 right-3 rounded-xl">
+      <button type="button" id="josieRoom" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 bottom-3 right-3 rounded-xl">
           Book Now!
         </button>
     </div>
@@ -211,7 +211,7 @@
               class="absolute text-gray-600 top-3 right-3 hover:text-gray-900">&times;</button>
       
       <h2 class="mb-4 text-2xl font-bold text-gray-800">Aircon Cabin2</h2>
-      <img src="./src/Pictures/VillaVictoria1.jpg" alt="Deluxe Room" class="mb-4 rounded-xl">
+      <img src="../src/Pictures/Room/Aircon rooms without meals/Old MCR.PNG" alt="Deluxe Room" class="mb-4 rounded-xl">
       <p class="mb-4 text-gray-700">
         Our Deluxe Room features a queen-sized bed, air conditioning, and complimentary breakfast. 
         Perfect for a relaxing getaway.
@@ -222,7 +222,7 @@
         <li>Private Bathroom</li>
         <li>Free Breakfast</li>
       </ul>
-      <button id="roomReser" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 bottom-3 right-3 rounded-xl">
+      <button type="button" id="cabin2" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 bottom-3 right-3 rounded-xl">
           Book Now!
         </button>
     </div>
@@ -235,7 +235,7 @@
               class="absolute text-gray-600 top-3 right-3 hover:text-gray-900">&times;</button>
       
       <h2 class="mb-4 text-2xl font-bold text-gray-800">Aircon Room Cabin</h2>
-      <img src="../src/Pictures/VillaVictoria1.jpg" alt="Deluxe Room" class="mb-4 rounded-xl">
+      <img src="../src/Pictures/Room/Villavictoria/VillaVictoria1.jpg" alt="Deluxe Room" class="mb-4 rounded-xl">
       <p class="mb-4 text-gray-700">
         Our Deluxe Room features a queen-sized bed, air conditioning, and complimentary breakfast. 
         Perfect for a relaxing getaway.
@@ -246,7 +246,7 @@
         <li>✔ Private Bathroom</li>
         <li>✔ Free Breakfast</li>
       </ul>
-      <button  class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md bookNowBtn hover:bg-teal-800 bottom-3 right-3 rounded-xl">
+      <button type="button" id="villavictoria" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md bookNowBtn hover:bg-teal-800 bottom-3 right-3 rounded-xl">
           Book Now!
         </button>
     </div>
@@ -308,13 +308,6 @@
           Farm Order
         </button>
       </div>
-
-      <!-- Close Button -->
-      <div class="mt-6 text-center">
-        <button onclick="closeOrderModal()" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
-      </div>
-    </div>
-  </div>
 
       <!-- Close Button -->
       <div class="mt-6 text-center">

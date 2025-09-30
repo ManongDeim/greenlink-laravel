@@ -118,11 +118,11 @@ document.addEventListener("DOMContentLoaded", () => {
   //Room Reservation Page
   document.addEventListener("DOMContentLoaded", () => {
   
-  const btn = document.getElementById("roomReserPage");
+  const btn = document.getElementById("roomReser");
   
 
   btn.addEventListener("click", () => {
-    window.location.href = "#"; // go to another page
+    window.location.href = "RoomReser.html"; // go to another page
   });
 });
 
@@ -220,13 +220,33 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-//Bree Room Page
+//Josie Room Page
   document.addEventListener("DOMContentLoaded", () => { 
   const btn = document.getElementById("josieRoom");
 
 
   btn.addEventListener("click", () => {
     window.location.href = "./Josie.html"; // go to another page
+  });
+});
+
+//Cabin 2 Room Page
+  document.addEventListener("DOMContentLoaded", () => { 
+  const btn = document.getElementById("cabin2");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "./Cabin2.html"; // go to another page
+  });
+});
+
+//Villa Victoria Room Page
+  document.addEventListener("DOMContentLoaded", () => { 
+  const btn = document.getElementById("villavictoria");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "./Villavictoria.html"; // go to another page
   });
 });
 
