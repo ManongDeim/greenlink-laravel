@@ -1,8 +1,3 @@
-// Buttons
-
-document.getElementById("loginBtn").addEventListener("click", () => {
-    window.location.href = "/auth/google";
-});
 
 
 // --- Modal Functions ---
@@ -25,6 +20,34 @@ function closeOrderModal() {
   document.getElementById('orderModal').classList.add('hidden');
   document.body.classList.remove("overflow-hidden"); // re-enable scroll
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    
+    console.log("✅ DOM loaded, attaching button listeners...");
+    
+  // Google login redirect
+  const loginBtn = document.getElementById("loginBtn");
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+      window.location.href = "/auth/google";
+    });
+  }
+
+  // Booking modal
+  document.getElementById("bookingBtn")?.addEventListener("click", openReserModal);
+  document.getElementById("resCloseBtn")?.addEventListener("click", closeReserModal);
+
+  // Order modal
+  document.getElementById("orderBtn")?.addEventListener("click", openOrderModal);
+  document.getElementById("orderCloseBtn")?.addEventListener("click", closeOrderModal);
+
+  // Check login status
+  loadUserProfile();
+});
+
+
+
 
 // --- Close Modal When Clicking Outside ---
 document.addEventListener("click", function (event) {
@@ -122,14 +145,6 @@ flatpickrScript.onload = () => {
   const checkInInput = document.getElementById("checkIn");
   const checkOutInput = document.getElementById("checkOut");
 
-  // --- Flatpickr ---
-const flatpickrScript = document.createElement("script");
-flatpickrScript.src = "https://cdn.jsdelivr.net/npm/flatpickr";
-document.head.appendChild(flatpickrScript);
-
-flatpickrScript.onload = () => {
-  const checkInInput = document.getElementById("checkIn");
-  const checkOutInput = document.getElementById("checkOut");
 
   let lastCheckIn = null; // store last check-in date
 
@@ -172,22 +187,27 @@ flatpickrScript.onload = () => {
     picker.open();
   });
 };
-};
 
 async function loadUserProfile() {
     try {
+        console.log("🔍 Checking logged-in user...");
         const response = await fetch("/api/user", {
             credentials: "include" // ✅ important for session cookies
         });
+
+        console.log("📡 /api/user status:", response.status);
 
         if (!response.ok) {
             throw new Error("Not logged in");
         }
 
         const user = await response.json();
+        console.log("✅ User data from API:", user);
 
         // If user is logged in, replace login button
         if (user && user.name) {
+            console.log("🎉 Logged in as:", user.name);
+
             const authSection = document.getElementById("auth-section");
             authSection.innerHTML = `
                 <div class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full shadow-sm">
@@ -198,14 +218,17 @@ async function loadUserProfile() {
                             class="ml-2 text-xs text-red-500 hover:underline">Logout</button>
                 </div>
             `;
+        } else {
+            console.log("⚠️ No user.name found in response");
         }
     } catch (err) {
-        console.log("User not logged in:", err.message);
+        console.error("❌ User not logged in:", err.message);
     }
 }
 
 // Logout request
 async function logout() {
+    console.log("🚪 Logging out...");
     await fetch("/logout", { credentials: "include" });
     location.reload(); // reload page to reset UI
 }
