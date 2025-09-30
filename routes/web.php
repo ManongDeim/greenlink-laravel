@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Api\FarmOrderController;
 
@@ -24,6 +25,18 @@ require __DIR__.'/auth.php';
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.redirect');
 
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+
+Route::get('/api/user', function () {
+    if (Auth::check()) {
+        $user = \App\Models\User::with('googleUser')->find(Auth::id());
+        return response()->json([
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $user->googleUser->avatar ?? null,
+        ]);
+    }
+    return response()->json(null, 401);
+});
 
 // Farm Order routes
 
