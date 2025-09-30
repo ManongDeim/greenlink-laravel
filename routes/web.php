@@ -32,7 +32,7 @@ Route::get('/api/user', function () {
         return response()->json([
             'name' => $user->name,
             'email' => $user->email,
-            'avatar' => $user->googleUser->avatar ?? null,
+            'avatar' => $user->googleAccount->avatar ?? null,
         ]);
     }
     return response()->json(null, 401);
