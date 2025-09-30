@@ -42,7 +42,7 @@ class GoogleController extends Controller
 
         Auth::login($user);
 
-        return redirect('/homePage.html');
+        return redirect('/');
     }
 
     
