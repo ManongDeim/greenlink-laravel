@@ -167,24 +167,42 @@ flatpickrScript.onload = () => {
 };
 };
 
-// --- Show Google Profile after login ---
-document.addEventListener("DOMContentLoaded", () => {
-  fetch("/api/user")
-    .then(res => {
-      if (!res.ok) throw new Error("Not logged in");
-      return res.json();
-    })
-    .then(user => {
-      if (user) {
-        document.getElementById("login-btn").classList.add("hidden");
-        document.getElementById("profile-name").innerText = user.name;
-        document.getElementById("profile-avatar").src = user.avatar;
-        document.getElementById("profile").classList.remove("hidden");
-      }
-    })
-    .catch(() => {
-      // User not logged in -> show login button
-      document.getElementById("profile").classList.add("hidden");
-      document.getElementById("login-btn").classList.remove("hidden");
-    });
-});
+async function loadUserProfile() {
+    try {
+        const response = await fetch("/api/user", {
+            credentials: "include" // ✅ important for session cookies
+        });
+
+        if (!response.ok) {
+            throw new Error("Not logged in");
+        }
+
+        const user = await response.json();
+
+        // If user is logged in, replace login button
+        if (user && user.name) {
+            const authSection = document.getElementById("auth-section");
+            authSection.innerHTML = `
+                <div class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full shadow-sm">
+                    <img src="${user.avatar ?? "https://via.placeholder.com/40"}" 
+                         class="w-8 h-8 rounded-full" />
+                    <span class="text-sm font-medium">${user.name}</span>
+                    <button onclick="logout()" 
+                            class="ml-2 text-xs text-red-500 hover:underline">Logout</button>
+                </div>
+            `;
+        }
+    } catch (err) {
+        console.log("User not logged in:", err.message);
+    }
+}
+
+// Logout request
+async function logout() {
+    await fetch("/logout", { credentials: "include" });
+    location.reload(); // reload page to reset UI
+}
+
+// Run on page load
+document.addEventListener("DOMContentLoaded", loadUserProfile);
+
