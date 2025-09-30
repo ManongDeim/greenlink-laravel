@@ -298,3 +298,59 @@ document.addEventListener("keydown", function (event) {
   }
 });
 });
+
+// Add this inside roomConnection.js
+function setupModalOutsideClick(modalId) {
+  const modal = document.getElementById(modalId);
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) { // clicked backdrop, not modal content
+      modal.classList.add("hidden");
+    }
+  });
+}
+
+// Call this for each modal
+setupModalOutsideClick("soloHut");
+setupModalOutsideClick("DuoHut");
+setupModalOutsideClick("TrioHut");
+setupModalOutsideClick("airconCabin1");
+setupModalOutsideClick("airconCabin2");
+setupModalOutsideClick("airconRoomCabin");
+setupModalOutsideClick("checkoutModal");
+setupModalOutsideClick("reservationModal");
+setupModalOutsideClick("orderModal");
+
+// Close modal function
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.add("hidden");
+}
+
+// Setup outside click + Escape
+function setupModalControls(modalId) {
+  const modal = document.getElementById(modalId);
+
+  // Close when clicking outside the modal content
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) {
+      closeModal(modalId);
+    }
+  });
+
+  // Close when pressing Escape key
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+      closeModal(modalId);
+    }
+  });
+}
+
+// Apply to all your modals
+setupModalControls("soloHut");
+setupModalControls("DuoHut");
+setupModalControls("TrioHut");
+setupModalControls("airconCabin1");
+setupModalControls("airconCabin2");
+setupModalControls("airconRoomCabin");
+setupModalControls("checkoutModal");
+setupModalControls("reservationModal");
+setupModalControls("orderModal");
