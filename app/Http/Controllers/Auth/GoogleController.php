@@ -32,13 +32,16 @@ class GoogleController extends Controller
             ]
         );
 
-         GoogleUser::updateOrCreate(
-            ['email' => $googleUser->getEmail()],
-            [
-                'user_id' => $user->id,
-                'avatar'  => $googleUser->getAvatar(),
-            ]
-        );
+        $googleUser = GoogleUser::firstOrNew([
+            'user_id' => $user->id,
+        ]);
+
+        $googleUser->fill([
+            'email' => $googleUser->getEmail(),
+            'avatar' => $googleUser->getAvatar(),
+        ]);
+
+        $googleUser->save();
 
         Auth::login($user);
 
