@@ -81,11 +81,13 @@ document.querySelector("form").addEventListener("button", function(e) {
 function openModal() {
   updateModal();
   document.getElementById("checkoutModal").classList.remove("hidden");
+  document.body.classList.add("overflow-hidden"); // disable scroll
 }
 
 // Close modal
 function closeModal() {
   document.getElementById("checkoutModal").classList.add("hidden");
+  document.body.classList.remove("overflow-hidden"); // re-enable scroll
 }
 
 // Update modal live
@@ -165,6 +167,7 @@ function confirmOrder() {
 
     closeModal();
     document.getElementById("paymentModal").classList.remove("hidden");
+    document.body.classList.add("overflow-hidden"); // disable scroll
     
 }
 
@@ -221,16 +224,20 @@ function getPrice(itemName) {
   
   function openReserModal() {
       document.getElementById('reservationModal').classList.remove('hidden');
+      document.body.classList.add("overflow-hidden"); // disable scroll
     }
     function closeReserModal() {
       document.getElementById('reservationModal').classList.add('hidden');
+      document.body.classList.remove("overflow-hidden"); // re-enable scroll
     }
 
     function openOrderModal() {
       document.getElementById('orderModal').classList.remove('hidden');
+      document.body.classList.add("overflow-hidden"); // disable scroll
     }
     function closeOrderModal() {
       document.getElementById('orderModal').classList.add('hidden');
+      document.body.classList.remove("overflow-hidden"); // re-enable scroll
       
     }
 
