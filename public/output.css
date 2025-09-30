@@ -1695,9 +1695,24 @@
   syntax: "*";
   inherits: false;
 }
+<<<<<<< HEAD
 @property --tw-ease {
+=======
+@property --tw-scale-x {
+>>>>>>> 3393beb87b2ab03caa4319d1c2ff0dd44d5c1138
   syntax: "*";
   inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-z {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
 }
 @property --tw-scale-x {
   syntax: "*";
@@ -1778,7 +1793,10 @@
       --tw-backdrop-saturate: initial;
       --tw-backdrop-sepia: initial;
       --tw-duration: initial;
+<<<<<<< HEAD
       --tw-ease: initial;
+=======
+>>>>>>> 3393beb87b2ab03caa4319d1c2ff0dd44d5c1138
       --tw-scale-x: 1;
       --tw-scale-y: 1;
       --tw-scale-z: 1;

@@ -10,7 +10,7 @@ async function sendReservation(paymentMethod){
     form.append("payment_method", paymentMethod);
 
     try {
-        let response = await fetch("http://greenlinklolasayong.site/laravel/api/cottageReservation", {
+        let response = await fetch("http://greenlinklolasayong.site/api/cottageReservation", {
             method: "POST",
             body: form
         });
@@ -54,16 +54,20 @@ document.addEventListener("DOMContentLoaded", () => {
   
   function openReserModal() {
       document.getElementById('reservationModal').classList.remove('hidden');
+      document.body.classList.add("overflow-hidden"); // disable scroll
     }
     function closeReserModal() {
       document.getElementById('reservationModal').classList.add('hidden');
+      document.body.classList.remove("overflow-hidden"); // re-enable scroll
     }
 
     function openOrderModal() {
       document.getElementById('orderModal').classList.remove('hidden');
+      document.body.classList.add("overflow-hidden"); // disable scroll
     }
     function closeOrderModal() {
       document.getElementById('orderModal').classList.add('hidden');
+      document.body.classList.remove("overflow-hidden"); // re-enable scroll
     }
 
       function openPaymentModal() {
@@ -290,11 +294,13 @@ document.addEventListener("click", function (event) {
       event.target === orderModal) {
     closeOrderModal();
   }
+
   // --- Close Modal When Pressing ESC ---
 document.addEventListener("keydown", function (event) {
   if (event.key === "Escape") {
     closeReserModal();
     closeOrderModal();
+
   }
 });
 });

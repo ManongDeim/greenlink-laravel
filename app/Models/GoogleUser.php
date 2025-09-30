@@ -10,7 +10,10 @@ class GoogleUser extends Model
 {
     use HasFactory;
 
-    protected $table = 'google_users'; // explicitly point to your existing table
+    protected $table = 'google_users';
+    protected $primaryKey = 'user_id'; // 👈 change to real PK
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
         'user_id',
@@ -20,6 +23,6 @@ class GoogleUser extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }
