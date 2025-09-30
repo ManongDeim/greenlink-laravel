@@ -246,7 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   btn.addEventListener("click", () => {
-    window.location.href = "./Villavictoria.html"; // go to another page
+    window.location.href = "./VillaVictoria.html"; // go to another page
   });
 });
 
