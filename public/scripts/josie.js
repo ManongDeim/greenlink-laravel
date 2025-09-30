@@ -37,9 +37,9 @@ const carousel = document.getElementById("carousel");
   function prevSlide() {
   currentSlide = (currentSlide - 1 + slides.length) % slides.length;
   goToSlide(currentSlide);
-  }
+}
 
-  function openPaymentModal() {
+function openPaymentModal() {
 
     const form = document.getElementById("roomBookingForm");
 

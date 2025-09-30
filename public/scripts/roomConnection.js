@@ -360,3 +360,8 @@ setupModalControls("airconRoomCabin");
 setupModalControls("checkoutModal");
 setupModalControls("reservationModal");
 setupModalControls("orderModal");
+
+
+
+
+

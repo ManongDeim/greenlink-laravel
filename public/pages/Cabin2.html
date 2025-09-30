@@ -26,7 +26,7 @@
 
     <!-- Navigation -->
     <nav class="flex gap-6 text-lg font-medium">
-      <a href="/homePage.html" class="text-white transition hover:text-gray-200">Home</a>
+      <a href="../homePage.html" class="text-white transition hover:text-gray-200">Home</a>
       <a onclick="openReserModal()" class="text-white transition hover:text-gray-200">Booking</a>
       <a onclick="openOrderModal()" class="text-white transition hover:text-gray-200">Order</a>
     </nav>
@@ -65,23 +65,27 @@
   <p class="mt-2 text-sm italic text-gray-500">Affordable comfort by the sea 🌊</p>
 </section>
 
- <!-- Room Images Carousel-->
+<!-- Room Images Carousel-->
 <section class="mt-6">
   <div class="relative w-full overflow-hidden rounded-lg shadow-md">
     <!-- Carousel Images -->
     <div id="carousel" class="flex transition-transform duration-500">
-      <img class="w-full h-[400px] object-cover rounded-xl flex-shrink-0 bg-gray-100 shadow-md" src="../src/Pictures/Room/Aircon rooms without meals/Old MCR.PNG" alt="Room Image 1">
-      <img class="w-full h-[400px] object-cover rounded-xl flex-shrink-0 bg-gray-100 shadow-md" src="../src/Pictures/Room/Aircon rooms without meals/Old MCR bedroom.PNG" alt="Room Image 2">
+      <img class="w-full h-[400px] object-cover rounded-xl flex-shrink-0 bg-gray-100 shadow-md"
+        src="../src/Pictures/Room/Aircon rooms without meals/Old MCR.PNG"
+        alt="Room Image 1">
+      <img class="w-full h-[400px] object-cover rounded-xl flex-shrink-0 bg-gray-100 shadow-md"
+        src="../src/Pictures/Room/Aircon rooms without meals/Old MCR bedroom.PNG"
+        alt="Room Image 2">
     </div>
 
-     <!-- Prev/Next Buttons -->
-  <button onclick="prevSlide()" class="absolute p-2 -translate-y-1/2 rounded-full top-1/2 left-3 bg-white/70">‹</button>
-  <button onclick="nextSlide()" class="absolute p-2 -translate-y-1/2 rounded-full top-1/2 right-3 bg-white/70">›</button>
+    <!-- Prev/Next Buttons -->
+    <button type="button" onclick="prevSlide()" class="absolute p-2 -translate-y-1/2 rounded-full top-1/2 left-3 bg-white/70">‹</button>
+    <button type="button" onclick="nextSlide()" class="absolute p-2 -translate-y-1/2 rounded-full top-1/2 right-3 bg-white/70">›</button>
 
-  <!-- Indicators -->
-  <div id="indicators" class="absolute flex gap-2 -translate-x-1/2 bottom-3 left-1/2"></div>
-</div>
-</section>
+    <!-- Indicators -->
+    <div id="indicators" class="absolute flex gap-2 -translate-x-1/2 bottom-3 left-1/2"></div>
+  </div>
+</section> 
 
   <!-- Calendar -->
   <div class="flex justify-center mt-8">
@@ -115,7 +119,7 @@
           <span class="text-lg text-teal-600">•</span>Equipped with an Aircon for added comfort.
         </li>
         <li class="flex items-center gap-3">
-          <span class="text-lg text-teal-600">•</span>Let the refreshing nighttime wind calm your senses as you gaze at the endless sea.
+          <span class="text-lg text-teal-600">•</span>Let the refreshing night time wind calm your senses as you gaze at the endless sea.
         </li>
       </ul>
     </div>
@@ -287,46 +291,7 @@
     © 2025 Lola Sayong Eco-Surf Camp. All rights reserved.
   </div>
 </footer>
-<!-- Carousel Script -->
-<script>
- const carousel = document.getElementById("carousel");
-  const slides = carousel.querySelectorAll("img");
-  const indicators = document.getElementById("indicators");
 
-  let currentSlide = 0;
-
-  // Create indicators
-  slides.forEach((_, i) => {
-    const dot = document.createElement("span");
-    dot.style.width = dot.style.height = "10px";
-    dot.style.borderRadius = "50%";
-    dot.style.display = "inline-block";
-    dot.style.background = i === 0 ? "teal" : "#ccc";
-    dot.addEventListener("click", () => goToSlide(i));
-    indicators.appendChild(dot);
-  });
-
-  function goToSlide(index) {
-    currentSlide = index;
-    carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
-    updateIndicators();
-  }
-
-  function updateIndicators() {
-    [...indicators.children].forEach((dot, i) => {
-      dot.style.background = i === currentSlide ? "teal" : "#ccc";
-    });
-  }
-
-  function nextSlide() {
-    currentSlide = (currentSlide + 1) % slides.length;
-    goToSlide(currentSlide);
-  }
-
-  setInterval(nextSlide, 3000); // Auto slide every 3s
-</script>
-
-
-<script src="../scripts/roomConnection.js"></script>
+<script src="../scripts/cabin2.js"></script>
 </body>
 </html>

@@ -294,45 +294,6 @@
   </div>
 </footer>
 
-<<<<<<< HEAD
-  let currentSlide = 0;
-
-  // Create indicators
-  slides.forEach((_, i) => {
-    const dot = document.createElement("span");
-    dot.style.width = dot.style.height = "10px";
-    dot.style.borderRadius = "50%";
-    dot.style.display = "inline-block";
-    dot.style.background = i === 0 ? "teal" : "#ccc";
-    dot.addEventListener("click", () => goToSlide(i));
-    indicators.appendChild(dot);
-  });
-
-  function goToSlide(index) {
-    currentSlide = index;
-    carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
-    updateIndicators();
-  }
-  
-
-  function updateIndicators() {
-    [...indicators.children].forEach((dot, i) => {
-      dot.style.background = i === currentSlide ? "teal" : "#ccc";
-    });
-  }
-
-  function nextSlide() {
-    currentSlide = (currentSlide + 1) % slides.length;
-    goToSlide(currentSlide);
-  }
-
-  setInterval(nextSlide, 3000); // Auto slide every 3s
-</script>
-
-
-<script src="../scripts/roomConnection.js"></script>
-=======
 <script src="../scripts/squareRoom.js"></script>
->>>>>>> 3393beb87b2ab03caa4319d1c2ff0dd44d5c1138
 </body>
 </html>
