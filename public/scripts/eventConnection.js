@@ -88,22 +88,24 @@ async function sendReservation(){
 //Modals
   
   function openReserModal() {
-      document.getElementById('reservationModal').classList.remove('hidden');
-    }
-    function closeReserModal() {
-      document.getElementById('reservationModal').classList.add('hidden');
-    }
+  document.getElementById('reservationModal').classList.remove('hidden');
+  document.body.classList.add("overflow-hidden"); // disable scroll
+}
 
-    function openOrderModal() {
-      document.getElementById('orderModal').classList.remove('hidden');
-    }
-    function closeOrderModal() {
-      document.getElementById('orderModal').classList.add('hidden');
-    }
+function closeReserModal() {
+  document.getElementById('reservationModal').classList.add('hidden');
+  document.body.classList.remove("overflow-hidden"); // re-enable scroll
+}
 
-    function closeOrderModal() {
-      document.getElementById('orderModal').classList.add('hidden');
-    }
+function openOrderModal() {
+  document.getElementById('orderModal').classList.remove('hidden');
+  document.body.classList.add("overflow-hidden"); // disable scroll
+}
+
+function closeOrderModal() {
+  document.getElementById('orderModal').classList.add('hidden');
+  document.body.classList.remove("overflow-hidden"); // re-enable scroll
+}
 
     function openConfirmationModal() {
 
