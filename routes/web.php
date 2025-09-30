@@ -39,7 +39,7 @@ Route::get('/api/user', function () {
 });
 
 
-Route::post('/logout', function () {
+Route::get('/logout', function () {
     Auth::logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();

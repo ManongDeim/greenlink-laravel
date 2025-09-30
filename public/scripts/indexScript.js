@@ -195,15 +195,8 @@ async function loadUserProfile() {
 
 // Logout request
 async function logout() {
-    await fetch("/logout", { method: "POST", credentials: "include", headers: { "X-CSRF-TOKEN": getCSRFToken() } });
+    await fetch("/logout", { credentials: "include" });
     location.reload(); // reload page to reset UI
-}
-
-// Helper to get CSRF token (Laravel includes it in meta tag if using blade)
-// If you're on raw HTML, we can output token another way
-function getCSRFToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute("content") : "";
 }
 
 // Run on page load
