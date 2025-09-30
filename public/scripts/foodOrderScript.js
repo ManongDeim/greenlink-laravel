@@ -184,7 +184,7 @@ function sendOrder(paymentMethod) {
     price: getPrice(item.name)
   }));
 
-  fetch("http://greenlinklolasayong.site/laravel/api/foodOrder", {
+  fetch("http://greenlinklolasayong.site/api/foodOrder", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

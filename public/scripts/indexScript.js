@@ -162,3 +162,25 @@ flatpickrScript.onload = () => {
   });
 };
 };
+
+// --- Show Google Profile after login ---
+document.addEventListener("DOMContentLoaded", () => {
+  fetch("/api/user")
+    .then(res => {
+      if (!res.ok) throw new Error("Not logged in");
+      return res.json();
+    })
+    .then(user => {
+      if (user) {
+        document.getElementById("login-btn").classList.add("hidden");
+        document.getElementById("profile-name").innerText = user.name;
+        document.getElementById("profile-avatar").src = user.avatar;
+        document.getElementById("profile").classList.remove("hidden");
+      }
+    })
+    .catch(() => {
+      // User not logged in -> show login button
+      document.getElementById("profile").classList.add("hidden");
+      document.getElementById("login-btn").classList.remove("hidden");
+    });
+});
