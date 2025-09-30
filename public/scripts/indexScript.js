@@ -1,7 +1,16 @@
 // Buttons
 
-document.getElementById("loginBtn").addEventListener("click", () => {
-    window.location.href = "/auth/google";
+document.addEventListener("DOMContentLoaded", () => {
+  const loginBtn = document.getElementById("loginBtn");
+  if (loginBtn) {
+    loginBtn.addEventListener("click", (e) => {
+      // optional: e.preventDefault();
+      window.location.href = "/auth/google";
+    });
+  }
+
+  // call your loadUserProfile here so it runs after DOM loaded
+  loadUserProfile();
 });
 
 
