@@ -22,12 +22,12 @@ class GoogleController extends Controller
         /** @var GoogleProvider $driver */
     $driver = Socialite::driver('google');
 
-        $googleUser = $driver->stateless()->user();
+        $googleUserData = $driver->stateless()->user();
 
         $user = User::updateOrCreate(
-            ['email' => $googleUser->getEmail()],
+            ['email' => $googleUserData->getEmail()],
             [
-                'name' => $googleUser->getName(),
+                'name' => $googleUserData->getName(),
                 'password' => null,
             ]
         );
@@ -36,8 +36,8 @@ class GoogleController extends Controller
             'user_id' => $user->id,
         ]);
 
-       $googleUser->email = $googleUser->getEmail();
-       $googleUser->avatar = $googleUser->getAvatar();
+       $googleUser->email = $googleUserData->getEmail();
+       $googleUser->avatar = $googleUserData->getAvatar();
        $googleUser->save();
 
         Auth::login($user);
