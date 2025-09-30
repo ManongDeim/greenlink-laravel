@@ -28,7 +28,7 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name
 
 Route::get('/api/user', function () {
     if (Auth::check()) {
-        $user = \App\Models\User::with('googleUser')->find(Auth::id());
+        $user = \App\Models\User::with('googleAccount')->find(Auth::id());
         return response()->json([
             'name' => $user->name,
             'email' => $user->email,
