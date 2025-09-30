@@ -28,10 +28,10 @@
     <!-- Navigation -->
     <nav class="flex gap-6 text-lg font-medium">
       <a href="./homePage.html" class="text-gray-700 transition hover:text-teal-600">Home</a>
-      <button onclick="openReserModal()" class="text-gray-700 transition bg-auto hover:text-teal-600">
+      <button id="bookingBtn" class="text-gray-700 transition bg-auto hover:text-teal-600">
         Booking
       </button>
-      <button onclick="openOrderModal()" class="text-gray-700 transition hover:text-teal-600">
+      <button id="orderBtn" class="text-gray-700 transition hover:text-teal-600">
         Order
       </button> 
     </nav>
@@ -40,19 +40,12 @@
 
   <!-- Right: Auth Section -->
 <div id="auth-section" class="flex items-center">
-  <a href = "https://greenlinklolasayong.site/auth/google";
+  <a id="loginBtn"
      class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm hover:bg-gray-100">
     <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
     <span class="text-sm font-medium">Log-in</span>
   </a>
 </div>
-
-
-   <!-- Hidden until login -->
-  <div id="profile" class="hidden flex items-center gap-2">
-      <img id="profile-avatar" class="w-8 h-8 rounded-full" />
-      <span id="profile-name" class="text-sm font-medium"></span>
-  </div>
 
 </header>
 
@@ -183,7 +176,7 @@
 
       <!-- Close Button -->
       <div class="mt-6 text-center">
-        <button onclick="closeReserModal()" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
+        <button id="resCloseBtn" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
       </div>
     </div>
   </div>
@@ -205,13 +198,13 @@
 
       <!-- Close Button -->
       <div class="mt-6 text-center">
-        <button onclick="closeOrderModal()" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
+        <button id="orderCloseBtn" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Link to your JS file -->
-  <script src="./scripts/indexScript.js"></script>
+  <script src="./scripts/indexScript.js" defer></script>
 
   <style>
     @keyframes fadeIn {

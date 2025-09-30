@@ -21,6 +21,31 @@ function closeOrderModal() {
   document.body.classList.remove("overflow-hidden"); // re-enable scroll
 }
 
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Google login redirect
+  const loginBtn = document.getElementById("loginBtn");
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+      window.location.href = "/auth/google";
+    });
+  }
+
+  // Booking modal
+  document.getElementById("bookingBtn")?.addEventListener("click", openReserModal);
+  document.getElementById("resCloseBtn")?.addEventListener("click", closeReserModal);
+
+  // Order modal
+  document.getElementById("orderBtn")?.addEventListener("click", openOrderModal);
+  document.getElementById("orderCloseBtn")?.addEventListener("click", closeOrderModal);
+
+  // Check login status
+  loadUserProfile();
+});
+
+
+
+
 // --- Close Modal When Clicking Outside ---
 document.addEventListener("click", function (event) {
   const reservationModal = document.getElementById("reservationModal");
