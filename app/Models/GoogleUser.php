@@ -10,7 +10,10 @@ class GoogleUser extends Model
 {
     use HasFactory;
 
-    protected $table = 'google_users'; // explicitly point to your existing table
+    protected $table = 'google_users';
+    protected $primaryKey = 'user_id'; // 👈 change to real PK
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
         'user_id',

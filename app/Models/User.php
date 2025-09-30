@@ -13,6 +13,10 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    protected $primaryKey = 'user_id';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -49,6 +53,6 @@ class User extends Authenticatable
 
         public function googleAccount()
     {
-        return $this->hasOne(GoogleUser::class);
+        return $this->hasOne(GoogleUser::class, 'user_id', 'id');
     }
 }
