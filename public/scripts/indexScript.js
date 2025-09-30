@@ -23,6 +23,9 @@ function closeOrderModal() {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+    
+    console.log("✅ DOM loaded, attaching button listeners...");
+    
   // Google login redirect
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
@@ -142,14 +145,6 @@ flatpickrScript.onload = () => {
   const checkInInput = document.getElementById("checkIn");
   const checkOutInput = document.getElementById("checkOut");
 
-  // --- Flatpickr ---
-const flatpickrScript = document.createElement("script");
-flatpickrScript.src = "https://cdn.jsdelivr.net/npm/flatpickr";
-document.head.appendChild(flatpickrScript);
-
-flatpickrScript.onload = () => {
-  const checkInInput = document.getElementById("checkIn");
-  const checkOutInput = document.getElementById("checkOut");
 
   let lastCheckIn = null; // store last check-in date
 
@@ -191,7 +186,6 @@ flatpickrScript.onload = () => {
     }
     picker.open();
   });
-};
 };
 
 async function loadUserProfile() {
