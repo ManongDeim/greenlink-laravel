@@ -38,6 +38,15 @@ Route::get('/api/user', function () {
     return response()->json(null, 401);
 });
 
+
+Route::post('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return response()->json(['success' => true]);
+});
+
+
 // Farm Order routes
 
 Route::get('/farmOrders/payment-success', [FarmOrderController::class, 'paymentSuccess'])
