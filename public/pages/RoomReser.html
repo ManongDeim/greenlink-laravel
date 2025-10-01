@@ -26,8 +26,8 @@
     <!-- Navigation -->
     <nav class="flex gap-6 text-lg font-medium">
       <a href="../homePage.html" class="text-white transition hover:text-gray-200">Home</a>
-      <a onclick="openReserModal()" class="text-white transition hover:text-gray-200">Booking</a>
-      <a onclick="openOrderModal()" class="text-white transition hover:text-gray-200">Order</a>
+      <a id="openBooking" class="text-white transition hover:text-gray-200">Booking</a>
+      <a id="openOrder" class="text-white transition hover:text-gray-200">Order</a>
     </nav>
   </div>
 
@@ -52,8 +52,8 @@
   <section class="grid max-w-6xl grid-cols-1 gap-6 p-4 mx-auto mt-10 sm:grid-cols-2 lg:grid-cols-3">
     
     <!-- Square Room -->
-    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
-         onclick="openRoomModal('soloHut')">
+    <div id="soloHutCard" class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         >
       <img src="../src/Pictures/Room/Square 1-2 pax with or eithout meals/328a158b-bae7-48f0-ae5e-95b28e7b1a3f.PNG" alt="Solo Hut" class="object-cover w-full h-56">
       <div class="p-4 text-center">
         <h2 class="text-xl font-bold text-gray-800">Square Room</h2>
@@ -62,8 +62,8 @@
     </div>
 
     <!-- Twin Room -->
-    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
-         onclick="openRoomModal('DuoHut')">
+    <div id="duoHutCard" class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         >
       <img src="../src/Pictures/Room/Twin room 1-2 pax with or without meals/9f410870-4f54-4573-8bb8-bf3e582c97ca.PNG" alt="TwinRoom" class="object-cover w-full h-56">
       <div class="p-4 text-center">
         <h2 class="text-xl font-bold text-gray-800">Twin Room</h2>
@@ -72,8 +72,8 @@
     </div>
 
     <!-- Bree 2 -->
-    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
-         onclick="openRoomModal('TrioHut')">
+    <div id="trioHut" class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         >
       <img src="../src/Pictures/Room/Bree 2 without meals/c7bde137-1e79-4dbf-a197-845ec0df24fb.PNG" alt="TrioHut" class="object-cover w-full h-56">
       <div class="p-4 text-center">
         <h2 class="text-xl font-bold text-gray-800">Bree 2</h2>
@@ -82,8 +82,8 @@
     </div>
 
     <!-- Josie -->
-    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
-         onclick="openRoomModal('airconCabin1')">
+    <div id="airconCabin1Card" class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         >
       <img src="../src/Pictures/Room/Aircon rooms without meals/AC Room Josie 1&2.PNG" alt="AirconCabin1" class="object-cover w-full h-56">
       <div class="p-4 text-center">
         <h2 class="text-xl font-bold text-gray-800">Josie</h2>
@@ -92,8 +92,8 @@
     </div>
 
     <!-- Aircon Cabin2 -->
-    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
-         onclick="openRoomModal('airconCabin2')">
+    <div id="airconCabin2Card" class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         >
       <img src="../src/Pictures/Room/Aircon rooms without meals/Old MCR.PNG" alt="AirconCabin2" class="object-cover w-full h-56">
       <div class="p-4 text-center">
         <h2 class="text-xl font-bold text-gray-800">Aircon Cabin 2</h2>
@@ -102,8 +102,8 @@
     </div>
 
     <!-- Aircon Room Cabin -->
-    <div class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
-         onclick="openRoomModal('airconRoomCabin')">
+    <div id="airconRoomCabinCard" class="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer"
+         >
       <img src="../src/Pictures/VillaVictoria1.jpg" alt="AirconRoomCabin" class="object-cover w-full h-56">
       <div class="p-4 text-center">
         <h2 class="text-xl font-bold text-gray-800">Bree 1</h2>
@@ -116,7 +116,7 @@
   <!-- Modal for Solo Hut -->
     <div id="soloHut" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-white/30 backdrop-blur-md">
     <div class="relative w-full max-w-lg p-6 bg-white shadow-lg rounded-2xl">
-      <button onclick="closeRoomModal('soloHut')" 
+      <button id="closeSoloHut"
               class="absolute text-gray-600 top-3 right-3 hover:text-gray-900">&times;</button>
       
       <h2 class="mb-4 text-2xl font-bold text-gray-800">Square Room</h2>
@@ -139,7 +139,7 @@
   <!-- Modal for Duo Hut -->
   <div id="DuoHut" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/40 backdrop-blur-sm">
     <div class="relative w-full max-w-lg p-6 bg-white shadow-lg rounded-2xl">
-      <button onclick="closeRoomModal('DuoHut')" 
+      <button id="closeDuoHut" 
               class="absolute text-gray-600 top-3 right-3 hover:text-gray-900">&times;</button>
       
       <h2 class="mb-4 text-2xl font-bold text-gray-800">Twin Room</h2>
@@ -162,7 +162,7 @@
   <!-- Modal for Trio Hut -->
   <div id="TrioHut" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/40 backdrop-blur-sm">
     <div class="relative w-full max-w-lg p-6 bg-white shadow-lg rounded-2xl">
-      <button onclick="closeRoomModal('TrioHut')" 
+      <button id="closeTrioHut" 
               class="absolute text-gray-600 top-3 right-3 hover:text-gray-900">&times;</button>
       
       <h2 class="mb-4 text-2xl font-bold text-gray-800">Bree 2 </h2>
@@ -185,7 +185,7 @@
   <!-- Modal for Aircon Cabin1 -->
   <div id="airconCabin1" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/40 backdrop-blur-sm">
     <div class="relative w-full max-w-lg p-6 bg-white shadow-lg rounded-2xl">
-      <button onclick="closeRoomModal('airconCabin1')" 
+      <button id="closeAirconCabin1" 
               class="absolute text-gray-600 top-3 right-3 hover:text-gray-900">&times;</button>
       
       <h2 class="mb-4 text-2xl font-bold text-gray-800">Josie</h2>
@@ -208,7 +208,7 @@
   <!-- Modal for Aircon Cabin2 -->
   <div id="airconCabin2" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/40 backdrop-blur-sm">
     <div class="relative w-full max-w-lg p-6 bg-white shadow-lg rounded-2xl">
-      <button onclick="closeRoomModal('airconCabin2')" 
+      <button id="closeAirconCabin1" 
               class="absolute text-gray-600 top-3 right-3 hover:text-gray-900">&times;</button>
       
       <h2 class="mb-4 text-2xl font-bold text-gray-800">Aircon Cabin 2</h2>
@@ -231,7 +231,7 @@
   <!-- Modal for Aircon Room Cabin -->
   <div id="airconRoomCabin" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/40 backdrop-blur-sm">
     <div class="relative w-full max-w-lg p-6 bg-white shadow-lg rounded-2xl">
-      <button onclick="closeRoomModal('airconRoomCabin')" 
+      <button id="closeAirconRoomCabin" 
               class="absolute text-gray-600 top-3 right-3 hover:text-gray-900">&times;</button>
       
       <h2 class="mb-4 text-2xl font-bold text-gray-800">Bree 1</h2>
@@ -248,27 +248,6 @@
       <button type="button" id="villavictoria" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md bookNowBtn hover:bg-teal-800 bottom-3 right-3 rounded-xl">
           Book Now!
         </button>
-    </div>
-  </div>
-  <!-- Modal -->
-  <div id="checkoutModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-white/30 backdrop-blur-md">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-[400px] relative">
-      
-      <!-- Close -->
-      <button onclick="closeModal()" class="absolute text-xl text-gray-500 top-2 right-2 hover:text-black">&times;</button>
-      
-      <h2 class="mb-4 text-2xl font-bold text-center">🛒 Order Summary</h2>
-      <div id="cartSummary" class="space-y-3 text-gray-700"></div>
-      
-      <div class="flex justify-between mt-4 text-lg font-bold">
-        <span>Total:</span>
-        <span id="cartTotal">₱0</span>
-      </div>
-
-      <div class="flex justify-end gap-4 mt-6">
-        <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
-        <button onclick="confirmOrder()" class="px-4 py-2 text-white bg-teal-600 rounded hover:bg-teal-700">Confirm</button>
-      </div>
     </div>
   </div>
 
@@ -289,7 +268,7 @@
 
       <!-- Close Button -->
       <div class="mt-6 text-center">
-        <button onclick="closeReserModal()" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
+        <button id="closeReser" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
       </div>
     </div>
   </div>
@@ -310,7 +289,7 @@
 
       <!-- Close Button -->
       <div class="mt-6 text-center">
-        <button onclick="closeOrderModal()" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
+        <button id="closeOrder" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
       </div>
     </div>
   </div>

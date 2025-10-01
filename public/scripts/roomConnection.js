@@ -116,144 +116,65 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+// Modals
 
-  //Pages  
-
-  //Room Reservation Page
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("roomReser");
-  
-
-  btn.addEventListener("click", () => {
-    window.location.href = "RoomReser.html"; // go to another page
-  });
-});
-
-//Event Reservation Page
-
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("eventReser");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "EventReser.html"; // go to another page
-  });
-});
-
-
-//Food Order Page
-
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("foodOrder");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "FarmOrders.html"; // go to another page
-  });
-});
-
-//Farm Order Page
-
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("farmOrder");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "./FarmOrders.html"; // go to another page
-  });
-});
-// Automatic Image Carousel
 document.addEventListener("DOMContentLoaded", () => {
-  const carousel = document.getElementById("carousel");
-  const slides = carousel.querySelectorAll("img");
-  let index = 0;
+  // --- Utility functions ---
+  const openModal = id => document.getElementById(id)?.classList.remove("hidden");
+  const closeModal = id => document.getElementById(id)?.classList.add("hidden");
 
-  function updateCarousel() {
-    carousel.style.transform = `translateX(-${index * 100}%)`;
+  // --- Booking & Order ---
+  document.getElementById("openBooking")?.addEventListener("click", e => {
+    e.preventDefault();
+    openModal("reserModal");
+  });
+
+  document.getElementById("openOrder")?.addEventListener("click", e => {
+    e.preventDefault();
+    openModal("orderModal");
+  });
+
+  // --- Room Cards → Modals ---
+  const roomCards = {
+    soloHutCard: "soloHutModal",
+    duoHutCard: "duoHutModal",
+    trioHutCard: "trioHutModal",
+    airconCabin1Card: "airconCabin1Modal",
+    airconCabin2Card: "airconCabin2Modal",
+    airconRoomCabinCard: "airconRoomCabinModal"
+  };
+
+  for (const [cardId, modalId] of Object.entries(roomCards)) {
+    document.getElementById(cardId)?.addEventListener("click", () => openModal(modalId));
   }
 
-  function nextSlide() {
-    index = (index + 1) % slides.length;
-    updateCarousel();
+  // --- Room Close Buttons ---
+  const roomCloses = {
+    closeSoloHut: "soloHutModal",
+    closeDuoHut: "duoHutModal",
+    closeTrioHut: "trioHutModal",
+    closeAirconCabin1: "airconCabin1Modal",
+    closeAirconCabin2: "airconCabin2Modal",
+    closeAirconRoomCabin: "airconRoomCabinModal"
+  };
+
+  for (const [btnId, modalId] of Object.entries(roomCloses)) {
+    document.getElementById(btnId)?.addEventListener("click", () => closeModal(modalId));
   }
 
-  function prevSlide() {
-    index = (index - 1 + slides.length) % slides.length;
-    updateCarousel();
-  }
+  // --- Reservation & Order Modals ---
+  document.getElementById("closeReser")?.addEventListener("click", () => closeModal("reserModal"));
+  document.getElementById("closeOrder")?.addEventListener("click", () => closeModal("orderModal"));
 
-  // Auto scroll every 3 seconds
-  setInterval(nextSlide, 3000);
-
-  // Expose functions globally so buttons work
-  window.nextSlide = nextSlide;
-  window.prevSlide = prevSlide;
-});
-
-//Square Room Page
-  document.addEventListener("DOMContentLoaded", () => { 
-  const btn = document.getElementById("squareRoom");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "./SquareRoom.html"; // go to another page
+  // --- Checkout Modal ---
+  document.getElementById("cancelCheckout")?.addEventListener("click", () => closeModal("checkoutModal"));
+  document.getElementById("confirmCheckout")?.addEventListener("click", () => {
+    alert("Order Confirmed ✅"); // Replace with your checkout logic
+    closeModal("checkoutModal");
   });
 });
 
-//Twin Room Page
-  document.addEventListener("DOMContentLoaded", () => { 
-  const btn = document.getElementById("twinRoom");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "./TwinRoom.html"; // go to another page
-  });
-});
-
-//Bree Room Page
-  document.addEventListener("DOMContentLoaded", () => { 
-  const btn = document.getElementById("breeRoom");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "./Bree.html"; // go to another page
-  });
-});
-
-//Josie Room Page
-  document.addEventListener("DOMContentLoaded", () => { 
-  const btn = document.getElementById("josieRoom");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "./Josie.html"; // go to another page
-  });
-});
-
-//Cabin 2 Room Page
-  document.addEventListener("DOMContentLoaded", () => { 
-  const btn = document.getElementById("cabin2");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "./Cabin2.html"; // go to another page
-  });
-});
-
-//Villa Victoria Room Page
-  document.addEventListener("DOMContentLoaded", () => { 
-  const btn = document.getElementById("villavictoria");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "./VillaVictoria.html"; // go to another page
-  });
-});
-
+  
 
 function openRoomModal(modalId) {
       document.getElementById(modalId).classList.remove('hidden');
