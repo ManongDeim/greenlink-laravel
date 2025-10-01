@@ -179,4 +179,24 @@ for (const [btnId, url] of Object.entries(orderRoutes)) {
     window.location.href = url;
   });
 }
+
+// --- Redirects for "Book Now!" buttons in modals ---
+const bookNowButtons = [
+  { id: "squareRoom", url: "SquareRoom.html" },
+  { id: "twinRoom", url: "TwinRoom.html" },
+  { id: "breeRoom", url: "Bree.html" },
+  { id: "josieRoom", url: "Josie.html" },
+  { id: "cabin2", url: "Cabin2.html" },
+  { id: "villaVictoria", url: "VillaVictoria.html" },
+];
+
+bookNowButtons.forEach(btn => {
+  const element = document.getElementById(btn.id);
+  if (element) {
+    element.addEventListener("click", () => {
+      window.location.href = btn.url;
+    });
+  }
+});
+
 });
