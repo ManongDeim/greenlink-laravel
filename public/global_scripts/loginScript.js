@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("✅ loginScript.js is running!");
     console.log("✅ DOM loaded, checking login...");
 
     loadUserProfile();
