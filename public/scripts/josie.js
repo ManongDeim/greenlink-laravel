@@ -83,3 +83,24 @@ function openPaymentModal() {
     function closeAlert() {
   document.getElementById("alertModal").classList.add("hidden");
     }
+
+    // --- Modal Functions ---
+function openReserModal() {
+  document.getElementById('reservationModal').classList.remove('hidden');
+  document.body.classList.add("overflow-hidden"); // disable scroll
+}
+
+function closeReserModal() {
+  document.getElementById('reservationModal').classList.add('hidden');
+  document.body.classList.remove("overflow-hidden"); // re-enable scroll
+}
+
+function openOrderModal() {
+  document.getElementById('orderModal').classList.remove('hidden');
+  document.body.classList.add("overflow-hidden"); // disable scroll
+}
+
+function closeOrderModal() {
+  document.getElementById('orderModal').classList.add('hidden');
+  document.body.classList.remove("overflow-hidden"); // re-enable scroll
+}
