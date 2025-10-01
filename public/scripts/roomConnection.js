@@ -47,6 +47,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+
+
+  
+//Modals
+  
+  function openReserModal() {
+      document.getElementById('reserModal').classList.remove('hidden');
+      document.body.classList.add("overflow-hidden"); // disable scroll
+    }
+    function closeReserModal() {
+      document.getElementById('reservationModal').classList.add('hidden');
+      document.body.classList.remove("overflow-hidden"); // re-enable scroll
+    }
+
+    function openOrderModal() {
+      document.getElementById('orderModal').classList.remove('hidden');
+      document.body.classList.add("overflow-hidden"); // disable scroll
+    }
+    function closeOrderModal() {
+      document.getElementById('orderModal').classList.add('hidden');
+      document.body.classList.remove("overflow-hidden"); // re-enable scroll
+    }
+
+    
+    function showAlert(message) {
+  document.getElementById("alertMessage").textContent = message;
+  document.getElementById("alertModal").classList.remove("hidden");
+}
+
+    function closeAlert() {
+  document.getElementById("alertModal").classList.add("hidden");
+    }
+
+
 // Modals
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -81,12 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Room Close Buttons ---
   const roomCloses = {
-    closeSoloHut: "soloHutModal",
-    closeDuoHut: "duoHutModal",
-    closeTrioHut: "trioHutModal",
-    closeAirconCabin1: "airconCabin1Modal",
-    closeAirconCabin2: "airconCabin2Modal",
-    closeAirconRoomCabin: "airconRoomCabinModal"
+    closeSoloHut: "closeSoloHut",
+    closeDuoHut: "closeDuoHut",
+    closeTrioHut: "closeTrioHut",
+    closeAirconCabin1: "closeAirconCabin1",
+    closeAirconCabin2: "closeAirconCabin2",
+    closeAirconRoomCabin: "closeAirconRoomCabin"
   };
 
   for (const [btnId, modalId] of Object.entries(roomCloses)) {
@@ -97,125 +131,38 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("closeReser")?.addEventListener("click", () => closeModal("reserModal"));
   document.getElementById("closeOrder")?.addEventListener("click", () => closeModal("orderModal"));
 
-  // --- Checkout Modal ---
-  document.getElementById("cancelCheckout")?.addEventListener("click", () => closeModal("checkoutModal"));
-  document.getElementById("confirmCheckout")?.addEventListener("click", () => {
-    alert("Order Confirmed ✅"); // Replace with your checkout logic
-    closeModal("checkoutModal");
-  });
-});
+    // --- Setup modal outside click + ESC ---
+  function setupModalControls(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
 
-  
-
-function openRoomModal(modalId) {
-      document.getElementById(modalId).classList.remove('hidden');
-    }
-    function closeRoomModal(modalId) {
-      document.getElementById(modalId).classList.add('hidden');
-    }
-
-    // Close modal when clicking outside
-    document.querySelectorAll('[id$="Modal"]').forEach(modal => {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.add('hidden');
-        }
-      });
+    // Close when clicking backdrop
+    modal.addEventListener("click", e => {
+      if (e.target === modal) closeModal(modalId);
     });
 
-    // Close modal on ESC
-    document.addEventListener('keydown', (e) => {
-      if (e.key === "Escape") {
-        document.querySelectorAll('[id$="Modal"]').forEach(modal => modal.classList.add('hidden'));
+    // Close when pressing ESC
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+        closeModal(modalId);
       }
     });
-
-    // --- Close Modal When Clicking Outside ---
-document.addEventListener("click", function (event) {
-  const reservationModal = document.getElementById("reservationModal");
-  const orderModal = document.getElementById("orderModal");
-
-  // If Reservation Modal is open and user clicks outside the content box
-  if (!reservationModal.classList.contains("hidden") &&
-      event.target === reservationModal) {
-    closeReserModal();
   }
 
-  // If Order Modal is open and user clicks outside the content box
-  if (!orderModal.classList.contains("hidden") &&
-      event.target === orderModal) {
-    closeOrderModal();
-  }
-
-  // --- Close Modal When Pressing ESC ---
-document.addEventListener("keydown", function (event) {
-  if (event.key === "Escape") {
-    closeReserModal();
-    closeOrderModal();
-
-  }
-});
+  [
+    "soloHutModal",
+    "duoHutModal",
+    "trioHutModal",
+    "airconCabin1Modal",
+    "airconCabin2Modal",
+    "airconRoomCabinModal",
+    "checkoutModal",
+    "reserModal",
+    "orderModal"
+  ].forEach(setupModalControls);
 });
 
-// Add this inside roomConnection.js
-function setupModalOutsideClick(modalId) {
-  const modal = document.getElementById(modalId);
-  modal.addEventListener("click", function (e) {
-    if (e.target === modal) { // clicked backdrop, not modal content
-      modal.classList.add("hidden");
-    }
-  });
-}
 
-// Call this for each modal
-setupModalOutsideClick("soloHut");
-setupModalOutsideClick("DuoHut");
-setupModalOutsideClick("TrioHut");
-setupModalOutsideClick("airconCabin1");
-setupModalOutsideClick("airconCabin2");
-setupModalOutsideClick("airconRoomCabin");
-setupModalOutsideClick("checkoutModal");
-setupModalOutsideClick("reservationModal");
-setupModalOutsideClick("orderModal");
-
-// Close modal function
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.add("hidden");
-}
-
-// Setup outside click + Escape
-function setupModalControls(modalId) {
-  const modal = document.getElementById(modalId);
-
-  // Close when clicking outside the modal content
-  modal.addEventListener("click", function (e) {
-    if (e.target === modal) {
-      closeModal(modalId);
-    }
-  });
-
-  // Close when pressing Escape key
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-      closeModal(modalId);
-    }
-  });
-}
-
-// Apply to all your modals
-setupModalControls("soloHut");
-setupModalControls("DuoHut");
-setupModalControls("TrioHut");
-setupModalControls("airconCabin1");
-setupModalControls("airconCabin2");
-setupModalControls("airconRoomCabin");
-setupModalControls("checkoutModal");
-setupModalControls("reservationModal");
-setupModalControls("orderModal");
-
- function goBack() {
-    window.history.back();
- }
 
 
 
