@@ -39,14 +39,6 @@ async function sendReservation(paymentMethod){
 
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("cashPayment").addEventListener("click", () => {
-        console.log("Cash clicked"); 
-        sendReservation("Cash");
-    });
-
-});
-
 
 
   
@@ -156,14 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "airconCabin1Modal",
     "airconCabin2Modal",
     "airconRoomCabinModal",
-    "checkoutModal",
     "reserModal",
-    "orderModal"
+    "orderModal",
   ].forEach(setupModalControls);
 });
-
-
-
-
-
-
