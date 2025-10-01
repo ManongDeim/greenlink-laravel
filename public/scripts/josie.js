@@ -154,3 +154,7 @@ function closeOrderModal() {
     window.location.href = "../pages/FarmOrders.html"; // go to another page
   });
 });
+
+ function goBack() {
+    window.history.back();
+ }

@@ -361,6 +361,9 @@ setupModalControls("checkoutModal");
 setupModalControls("reservationModal");
 setupModalControls("orderModal");
 
+ function goBack() {
+    window.history.back();
+ }
 
 
 
