@@ -240,3 +240,7 @@ document.addEventListener("keydown", function (event) {
   }
 });
 });
+
+ function goBack() {
+    window.history.back();
+ }
