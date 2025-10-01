@@ -107,12 +107,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Room Close Buttons ---
   const roomCloses = {
-    closeSoloHut: "closeSoloHut",
-    closeDuoHut: "closeDuoHut",
-    closeTrioHut: "closeTrioHut",
-    closeAirconCabin1: "closeAirconCabin1",
-    closeAirconCabin2: "closeAirconCabin2",
-    closeAirconRoomCabin: "closeAirconRoomCabin"
+    closeSoloHut: "soloHutModal",
+    closeDuoHut: "duoHutModal",
+    closeTrioHut: "trioHutModal",
+    closeAirconCabin1: "airconCabin1Modal",
+    closeAirconCabin2: "airconCabin2Modal",
+    closeAirconRoomCabin: "airconRoomCabinModal"
   };
 
   for (const [btnId, modalId] of Object.entries(roomCloses)) {
@@ -150,5 +150,33 @@ document.addEventListener("DOMContentLoaded", () => {
     "airconRoomCabinModal",
     "reserModal",
     "orderModal",
-  ].forEach(setupModalControls);
+   ].forEach(setupModalControls);
+
+   // Redirects
+
+   // --- Reservation Modal Navigation ---
+const reserRoutes = {
+  roomReserPage: "RoomReser.html",
+  eventReserPage: "EventReser.html"
+};
+
+for (const [btnId, url] of Object.entries(reserRoutes)) {
+  document.getElementById(btnId)?.addEventListener("click", e => {
+    e.preventDefault();
+    window.location.href = url;
+  });
+}
+
+// --- Order Modal Navigation ---
+const orderRoutes = {
+  foodOrderPage: "FarmOrders.html",
+  farmOrderPage: "FarmOrders.html"
+};
+
+for (const [btnId, url] of Object.entries(orderRoutes)) {
+  document.getElementById(btnId)?.addEventListener("click", e => {
+    e.preventDefault();
+    window.location.href = url;
+  });
+}
 });
