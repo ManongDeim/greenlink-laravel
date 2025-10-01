@@ -179,9 +179,5 @@ flatpickrScript.onload = () => {
     }
     picker.open();
   });
-};
-
-// ______________________
-
-
+};S
 

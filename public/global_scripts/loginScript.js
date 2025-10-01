@@ -1,56 +1,45 @@
-// Google login redirect
-  const loginBtn = document.getElementById("loginBtn");
-  if (loginBtn) {
-    loginBtn.addEventListener("click", () => {
-      window.location.href = "/auth/google";
-    });
-  }
+document.addEventListener("DOMContentLoaded", () => {
+    // Build header
+    const header = document.createElement("header");
+    header.innerHTML = `
+        <div class="flex justify-between items-center p-4 bg-gray-100">
+            <h1 class="text-xl font-bold">Lola Sayong GreenLink</h1>
+            <div id="auth-section">
+                <button id="loginBtn" class="px-4 py-2 bg-blue-500 text-white rounded">
+                    Login with Google
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.prepend(header);
 
-  // Load user profile
+    // Attach login logic
+    loadUserProfile();
+    document.getElementById("loginBtn")?.addEventListener("click", () => {
+        window.location.href = "/auth/google";
+    });
+});
+
 async function loadUserProfile() {
     try {
-        console.log("🔍 Checking logged-in user...");
-        const response = await fetch("/api/user", {
-            credentials: "include" // ✅ important for session cookies
-        });
+        const res = await fetch("/api/user", { credentials: "include" });
+        if (!res.ok) throw new Error();
 
-        console.log("📡 /api/user status:", response.status);
-
-        if (!response.ok) {
-            throw new Error("Not logged in");
-        }
-
-        const user = await response.json();
-        console.log("✅ User data from API:", user);
-
-        // If user is logged in, replace login button
-        if (user && user.name) {
-            console.log("🎉 Logged in as:", user.name);
-
-            const authSection = document.getElementById("auth-section");
-            authSection.innerHTML = `
-                <div class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full shadow-sm">
-                    <img src="${user.avatar ?? "https://via.placeholder.com/40"}" 
-                         class="w-8 h-8 rounded-full" />
-                    <span class="text-sm font-medium">${user.name}</span>
-                    <button onclick="logout()" 
-                            class="ml-2 text-xs text-red-500 hover:underline">Logout</button>
-                </div>
-            `;
-        } else {
-            console.log("⚠️ No user.name found in response");
-        }
-    } catch (err) {
-        console.error("❌ User not logged in:", err.message);
+        const user = await res.json();
+        document.getElementById("auth-section").innerHTML = `
+            <div class="flex items-center gap-2 px-4 py-2 border rounded-full">
+                <img src="${user.avatar ?? "https://via.placeholder.com/40"}"
+                     class="w-8 h-8 rounded-full" />
+                <span>${user.name}</span>
+                <button onclick="logout()" class="ml-2 text-red-500 text-xs">Logout</button>
+            </div>
+        `;
+    } catch {
+        console.log("Not logged in");
     }
 }
 
-// Logout request
 async function logout() {
-    console.log("🚪 Logging out...");
     await fetch("/logout", { credentials: "include" });
-    location.reload(); // reload page to reset UI
+    location.reload();
 }
-
-// Run on page load
-// document.addEventListener("DOMContentLoaded", loadUserProfile);
