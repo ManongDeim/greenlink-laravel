@@ -5,16 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="../output.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
+<!-- Tab Icon -->
+  <link rel="icon" type="image/png" href="../src/Pictures/LogoLolasayong2.png">
+
+  <title>Dashboard</title>
 </head>
+
 <body class="min-h-screen bg-gray-50">
 
 <!-- Header (same as your current site) -->
 <header class="relative flex items-center justify-between px-8 py-3 shadow-md bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500">
   <!-- Left: Logo + Navigation -->
   <div class="flex items-center gap-10">
-    <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo" class="object-contain w-auto h-20">
-    <nav class="flex gap-8 text-lg font-medium">
-      <a href="../index.html" class="text-white transition hover:text-teal-600">Home</a>
+    <a href="../homePage.html">
+    <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo" 
+         class="object-contain w-auto h-20 transition-transform duration-300 cursor-pointer hover:scale-105 hover:drop-shadow-lg">
+      </a>
+      <a href="../homePage.html" class="text-white transition hover:text-teal-600">Home</a>
       <button onclick="openReserModal()" class="text-white transition hover:text-teal-600">Booking</button>
       <button onclick="openOrderModal()" class="text-white transition hover:text-teal-600">Order</button>
     </nav>
@@ -26,9 +34,10 @@
       class="px-4 py-2 text-white transition bg-teal-600 rounded-full shadow hover:bg-teal-700">
       Dashboard
     </button>
-    <button class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm hover:bg-gray-100">
-      <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
-      <span class="text-sm font-medium text-white">Log-in</span>
+     <!-- Google Login -->
+    <button class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-3 py-1.5 text-sm hover:bg-gray-100 transition-shadow shadow-sm">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google">
+      <span>Log-in</span>
     </button>
   </div>
 </header>
@@ -104,18 +113,63 @@
   </div>
 </main>
 
+
+  <!-- Reservation Pop-Up -->
+  <div id="reservationModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Reservation Type</h2>
+      <div class="grid gap-4">
+        <button id="roomReser"
+          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Room Reservation
+        </button>
+        <button id="eventReser"
+          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Event Reservation
+        </button>
+      </div>
+      <div class="text-center mt-6">
+        <button onclick="closeReserModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Pop-Up -->
+  <div id="orderModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
+      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Order Type</h2>
+      <div class="grid grid-cols-2 gap-6">
+        <button id="foodOrder"
+          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Food Order
+        </button>
+        <button id="farmOrder"
+          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          Farm Order
+        </button>
+      </div>
+      <div class="text-center mt-6">
+        <button onclick="closeOrderModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+
 <!-- Footer (same as your current site) -->
 <footer class="mt-12 text-gray-300 bg-gray-900">
   <div class="grid max-w-6xl grid-cols-1 gap-6 px-6 py-8 mx-auto md:grid-cols-3">
     <div>
       <h3 class="mb-3 text-lg font-semibold">About Us</h3>
       <p class="text-sm leading-relaxed">
-        We provide the perfect venue for your weddings, birthdays, team buildings, and family gatherings.
+        Lola Sayong Eco Surf-Farm is a community-driven space in Sorsogon where nature,
+        culture, and people come together. We offer eco-friendly venues for celebrations,
+        farm-to-table dining, event booking, and room reservations — giving you a relaxing
+        escape by the sea.
       </p>
     </div>
     <div>
       <h3 class="mb-3 text-lg font-semibold">Contact</h3>
-      <p class="text-sm">📍 Brgy. XYZ, City</p>
+      <p class="text-sm">📍 Brgy. Buenavista, Gubat, Sorsogon</p>
       <p class="text-sm">📞 +63 912 345 6789</p>
       <p class="text-sm">✉️ info@lolasayong.com</p>
     </div>
@@ -132,5 +186,6 @@
   </div>
 </footer>
 
+<script src="../scripts/customerDashboard.js"></script>
 </body>
 </html>

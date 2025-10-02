@@ -300,7 +300,7 @@ function getPrice(itemName) {
 
 
   btn.addEventListener("click", () => {
-    window.location.href = "./FarmOrders.html"; // go to another page
+    window.location.href = "./FoodOrders.html"; // go to another page
   });
 });
 
