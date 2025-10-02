@@ -32,14 +32,25 @@
     </nav>
   </div>
 
-    <!-- Google Login -->
-    <button class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-3 py-1.5 text-sm hover:bg-gray-100 transition-shadow shadow-sm">
+   <!-- Right: Auth Section -->
+<div id="auth-section" class="flex items-center">
+  <a id="loginBtn"
+     class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-3 py-1.5 text-sm hover:bg-gray-100 transition-shadow shadow-sm">
       <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google">
       <span>Log-in</span>
     </button>
-  </div>
+  </a>
+</div>
 
 </header>
+<!-- Back Button -->
+<div class="px-6 mt-4">
+  <button 
+    onclick="goBack()" 
+    type="button"
+    class="flex items-center gap-2 px-4 py-2 text-gray-800 transition border border-teal-700 rounded-lg hover:bg-teal-700 hover:text-white">
+    ← Return
+  </button>
 
   <!-- Booking Form -->
 <form id="roomBookingForm" class="max-w-4xl px-6 mx-auto">
@@ -295,5 +306,6 @@
 </footer>
 
 <script src="../scripts/squareRoom.js"></script>
+<script src="../global_scripts/loginScript.js" defer></script>
 </body>
 </html>

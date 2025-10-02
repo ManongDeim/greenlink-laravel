@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     console.log("✅ loginScript.js is running!");
-    console.log("✅ DOM loaded, checking login...");
+    console.log("✅ Checking login...");
 
     loadUserProfile();
 
@@ -26,15 +26,55 @@ async function loadUserProfile() {
         const authSection = document.getElementById("auth-section");
         if (authSection) {
             authSection.innerHTML = `
-                <div class="flex items-center gap-2 px-4 py-2 border rounded-full shadow-sm">
-                    <img src="${user.avatar ?? "https://via.placeholder.com/40"}" 
-                         alt="Avatar"
-                         class="w-8 h-8 rounded-full" />
-                    <span class="text-sm font-medium">${user.name}</span>
-                    <button onclick="logout()" 
-                            class="ml-2 text-xs text-red-500 hover:underline">Logout</button>
-                </div>
+             <div class="relative inline-block text-left">
+        <!-- Dropdown Trigger -->
+        <button id="userMenuBtn" 
+                class="flex items-center gap-2 px-4 py-2 border rounded-full shadow-sm bg-white hover:bg-gray-50 focus:outline-none">
+            <img src="${user.avatar ?? "https://via.placeholder.com/40"}" 
+                 alt="Avatar"
+                 class="w-8 h-8 rounded-full" />
+            <span class="text-sm font-medium">${user.name}</span>
+            <svg class="w-4 h-4 ml-1 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div id="userDropdown" 
+             class="hidden absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+            <a href="/pages/CustomerDashboard.html" 
+               class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+               <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m-4 0h8" />
+               </svg>
+               Dashboard
+            </a>
+            <button onclick="logout()" 
+                    class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-100">
+                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-9V7" />
+                </svg>
+                Logout
+            </button>
+        </div>
+    </div>
             `;
+
+             // Toggle dropdown open/close
+            const menuBtn = document.getElementById("userMenuBtn");
+            const dropdown = document.getElementById("userDropdown");
+
+            menuBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle("hidden");
+            });
+
+            // Close dropdown if clicking outside
+            document.addEventListener("click", (e) => {
+                if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add("hidden");
+                }
+            });
         }
     } catch (err) {
         console.log("⚠️ No active session");
