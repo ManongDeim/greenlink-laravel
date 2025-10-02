@@ -1,62 +1,51 @@
-// Event Reservation Fetch Script
+const sidebarButtons = document.querySelectorAll(".sidebar-btn");
+const content = document.getElementById("content");
 
-document.addEventListener("DOMContentLoaded", () => {
+// Attach sidebar button listeners
+sidebarButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    // Reset buttons
+    sidebarButtons.forEach(b => {
+      b.classList.remove("bg-teal-600", "text-white", "hover:bg-teal-700", "hover:border-teal-700");
+      if (!b.classList.contains("text-red-700")) {
+        b.classList.add("bg-gray-100", "text-gray-700", "hover:bg-gray-200", "hover:border-gray-400");
+      }
+    });
 
- fetch("https://greenlinklolasayong.site/laravel/api/reservations/latest")
-    .then(res => res.json())
-    .then(data => {
-      console.log("Latest reservation:", data);
-      fillReservation(data);
+    // Set active
+    btn.classList.remove("bg-gray-100", "text-gray-700", "hover:bg-gray-200", "hover:border-gray-400");
+    btn.classList.add("bg-teal-600", "text-white", "hover:bg-teal-700", "hover:border-teal-700");
 
-      setupApprovalButtons(data.id);
-    })
-    .catch(err => console.error("Error (latest):", err));
-
+    // Change content
+    const section = sections[btn.dataset.section];
+    if (section.custom) {
+      content.innerHTML = section.custom;
+      attachOrderEvents(); // 👈 Reattach events if foodOrders loaded
+    } else {
+      content.innerHTML = `
+        <h2 class="mb-4 text-xl font-bold text-teal-700">${section.title}</h2>
+        <p class="text-gray-700">${section.text}</p>
+      `;
+    }
+  });
 });
 
-function fillReservation(data) {
-  if (!data) return;
-
-  document.getElementById("reservationID").textContent = data.id || "";
-  document.getElementById("eventStart").textContent = data.start_date || "";
-  document.getElementById("eventEnd").textContent = data.end_date || "";
-  document.getElementById("fullName").textContent = data.full_name || "";
-  document.getElementById("email").textContent = data.email || "";
-  document.getElementById("phoneNumber").textContent = data.phone_number || "";
-  document.getElementById("pax").textContent = data.pax || "";
-  document.getElementById("toBring").textContent = data.to_bring || "";
-  document.getElementById("approvalStat").textContent = data.approval_status || "";
-}
-
-function setupApprovalButtons(reservationId) {
-  document.querySelector(".approve-btn").addEventListener("click", () => {
-    updateApprovalStatus(reservationId, "Approved");
+// Function to re-attach events for order items
+function attachOrderEvents() {
+  const orderItems = document.querySelectorAll(".order-item");
+  orderItems.forEach(item => {
+    item.addEventListener("click", () => {
+      item.classList.toggle("bg-teal-100");
+      item.classList.toggle("selected");
+    });
   });
 
-  document.querySelector(".disapprove-btn").addEventListener("click", () => {
-    updateApprovalStatus(reservationId, "Disapproved");
-  });
-}
-
-// ✅ Send PATCH request to Laravel API
-function updateApprovalStatus(reservationId, status) {
-  fetch(`http://127.0.0.1:8000/api/reservations/${reservationId}/approval`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    },
-    body: JSON.stringify({ status })
-  })
-  .then(res => {
-    if (!res.ok) {
-      throw new Error(`Failed to update: ${res.status}`);
-    }
-    return res.json();
-  })
-  .then(data => {
-    console.log("Updated:", data);
-    document.getElementById("approvalStat").textContent = data.reservation.approval_status;
-  })
-  .catch(err => console.error("Error updating:", err));
+  const completeBtn = document.getElementById("completeOrderBtn");
+  if (completeBtn) {
+    completeBtn.addEventListener("click", () => {
+      document.querySelectorAll(".order-item.selected").forEach(selectedItem => {
+        selectedItem.remove();
+      });
+    });
+  }
 }
