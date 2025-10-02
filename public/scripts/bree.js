@@ -154,3 +154,7 @@ function closeOrderModal() {
   document.getElementById('orderModal').classList.add('hidden');
   document.body.classList.remove("overflow-hidden"); // re-enable scroll
 }
+
+ function goBack() {
+    window.history.back();
+ }

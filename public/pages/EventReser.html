@@ -15,52 +15,62 @@
 <body class="bg-white">
 
   <!-- Header -->
-  <header class="flex items-center justify-between px-8 py-3 bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 shadow-md relative">
+  <header class="relative flex items-center justify-between px-8 py-3 shadow-md bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500">
     <!-- Left: Logo + Navigation -->
     <div class="flex items-center gap-10">
       <!-- Logo -->
      <a href="../homePage.html">
-    <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo"class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-lg cursor-pointer">
+    <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo"class="object-contain w-auto h-20 transition-transform duration-300 cursor-pointer hover:scale-105 hover:drop-shadow-lg">
       </a>
 
       <!-- Navigation -->
       <nav class="flex gap-6 text-lg font-medium">
-        <a href="../homePage.html" class="text-white hover:text-gray-200 transition">Home</a>
-        <a onclick="openReserModal()" class="text-white hover:text-gray-200 transition">Booking</a>
-        <a onclick="openOrderModal()" class="text-white hover:text-gray-200 transition">Order</a>
+        <a href="../homePage.html" class="text-white transition hover:text-gray-200">Home</a>
+        <a onclick="openReserModal()" class="text-white transition hover:text-gray-200">Booking</a>
+        <a onclick="openOrderModal()" class="text-white transition hover:text-gray-200">Order</a>
       </nav>
     </div>
 
-    <!-- Right: Google Login -->
-    <div class="flex items-center">
-      <button class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-4 py-2 hover:bg-gray-100 transition shadow-md">
-        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
-        <span class="text-sm font-medium">Log-in</span>
-      </button>
-    </div>
+        <!-- Right: Auth Section -->
+<div id="auth-section" class="flex items-center">
+  <a id="loginBtn"
+     class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm hover:bg-gray-100">
+    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
+    <span class="text-sm font-medium">Log-in</span>
+  </a>
+</div>
   </header>
+  
+       <!-- Back Button -->
+<div class="px-6 mt-4">
+  <button 
+    onclick="goBack()" 
+    type="button"
+    class="flex items-center gap-2 px-4 py-2 text-gray-800 transition border border-teal-700 rounded-lg hover:bg-teal-700 hover:text-white">
+    ← Return
+  </button>
 
   <!-- Event Booking Title -->
   <section class="px-6 mt-8 text-center">
-    <h1 class="text-3xl font-bold mb-6">Event Booking</h1>
+    <h1 class="mb-6 text-3xl font-bold">Event Booking</h1>
   </section>
 
 <!-- Booking Form -->
-<form id="eventBookingForm" class="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-6 space-y-6 mt-8">
+<form id="eventBookingForm" class="max-w-2xl p-6 mx-auto mt-8 space-y-6 bg-white shadow-md rounded-xl">
   <!-- Date Section -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <!-- Start Date -->
     <div>
-      <label for="start_date" class="block mb-1 text-gray-700 font-medium">Start Date</label>
+      <label for="start_date" class="block mb-1 font-medium text-gray-700">Start Date</label>
       <input type="date" name="start_date" id="startDate"
-        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+        class="w-full px-3 py-2 text-sm transition border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600">
     </div>
 
     <!-- End Date -->
     <div>
-      <label for="end_date" class="block mb-1 text-gray-700 font-medium">End Date</label>
+      <label for="end_date" class="block mb-1 font-medium text-gray-700">End Date</label>
       <input type="date" name="end_date" id="endDate"
-        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+        class="w-full px-3 py-2 text-sm transition border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600">
     </div>
   </div>
 
@@ -70,16 +80,16 @@
 
     <!-- Full Name -->
     <div>
-      <label for="fullname" class="block mb-1 text-gray-700 font-medium">Full Name</label>
+      <label for="fullname" class="block mb-1 font-medium text-gray-700">Full Name</label>
       <input type="text" name="full_name" id="fullname" placeholder="Enter your name"
-        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+        class="w-full px-3 py-2 text-sm transition border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600">
     </div>
 
     <!-- Event Type -->
     <div>
-      <label for="event_type" class="block mb-1 text-gray-700 font-medium">Event Type</label>
+      <label for="event_type" class="block mb-1 font-medium text-gray-700">Event Type</label>
       <select name="event_type" id="event_type"
-        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+        class="w-full px-3 py-2 text-sm transition bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600">
         <option value="" disabled selected>Select Event Type</option>
         <option value="Workshops">Workshops</option>
         <option value="Wedding">Wedding</option>
@@ -91,49 +101,49 @@
 
     <!-- Email -->
     <div>
-      <label for="email" class="block mb-1 text-gray-700 font-medium">E-mail</label>
+      <label for="email" class="block mb-1 font-medium text-gray-700">E-mail</label>
       <input type="email" name="email" id="email" placeholder="name@mail.com"
-        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+        class="w-full px-3 py-2 text-sm transition border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600">
     </div>
 
     <!-- Phone No -->
     <div>
-      <label for="phone" class="block mb-1 text-gray-700 font-medium">Phone No</label>
+      <label for="phone" class="block mb-1 font-medium text-gray-700">Phone No</label>
       <input type="tel" name="phone_number" id="phone" placeholder="09*********"
-        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+        class="w-full px-3 py-2 text-sm transition border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600">
     </div>
 
     <!-- No of Pax -->
     <div>
-      <label for="pax" class="block mb-1 text-gray-700 font-medium">No of Pax</label>
+      <label for="pax" class="block mb-1 font-medium text-gray-700">No of Pax</label>
       <input type="number" name="pax" id="pax" placeholder="Pax."
-        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition">
+        class="w-full px-3 py-2 text-sm transition border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600">
     </div>
 
     <!-- Things to be brought -->
     <div>
-      <label for="things" class="block mb-1 text-gray-700 font-medium">Things to be brought</label>
+      <label for="things" class="block mb-1 font-medium text-gray-700">Things to be brought</label>
       <textarea id="things" name="to_bring" placeholder="Volleyball Net&#10;Banners"
-        class="w-full border border-gray-300 rounded-md px-3 py-2  resize-none text-sm shadow-sm h-24 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition"></textarea>
+        class="w-full h-24 px-3 py-2 text-sm transition border border-gray-300 rounded-md shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600"></textarea>
     </div>
   </section>
 
   <!-- Submit Button -->
   <div class="flex justify-center">
     <button type="button" onclick="openConfirmationModal()"
-      class="bg-gradient-to-r from-teal-700 to-teal-600 hover:from-teal-800 hover:to-teal-700 text-white font-semibold text-lg px-10 py-3 rounded-xl shadow-lg transition-transform transform hover:scale-105">
+      class="px-10 py-3 text-lg font-semibold text-white transition-transform transform shadow-lg bg-gradient-to-r from-teal-700 to-teal-600 hover:from-teal-800 hover:to-teal-700 rounded-xl hover:scale-105">
       Review & Confirm Booking
     </button>
   </div>
 
-  <p id="response" class="text-center text-sm mt-2"></p>
+  <p id="response" class="mt-2 text-sm text-center"></p>
 </form>
 
  <!-- Footer -->
-<footer class="bg-gray-900 text-gray-300 mt-12">
-  <div class="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+<footer class="mt-12 text-gray-300 bg-gray-900">
+  <div class="grid max-w-6xl grid-cols-1 gap-6 px-6 py-8 mx-auto md:grid-cols-3">
     <div>
-      <h3 class="text-lg font-semibold mb-3">About Us</h3>
+      <h3 class="mb-3 text-lg font-semibold">About Us</h3>
       <p class="text-sm leading-relaxed">
         Lola Sayong Eco Surf-Farm is a community-driven space in Sorsogon where nature,
   culture, and people come together. We offer eco-friendly venues for celebrations,
@@ -142,73 +152,73 @@
       </p>
     </div>
      <div>
-      <h3 class="text-lg font-semibold mb-3">Contact</h3>
+      <h3 class="mb-3 text-lg font-semibold">Contact</h3>
       <p class="text-sm">📍 Brgy. Buenavista, Gubat, Sorsogon</p>
       <p class="text-sm">📞 +63 939 907 6136</p>
       <p class="text-sm">✉️ lolasayong.org@gmail.com</p>
     </div>
     <div>
-      <h3 class="text-lg font-semibold mb-3">Follow Us</h3>
+      <h3 class="mb-3 text-lg font-semibold">Follow Us</h3>
       <div class="flex gap-3">
         <a href="https://www.facebook.com/Lola.Sayong.Surf.Camp" class="hover:text-white">Facebook</a>
         <a href="https://www.instagram.com/lolasayong.and.thesimplethings/" class="hover:text-white">Instagram</a>
       </div>
     </div>
   </div>
-  <div class="text-center text-sm py-4 border-t border-gray-700">
+  <div class="py-4 text-sm text-center border-t border-gray-700">
     © 2025 Lola Sayong Eco-Surf Camp. All rights reserved.
   </div>
 </footer>
 
   <!-- Reservation Pop-Up -->
-  <div id="reservationModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
-      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Reservation Type</h2>
+  <div id="reservationModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-white/30 backdrop-blur-md">
+    <div class="p-6 bg-white shadow-2xl rounded-2xl w-96 animate-fade-in">
+      <h2 class="mb-6 text-xl font-semibold text-center text-gray-800">Choose Reservation Type</h2>
       <div class="grid gap-4">
         <button id="roomReser"
-          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          class="px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 rounded-xl">
           Room Reservation
         </button>
         <button id="eventReser"
-          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          class="px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 rounded-xl">
           Event Reservation
         </button>
       </div>
-      <div class="text-center mt-6">
-        <button onclick="closeReserModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      <div class="mt-6 text-center">
+        <button onclick="closeReserModal()" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Order Pop-Up -->
-  <div id="orderModal" class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
-      <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Choose Order Type</h2>
+  <div id="orderModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-white/30 backdrop-blur-md">
+    <div class="p-6 bg-white shadow-2xl rounded-2xl w-96 animate-fade-in">
+      <h2 class="mb-6 text-xl font-semibold text-center text-gray-800">Choose Order Type</h2>
       <div class="grid grid-cols-2 gap-6">
         <button id="foodOrder"
-          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          class="px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 rounded-xl">
           Food Order
         </button>
         <button id="farmOrder"
-          class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300">
+          class="px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 rounded-xl">
           Farm Order
         </button>
       </div>
-      <div class="text-center mt-6">
-        <button onclick="closeOrderModal()" class="text-gray-500 hover:text-gray-700 font-medium">Close</button>
+      <div class="mt-6 text-center">
+        <button onclick="closeOrderModal()" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Confirmation Modal -->
 <div id="confirmationModal"
-  class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
-  <div class="bg-white rounded-2xl shadow-2xl p-6 w-96 animate-fade-in">
-    <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Booking Summary</h2>
+  class="fixed inset-0 z-50 flex items-center justify-center hidden bg-white/30 backdrop-blur-md">
+  <div class="p-6 bg-white shadow-2xl rounded-2xl w-96 animate-fade-in">
+    <h2 class="mb-6 text-xl font-semibold text-center text-gray-800">Booking Summary</h2>
 
     <!-- Summary Box -->
     <div id="confirmationSummary"
-      class="bg-gray-100 p-4 rounded-lg mb-4 text-sm text-gray-800">
+      class="p-4 mb-4 text-sm text-gray-800 bg-gray-100 rounded-lg">
       <p class="justify-center text-sm text-gray-700">
         Note: Event Reservations will undergo approval process, check your email for approval results and payment.
       </p>
@@ -218,15 +228,15 @@
     <div class="grid gap-4">
       <!-- Single Proper Submit Button -->
       <button type="submit" id="confirmBtn"
-        class="bg-teal-700 hover:bg-teal-800 text-white font-medium py-3 px-4 rounded-xl shadow-md transition duration-300 w-full">
+        class="w-full px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 rounded-xl">
         Submit
       </button>
     </div>
 
     <!-- Close Button -->
-    <div class="text-center mt-6">
+    <div class="mt-6 text-center">
       <button onclick="closeConfirmationModal()" 
-        class="text-gray-500 hover:text-gray-700 font-medium">
+        class="font-medium text-gray-500 hover:text-gray-700">
         Close
       </button>
     </div>
@@ -235,15 +245,16 @@
 
   <!-- Alert Modal -->
   <div id="alertModal"
-    class="fixed inset-0 bg-white/30 backdrop-blur-md items-center flex justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-2xl shadow-xl w-80 text-center">
-      <h2 id="alertMessage" class="text-lg font-semibold text-gray-800 mb-4"></h2>
-      <button onclick="closeAlert()" class="px-4 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700">
+    class="fixed inset-0 z-50 flex items-center justify-center hidden bg-white/30 backdrop-blur-md">
+    <div class="p-6 text-center bg-white shadow-xl rounded-2xl w-80">
+      <h2 id="alertMessage" class="mb-4 text-lg font-semibold text-gray-800"></h2>
+      <button onclick="closeAlert()" class="px-4 py-2 text-white bg-teal-600 rounded-xl hover:bg-teal-700">
         OK
       </button>
     </div>
   </div>
 
   <script src="../scripts/eventConnection.js"></script>
+  <script src="../global_scripts/loginScript.js" defer></script>
 </body>
 </html>
