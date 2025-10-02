@@ -41,7 +41,7 @@ async function loadUserProfile() {
                 <! -- Dropdown Menu -->
 
                  <div id="userDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-50">
-                        <a href="/CustomerDashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
+                        <a href="/pages/CustomerDashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
                         <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-100">Logout</button>
                     </div>
             </div>

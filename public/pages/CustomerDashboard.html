@@ -30,17 +30,19 @@
 
   <!-- Right: Login + Dashboard Button -->
   <div class="flex items-center gap-4">
-    <button onclick="window.location.href='customerDashboard.html'" 
+    <button onclick="window.location.href='CustomerDashboard.html'" 
       class="px-4 py-2 text-white transition bg-teal-600 rounded-full shadow hover:bg-teal-700">
       Dashboard
     </button>
-     <!-- Google Login -->
-    <button class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-3 py-1.5 text-sm hover:bg-gray-100 transition-shadow shadow-sm">
+       <!-- Right: Auth Section -->
+<div id="auth-section" class="flex items-center">
+  <a id="loginBtn"
+     class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-3 py-1.5 text-sm hover:bg-gray-100 transition-shadow shadow-sm">
       <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google">
       <span>Log-in</span>
     </button>
-  </div>
-</header>
+  </a>
+</div>
 
 <!-- Dashboard Section -->
 <main class="max-w-6xl px-6 py-12 mx-auto">
@@ -187,5 +189,6 @@
 </footer>
 
 <script src="../scripts/customerDashboard.js"></script>
+<script src="../global_scripts/loginScript.js" defer></script>
 </body>
 </html>
