@@ -29,7 +29,7 @@ async function loadUserProfile() {
               <div class="relative inline-block text-left">
   <!-- Profile Button -->
   <button id="userMenuBtn" 
-          class="flex items-center gap-2 px-4 py-2 bg-white shadow-sm hover:bg-gray-50 focus:outline-none transition-all duration-200">
+          class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 focus:outline-none transition-all duration-200">
       <img src="${user.avatar ?? "https://via.placeholder.com/40"}" 
            alt="Avatar"
            class="w-8 h-8 rounded-full" />
@@ -42,7 +42,7 @@ async function loadUserProfile() {
 
   <!-- Dropdown Menu -->
   <div id="userDropdown" 
-       class="hidden absolute right-0 w-48 bg-white shadow-lg overflow-hidden origin-top scale-95 opacity-0 transition-all duration-200">
+       class="hidden absolute right-0 w-48 bg-white overflow-hidden origin-top scale-95 opacity-0 transition-all duration-200">
       <a href="/pages/CustomerDashboard.html" 
          class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
