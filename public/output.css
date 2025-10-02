@@ -667,8 +667,8 @@
   .border-gray-700 {
     border-color: var(--color-gray-700);
   }
-  .border-transparent {
-    border-color: transparent;
+  .border-teal-700 {
+    border-color: var(--color-teal-700);
   }
   .bg-black {
     background-color: var(--color-black);
@@ -1146,27 +1146,6 @@
     &:hover {
       @media (hover: hover) {
         scale: 1.02;
-      }
-    }
-  }
-  .hover\:border-gray-400 {
-    &:hover {
-      @media (hover: hover) {
-        border-color: var(--color-gray-400);
-      }
-    }
-  }
-  .hover\:border-red-400 {
-    &:hover {
-      @media (hover: hover) {
-        border-color: var(--color-red-400);
-      }
-    }
-  }
-  .hover\:border-teal-700 {
-    &:hover {
-      @media (hover: hover) {
-        border-color: var(--color-teal-700);
       }
     }
   }
