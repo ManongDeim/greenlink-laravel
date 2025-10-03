@@ -28,21 +28,21 @@ async function loadUserProfile() {
             authSection.innerHTML = `
               <div class="relative inline-block text-left">
   <!-- Profile Button -->
-  <button id="userMenuBtn" 
-          class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 focus:outline-none transition-all duration-200">
-      <img src="${user.avatar ?? "https://via.placeholder.com/40"}" 
-           alt="Avatar"
-           class="w-8 h-8 rounded-full" />
-      <span class="text-sm font-medium">${user.name}</span>
-      <svg id="chevronIcon" class="w-4 h-4 ml-1 text-gray-500 transition-transform duration-200" 
-           fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-      </svg>
-  </button>
+    <button id="userMenuBtn" 
+        class="flex items-center gap-2 px-2 py-1 bg-white hover:bg-gray-100 shadow-sm focus:outline-none transition-all duration-200 rounded-full">
+    <img src="${user.avatar ?? 'https://via.placeholder.com/40'}"
+         alt="Avatar"
+         class="w-10 h-10 rounded-full object-cover" />
+    <span class="text-sm font-medium leading-none truncate max-w-[100px]">${user.name}</span>
+    <svg id="chevronIcon" class="w-4 h-4 text-gray-500 transition-transform duration-200" 
+         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+</button>
 
   <!-- Dropdown Menu -->
   <div id="userDropdown" 
-       class="hidden absolute right-0 w-48 bg-white overflow-hidden origin-top scale-95 opacity-0 transition-all duration-200">
+       class="hidden shadow-sm absolute right-0 w-44 bg-white rounded-xl overflow-hidden origin-top scale-95 opacity-0 transition-all duration-200">
       <a href="/pages/CustomerDashboard.html" 
          class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@ async function loadUserProfile() {
          Dashboard
       </a>
       <button onclick="logout()" 
-              class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-100">
+              class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100">
           <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-9V7" />
           </svg>
@@ -59,6 +59,7 @@ async function loadUserProfile() {
       </button>
   </div>
 </div>
+
             `;
 
              // Toggle dropdown open/close
@@ -77,12 +78,7 @@ async function loadUserProfile() {
             dropdown.classList.remove("scale-95", "opacity-0");
             dropdown.classList.add("scale-100", "opacity-100");
         }, 10);
-
-        // Change button shape (only top rounded, no bottom border)
-        menuBtn.classList.remove("rounded-full");
-        menuBtn.classList.add("rounded-t-xl", "border-b-0");
-
-        chevron.classList.add("rotate-180");
+        
     } else {
         // Hide dropdown
         dropdown.classList.remove("scale-100", "opacity-100");
