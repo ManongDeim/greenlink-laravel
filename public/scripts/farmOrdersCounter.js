@@ -166,72 +166,81 @@ function confirmOrder() {
 
 
 
-// Send to Laravel
+// --- Confirm Order stays the same above ---
 
+
+// --- Send to Laravel + login guard ---
 function sendOrder(paymentMethod) {
-
   console.log("sendOrder triggered with:", paymentMethod);
 
-  let orderData = cart.map(item => ({
+  if (!window.isLoggedIn) {
+    openLoginModal();
+    return;
+  }
+
+  let orderData = cart.map((item) => ({
     name: item.name,
     qty: item.qty,
-    price: getPrice(item.name)
+    price: getPrice(item.name),
   }));
-
-  console.log("Sending to backend:", {
-  cart: orderData,
-  payment_method: paymentMethod
-});
 
   fetch("http://greenlinklolasayong.site/api/farmOrder/create-link", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Accept": "application/json"
+      Accept: "application/json",
     },
     body: JSON.stringify({
       cart: orderData,
-      payment_method: paymentMethod
-    })
+      payment_method: paymentMethod,
+    }),
   })
-  .then(res => res.json())
-.then(data => {
-  console.log("PayMongo response:", data); // 👀 debug in console
-  if (data.payment_url) {
-    window.location.href = data.payment_url; // ✅ redirect to PayMongo checkout
-  } else {
-    showAlert("No payment URL returned.");
-  }
-})
-.catch(err => {
-  console.error("Error:", err);
-  showAlert("Failed to place order.");
-});
-  
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("PayMongo response:", data);
+      if (data.payment_url) {
+        window.location.href = data.payment_url;
+      } else {
+        showAlert("No payment URL returned.");
+      }
+    })
+    .catch((err) => {
+      console.error("Error:", err);
+      showAlert("Failed to place order.");
+    });
 }
 
+// --- DOMContentLoaded Event ---
 document.addEventListener("DOMContentLoaded", () => {
-document.getElementById("checkoutBtn").addEventListener("click", (e) => {
+  // Checkout button opens cart modal
+  document.getElementById("checkoutBtn").addEventListener("click", (e) => {
     e.preventDefault();
-     if (cart.length === 0) {
-    showAlert("Your cart is empty.");
-    return;
-  }
-    openModal(); // this shows the modal with Cash & GCash options
+    if (cart.length === 0) {
+      showAlert("Your cart is empty.");
+      return;
+    }
+    openModal();
   });
 
-   const gcashBtn = document.getElementById("gcashPayment");
-  if (gcashBtn) {
-    gcashBtn.addEventListener("click", (e) => {
+  // Proceed to payment (PayMongo)
+  const paymongoBtn = document.getElementById("paymongoBtn");
+  if (paymongoBtn) {
+    paymongoBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log("✅ GCash button clicked");
-      sendOrder("GCash");
+
+      if (!window.isLoggedIn) {
+        openLoginModal();
+        return;
+      }
+
+      sendOrder("PayMongo");
     });
   } else {
-    console.error("❌ GCash button not found in DOM");
+    console.error("❌ paymongoBtn not found");
   }
 });
+
 
  
 
