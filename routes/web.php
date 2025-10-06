@@ -46,6 +46,13 @@ Route::get('/logout', function () {
     return response()->json(['success' => true]);
 });
 
+Route::get('/auth-status', function () {
+    return response()->json([
+        'logged_in' => Auth::check(),
+    ]);
+});
+
+
 
 // Farm Order routes
 
