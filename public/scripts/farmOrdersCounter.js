@@ -1,3 +1,5 @@
+let productData = {};
+
 // Store counters for all 6 items
     const counters = { counter1: 0, counter2: 0, counter3: 0, counter4: 0, counter5: 0, counter6: 0 };
 
@@ -36,7 +38,7 @@
     let cart = [];
 
 // Add item to cart
-function addItem(itemName, counterId) {
+function addItem(itemName, counterId, price) {
   event.preventDefault();
   let qty = parseInt(document.getElementById(counterId).textContent);
 
@@ -50,9 +52,7 @@ function addItem(itemName, counterId) {
 
     // reset counter
     document.getElementById(counterId).textContent = 0;
-    if (typeof counters !== "undefined") {
-      counters[counterId] = 0; 
-    }
+    counters[counterId] = 0;
 
     updateCartBadge();
     updateModal();
@@ -246,15 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Price list
 function getPrice(itemName) {
-  switch(itemName) {
-    case "Bangus": return 200;
-    case "Egg": return 8.5;
-    case "Mud Crab": return 240;
-    case "Native Chicken": return 350;
-    case "Native Pork": return 350;
-    case "Squash": return 100;
-    default: return 0;
-  }
+  return productData[itemName] || 0;
 }
 
 
@@ -348,3 +340,40 @@ document.addEventListener("keydown", function (event) {
 
 
 
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const response = await fetch('https://grenlinklolasayong.site/api/farmProducts'); 
+    const products = await response.json();
+    const grid = document.getElementById('productGrid');
+
+    // Reset global counter store
+    window.counters = {};
+    
+    products.forEach((product, index) => {
+      productData[product.productName] = product.price; 
+      const counterId = `counter_${product.id}`;
+      window.counters[counterId] = 0;
+
+      const card = document.createElement('div');
+      card.className = "overflow-hidden transition bg-white shadow-md rounded-xl w-80 hover:shadow-xl";
+      card.innerHTML = `
+        <img src="${product.productPicture}" alt="${product.productName}" class="object-cover w-full h-48">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold">${product.productName}</h3>
+          <p class="text-gray-500">₱${product.price}</p>
+          <div class="flex items-center mt-4 space-x-4">
+            <div class="flex items-center space-x-4">
+              <button type="button" class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full hover:bg-teal-600 hover:text-white" onclick="decrementCounter('${counterId}')">−</button>
+              <span id="${counterId}" class="w-10 py-1 text-lg font-semibold text-center bg-gray-100 rounded-lg">0</span>
+              <button type="button" class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full hover:bg-teal-600 hover:text-white" onclick="incrementCounter('${counterId}')">+</button>
+            </div>
+            <button type="button" class="px-4 py-2 text-white bg-teal-600 rounded-lg shadow hover:bg-teal-700" onclick="addItem('${product.productName}', '${counterId}', ${product.price})">Add Item</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  } catch (error) {
+    console.error('Failed to load products:', error);
+  }
+});

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\FarmOrderController;
 use App\Http\Controllers\Api\FoodOrderController;
 use App\Http\Controllers\Api\EventAdminReservationController;
+use App\Http\Controllers\Api\FarmProductController;
 use App\Models\EventAdminModel;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
@@ -23,7 +24,7 @@ Route::post('foodOrder', [FoodOrderController::class, 'store']);
 // Farm Order routes
 Route::post('farmOrder/create-link', [FarmOrderController::class, 'createPaymentLink']);
 
-
+Route::get('farmProducts', [FarmProductController::class, 'index']);
 
 
 // Admin Routes
