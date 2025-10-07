@@ -10,7 +10,6 @@ class FarmProductController extends Controller
 {
     public function index()
     {
-        $products = FarmProduct::all();
-        return response()->json($products);
+        return response()->json(FarmProduct::all());
     }
 }
