@@ -342,7 +342,7 @@ document.addEventListener("keydown", function (event) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const response = await fetch('http://grenlinklolasayong.site/api/farmProducts'); 
+    const response = await fetch('https://greenlinklolasayong.site/api/farmProducts'); 
     const products = await response.json();
     const grid = document.getElementById('productGrid');
 
