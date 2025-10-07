@@ -42,7 +42,11 @@ class GoogleController extends Controller
 
         Auth::login($user);
 
-        return redirect('/');
+        if ($user->role === 'admin') {
+            return redirect('/AdminPage.html');
+        } else{
+            return redirect('/');
+        }
     }
 
     
