@@ -1,17 +1,18 @@
 let productData = {};
+window.counters = {};
 
-// Store counters for all 6 items
-    const counters = { counter1: 0, counter2: 0, counter3: 0, counter4: 0, counter5: 0, counter6: 0 };
 
     function incrementCounter(id) {
-      counters[id]++;
-      document.getElementById(id).textContent = counters[id];
+      if (!window.counters[id]) window.counters[id] = 0;
+  window.counters[id]++;
+  document.getElementById(id).textContent = window.counters[id];
     }
 
     function decrementCounter(id) {
-      if (counters[id] > 0) {
-        counters[id]--;
-        document.getElementById(id).textContent = counters[id];
+      if (!window.counters[id]) window.counters[id] = 0;
+  if (window.counters[id] > 0) {
+    window.counters[id]--;
+    document.getElementById(id).textContent = window.counters[id];
       }
     }
 
@@ -47,7 +48,7 @@ function addItem(itemName, counterId, price) {
     if (existing) {
       existing.qty += qty;
     } else {
-      cart.push({ name: itemName, qty: qty });
+      cart.push({ name: itemName, qty: qty, price: getPrice(itemName) });
     }
 
     // reset counter
@@ -90,7 +91,7 @@ function updateModal() {
   let total = 0;
 
   cart.forEach((item, index) => {
-    let price = getPrice(item.name);
+    let price = parseFloat(item.price || getPrice(item.name));
     let itemTotal = price * item.qty;
     total += itemTotal;
 
@@ -246,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Price list
 function getPrice(itemName) {
-  return productData[itemName] || 0;
+  return parseFloat(productData[itemName]) || 0;
 }
 
 
@@ -346,11 +347,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const products = await response.json();
     const grid = document.getElementById('productGrid');
 
-    // Reset global counter store
-    window.counters = {};
     
     products.forEach((product, index) => {
-      productData[product.productName] = product.price; 
+      productData[product.productName] = parseFloat(product.price); 
       const counterId = `counter_${product.id}`;
       window.counters[counterId] = 0;
 
