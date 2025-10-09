@@ -39,7 +39,7 @@ class FarmOrderController extends Controller
             // Prepare initial order data
             $orderData = [
                 'farmOrder_id' => $farmOrderId,
-                'user_id' => $user->user_id, // ✅ taken automatically from logged-in user
+                'user_id' => $user->id, // ✅ taken automatically from logged-in user
                 'bangus_order' => 0,
                 'eggs_order' => 0,
                 'mudCrab_order' => 0,
