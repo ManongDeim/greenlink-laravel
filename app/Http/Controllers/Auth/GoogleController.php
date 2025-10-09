@@ -28,19 +28,26 @@ class GoogleController extends Controller
             ['email' => $googleUserData->getEmail()],
             [
                 'name' => $googleUserData->getName(),
-                'password' => null,
+                'password' => bcrypt(str()->random(16)),
             ]
         );
 
-        $googleUser = GoogleUser::firstOrNew([
-            'user_id' => $user->id,
-        ]);
+        $googleUser =GoogleUser::updateOrCreate(
+        ['user_id' => $user->id],
+        [
+            'email' => $googleUserData->getEmail(),
+            'avatar' => $googleUserData->getAvatar(),
+        ]
+    );
 
        $googleUser->email = $googleUserData->getEmail();
        $googleUser->avatar = $googleUserData->getAvatar();
        $googleUser->save();
 
-        Auth::login($user);
+        Auth::login($user, true);
+
+        $request = request();
+        $request->session()->regenerate();
 
         if ($googleUser->role === 'admin') {
             return redirect('/AdminPage.html');

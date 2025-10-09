@@ -179,6 +179,8 @@ async function sendOrder(paymentMethod) {
           Accept: "application/json",
         },
       });
+   
+      
 
       if (!userRes.ok) {
         console.error("Failed to fetch user:", await userRes.text());
