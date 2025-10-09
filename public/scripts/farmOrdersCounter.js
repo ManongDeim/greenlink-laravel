@@ -205,6 +205,8 @@ function sendOrder(paymentMethod) {
     price: getPrice(item.name),
   }));
 
+  console.log("Sending order with user_id:", userId);
+
   fetch("http://greenlinklolasayong.site/api/farmOrder/create-link", {
     method: "POST",
     headers: {
