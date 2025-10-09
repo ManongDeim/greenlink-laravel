@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User; 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class GoogleUser extends Model
+class GoogleUser extends Authenticatable
 {
     use HasFactory;
 
