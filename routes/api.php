@@ -13,11 +13,15 @@ use App\Http\Controllers\Api\FarmProductController;
 use App\Models\EventAdminModel;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-     return [
-        'id'     => $request->user()->id,
-        'name'   => $request->user()->name,
-        'email'  => $request->user()->email,
-        'avatar' => $request->user()->googleAccount->avatar ?? null,
+    $user = $request->user();
+    $googleUser = $user->googleAccount;
+
+    return [
+        'id'     => $user->id,
+        'name'   => $user->name,
+        'email'  => $user->email,
+        'avatar' => $googleUser?->avatar,
+        'role'   => $googleUser?->role ?? 'customer'
     ];
 });
 
