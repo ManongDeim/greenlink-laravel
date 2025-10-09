@@ -76,6 +76,7 @@ class FarmOrderController extends Controller
             }
 
             // Save to DB inside the transaction
+        $orderData['user_id'] = $request->input('user_id');
             return FarmOrderModel::create($orderData);
         });
 
