@@ -22,6 +22,8 @@ async function loadUserProfile() {
 
         const user = await response.json();
         console.log("👤 Logged in:", user);
+          window.isLoggedIn = true;
+          window.userId = user.id; 
 
         const authSection = document.getElementById("auth-section");
         if (authSection) {

@@ -13,48 +13,44 @@ use Laravel\Socialite\Two\GoogleProvider;
 class GoogleController extends Controller
 {
     public function redirect()
-    {   
+    {
         return Socialite::driver('google')->redirect();
     }
 
     public function callback()
     {
         /** @var GoogleProvider $driver */
-    $driver = Socialite::driver('google');
+        $driver = Socialite::driver('google');
 
         $googleUserData = $driver->user();
 
+        // Create or update main user
         $user = User::updateOrCreate(
             ['email' => $googleUserData->getEmail()],
             [
-                'name' => $googleUserData->getName(),
+                'name'     => $googleUserData->getName(),
                 'password' => bcrypt(str()->random(16)),
             ]
         );
 
-        $googleUser =GoogleUser::updateOrCreate(
-        ['user_id' => $user->id],
-        [
-            'email' => $googleUserData->getEmail(),
-            'avatar' => $googleUserData->getAvatar(),
-        ]
-    );
+        // Create or update Google user profile
+        $googleUser = GoogleUser::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'email'  => $googleUserData->getEmail(),
+                'avatar' => $googleUserData->getAvatar(),
+                'role'   => 'customer' // Default role
+            ]
+        );
 
-       $googleUser->email = $googleUserData->getEmail();
-       $googleUser->avatar = $googleUserData->getAvatar();
-       $googleUser->save();
+        // ✅ Log in the main user (not GoogleUser)
+        Auth::login($user);
 
-        Auth::login($user, true);
-
-        $request = request();
-        $request->session()->regenerate();
-
+        // Redirect based on role
         if ($googleUser->role === 'admin') {
             return redirect('/AdminPage.html');
-        } else{
-            return redirect('/');
         }
-    }
 
-    
+        return redirect('/');
+    }
 }
