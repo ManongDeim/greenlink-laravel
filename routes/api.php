@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\FarmOrderController;

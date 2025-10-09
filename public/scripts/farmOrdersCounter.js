@@ -167,7 +167,27 @@ function confirmOrder() {
 
 
 
-// --- Confirm Order stays the same above ---
+let userId = null;
+
+// Fetch current user ID
+async function fetchCurrentUser() {
+  try {
+    const res = await fetch("http://greenlinklolasayong.site/api/user", {
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Not logged in");
+    const user = await res.json();
+
+    userId = user.user_id;
+    window.isLoggedIn = true;
+    console.log("Logged in user:", user);
+  } catch (err) {
+    window.isLoggedIn = false;
+    console.log("User not logged in:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", fetchCurrentUser);
 
 
 // --- Send to Laravel + login guard ---
