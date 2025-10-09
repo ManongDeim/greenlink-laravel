@@ -187,7 +187,7 @@ async function sendOrder(paymentMethod) {
       }
 
       const user = await userRes.json();
-      window.userId = user.id;
+      window.userId = user.id || user.user_id;
       console.log("✅ Retrieved user_id:", window.userId);
     } catch (err) {
       console.error("Error fetching user info:", err);
@@ -207,7 +207,7 @@ async function sendOrder(paymentMethod) {
     price: getPrice(item.name),
   }));
 
-  console.log("📦 Sending order with user_id:", window.userId);
+  console.log("Sending order with user_id:", window.userId);
 
   console.log("Sending order with user_id:", userId);
 

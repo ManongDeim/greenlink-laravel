@@ -11,7 +11,7 @@ class GoogleUser extends Model
     use HasFactory;
 
     protected $table = 'google_users';
-    protected $primaryKey = 'user_id'; // 👈 change to real PK
+    protected $primaryKey = 'user_id'; 
     public $incrementing = true;
     protected $keyType = 'int';
 
