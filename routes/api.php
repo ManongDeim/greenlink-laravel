@@ -12,7 +12,7 @@ use App\Http\Controllers\Api\EventAdminReservationController;
 use App\Http\Controllers\Api\FarmProductController;
 use App\Models\EventAdminModel;
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
+Route::middleware(['auth:sanctum'])->get('/user-info', function (Request $request) {
      $user = $request->user()->load('googleAccount');
 
     return response()->json([

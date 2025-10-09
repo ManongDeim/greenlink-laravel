@@ -173,7 +173,7 @@ async function sendOrder(paymentMethod) {
 
  if (!window.userId) {
     try {
-      const userRes = await fetch("https://greenlinklolasayong.site/api/user", {
+      const userRes = await fetch("https://greenlinklolasayong.site/api/user-info", {
         credentials: "include",
         headers: {
           Accept: "application/json",
