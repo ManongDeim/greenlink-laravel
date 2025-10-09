@@ -51,4 +51,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(GoogleUser::class, 'user_id', 'id');
     }
+
+   public function farmOrders() {
+    return $this->hasMany(FarmOrderModel::class, 'user_id', 'id');
+}
+
 }
