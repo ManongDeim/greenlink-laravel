@@ -211,14 +211,14 @@ async function sendOrder(paymentMethod) {
 
   console.log("Sending order with user_id:", window.userId);
 
-  fetch("http://greenlinklolasayong.site/api/farmOrder/create-link", {
+  fetch("https://greenlinklolasayong.site/api/farmOrder/create-link", {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
     body: JSON.stringify({
-      user_id: userId,
       cart: orderData,
       payment_method: paymentMethod,
     }),

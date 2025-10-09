@@ -13,7 +13,12 @@ use App\Http\Controllers\Api\FarmProductController;
 use App\Models\EventAdminModel;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
+     return [
+        'id'     => $request->user()->id,
+        'name'   => $request->user()->name,
+        'email'  => $request->user()->email,
+        'avatar' => $request->user()->googleAccount->avatar ?? null,
+    ];
 });
 
 Route::post('cottageReservation', [RoomController::class, 'store']);
