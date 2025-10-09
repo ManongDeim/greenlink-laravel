@@ -1,4 +1,5 @@
 let productData = {};
+let userId = null;
 window.counters = {};
 
 
@@ -166,44 +167,47 @@ function confirmOrder() {
 }
 
 
-
-let userId = null;
-
-// Fetch current user ID
-async function fetchCurrentUser() {
-  try {
-    const res = await fetch("http://greenlinklolasayong.site/api/user", {
-      credentials: "include",
-    });
-    if (!res.ok) throw new Error("Not logged in");
-    const user = await res.json();
-
-    userId = user.user_id;
-    window.isLoggedIn = true;
-    console.log("Logged in user:", user);
-  } catch (err) {
-    window.isLoggedIn = false;
-    console.log("User not logged in:", err);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", fetchCurrentUser);
-
-
 // --- Send to Laravel + login guard ---
-function sendOrder(paymentMethod) {
+async function sendOrder(paymentMethod) {
   console.log("sendOrder triggered with:", paymentMethod);
+
+ if (!window.userId) {
+    try {
+      const userRes = await fetch("https://greenlinklolasayong.site/api/user", {
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!userRes.ok) {
+        console.error("Failed to fetch user:", await userRes.text());
+        openLoginModal();
+        return;
+      }
+
+      const user = await userRes.json();
+      window.userId = user.id;
+      console.log("✅ Retrieved user_id:", window.userId);
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+      openLoginModal();
+      return;
+    }
+  }
 
   if (!window.isLoggedIn) {
     openLoginModal();
     return;
   }
 
-  let orderData = cart.map((item) => ({
+  const orderData = cart.map((item) => ({
     name: item.name,
     qty: item.qty,
     price: getPrice(item.name),
   }));
+
+  console.log("📦 Sending order with user_id:", window.userId);
 
   console.log("Sending order with user_id:", userId);
 
