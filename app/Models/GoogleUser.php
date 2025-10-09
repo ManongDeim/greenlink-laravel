@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\User; 
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class GoogleUser extends Authenticatable
+
+class GoogleUser extends Model
 {
     use HasFactory;
 
