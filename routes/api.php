@@ -28,6 +28,14 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     ];
 });
 
+Route::get('/debug-session', function () {
+    return [
+        'is_logged_in' => Auth::check(),
+        'user'         => Auth::user(),
+        'session_data' => session()->all(),
+    ];
+});
+
 Route::post('cottageReservation', [RoomController::class, 'store']);
 
 Route::post('eventReservation', [EventController::class, 'store']);
