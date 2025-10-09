@@ -15,13 +15,17 @@ use App\Models\EventAdminModel;
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
      $user = $request->user()->load('googleAccount');
 
-    return [
-         'id'     => $user->id,
-        'name'   => $user->name,
-        'email'  => $user->email,
-        'avatar' => $user->googleAccount?->avatar,
-        'role'   => $user->googleAccount?->role ?? 'customer'
-    ];
+    return response()->json([
+        'is_logged_in' => true,
+        'user' => [
+            'id'     => $user->id,
+            'name'   => $user->name,
+            'email'  => $user->email,
+            'avatar' => $user->googleAccount?->avatar,
+            'role'   => $user->googleAccount?->role ?? 'customer'
+        ],
+        'session_data' => session()->all()
+    ]);
 });
 
 
