@@ -15,7 +15,7 @@ class FarmOrderModel extends Model
 
     protected $fillable = [
         'user_id',
-        'foodOrder_id',
+        'farmOrder_id',
         'bangus_order',
         'eggs_order',
         'mudCrab_order',
