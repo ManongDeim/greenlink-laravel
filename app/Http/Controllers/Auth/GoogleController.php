@@ -40,7 +40,7 @@ class GoogleController extends Controller
        $googleUser->avatar = $googleUserData->getAvatar();
        $googleUser->save();
 
-        Auth::login($user);
+        Auth::login($googleUser);
 
         if ($googleUser->role === 'admin') {
             return redirect('/AdminPage.html');
