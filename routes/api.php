@@ -22,8 +22,6 @@ Route::post('eventReservation', [EventController::class, 'store']);
 Route::post('foodOrder', [FoodOrderController::class, 'store']);
 
 // Farm Order routes
-Route::post('farmOrder/create-link', [FarmOrderController::class, 'createPaymentLink']);
-
 Route::get('farmProducts', [FarmProductController::class, 'index']);
 
 

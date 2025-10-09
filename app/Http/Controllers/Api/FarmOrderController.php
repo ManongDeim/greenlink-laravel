@@ -6,72 +6,100 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\FarmOrderModel;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 
 class FarmOrderController extends Controller
 {       
 
 
- public function createPaymentLink(Request $request)
+     public function createPaymentLink(Request $request)
     {
         Log::info('Incoming request:', $request->all());
 
-        $refNumber = uniqid('REF-');
+        // ✅ Get authenticated user automatically
+        $user = Auth::user();
 
-        // Convert cart into orderData
-        $orderData = [
-            'bangus_order' => 0,
-            'eggs_order' => 0,
-            'mudCrab_order' => 0,
-            'nativeChicken_order' => 0,
-            'nativePork_order' => 0,
-            'squash_order' => 0,
-            'total_bill' => 0,
-            'payment_method' => 'GCash',
-            'order_status' => 'Pending',
-            'ref_number' => $refNumber,
-        ];
-
-        $lineitems = [];
-
-        foreach ($request->cart as $item) {
-            switch ($item['name']) {
-                case 'Bangus': $orderData['bangus_order'] = $item['qty']; break;
-                case 'Egg': $orderData['eggs_order'] = $item['qty']; break;
-                case 'Mud Crab': $orderData['mudCrab_order'] = $item['qty']; break;
-                case 'Native Chicken': $orderData['nativeChicken_order'] = $item['qty']; break;
-                case 'Native Pork': $orderData['nativePork_order'] = $item['qty']; break;
-                case 'Squash': $orderData['squash_order'] = $item['qty']; break;
-            }
-
-             $subtotal = $item['price'] * $item['qty'];
-             $orderData['total_bill'] += $subtotal;
-
-            $lineitems[] = [
-            'currency' => 'PHP',
-            'amount'   => intval($item['price'] * 100), 
-            'name'     => $item['name'],
-            'quantity' => $item['qty']
-            ];
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized. Please log in first.'], 401);
         }
 
-        // Save order to DB
-        FarmOrderModel::create($orderData);
+        // Wrap everything in a transaction to prevent race conditions
+        $order = DB::transaction(function () use ($request, $user) {
 
-        // Call PayMongo API
+            // Generate unique FARM order ID (safe under concurrency)
+            do {
+                $foodOrderId = 'FARM-' . strtoupper(uniqid());
+            } while (FarmOrderModel::where('foodOrder_id', $foodOrderId)->exists());
+
+            // Generate unique reference number for PayMongo
+            $refNumber = uniqid('REF-');
+
+            // Prepare initial order data
+            $orderData = [
+                'foodOrder_id' => $foodOrderId,
+                'user_id' => $user->user_id, // ✅ taken automatically from logged-in user
+                'bangus_order' => 0,
+                'eggs_order' => 0,
+                'mudCrab_order' => 0,
+                'nativeChicken_order' => 0,
+                'nativePork_order' => 0,
+                'squash_order' => 0,
+                'total_bill' => 0,
+                'payment_method' => 'GCash',
+                'order_status' => 'Pending',
+                'ref_number' => $refNumber,
+            ];
+
+            $lineitems = [];
+
+            foreach ($request->cart as $item) {
+                switch ($item['name']) {
+                    case 'Bangus': $orderData['bangus_order'] = $item['qty']; break;
+                    case 'Egg': $orderData['eggs_order'] = $item['qty']; break;
+                    case 'Mud Crab': $orderData['mudCrab_order'] = $item['qty']; break;
+                    case 'Native Chicken': $orderData['nativeChicken_order'] = $item['qty']; break;
+                    case 'Native Pork': $orderData['nativePork_order'] = $item['qty']; break;
+                    case 'Squash': $orderData['squash_order'] = $item['qty']; break;
+                }
+
+                $subtotal = $item['price'] * $item['qty'];
+                $orderData['total_bill'] += $subtotal;
+
+                $lineitems[] = [
+                    'currency' => 'PHP',
+                    'amount'   => intval($item['price'] * 100),
+                    'name'     => $item['name'],
+                    'quantity' => $item['qty']
+                ];
+            }
+
+            // Save to DB inside the transaction
+            return FarmOrderModel::create($orderData);
+        });
+
+        // ✅ PayMongo API call
         $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
             ->post('https://api.paymongo.com/v1/checkout_sessions', [
                 'data' => [
                     'attributes' => [
-                        'line_items' => $lineitems, 
+                        'line_items' => array_map(function ($item) {
+                            return [
+                                'currency' => 'PHP',
+                                'amount' => intval($item['price'] * 100),
+                                'name' => $item['name'],
+                                'quantity' => $item['qty'],
+                            ];
+                        }, $request->cart),
                         'payment_method_types' => ['gcash'],
-                        'amount' => intval($orderData['total_bill'] * 100), // centavos
-                        'description' => "Farm Order Ref: $refNumber",
-                        'remarks' => $refNumber,
+                        'amount' => intval($order->total_bill * 100),
+                        'description' => "Farm Order Ref: {$order->ref_number}",
+                        'remarks' => $order->ref_number,
                         'currency' => 'PHP',
                         'show_line_items' => true,
                         'show_description' => true,
-                        'success_url' =>  'https://greenlinklolasayong.site/pages/paymentSuccess.html',
+                        'success_url' => 'https://greenlinklolasayong.site/pages/paymentSuccess.html',
                         'cancel_url' => 'https://greenlinklolasayong.site/pages/paymentFailed.html',
                     ]
                 ]
@@ -82,8 +110,10 @@ class FarmOrderController extends Controller
         Log::info('PayMongo response', $response->json());
 
         return response()->json([
-    'payment_url' => $checkoutUrl
-]);
+            'payment_url' => $checkoutUrl,
+            'foodOrder_id' => $order->foodOrder_id,
+            'ref_number' => $order->ref_number
+        ]);
     }
 
     public function paymentSuccess(Request $request)

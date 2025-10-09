@@ -56,6 +56,9 @@ Route::get('/auth-status', function () {
 
 // Farm Order routes
 
+Route::post('/api/farmOrder/create-link', [FarmOrderController::class, 'createPaymentLink'])
+    ->middleware('auth');
+
 Route::get('/farmOrders/payment-success', [FarmOrderController::class, 'paymentSuccess'])
     ->name('farmOrders.paymentSuccess');
 

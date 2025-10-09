@@ -192,6 +192,7 @@ function sendOrder(paymentMethod) {
       Accept: "application/json",
     },
     body: JSON.stringify({
+      user_id: userId,
       cart: orderData,
       payment_method: paymentMethod,
     }),
