@@ -13,18 +13,14 @@ use App\Http\Controllers\Api\FarmProductController;
 use App\Models\EventAdminModel;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    Log::info("Authenticated user class: " . get_class($request->user()));
-    Log::info("Authenticated user ID: " . $request->user()?->id);
-
-    $user = $request->user();
-    $googleUser = $user->googleAccount;
+     $user = $request->user()->load('googleAccount');
 
     return [
-        'id'     => $user->id,
+         'id'     => $user->id,
         'name'   => $user->name,
         'email'  => $user->email,
-        'avatar' => $googleUser?->avatar,
-        'role'   => $googleUser?->role ?? 'customer'
+        'avatar' => $user->googleAccount?->avatar,
+        'role'   => $user->googleAccount?->role ?? 'customer'
     ];
 });
 
