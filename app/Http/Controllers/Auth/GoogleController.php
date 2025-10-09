@@ -17,40 +17,41 @@ class GoogleController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-    public function callback()
-    {
-        /** @var GoogleProvider $driver */
-        $driver = Socialite::driver('google');
+   public function callback()
+{
+    /** @var GoogleProvider $driver */
+    $driver = Socialite::driver('google');
 
-        $googleUserData = $driver->user();
+    $googleUserData = $driver->user();
 
-        // Create or update main user
-        $user = User::updateOrCreate(
-            ['email' => $googleUserData->getEmail()],
-            [
-                'name'     => $googleUserData->getName(),
-                'password' => bcrypt(str()->random(16)),
-            ]
-        );
+    // Create or update main User
+    $user = User::updateOrCreate(
+        ['email' => $googleUserData->getEmail()],
+        [
+            'name'     => $googleUserData->getName(),
+            'password' => bcrypt(str()->random(16)),
+        ]
+    );
 
-        // Create or update Google user profile
-        $googleUser = GoogleUser::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'email'  => $googleUserData->getEmail(),
-                'avatar' => $googleUserData->getAvatar(),
-                'role'   => 'customer' // Default role
-            ]
-        );
+    // Create or update GoogleUser
+    $googleUser = GoogleUser::updateOrCreate(
+        ['user_id' => $user->id],
+        [
+            'email'  => $googleUserData->getEmail(),
+            'avatar' => $googleUserData->getAvatar(),
+            'role'   => 'customer' // default role
+        ]
+    );
 
-        // ✅ Log in the main user (not GoogleUser)
-        Auth::login($user);
+    // ✅ Log in the main User model
+    Auth::login($user);
 
-        // Redirect based on role
-        if ($googleUser->role === 'admin') {
-            return redirect('/AdminPage.html');
-        }
-
-        return redirect('/');
+    // Redirect based on role
+    if ($googleUser->role === 'admin') {
+        return redirect('/AdminPage.html');
     }
+
+    return redirect('/');
+}
+
 }
