@@ -64,3 +64,12 @@ Route::get('/farmOrders/payment-success', [FarmOrderController::class, 'paymentS
 
 Route::get('/farmOrders/payment-failed', [FarmOrderController::class, 'paymentFailed'])
     ->name('farmOrders.paymentFailed');
+
+
+    Route::get('/debug-session', function () {
+    return [
+        'is_logged_in' => Auth::check(),
+        'user'         => Auth::user(),
+        'session_data' => session()->all(),
+    ];
+});
