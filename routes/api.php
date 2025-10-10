@@ -67,3 +67,8 @@ Route::patch('/reservations/{id}/approval', [EventAdminReservationController::cl
 // Farm Order routes
 Route::get('/paymentSuccess', [FarmOrderController::class, 'paymentSuccess']);
 Route::get('/paymentFailed', [FarmOrderController::class, 'paymentFailed']);
+
+// Food Order routes
+
+Route::get('/paymentSuccess', [FoodOrderController::class, 'paymentSuccess']);
+Route::get('/paymentFailed', [FoodOrderController::class, 'paymentFailed']);
