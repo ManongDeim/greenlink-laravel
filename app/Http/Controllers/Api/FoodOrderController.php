@@ -24,17 +24,17 @@ class FoodOrderController extends Controller
          // Wrap everything in a transaction to prevent race conditions
         $order = DB::transaction(function () use ($request, $user) {
 
-            // Generate unique FARM order ID (safe under concurrency)
+            // Generate unique FOOD order ID (safe under concurrency)
             do {
-                $farmOrderId = 'FARM-'. mt_rand(1,99999);
-            } while (FoodOrderModel::where('farmOrder_id', $farmOrderId)->exists());
+                $foodOrderId = 'FOOD-'. mt_rand(1,99999);
+            } while (FoodOrderModel::where('foodOrder_id', $foodOrderId)->exists());
 
             // Generate unique reference number for PayMongo
             $refNumber = uniqid('REF-');
 
             // Prepare initial order data
             $orderData = [
-                'foodOrder_id' => $farmOrderId,
+                'foodOrder_id' => $foodOrderId,
                 'user_id' => $user->id, // ✅ taken automatically from logged-in user
                 'smokedFish_order' => 0,
                 'deviledFish_order' => 0,
@@ -94,7 +94,7 @@ class FoodOrderController extends Controller
                         }, $request->cart),
                         'payment_method_types' => ['gcash'],
                         'amount' => intval($order->total_bill * 100),
-                        'description' => "Farm Order Ref: {$order->ref_number}",
+                        'description' => "Food Order Ref: {$order->ref_number}",
                         'remarks' => $order->ref_number,
                         'currency' => 'PHP',
                         'show_line_items' => true,
@@ -111,7 +111,7 @@ class FoodOrderController extends Controller
 
         return response()->json([
             'payment_url' => $checkoutUrl,
-            'farmrOder_id' => $order->farmOrder_id,
+            'foodOder_id' => $order->foodOrder_id,
             'ref_number' => $order->ref_number
         ]);
     }   
