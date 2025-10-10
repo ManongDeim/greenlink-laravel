@@ -103,8 +103,8 @@ class FarmOrderController extends Controller
                         'currency' => 'PHP',
                         'show_line_items' => true,
                         'show_description' => true,
-                        'success_url' => 'https://greenlinklolasayong.site/pages/paymentSuccess.html',
-                        'cancel_url' => 'https://greenlinklolasayong.site/pages/paymentFailed.html',
+                        'success_url' => 'https://greenlinklolasayong.site/api/paymentSuccess?ref=' . $order->ref_number,
+                        'cancel_url' => 'https://greenlinklolasayong.site/api/paymentFailed?ref=' . $order->ref_number,
                     ]
                 ]
             ]);
@@ -125,10 +125,16 @@ class FarmOrderController extends Controller
 
   Log::info("✅ paymentSuccess route hit", [
         'full_url' => $request->fullUrl(),
-        'ref' => $request->query('remarks')
+        'ref' => $request->query('ref')
     ]);
 
-        $refNumber = $request->query('remarks');
+        $refNumber = $request->query('ref');
+
+        if(!$refNumber) {
+            Log::warning("No ref number provided in paymentSuccess");
+            return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
+        }
+
         $order = FarmOrderModel::where('ref_number', $refNumber)->first();
 
         if (!$order) {
@@ -138,7 +144,7 @@ class FarmOrderController extends Controller
         
 
         $order->update(['payment_status' => 'Paid']);
-        Log::info("PaymentSuccess hit", $request->all());
+        Log::info("Payment marked successful with reference number: {$refNumber}");
         return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
         
     }
@@ -146,15 +152,26 @@ class FarmOrderController extends Controller
     // Step 2b: If payment fails
     public function paymentFailed(Request $request)
     {
-        $refNumber = $request->query('remarks');
+      Log::info("❌ paymentFailed route hit", [
+        'full_url' => $request->fullUrl(),
+        'ref' => $request->query('ref'),
+    ]);
 
-        // Optional: update DB if needed
-        if ($refNumber) {
-            FarmOrderModel::where('ref_number', $refNumber)
-                ->update(['payment_status' => 'Failed']);
-        }
+    $refNumber = $request->query('ref');
 
-        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
+    if ($refNumber) {
+        $updated = FarmOrderModel::where('ref_number', $refNumber)
+            ->update([
+                'payment_status' => 'Failed',
+                'order_status' => 'Cancelled'
+            ]);
+
+        Log::info("❌ Payment marked as failed for ref: {$refNumber}, updated rows: {$updated}");
+    } else {
+        Log::warning('⚠️ No ref number in paymentFailed redirect.');
     }
+
+    return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
     
+    }
 }

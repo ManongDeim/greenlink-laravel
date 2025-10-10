@@ -59,3 +59,7 @@ Route::get('/reservations/latest', function () {
 
 
 Route::patch('/reservations/{id}/approval', [EventAdminReservationController::class, 'updateApproval']);
+
+// Farm Order routes
+Route::get('/paymentSuccess', [FarmOrderController::class, 'paymentSuccess']);
+Route::get('/paymentFailed', [FarmOrderController::class, 'paymentFailed']);
