@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\FarmOrderController;
 use App\Http\Controllers\Api\FoodOrderController;
 use App\Http\Controllers\Api\EventAdminReservationController;
 use App\Http\Controllers\Api\FarmProductController;
+use App\Http\Controllers\Api\FoodProductController;
 use App\Models\EventAdminModel;
 
 Route::middleware(['auth:sanctum'])->get('/user-info', function (Request $request) {
@@ -38,6 +39,9 @@ Route::post('foodOrder', [FoodOrderController::class, 'store']);
 
 // Farm Order routes
 Route::get('farmProducts', [FarmProductController::class, 'index']);
+
+// Food Order routes
+Route::get('foodProducts', [FoodProductController::class, 'index']);
 
 
 // Admin Routes
