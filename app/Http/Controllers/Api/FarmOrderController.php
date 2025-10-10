@@ -48,6 +48,7 @@ class FarmOrderController extends Controller
                 'squash_order' => 0,
                 'total_bill' => 0,
                 'payment_method' => 'GCash',
+                'payment_status' => 'Pending',
                 'order_status' => 'Pending',
                 'ref_number' => $refNumber,
             ];
@@ -136,7 +137,7 @@ class FarmOrderController extends Controller
 
         
 
-        $order->update(['order_status' => 'Paid']);
+        $order->update(['payment_status' => 'Paid']);
         Log::info("PaymentSuccess hit", $request->all());
         return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
         
@@ -150,7 +151,7 @@ class FarmOrderController extends Controller
         // Optional: update DB if needed
         if ($refNumber) {
             FarmOrderModel::where('ref_number', $refNumber)
-                ->update(['order_status' => 'Failed']);
+                ->update(['payment_status' => 'Failed']);
         }
 
         return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');

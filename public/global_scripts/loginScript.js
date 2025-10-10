@@ -16,12 +16,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadUserProfile() {
     try {
-        const response = await fetch("/api/user", { credentials: "include" });
+        const response = await fetch("/api/user-info", { credentials: "include" });
 
         if (!response.ok) throw new Error("Not logged in");
 
-        const user = await response.json();
+
+        const data = await response.json();
+        const user = data.user;
+
         console.log("👤 Logged in:", user);
+        
           window.isLoggedIn = true;
           window.userId = user.id; 
 

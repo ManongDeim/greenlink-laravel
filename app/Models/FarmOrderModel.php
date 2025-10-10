@@ -24,6 +24,7 @@ class FarmOrderModel extends Model
         'squash_order',
         'total_bill',
         'payment_method',
+        'payment_status',
         'order_status',
         'ref_number'
     ];

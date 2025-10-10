@@ -220,6 +220,7 @@ async function sendOrder(paymentMethod) {
       Accept: "application/json",
     },
     body: JSON.stringify({
+      user_id: window.userId,
       cart: orderData,
       payment_method: paymentMethod,
     }),
