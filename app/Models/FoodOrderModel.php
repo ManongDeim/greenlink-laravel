@@ -14,6 +14,8 @@ class FoodOrderModel extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'user_id',
+        'foodOrder_id',
         'smokedFish_order',
         'deviledFish_order',
         'seaSig_order',
@@ -22,6 +24,12 @@ class FoodOrderModel extends Model
         'blackMeal_order',
         'total_bill',
         'payment_method',
-        'order_status'
+        'payment_status',
+        'order_status',
+        'ref_number'
     ];
+
+      public function user() {
+    return $this->belongsTo(User::class, 'user_id', 'id');
+}
 }

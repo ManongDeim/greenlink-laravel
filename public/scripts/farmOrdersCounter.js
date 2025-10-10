@@ -167,7 +167,7 @@ function confirmOrder() {
 }
 
 
-// --- Send to Laravel + login guard ---
+// Send to Laravel + login guard
 async function sendOrder(paymentMethod) {
   console.log("sendOrder triggered with:", paymentMethod);
 

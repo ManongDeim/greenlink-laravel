@@ -173,54 +173,115 @@ function confirmOrder() {
     
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("cashPayment").addEventListener("click", () => {
-    sendOrder("Cash");
-  });
+// Send to Laravel + Log in guard
 
-});
+async function sendOrder(paymentMethod) {
+  console.log("sendOrder triggered with:", paymentMethod);
 
-// Send to Laravel
+ if (!window.userId) {
+    try {
+      const userRes = await fetch("https://greenlinklolasayong.site/api/user-info", {
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+   
+      
 
-function sendOrder(paymentMethod) {
-  let orderData = cart.map(item => ({
+      if (!userRes.ok) {
+        console.error("Failed to fetch user:", await userRes.text());
+        openLoginModal();
+        return;
+      }
+
+      const data = await userRes.json();
+
+      window.userId = data.user.id;
+      console.log("✅ Retrieved user_id:", window.userId);
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+      openLoginModal();
+      return;
+    }
+  }
+
+  if (!window.isLoggedIn) {
+    openLoginModal();
+    return;
+  }
+
+  const orderData = cart.map((item) => ({
     name: item.name,
     qty: item.qty,
-    price: getPrice(item.name)
+    price: getPrice(item.name),
   }));
 
-  fetch("http://greenlinklolasayong.site/api/foodOrder", {
+  console.log("Sending order with user_id:", window.userId);
+
+  fetch("https://greenlinklolasayong.site/api/foodOrder/create-link", {
     method: "POST",
+    credentials: "include",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      Accept: "application/json",
     },
     body: JSON.stringify({
+      user_id: window.userId,
       cart: orderData,
-      payment_method: paymentMethod
+      payment_method: paymentMethod,
+    }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("PayMongo response:", data);
+      if (data.payment_url) {
+        window.location.href = data.payment_url;
+      } else {
+        showAlert("No payment URL returned.");
+      }
     })
-  })
-  .then(res => res.json())
-  .then(data => {
-    showAlert("✅ " + data.message + " (" + paymentMethod + ")");
-    cart = [];
-    updateCartBadge();
-    closePaymentModal();
-  })
-  .catch(err => console.error("Error:", err));
+    .catch((err) => {
+      console.error("Error:", err);
+      showAlert("Failed to place order.");
+    });
 }
 
 // Price list
 function getPrice(itemName) {
-  switch(itemName) {
-    case "Smoked Fish": return 190;
-    case "Deviled Fish": return 190;
-    case "SeaSig": return 190;
-    case "Blue Craze": return 190;
-    case "Chicken Sheet": return 190;
-    case "Black Meal": return 190;
-    default: return 0;
-  }
+   return parseFloat(productData[itemName]) || 0;
 }
+
+// --- DOMContentLoaded Event ---
+document.addEventListener("DOMContentLoaded", () => {
+  // Checkout button opens cart modal
+  document.getElementById("checkoutBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    if (cart.length === 0) {
+      showAlert("Your cart is empty.");
+      return;
+    }
+    openModal();
+  });
+
+  // Proceed to payment (PayMongo)
+  const paymongoBtn = document.getElementById("paymongoBtn");
+  if (paymongoBtn) {
+    paymongoBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!window.isLoggedIn) {
+        openLoginModal();
+        return;
+      }
+
+      sendOrder("PayMongo");
+    });
+  } else {
+    console.error("❌ paymongoBtn not found");
+  }
+});
 
 //Modals
   
