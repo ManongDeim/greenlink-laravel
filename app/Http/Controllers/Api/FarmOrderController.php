@@ -30,7 +30,7 @@ class FarmOrderController extends Controller
 
             // Generate unique FARM order ID (safe under concurrency)
             do {
-                $farmOrderId = 'FARM-' . strtoupper(uniqid());
+                $farmOrderId = 'FARM-'. date('dHi').'-' . mt_rand(1,99999);
             } while (FarmOrderModel::where('farmOrder_id', $farmOrderId)->exists());
 
             // Generate unique reference number for PayMongo
