@@ -37,12 +37,6 @@ Route::post('eventReservation', [EventController::class, 'store']);
 
 Route::post('foodOrder', [FoodOrderController::class, 'store']);
 
-// Farm Order routes
-Route::get('farmProducts', [FarmProductController::class, 'index']);
-
-// Food Order routes
-Route::get('foodProducts', [FoodProductController::class, 'index']);
-
 
 // Admin Routes
 
@@ -65,6 +59,7 @@ Route::get('/reservations/latest', function () {
 Route::patch('/reservations/{id}/approval', [EventAdminReservationController::class, 'updateApproval']);
 
 // Farm Order routes
+Route::get('farmProducts', [FarmProductController::class, 'index']);
 Route::get('/paymentSuccess', [FarmOrderController::class, 'paymentSuccess']);
 Route::get('/paymentFailed', [FarmOrderController::class, 'paymentFailed']);
 
@@ -72,3 +67,9 @@ Route::get('/paymentFailed', [FarmOrderController::class, 'paymentFailed']);
 
 Route::get('/paymentSuccess', [FoodOrderController::class, 'paymentSuccess']);
 Route::get('/paymentFailed', [FoodOrderController::class, 'paymentFailed']);
+Route::get('foodProducts', [FoodProductController::class, 'index']);
+
+
+// Room Routes
+
+Route::get('/rooms', [RoomController::class, 'index']);
