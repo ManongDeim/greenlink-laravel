@@ -10,7 +10,16 @@ class RoomSeederController extends Controller
 {
      public function index()
     {
-        return response()->json(Room::all());
+         $rooms = Room::all()->map(function ($room) {
+        // Decode the carousel_images if it's a JSON string
+        if (is_string($room->carousel_images)) {
+            $decoded = json_decode($room->carousel_images, true);
+            $room->carousel_images = is_array($decoded) ? $decoded : [];
+        }
+        return $room;
+    });
+
+    return response()->json($rooms);
     }
 
     

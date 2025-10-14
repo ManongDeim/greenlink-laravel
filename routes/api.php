@@ -76,6 +76,12 @@ Route::get('foodProducts', [FoodProductController::class, 'index']);
 
 Route::get('rooms', [RoomSeederController::class, 'index']);
 Route::get('/rooms/{id}', function($id) {
-    $room = RoomSeederModel::findOrFail($id);
+     $room = RoomSeederModel::findOrFail($id);
+
+    if (is_string($room->carousel_images)) {
+        $decoded = json_decode($room->carousel_images, true);
+        $room->carousel_images = is_array($decoded) ? $decoded : [];
+    }
+
     return response()->json($room);
 });
