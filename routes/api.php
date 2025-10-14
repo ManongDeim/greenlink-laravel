@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\Api\RoomSeederController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\FarmOrderController;
 use App\Http\Controllers\Api\FoodOrderController;
@@ -72,4 +73,4 @@ Route::get('foodProducts', [FoodProductController::class, 'index']);
 
 // Room Routes
 
-Route::get('rooms', [RoomController::class, 'index']);
+Route::get('rooms', [RoomSeederController::class, 'index']);
