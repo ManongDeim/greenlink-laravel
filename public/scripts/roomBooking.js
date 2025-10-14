@@ -66,6 +66,7 @@ async function loadRoomData() {
 }
 
 // === Carousel Logic ===
+// === Carousel Logic ===
 let currentSlide = 0;
 
 function initializeCarousel() {
@@ -74,6 +75,12 @@ function initializeCarousel() {
   const indicators = document.getElementById("indicators");
 
   if (slides.length === 0) return;
+
+  // Set up flex widths so each image takes full container width
+  slides.forEach(slide => {
+    slide.style.minWidth = "100%";
+    slide.style.flexShrink = "0";
+  });
 
   function goToSlide(index) {
     currentSlide = index;
@@ -101,7 +108,10 @@ function initializeCarousel() {
   window.prevSlide = prevSlide;
   window.goToSlide = goToSlide;
 
+  // Start with first slide
+  goToSlide(0);
+
+  // Auto slide every 4s
   setInterval(nextSlide, 4000);
 }
-
 document.addEventListener("DOMContentLoaded", loadRoomData);
