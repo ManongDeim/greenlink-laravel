@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     // Adjust to your actual Laravel API URL
-    const response = await fetch("https://yourdomain.com/api/rooms");
+    const response = await fetch("https://greenlinklolasayong.site/api/rooms");
     const rooms = await response.json();
 
     rooms.forEach(room => {

@@ -72,4 +72,4 @@ Route::get('foodProducts', [FoodProductController::class, 'index']);
 
 // Room Routes
 
-Route::get('/rooms', [RoomController::class, 'index']);
+Route::get('rooms', [RoomController::class, 'index']);
