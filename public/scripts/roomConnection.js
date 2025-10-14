@@ -215,9 +215,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       card.className =
         "bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer";
       card.innerHTML = `
-        <img src="${room.image}" alt="${room.name}" class="object-cover w-full h-56">
+        <img src="${room.image}" alt="${room.room_name}" class="object-cover w-full h-56">
         <div class="p-4 text-center">
-          <h2 class="text-xl font-bold text-gray-800">${room.name}</h2>
+          <h2 class="text-xl font-bold text-gray-800">${room.room_name}</h2>
           <p class="mt-2 text-sm text-gray-600">${room.description}</p>
           <p class="mt-2 text-lg font-semibold text-teal-700">₱${parseFloat(room.price).toLocaleString()}</p>
         </div>
@@ -230,8 +230,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       modal.innerHTML = `
         <div class="relative w-full max-w-lg p-6 bg-white shadow-lg rounded-2xl">
           <button type="button" class="absolute text-gray-600 top-3 right-3 hover:text-gray-900 close-modal">&times;</button>
-          <h2 class="mb-4 text-2xl font-bold text-gray-800">${room.name} (${room.roomId})</h2>
-          <img src="${room.image}" alt="${room.name}" class="mb-4 rounded-xl">
+          <h2 class="mb-4 text-2xl font-bold text-gray-800">${room.room_name}</h2>
+          <img src="${room.image}" alt="${room.room_name}" class="mb-4 rounded-xl">
           <p class="mb-2 text-gray-700">${room.description}</p>
           <p class="mb-4 text-lg font-semibold text-teal-700">₱${parseFloat(room.price).toLocaleString()}</p>
           <button type="button" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 bottom-3 right-3 rounded-xl book-now-btn">
@@ -251,7 +251,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Book Now → redirect
       modal.querySelector(".book-now-btn").addEventListener("click", () => {
-        window.location.href = room.book_now_url;
+        window.location.href = `../pages/roomBooking.html?id=${room.id}`;;
       });
 
       container.appendChild(card);

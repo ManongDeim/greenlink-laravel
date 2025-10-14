@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\EventAdminReservationController;
 use App\Http\Controllers\Api\FarmProductController;
 use App\Http\Controllers\Api\FoodProductController;
 use App\Models\EventAdminModel;
+use App\Models\RoomSeederModel;
 
 Route::middleware(['auth:sanctum'])->get('/user-info', function (Request $request) {
      $user = $request->user()->load('googleAccount');
@@ -74,3 +75,7 @@ Route::get('foodProducts', [FoodProductController::class, 'index']);
 // Room Routes
 
 Route::get('rooms', [RoomSeederController::class, 'index']);
+Route::get('/rooms/{id}', function($id) {
+    $room = RoomSeederModel::findOrFail($id);
+    return response()->json($room);
+});
