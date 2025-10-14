@@ -19,6 +19,11 @@ class RoomSeederModel extends Model
         'max_capacity',
         'price',
         'image',
+        'carousel_images',
         'book_now_url',
+    ];
+
+     protected $casts = [
+        'carousel_images' => 'array', 
     ];
 }
