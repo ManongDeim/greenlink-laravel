@@ -233,3 +233,20 @@ function closePaymentModal() {
 function goBack() {
   window.location.href = "../pages/RoomReser.html";
 }
+
+function openTermsModal() {
+      document.getElementById('termsModal').classList.remove('hidden');
+      document.getElementById('termsModal').classList.add('flex');
+    }
+    function closeTermsModal() {
+      document.getElementById('termsModal').classList.add('hidden');
+    }
+    function handleReviewClick() {
+      const checkbox = document.getElementById('termsCheckbox');
+      if (!checkbox.checked) {
+        document.getElementById('alertMessage').textContent = 'Please agree to the Terms and Conditions before proceeding.';
+        document.getElementById('alertModal').classList.remove('hidden');
+        return;
+      }
+      openPaymentModal();
+    }
