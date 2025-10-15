@@ -249,4 +249,47 @@ function openTermsModal() {
         return;
       }
       openPaymentModal();
-    }z
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+  const checkInInput = document.querySelector("input[name='check_in_date']");
+  const checkOutInput = document.querySelector("input[name='check_out_date']");
+
+  if (!checkInInput || !checkOutInput) return;
+
+  // 🔒 Disable past dates for both inputs
+  const today = new Date().toISOString().split("T")[0];
+  checkInInput.min = today;
+  checkOutInput.min = today;
+
+  // 🗓️ When check-in date changes
+  checkInInput.addEventListener("change", () => {
+    const checkInDate = new Date(checkInInput.value);
+
+    if (isNaN(checkInDate)) return;
+
+    // Update checkout minimum to be at least the next day
+    const minCheckOut = new Date(checkInDate);
+    minCheckOut.setDate(minCheckOut.getDate() + 1);
+
+    const minCheckOutStr = minCheckOut.toISOString().split("T")[0];
+    checkOutInput.min = minCheckOutStr;
+
+    // If checkout date is invalid or same day → auto-adjust it
+    if (!checkOutInput.value || new Date(checkOutInput.value) <= checkInDate) {
+      checkOutInput.value = minCheckOutStr;
+    }
+  });
+
+  // 🗓️ When checkout changes (just safety check)
+  checkOutInput.addEventListener("change", () => {
+    const checkInDate = new Date(checkInInput.value);
+    const checkOutDate = new Date(checkOutInput.value);
+
+    // If checkout = checkin → push to next day
+    if (checkOutDate <= checkInDate) {
+      const nextDay = new Date(checkInDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      checkOutInput.value = nextDay.toISOString().split("T")[0];
+    }
+  });
+});
