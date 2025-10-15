@@ -255,83 +255,77 @@ function openTermsModal() {
       openPaymentModal();
     }
 
-    // ✅ PayMongo Redirect
-document.getElementById("payNowBtn").addEventListener("click", async () => {
+  // --- Room Payment (Down / Full) ---
+async function sendRoomPayment(paymentType) {
   if (!window.bookingDetails) {
-    alert("Booking details are missing. Please go back and fill out the form again.");
+    alert("Booking details are missing. Please fill out the form again.");
     return;
   }
 
-  // ✅ Ensure payment type and total are stored properly
-  const selectedPaymentType = window.selectedPaymentType || window.bookingDetails.paymentType || "full";
-  const finalTotal =
-    selectedPaymentType === "down"
-      ? window.bookingDetails.total * 0.5
-      : window.bookingDetails.total;
+  const { roomName, fullName, pax, email, phone, total } = window.bookingDetails;
 
-  // ✅ Extract details
-  const { roomName, fullName, pax, email, phone } = window.bookingDetails;
-
-  // ✅ Gather form data
-  const form = document.getElementById("roomBookingForm");
+  // Prepare data for API
   const data = {
     room: roomName,
-    check_in_date: form.querySelector("input[name='check_in_date']").value,
-    check_out_date: form.querySelector("input[name='check_out_date']").value,
+    check_in_date: document.querySelector("input[name='check_in_date']").value,
+    check_out_date: document.querySelector("input[name='check_out_date']").value,
     full_name: fullName,
+    pax: pax,
     email: email,
     phone_number: phone,
-    pax: pax,
-    total_bill: finalTotal,
-    payment_method: selectedPaymentType === "down" ? "Down Payment" : "Full Payment",
+    total_bill: total,
+    payment_type: paymentType // 'down' or 'full'
   };
 
-  console.log("💳 Sending payment data:", data);
+  console.log("💳 Sending room payment data:", data);
 
   try {
-  const response = await fetch(
-    "https://greenlinklolasayong.site/api/create-room-payment",
-    {
+    const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/json",
+        Accept: "application/json"
       },
       credentials: "include",
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("HTTP Error:", response.status, text);
+      alert("Failed to initiate payment. Please try again.");
+      return;
     }
-  );
 
-  console.log("HTTP status:", response.status);
+    const result = await response.json();
+    console.log("✅ PayMongo response:", result);
 
-  let text = "";
-  try {
-    text = await response.text();
-    console.log("Raw server response:", text);
+    if (result.payment_url) {
+      // Redirect to PayMongo checkout
+      window.location.href = result.payment_url;
+    } else {
+      alert("Payment URL not returned. Please try again.");
+    }
   } catch (err) {
-    console.error("Failed to read response text:", err);
+    console.error("💥 Room payment error:", err);
+    alert("An error occurred while processing the payment. Please try again.");
   }
-
-  let result;
-  try {
-    result = JSON.parse(text);
-  } catch {
-    console.error("⚠️ Server returned non-JSON:", text);
-    throw new Error("Invalid JSON response from server");
-  }
-
-  console.log("✅ Server response:", result);
-
-  if (result.checkout_url) {
-    window.location.href = result.checkout_url;
-  } else {
-    alert("Payment initialization failed. Please try again.");
-  }
-} catch (err) {
-  console.error("💥 Payment redirect error:", err);
-  alert(
-    "An error occurred while redirecting to payment. Please check the console."
-  );
 }
-});
 
+// --- Button Event Listeners ---
+const payDownBtn = document.getElementById("payDownBtn");
+const payFullBtn = document.getElementById("payFullBtn");
+
+if (payDownBtn) {
+  payDownBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    sendRoomPayment("down");
+  });
+}
+
+if (payFullBtn) {
+  payFullBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    sendRoomPayment("full");
+  });
+}
