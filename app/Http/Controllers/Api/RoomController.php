@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Http;
 
 class RoomController extends Controller
 {
-public function createRoomPayment(Request $request)
+public function createPaymentLink(Request $request)
 {
     $user = Auth::user();
     if (!$user) {
