@@ -250,86 +250,63 @@ function openTermsModal() {
       }
       openPaymentModal();
     }
-<<<<<<< HEAD
 
     // ✅ PayMongo Redirect
 document.getElementById("payNowBtn").addEventListener("click", async () => {
+  if (!window.bookingDetails) {
+    alert("Booking details are missing. Please go back and fill out the form again.");
+    return;
+  }
+
+  // Extract details
+  const { roomName, fullName, pax, email, phone, finalTotal } = window.bookingDetails;
+  const selectedPaymentType = window.selectedPaymentType || "full";
+
+  // Gather form data
   const form = document.getElementById("roomBookingForm");
   const data = {
-    room: document.querySelector("#roomName").innerText,
+    room: roomName,
     check_in_date: form.querySelector("input[name='check_in_date']").value,
     check_out_date: form.querySelector("input[name='check_out_date']").value,
-    full_name: form.querySelector("input[name='full_name']").value,
-    email: form.querySelector("input[name='email']").value,
-    phone_number: form.querySelector("input[name='phone_number']").value,
-    pax: form.querySelector("select[name='pax']").value,
+    full_name: fullName,
+    email: email,
+    phone_number: phone,
+    pax: pax,
     total_bill: finalTotal,
     payment_method: selectedPaymentType === "down" ? "Down Payment" : "Full Payment",
   };
 
+  console.log("Sending payment data:", data);
+
   try {
+    // ✅ Fixed endpoint and JSON parsing
     const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
 
-    const result = await response.json();
+    // Handle non-JSON responses gracefully
+    const text = await response.text();
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      console.error("Server returned non-JSON:", text);
+      throw new Error("Invalid JSON response from server");
+    }
+
+    console.log("Server response:", result);
+
     if (result.checkout_url) {
+      // ✅ Redirect to PayMongo checkout
       window.location.href = result.checkout_url;
     } else {
-      alert("Payment initialization failed.");
-      console.error(result);
+      alert("Payment initialization failed. Please try again.");
     }
   } catch (err) {
-    console.error("Error:", err);
-    alert("An error occurred while processing your payment.");
+    console.error("Payment redirect error:", err);
+    alert("An error occurred while redirecting to payment. Please try again.");
   }
 });
-=======
-    document.addEventListener("DOMContentLoaded", () => {
-  const checkInInput = document.querySelector("input[name='check_in_date']");
-  const checkOutInput = document.querySelector("input[name='check_out_date']");
-
-  if (!checkInInput || !checkOutInput) return;
-
-  // 🔒 Disable past dates for both inputs
-  const today = new Date().toISOString().split("T")[0];
-  checkInInput.min = today;
-  checkOutInput.min = today;
-
-  // 🗓️ When check-in date changes
-  checkInInput.addEventListener("change", () => {
-    const checkInDate = new Date(checkInInput.value);
-
-    if (isNaN(checkInDate)) return;
-
-    // Update checkout minimum to be at least the next day
-    const minCheckOut = new Date(checkInDate);
-    minCheckOut.setDate(minCheckOut.getDate() + 1);
-
-    const minCheckOutStr = minCheckOut.toISOString().split("T")[0];
-    checkOutInput.min = minCheckOutStr;
-
-    // If checkout date is invalid or same day → auto-adjust it
-    if (!checkOutInput.value || new Date(checkOutInput.value) <= checkInDate) {
-      checkOutInput.value = minCheckOutStr;
-    }
-  });
-
-  // 🗓️ When checkout changes (just safety check)
-  checkOutInput.addEventListener("change", () => {
-    const checkInDate = new Date(checkInInput.value);
-    const checkOutDate = new Date(checkOutInput.value);
-
-    // If checkout = checkin → push to next day
-    if (checkOutDate <= checkInDate) {
-      const nextDay = new Date(checkInDate);
-      nextDay.setDate(nextDay.getDate() + 1);
-      checkOutInput.value = nextDay.toISOString().split("T")[0];
-    }
-  });
-});
->>>>>>> c1fec426765279b59f4d71042c34c5d0089ed9a9
