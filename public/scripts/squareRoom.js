@@ -150,80 +150,80 @@ function initCarousel(totalSlides) {
   window.prevSlide = prevSlide;
 }
 
-async function openConfirmationModal() {
+// Open confirmation modal first
+function openConfirmationModal() {
   const form = document.getElementById("roomBookingForm");
-  const params = new URLSearchParams(window.location.search);
-  const roomId = params.get("id") || 1;
+  const roomName = document.querySelector("#roomName").innerText;
+  const price = parseFloat(document.querySelector("#roomPrice").innerText.replace(/[^\d.]/g, "")) || 0;
 
-  try {
-    const response = await fetch(`https://greenlinklolasayong.site/api/rooms/${roomId}`);
-    const room = await response.json();
+  const checkIn = new Date(form.querySelector("input[name='check_in_date']").value);
+  const checkOut = new Date(form.querySelector("input[name='check_out_date']").value);
+  const fullName = form.querySelector("input[name='full_name']").value;
+  const pax = form.querySelector("select[name='pax']").value;
+  const email = form.querySelector("input[name='email']").value;
+  const phone = form.querySelector("input[name='phone_number']").value;
 
-    const check_in_date = form.querySelector("input[name='check_in_date']").value;
-    const check_out_date = form.querySelector("input[name='check_out_date']").value;
-    const fullName = form.querySelector("input[name='full_name']").value;
-    const pax = form.querySelector("select[name='pax']").value;
-    const email = form.querySelector("input[name='email']").value;
-    const phone = form.querySelector("input[name='phone_number']").value;
+  const nights = Math.max((checkOut - checkIn) / (1000 * 60 * 60 * 24), 1);
+  const total = price * nights;
 
-    if (!check_in_date || !check_out_date) {
-      alert("Please select both check-in and check-out dates.");
-      return;
-    }
+  const summaryHtml = `
+    <p><strong>Room:</strong> ${roomName}</p>
+    <p><strong>Price per Night:</strong> ₱${price.toLocaleString()}</p>
+    <p><strong>Check-In:</strong> ${form.querySelector("input[name='check_in_date']").value}</p>
+    <p><strong>Check-Out:</strong> ${form.querySelector("input[name='check_out_date']").value}</p>
+    <p><strong>Nights:</strong> ${nights}</p>
+    <p><strong>Total Bill:</strong> <span class="text-teal-600 font-semibold">₱${total.toLocaleString()}</span></p>
+    <hr class="my-2">
+    <p><strong>Full Name:</strong> ${fullName}</p>
+    <p><strong>Pax:</strong> ${pax}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Phone:</strong> ${phone}</p>
+  `;
 
-    const checkIn = new Date(check_in_date);
-    const checkOut = new Date(check_out_date);
-    const diffTime = Math.abs(checkOut - checkIn);
-    const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  document.getElementById("confirmationSummary").innerHTML = summaryHtml;
 
-    if (nights <= 0) {
-      alert("Check-out date must be after check-in date.");
-      return;
-    }
+  // Show confirmation modal
+  document.getElementById("confirmationModal").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
 
-    const totalBill = room.price * nights;
-
-    const summaryHtml = `
-      <p><strong>Room:</strong> ${room.room_name}</p>
-      <p><strong>Price per Night:</strong> ₱${room.price.toLocaleString()}</p>
-      <p><strong>Check-In:</strong> ${check_in_date}</p>
-      <p><strong>Check-Out:</strong> ${check_out_date}</p>
-      <p><strong>Nights:</strong> ${nights}</p>
-      <p><strong>Total Bill:</strong> <span class="text-teal-700 font-semibold">₱${totalBill.toLocaleString()}</span></p>
-      <hr class="my-2">
-      <p><strong>Full Name:</strong> ${fullName}</p>
-      <p><strong>Pax:</strong> ${pax}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Phone:</strong> ${phone}</p>
-    `;
-
-    // Show summary in confirmation modal
-    document.getElementById("confirmationSummary").innerHTML = summaryHtml;
-    document.getElementById("confirmationModal").classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-
-    // Also store summary for reuse in payment modal
-    window.latestSummaryHtml = summaryHtml;
-
-  } catch (error) {
-    console.error("Error loading room details:", error);
-    alert("Failed to load room details. Please try again.");
-  }
+  // Save total for payment stage
+  window.bookingDetails = { roomName, price, nights, total, fullName, pax, email, phone };
 }
 
-function proceedToPayment() {
-  // Reuse same summary content
-  document.getElementById("paymentSummary").innerHTML = window.latestSummaryHtml || "";
-  
-  // Switch modals
-  document.getElementById("confirmationModal").classList.add("hidden");
-  document.getElementById("paymentModal").classList.remove("hidden");
+// Proceed to payment modal
+function proceedToPayment(type) {
+  const paymentModal = document.getElementById("paymentModal");
+  const confirmationModal = document.getElementById("confirmationModal");
+  const summary = document.getElementById("paymentSummary");
+
+  const { roomName, price, nights, total, fullName, pax, email, phone } = window.bookingDetails;
+
+  let finalTotal = type === "down" ? total * 0.5 : total;
+  const paymentTypeLabel = type === "down" ? "50% Down Payment" : "Full Payment";
+
+  summary.innerHTML = `
+    <p><strong>Room:</strong> ${roomName}</p>
+    <p><strong>Price per Night:</strong> ₱${price.toLocaleString()}</p>
+    <p><strong>Nights:</strong> ${nights}</p>
+    <p><strong>${paymentTypeLabel}:</strong> <span class="text-teal-600 font-semibold">₱${finalTotal.toLocaleString()}</span></p>
+    <hr class="my-2">
+    <p><strong>Full Name:</strong> ${fullName}</p>
+    <p><strong>Pax:</strong> ${pax}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Phone:</strong> ${phone}</p>
+  `;
+
+  // Hide confirmation modal, show payment modal
+  confirmationModal.classList.add("hidden");
+  paymentModal.classList.remove("hidden");
 }
 
+// Close confirmation modal
 function closeConfirmationModal() {
   document.getElementById("confirmationModal").classList.add("hidden");
-  document.body.style.overflow = "";
+  document.body.style.overflow = "auto";
 }
+
 
 function closePaymentModal() {
   document.getElementById("paymentModal").classList.add("hidden");
