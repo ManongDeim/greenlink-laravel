@@ -198,18 +198,17 @@ function proceedToPayment(type) {
 
   const { roomName, price, nights, total, fullName, pax, email, phone } = window.bookingDetails;
 
-  window.selectedPaymentType = type; // ✅ store payment type globally
+  window.selectedPaymentType = type; // store payment type globally
 
-
-  let finalTotal = type === "down" ? +(total * 0.5).toFixed(2) : +total.toFixed(2);
-  window.bookingDetails.finalTotal = finalTotal; // ✅ store total globally
+  // Calculate display total only
+  const displayTotal = type === "down" ? +(total * 0.5).toFixed(2) : +total.toFixed(2);
   const paymentTypeLabel = type === "down" ? "50% Down Payment" : "Full Payment";
 
   summary.innerHTML = `
     <p><strong>Room:</strong> ${roomName}</p>
     <p><strong>Price per Night:</strong> ₱${price.toLocaleString()}</p>
     <p><strong>Nights:</strong> ${nights}</p>
-    <p><strong>${paymentTypeLabel}:</strong> <span class="text-teal-600 font-semibold">₱${finalTotal.toLocaleString()}</span></p>
+    <p><strong>${paymentTypeLabel}:</strong> <span class="text-teal-600 font-semibold">₱${displayTotal.toLocaleString()}</span></p>
     <hr class="my-2">
     <p><strong>Full Name:</strong> ${fullName}</p>
     <p><strong>Pax:</strong> ${pax}</p>
@@ -270,16 +269,7 @@ async function sendRoomPayment(paymentType) {
     return;
   }
 
-  const { roomName, fullName, pax, email, phone, total, finalTotal } = window.bookingDetails;
-
-   // Fallback if somehow roomName is empty
-  const safeRoomName = roomName || "Unknown Room";
-  const totalBill = finalTotal || total;
-
-  if (!totalBill) {
-    alert("Total bill is not calculated. Please check your booking.");
-    return;
-  }
+  const { roomName, fullName, pax, email, phone, total } = window.bookingDetails;
 
   const data = {
     room: roomName,
@@ -289,15 +279,9 @@ async function sendRoomPayment(paymentType) {
     pax: pax,
     email: email,
     phone_number: phone,
-    total_bill: totalBill,
+    total_bill: total, // always full total
     payment_method: paymentType === "down" ? "Down Payment" : "Full Payment"
   };
-
-  if (!roomName) {
-  console.error("Room name is missing!");
-  alert("Room info is missing. Please refresh the page.");
-  return;
-}
 
   console.log("💳 Sending room payment data:", data);
 

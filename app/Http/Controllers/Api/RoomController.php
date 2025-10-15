@@ -74,8 +74,8 @@ public function createPaymentLink(Request $request)
                     'currency' => 'PHP',
                     'show_line_items' => true,
                     'show_description' => true,
-                    'success_url' => url("/api/room-payment-success?ref={$refNumber}"),
-                    'cancel_url' => url("/api/room-payment-failed?ref={$refNumber}"),
+                    'success_url' => url("/api/paymentSuccess?ref={$refNumber}"),
+                    'cancel_url' => url("/api/PaymentFailed?ref={$refNumber}"),
                 ]
             ]
         ]);
@@ -111,8 +111,7 @@ public function createPaymentLink(Request $request)
     $reservation = RoomModel::where('ref_number', $ref)->first();
     if ($reservation) {
         $reservation->update([
-            'payment_status' => 'Failed',
-            'order_status' => 'Cancelled'
+            'payment_status' => 'Failed'
         ]);
     }
     return redirect('/pages/paymentFailed.html');
