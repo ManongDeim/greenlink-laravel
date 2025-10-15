@@ -80,6 +80,8 @@ public function createRoomPayment(Request $request)
             ]
         ]);
 
+        Log::info('PayMongo response', $response->json());
+
     $checkoutUrl = $response->json()['data']['attributes']['checkout_url'] ?? null;
 
     return response()->json([

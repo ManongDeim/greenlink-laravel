@@ -262,9 +262,9 @@ async function sendRoomPayment(paymentType) {
     return;
   }
 
-  const { roomName, fullName, pax, email, phone, total } = window.bookingDetails;
+  const { roomName, fullName, pax, email, phone, total, finalTotal } = window.bookingDetails;
+  const totalBill = finalTotal || total;
 
-  // Prepare data for API
   const data = {
     room: roomName,
     check_in_date: document.querySelector("input[name='check_in_date']").value,
@@ -273,8 +273,8 @@ async function sendRoomPayment(paymentType) {
     pax: pax,
     email: email,
     phone_number: phone,
-    total_bill: total,
-    payment_type: paymentType // 'down' or 'full'
+    total_bill: totalBill,
+    payment_method: paymentType === "down" ? "Down Payment" : "Full Payment"
   };
 
   console.log("💳 Sending room payment data:", data);
@@ -301,7 +301,6 @@ async function sendRoomPayment(paymentType) {
     console.log("✅ PayMongo response:", result);
 
     if (result.payment_url) {
-      // Redirect to PayMongo checkout
       window.location.href = result.payment_url;
     } else {
       alert("Payment URL not returned. Please try again.");
@@ -315,6 +314,8 @@ async function sendRoomPayment(paymentType) {
 // --- Button Event Listeners ---
 const payDownBtn = document.getElementById("payDownBtn");
 const payFullBtn = document.getElementById("payFullBtn");
+const payNowBtn = document.getElementById("payNowBtn");
+
 
 if (payDownBtn) {
   payDownBtn.addEventListener("click", (e) => {
@@ -329,3 +330,9 @@ if (payFullBtn) {
     sendRoomPayment("full");
   });
 }
+
+payNowBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  const selectedType = window.selectedPaymentType || "full"; // Default to full if not set
+  sendRoomPayment(selectedType);
+});
