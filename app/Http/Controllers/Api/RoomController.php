@@ -75,7 +75,7 @@ public function createPaymentLink(Request $request)
                     'show_line_items' => true,
                     'show_description' => true,
                     'success_url' => url("/api/paymentSuccess?ref={$refNumber}"),
-                    'cancel_url' => url("/api/PaymentFailed?ref={$refNumber}"),
+                    'cancel_url' => url("/api/paymentFailed?ref={$refNumber}"),
                 ]
             ]
         ]);
@@ -94,26 +94,48 @@ public function createPaymentLink(Request $request)
 
     // ✅ Handle successful payment
     public function paymentSuccess(Request $request)
-    {
-        
+{
     $ref = $request->query('ref');
+
+    // Log the incoming request
+    Log::info('Room payment success hit', [
+        'full_url' => $request->fullUrl(),
+        'query' => $request->query()
+    ]);
+
     $reservation = RoomModel::where('ref_number', $ref)->first();
-    if (!$reservation) return redirect('/pages/paymentFailed.html');
+
+    if (!$reservation) {
+        Log::warning("No reservation found for ref: {$ref}");
+        return redirect('/pages/paymentFailed.html');
+    }
 
     $reservation->update(['payment_status' => 'Paid']);
+
+    Log::info("Reservation updated to Paid for ref: {$ref}");
+
     return redirect('/pages/paymentSuccess.html');
+}
+
+public function paymentFailed(Request $request)
+{
+    $ref = $request->query('ref');
+
+    // Log the incoming request
+    Log::info('Room payment failed hit', [
+        'full_url' => $request->fullUrl(),
+        'query' => $request->query()
+    ]);
+
+    if ($ref) {
+        $updated = RoomModel::where('ref_number', $ref)
+            ->update(['payment_status' => 'Failed']);
+
+        Log::info("Reservation updated to Failed for ref: {$ref}, rows affected: {$updated}");
+    } else {
+        Log::warning('No ref parameter in failed payment redirect.');
     }
 
-    // ✅ Handle failed payment
-    public function paymentFailed(Request $request)
-    {
-       $ref = $request->query('ref');
-    $reservation = RoomModel::where('ref_number', $ref)->first();
-    if ($reservation) {
-        $reservation->update([
-            'payment_status' => 'Failed'
-        ]);
-    }
     return redirect('/pages/paymentFailed.html');
-    }
+}
 }
