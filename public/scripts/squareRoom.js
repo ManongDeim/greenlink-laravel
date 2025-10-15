@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     initCarousel(images.length);
 
-    // 🌿 Handle Amenities (moved inside async)
+    // Handle Amenities (moved inside async)
     const amenitiesList = document.getElementById("amenitiesList");
     if (amenitiesList) {
       let amenities = [];
@@ -198,17 +198,14 @@ function proceedToPayment(type) {
 
   const { roomName, price, nights, total, fullName, pax, email, phone } = window.bookingDetails;
 
-  window.selectedPaymentType = type; // store payment type globally
-
-  // Calculate display total only
-  const displayTotal = type === "down" ? +(total * 0.5).toFixed(2) : +total.toFixed(2);
+  let finalTotal = type === "down" ? total * 0.5 : total;
   const paymentTypeLabel = type === "down" ? "50% Down Payment" : "Full Payment";
 
   summary.innerHTML = `
     <p><strong>Room:</strong> ${roomName}</p>
     <p><strong>Price per Night:</strong> ₱${price.toLocaleString()}</p>
     <p><strong>Nights:</strong> ${nights}</p>
-    <p><strong>${paymentTypeLabel}:</strong> <span class="text-teal-600 font-semibold">₱${displayTotal.toLocaleString()}</span></p>
+    <p><strong>${paymentTypeLabel}:</strong> <span class="text-teal-600 font-semibold">₱${finalTotal.toLocaleString()}</span></p>
     <hr class="my-2">
     <p><strong>Full Name:</strong> ${fullName}</p>
     <p><strong>Pax:</strong> ${pax}</p>
@@ -254,86 +251,47 @@ function openTermsModal() {
       openPaymentModal();
     }
 
-  // --- Room Payment (Down / Full) ---
-async function sendRoomPayment(paymentType) {
-  if (!window.bookingDetails || !window.bookingDetails.roomName) {
-    alert("Booking details are missing. Please fill out the form again.");
-    return;
-  }
 
-  const checkIn = document.querySelector("input[name='check_in_date']").value;
-  const checkOut = document.querySelector("input[name='check_out_date']").value;
+  document.addEventListener("DOMContentLoaded", () => {
+  const checkInInput = document.querySelector("input[name='check_in_date']");
+  const checkOutInput = document.querySelector("input[name='check_out_date']");
 
-  if (!checkIn || !checkOut) {
-    alert("Please select both check-in and check-out dates.");
-    return;
-  }
+  if (!checkInInput || !checkOutInput) return;
 
-  const { roomName, fullName, pax, email, phone, total } = window.bookingDetails;
+  // 🔒 Disable past dates for both inputs
+  const today = new Date().toISOString().split("T")[0];
+  checkInInput.min = today;
+  checkOutInput.min = today;
 
-  const data = {
-    room: roomName,
-    check_in_date: checkIn,
-    check_out_date: checkOut,
-    full_name: fullName,
-    pax: pax,
-    email: email,
-    phone_number: phone,
-    total_bill: total, // always full total
-    payment_method: paymentType === "down" ? "Down Payment" : "Full Payment"
-  };
+  // 🗓️ When check-in date changes
+  checkInInput.addEventListener("change", () => {
+    const checkInDate = new Date(checkInInput.value);
 
-  console.log("💳 Sending room payment data:", data);
+    if (isNaN(checkInDate)) return;
 
-  try {
-    const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      credentials: "include",
-      body: JSON.stringify(data)
-    });
+    // Update checkout minimum to be at least the next day
+    const minCheckOut = new Date(checkInDate);
+    minCheckOut.setDate(minCheckOut.getDate() + 1);
 
-    const result = await response.json();
+    const minCheckOutStr = minCheckOut.toISOString().split("T")[0];
+    checkOutInput.min = minCheckOutStr;
 
-    if (!response.ok) {
-      console.error("HTTP Error:", response.status, result);
-      alert(result.message || "Failed to initiate payment.");
-      return;
+    // If checkout date is invalid or same day → auto-adjust it
+    if (!checkOutInput.value || new Date(checkOutInput.value) <= checkInDate) {
+      checkOutInput.value = minCheckOutStr;
     }
+  });
 
-    if (result.payment_url) {
-      window.location.href = result.payment_url;
-    } else {
-      alert("Payment URL not returned. Please try again.");
+  // 🗓️ When checkout changes (just safety check)
+  checkOutInput.addEventListener("change", () => {
+    const checkInDate = new Date(checkInInput.value);
+    const checkOutDate = new Date(checkOutInput.value);
+
+    // If checkout = checkin → push to next day
+    if (checkOutDate <= checkInDate) {
+      const nextDay = new Date(checkInDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      checkOutInput.value = nextDay.toISOString().split("T")[0];
     }
-  } catch (err) {
-    console.error("💥 Room payment error:", err);
-    alert("An error occurred while processing the payment. Please try again.");
-  }
-}
-
-// --- Button Event Listeners ---
-const payDownBtn = document.getElementById("payDownBtn");
-const payFullBtn = document.getElementById("payFullBtn");
-const payNowBtn = document.getElementById("payNowBtn");
-
-
-if (payDownBtn) {
-  payDownBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    sendRoomPayment("down");
   });
-}
-
-if (payFullBtn) {
-  payFullBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    sendRoomPayment("full");
-  });
-}
-
-payNowBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  const selectedType = window.selectedPaymentType || "full"; // Default to full if not set
-  sendRoomPayment(selectedType);
 });
