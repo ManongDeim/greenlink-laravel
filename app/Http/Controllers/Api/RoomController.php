@@ -28,7 +28,7 @@ public function createPaymentLink(Request $request)
         'phone_number' => 'required|string',
         'pax' => 'required|integer|min:1',
         'total_bill' => 'required|numeric|min:1',
-        'payment_type' => 'required|string|in:down,full'
+        'payment_method' => 'required|string|in:down,full'
     ]);
 
     $roomReserId = 'ROOM-' . strtoupper(uniqid());
