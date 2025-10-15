@@ -35,7 +35,7 @@ public function createPaymentLink(Request $request)
     $refNumber = uniqid('REF-');
 
     // Determine final amount based on payment type
-    $finalTotal = $validated['payment_type'] === 'down'
+    $finalTotal = $validated['payment_method'] === 'Down Payment'
         ? $validated['total_bill'] * 0.5
         : $validated['total_bill'];
 
@@ -51,7 +51,7 @@ public function createPaymentLink(Request $request)
         'phone_number' => $validated['phone_number'],
         'pax' => $validated['pax'],
         'total_bill' => $finalTotal,
-        'payment_method' => $validated['payment_type'] === 'down' ? 'Down Payment' : 'Full Payment',
+        'payment_method' => $validated['payment_method'],
         'payment_status' => 'Pending',
         'ref_number' => $refNumber
     ]);
