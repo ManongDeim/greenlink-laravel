@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   const roomId = params.get("id") || 1;
 
+  if (!roomId) return;
+
   try {
     const response = await fetch(`https://greenlinklolasayong.site/api/rooms/${roomId}`);
     const room = await response.json();
@@ -12,186 +14,239 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("roomPrice").textContent = `₱${room.price} / night`;
     document.getElementById("roomDesc").textContent = room.description;
 
-    // ✅ Pax Dropdown
+       // ✅ Dynamically populate Pax dropdown
     const paxSelect = document.getElementById("pax");
-    paxSelect.innerHTML = "";
+    paxSelect.innerHTML = ""; // clear existing options
+
     const min = parseInt(room.min_capacity) || 1;
     const max = parseInt(room.max_capacity) || 1;
+
     for (let i = min; i <= max; i++) {
       const option = document.createElement("option");
       option.value = i;
       option.textContent = i;
       paxSelect.appendChild(option);
     }
+
+    // Add a default disabled "Select" placeholder at the top
     const placeholder = document.createElement("option");
     placeholder.textContent = "Select pax";
     placeholder.disabled = true;
     placeholder.selected = true;
     paxSelect.prepend(placeholder);
 
-    // 🖼️ Carousel
-    const carousel = document.getElementById("carousel");
-    if (carousel) {
-      let images = [];
+    // 🖼️ Handle Carousel Images
+    let images = [];
+    if (Array.isArray(room.carousel_images)) {
+      images = room.carousel_images;
+    } else {
       try {
-        images = Array.isArray(room.carousel_images)
-          ? room.carousel_images
-          : JSON.parse(room.carousel_images);
+        images = JSON.parse(room.carousel_images);
+        if (!Array.isArray(images)) images = [room.image];
       } catch {
         images = [room.image];
       }
-      carousel.innerHTML = "";
-      images.forEach((imgPath) => {
-        const img = document.createElement("img");
-        img.src = imgPath.replace(/\\\//g, "/");
-        img.className = "w-full h-[400px] object-cover rounded-xl flex-shrink-0 bg-gray-100 shadow-md";
-        carousel.appendChild(img);
-      });
-      initCarousel(images.length);
     }
 
-    // 🌿 Amenities
+    const carousel = document.getElementById("carousel");
+    carousel.innerHTML = "";
+
+    images.forEach((imgPath) => {
+      const img = document.createElement("img");
+      img.src = imgPath.replace(/\\\//g, "/");
+      img.className =
+        "w-full h-[400px] object-cover rounded-xl flex-shrink-0 bg-gray-100 shadow-md";
+      carousel.appendChild(img);
+    });
+
+    initCarousel(images.length);
+
+    // 🌿 Handle Amenities (moved inside async)
     const amenitiesList = document.getElementById("amenitiesList");
     if (amenitiesList) {
       let amenities = [];
+
       try {
-        let raw = room.amenities;
-        if (typeof raw === "string") {
-          raw = raw.trim().replace(/\r?\n/g, "").replace(/\\r\\n/g, "");
-          if (raw.startsWith("[") && raw.endsWith("]")) amenities = JSON.parse(raw);
-          else amenities = raw.split(",").map((a) => a.trim());
-        } else if (Array.isArray(raw)) amenities = raw;
+        let rawAmenities = room.amenities;
+
+        if (typeof rawAmenities === "string") {
+          rawAmenities = rawAmenities.trim().replace(/\r?\n/g, "").replace(/\\r\\n/g, "");
+
+          if (rawAmenities.startsWith("[") && rawAmenities.endsWith("]")) {
+            amenities = JSON.parse(rawAmenities);
+          } else {
+            amenities = rawAmenities.split(",").map((item) => item.trim());
+          }
+        } else if (Array.isArray(rawAmenities)) {
+          amenities = rawAmenities;
+        }
       } catch (e) {
-        console.error("Failed to parse amenities:", e);
+        console.error("Failed to parse amenities:", e, room.amenities);
       }
 
-      amenitiesList.innerHTML = amenities.length
-        ? amenities.map((a) => `<li class="flex items-center gap-3"><span class="text-lg text-teal-600">•</span>${a}</li>`).join("")
-        : `<li class="text-gray-500 italic">No amenities listed for this room.</li>`;
+      if (amenities.length > 0) {
+        amenitiesList.innerHTML = amenities
+          .map(
+            (item) => `
+            <li class="flex items-center gap-3">
+              <span class="text-lg text-teal-600">•</span>${item}
+            </li>`
+          )
+          .join("");
+      } else {
+        amenitiesList.innerHTML = `<li class="text-gray-500 italic">No amenities listed for this room.</li>`;
+      }
     }
-  } catch (err) {
-    console.error("Error loading room:", err);
+  } catch (error) {
+    console.error("Error loading room:", error);
   }
 });
 
-// ✅ Carousel logic
+// ✅ Fixed carousel logic
 function initCarousel(totalSlides) {
   const carousel = document.getElementById("carousel");
   const indicators = document.getElementById("indicators");
-  if (!carousel || !indicators) return;
   indicators.innerHTML = "";
+
   let currentSlide = 0;
 
   for (let i = 0; i < totalSlides; i++) {
     const dot = document.createElement("span");
-    dot.className = "inline-block w-3 h-3 mx-1 rounded-full cursor-pointer";
+    dot.style.width = dot.style.height = "10px";
+    dot.style.borderRadius = "50%";
+    dot.style.display = "inline-block";
     dot.style.background = i === 0 ? "teal" : "#ccc";
-    dot.addEventListener("click", () => goToSlide(i));
+    dot.style.cursor = "pointer";
+    dot.addEventListener("click", (e) => {
+      e.preventDefault();
+      goToSlide(i);
+    });
     indicators.appendChild(dot);
   }
 
   function goToSlide(index) {
     currentSlide = index;
     carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
-    updateDots();
+    updateIndicators();
   }
 
-  function updateDots() {
+  function updateIndicators() {
     [...indicators.children].forEach((dot, i) => {
       dot.style.background = i === currentSlide ? "teal" : "#ccc";
     });
   }
 
-  window.nextSlide = () => goToSlide((currentSlide + 1) % totalSlides);
-  window.prevSlide = () => goToSlide((currentSlide - 1 + totalSlides) % totalSlides);
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    goToSlide(currentSlide);
+  }
+
+  function prevSlide() {
+    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+    goToSlide(currentSlide);
+  }
+
+  window.nextSlide = nextSlide;
+  window.prevSlide = prevSlide;
 }
 
-let selectedPaymentType = null;
-let totalBill = 0;
-let fullBill = 0;
-
-// ✅ Confirmation Modal
+// Open confirmation modal first
 function openConfirmationModal() {
   const form = document.getElementById("roomBookingForm");
-  const room = document.querySelector("#roomName").innerText;
-  const check_in = form.querySelector("input[name='check_in_date']").value;
-  const check_out = form.querySelector("input[name='check_out_date']").value;
+  const roomName = document.querySelector("#roomName").innerText;
+  const price = parseFloat(document.querySelector("#roomPrice").innerText.replace(/[^\d.]/g, "")) || 0;
+
+  const checkIn = new Date(form.querySelector("input[name='check_in_date']").value);
+  const checkOut = new Date(form.querySelector("input[name='check_out_date']").value);
+  const fullName = form.querySelector("input[name='full_name']").value;
   const pax = form.querySelector("select[name='pax']").value;
+  const email = form.querySelector("input[name='email']").value;
+  const phone = form.querySelector("input[name='phone_number']").value;
 
-  const checkInDate = new Date(check_in);
-  const checkOutDate = new Date(check_out);
-  const days = Math.max((checkOutDate - checkInDate) / (1000 * 3600 * 24), 1);
+  const nights = Math.max((checkOut - checkIn) / (1000 * 60 * 60 * 24), 1);
+  const total = price * nights;
 
-  const price = parseFloat(document.getElementById("roomPrice").innerText.replace(/[₱,/night\s]/g, ""));
-  fullBill = price * days;
-
-  const summary = `
-    <p><strong>Room:</strong> ${room}</p>
-    <p><strong>Check-In:</strong> ${check_in}</p>
-    <p><strong>Check-Out:</strong> ${check_out}</p>
+  const summaryHtml = `
+    <p><strong>Room:</strong> ${roomName}</p>
+    <p><strong>Price per Night:</strong> ₱${price.toLocaleString()}</p>
+    <p><strong>Check-In:</strong> ${form.querySelector("input[name='check_in_date']").value}</p>
+    <p><strong>Check-Out:</strong> ${form.querySelector("input[name='check_out_date']").value}</p>
+    <p><strong>Nights:</strong> ${nights}</p>
+    <p><strong>Total Bill:</strong> <span class="text-teal-600 font-semibold">₱${total.toLocaleString()}</span></p>
+    <hr class="my-2">
+    <p><strong>Full Name:</strong> ${fullName}</p>
     <p><strong>Pax:</strong> ${pax}</p>
-    <p><strong>Days:</strong> ${days}</p>
-    <p class="mt-2 font-semibold text-teal-700">Full Bill: ₱${fullBill.toLocaleString()}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Phone:</strong> ${phone}</p>
   `;
-  document.getElementById("confirmationSummary").innerHTML = summary;
+
+  document.getElementById("confirmationSummary").innerHTML = summaryHtml;
+
+  // Show confirmation modal
   document.getElementById("confirmationModal").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+
+  // Save total for payment stage
+  window.bookingDetails = { roomName, price, nights, total, fullName, pax, email, phone };
 }
 
+// Proceed to payment modal
+function proceedToPayment(type) {
+  const paymentModal = document.getElementById("paymentModal");
+  const confirmationModal = document.getElementById("confirmationModal");
+  const summary = document.getElementById("paymentSummary");
+
+  const { roomName, price, nights, total, fullName, pax, email, phone } = window.bookingDetails;
+
+  let finalTotal = type === "down" ? total * 0.5 : total;
+  const paymentTypeLabel = type === "down" ? "50% Down Payment" : "Full Payment";
+
+  summary.innerHTML = `
+    <p><strong>Room:</strong> ${roomName}</p>
+    <p><strong>Price per Night:</strong> ₱${price.toLocaleString()}</p>
+    <p><strong>Nights:</strong> ${nights}</p>
+    <p><strong>${paymentTypeLabel}:</strong> <span class="text-teal-600 font-semibold">₱${finalTotal.toLocaleString()}</span></p>
+    <hr class="my-2">
+    <p><strong>Full Name:</strong> ${fullName}</p>
+    <p><strong>Pax:</strong> ${pax}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Phone:</strong> ${phone}</p>
+  `;
+
+  // Hide confirmation modal, show payment modal
+  confirmationModal.classList.add("hidden");
+  paymentModal.classList.remove("hidden");
+}
+
+// Close confirmation modal
 function closeConfirmationModal() {
   document.getElementById("confirmationModal").classList.add("hidden");
+  document.body.style.overflow = "auto";
 }
 
-// ✅ Payment Modal
-function proceedToPayment(type) {
-  selectedPaymentType = type;
-  totalBill = type === "down" ? fullBill * 0.5 : fullBill;
-
-  document.getElementById("confirmationModal").classList.add("hidden");
-  const summary = `
-    <p><strong>Payment Method:</strong> ${type === "down" ? "Down Payment (50%)" : "Full Payment"}</p>
-    <p><strong>Total Bill:</strong> ₱${totalBill.toLocaleString()}</p>
-  `;
-  document.getElementById("paymentSummary").innerHTML = summary;
-  document.getElementById("paymentModal").classList.remove("hidden");
-}
 
 function closePaymentModal() {
   document.getElementById("paymentModal").classList.add("hidden");
+  document.body.style.overflow = "";
 }
 
-// ✅ PayMongo Redirect + Save Booking
-document.getElementById("payNowBtn").addEventListener("click", async () => {
-  const form = document.getElementById("roomBookingForm");
+function goBack() {
+  window.location.href = "../pages/RoomReser.html";
+}
 
-  const payload = {
-    room: document.querySelector("#roomName").innerText,
-    check_in_date: form.querySelector("input[name='check_in_date']").value,
-    check_out_date: form.querySelector("input[name='check_out_date']").value,
-    full_name: form.querySelector("input[name='full_name']").value,
-    email: form.querySelector("input[name='email']").value,
-    phone_number: form.querySelector("input[name='phone_number']").value,
-    pax: form.querySelector("select[name='pax']").value,
-    total_bill: totalBill,
-    payment_method: selectedPaymentType === "down" ? "Down Payment" : "Full Payment",
-  };
-
-  try {
-    const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const result = await response.json();
-    console.log(result);
-
-    if (result.checkout_url) {
-      window.location.href = result.checkout_url;
-    } else {
-      alert("Payment initialization failed.");
+function openTermsModal() {
+      document.getElementById('termsModal').classList.remove('hidden');
+      document.getElementById('termsModal').classList.add('flex');
     }
-  } catch (err) {
-    console.error("Payment error:", err);
-    alert("An error occurred while processing your payment.");
-  }
-});
+    function closeTermsModal() {
+      document.getElementById('termsModal').classList.add('hidden');
+    }
+    function handleReviewClick() {
+      const checkbox = document.getElementById('termsCheckbox');
+      if (!checkbox.checked) {
+        document.getElementById('alertMessage').textContent = 'Please agree to the Terms and Conditions before proceeding.';
+        document.getElementById('alertModal').classList.remove('hidden');
+        return;
+      }
+      openPaymentModal();
+    }z

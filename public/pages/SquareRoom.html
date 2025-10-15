@@ -37,6 +37,31 @@
     </button>
   </div>
 
+<!-- Room Images Carousel -->
+    <section class="mt-6">
+      <div class="relative w-full overflow-hidden rounded-xl">
+  <div id="carousel" class="flex transition-transform ease-in-out durations-700">
+  </div>
+
+  <!-- Indicators -->
+  <div id="indicators" class="absolute flex space-x-2 transform -translate-x-1/2 bottom-4 left-1/2"></div>
+
+  <!-- Navigation (optional) -->
+  <button type="button" onclick="prevSlide()" class="absolute p-2 transform -translate-y-1/2 rounded-full left-2 top-1/2 bg-white/70">&#10094;</button>
+  <button type="button" onclick="nextSlide()" class="absolute p-2 transform -translate-y-1/2 rounded-full right-2 top-1/2 bg-white/70">&#10095;</button>
+</div>
+
+<!-- Amenities Section -->
+<section class="mt-10">
+  <h2 class="mb-4 text-2xl font-semibold text-center text-teal-700">Amenities</h2>
+  <div class="p-6 bg-white border shadow-md rounded-xl">
+    <ul id="amenitiesList" class="space-y-3 text-base text-gray-700">
+      <li class="italic text-gray-500">Loading amenities...</li>
+    </ul>
+  </div>
+</section>
+
+
   <!-- Booking Form -->
   <form id="roomBookingForm" class="max-w-4xl px-6 mx-auto">
     <section class="mt-10 text-center">
