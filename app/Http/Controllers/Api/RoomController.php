@@ -13,74 +13,82 @@ use Illuminate\Support\Facades\Http;
 class RoomController extends Controller
 {
       public function createPaymentLink(Request $request)
-    {
-        $user = Auth::user();
+{
+    try {
+        // Validate incoming data
+        $validated = $request->validate([
+            'room' => 'required|string',
+            'check_in_date' => 'required|date',
+            'check_out_date' => 'required|date',
+            'full_name' => 'required|string',
+            'email' => 'required|email',
+            'phone_number' => 'required|string',
+            'pax' => 'required|integer',
+            'total_bill' => 'required|numeric',
+            'payment_method' => 'required|string',
+        ]);
 
-        // Generate unique IDs
-        $roomReserId = 'ROOM-' . strtoupper(Str::random(8));
-        $reference = 'REF-' . strtoupper(Str::random(10));
+        // Generate unique reservation ID
+        $roomReserId = 'ROOM-' . strtoupper(Str::random(10));
 
-        // Payment logic
-        $paymentMethod = $request->input('payment_method'); // "Down Payment" or "Full Payment"
-        $totalBill = (int) $request->input('total_bill');
-        $payAmount = $paymentMethod === 'Down Payment' ? $totalBill * 0.5 : $totalBill;
-
-        // Create Reservation in DB
+        // Create a pending reservation first
         $reservation = RoomModel::create([
-            'user_id' => $user->id,
+            'user_id' => optional(Auth::user())->id,
+
             'room_reser_id' => $roomReserId,
-            'reference_number' => $reference,
-            'check_in_date' => $request->input('check_in_date'),
-            'check_out_date' => $request->input('check_out_date'),
-            'full_name' => $request->input('full_name'),
-            'email' => $request->input('email'),
-            'phone_number' => $request->input('phone_number'),
-            'pax' => $request->input('pax'),
-            'room' => $request->input('room'),
-            'total_bill' => $payAmount,
-            'payment_method' => $paymentMethod,
+            'room' => $validated['room'],
+            'check_in_date' => $validated['check_in_date'],
+            'check_out_date' => $validated['check_out_date'],
+            'full_name' => $validated['full_name'],
+            'email' => $validated['email'],
+            'phone_number' => $validated['phone_number'],
+            'pax' => $validated['pax'],
+            'total_bill' => $validated['total_bill'],
+            'payment_method' => $validated['payment_method'],
             'payment_status' => 'Pending',
         ]);
 
-        // ✅ Call PayMongo API
-        $response = Http::withHeaders([
-            'accept' => 'application/json',
-            'authorization' => 'Basic ' . base64_encode(env('PAYMONGO_SECRET_KEY')),
-            'content-type' => 'application/json',
-        ])->post('https://api.paymongo.com/v1/checkout_sessions', [
-            'data' => [
-                'attributes' => [
-                    'send_email_receipt' => false,
-                    'show_description' => false,
-                    'show_line_items' => true,
-                    'cancel_url' => url('/paymentFailed?room_reser_id=' . $roomReserId),
-                    'success_url' => url('/paymentSuccess?room_reser_id=' . $roomReserId),
-                    'payment_method_types' => ['gcash', 'card'],
-                    'line_items' => [[
-                        'name' => $request->input('room'),
-                        'quantity' => 1,
-                        'currency' => 'PHP',
-                        'amount' => (int) ($payAmount * 100),
-                        'description' => 'Booking from ' . $request->input('check_in_date') . ' to ' . $request->input('check_out_date'),
-                    ]],
-                    'metadata' => [
-                        'room_reser_id' => $roomReserId,
-                        'reference_number' => $reference,
-                        'payment_method' => $paymentMethod,
-                        'user_id' => $user->id,
+        // PayMongo secret key
+        $paymongoKey = config('services.paymongo.secret');
+
+        // Create checkout session
+        $response = Http::withBasicAuth($paymongoKey, '')
+            ->post('https://api.paymongo.com/v1/checkout_sessions', [
+                'data' => [
+                    'attributes' => [
+                        'send_email_receipt' => false,
+                        'show_description' => true,
+                        'description' => "Room Reservation: {$validated['room']} ({$roomReserId})",
+                        'line_items' => [[
+                            'name' => $validated['room'],
+                            'amount' => (int)($validated['total_bill'] * 100), // PayMongo expects centavos
+                            'currency' => 'PHP',
+                            'quantity' => 1,
+                        ]],
+                        'success_url' => url("/payment/success/{$roomReserId}"),
+                        'cancel_url' => url("/payment/failed/{$roomReserId}"),
                     ],
                 ],
-            ],
-        ]);
+            ]);
 
-        $checkoutData = $response->json();
+        $result = $response->json();
 
-        if (isset($checkoutData['data']['attributes']['checkout_url'])) {
-            return response()->json(['url' => $checkoutData['data']['attributes']['checkout_url']]);
-        } else {
+        if ($response->failed() || empty($result['data']['attributes']['checkout_url'])) {
+            Log::error('PayMongo error response:', ['response' => $result]);
             return response()->json(['error' => 'Failed to create PayMongo checkout link'], 500);
         }
+
+        $checkoutUrl = $result['data']['attributes']['checkout_url'];
+
+        return response()->json([
+            'checkout_url' => $checkoutUrl,
+            'reservation_id' => $roomReserId,
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Payment creation failed:', ['message' => $e->getMessage()]);
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 
     // ✅ Handle successful payment
     public function paymentSuccess(Request $request)
@@ -89,7 +97,7 @@ class RoomController extends Controller
         RoomModel::where('room_reser_id', $roomReserId)
             ->update(['payment_status' => 'Paid']);
 
-        return redirect('/pages/payment_success.html');
+        return redirect('/pages/paymentsuccess.html');
     }
 
     // ✅ Handle failed payment
