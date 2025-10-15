@@ -62,6 +62,7 @@ class RoomController extends Controller
                             'currency' => 'PHP',
                             'quantity' => 1,
                         ]],
+                        'payment_method_types' => ['gcash'],
                         'success_url' => url("/payment/success/{$roomReserId}"),
                         'cancel_url' => url("/payment/failed/{$roomReserId}"),
                     ],
