@@ -1,22 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-
-  <link rel="icon" type="image/png" href="../src/Pictures/LogoLolasayong2.png">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../src/Pictures/LogoLolasayong2.png" />
   <title>Room Booking</title>
 </head>
 <body class="w-full overflow-x-hidden bg-white">
-
   <!-- Header -->
   <header class="flex items-center justify-between px-8 py-3 shadow-md bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500">
     <div class="flex items-center gap-8">
       <a href="../homePage.html">
-        <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo"
-          class="object-contain w-auto h-20 transition-transform duration-300 cursor-pointer hover:scale-105 hover:drop-shadow-lg">
+        <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo" class="object-contain w-auto h-20 transition-transform duration-300 cursor-pointer hover:scale-105 hover:drop-shadow-lg" />
       </a>
       <nav class="flex gap-6 text-lg font-medium">
         <a href="../homePage.html" class="text-white transition hover:text-gray-200">Home</a>
@@ -26,9 +23,8 @@
     </div>
 
     <div id="auth-section" class="flex items-center">
-      <a id="loginBtn"
-        class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-3 py-1.5 text-sm hover:bg-gray-100 transition-shadow shadow-sm">
-        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google">
+      <a id="loginBtn" class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-3 py-1.5 text-sm hover:bg-gray-100 transition-shadow shadow-sm">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google" />
         <span>Log-in</span>
       </a>
     </div>
@@ -36,8 +32,7 @@
 
   <!-- Back Button -->
   <div class="px-6 mt-4">
-    <button onclick="goBack()" type="button"
-      class="flex items-center gap-2 px-4 py-2 text-gray-800 transition border border-teal-700 rounded-lg hover:bg-teal-700 hover:text-white">
+    <button onclick="goBack()" type="button" class="flex items-center gap-2 px-4 py-2 text-gray-800 transition border border-teal-700 rounded-lg hover:bg-teal-700 hover:text-white">
       ← Return
     </button>
   </div>
@@ -47,48 +42,21 @@
     <section class="mt-10 text-center">
       <h1 class="mb-2 text-3xl font-bold text-gray-800">Choose Your Perfect Stay</h1>
       <p class="mb-4 text-base text-gray-500">Book your ideal room and enjoy a relaxing getaway</p>
-
       <p id="roomName" class="text-2xl font-semibold text-gray-800">Loading...</p>
       <p id="roomPrice" class="mt-3 text-lg font-semibold text-teal-800">₱0 / night</p>
       <p id="roomDesc" class="mt-2 text-sm italic text-gray-500">Please wait while we load the details 🌿</p>
     </section>
 
-    <!-- Room Images Carousel -->
-    <section class="mt-6">
-      <div class="relative w-full overflow-hidden rounded-xl">
-  <div id="carousel" class="flex transition-transform ease-in-out durations-700">
-  </div>
-
-  <!-- Indicators -->
-  <div id="indicators" class="absolute flex space-x-2 transform -translate-x-1/2 bottom-4 left-1/2"></div>
-
-  <!-- Navigation (optional) -->
-  <button type="button" onclick="prevSlide()" class="absolute p-2 transform -translate-y-1/2 rounded-full left-2 top-1/2 bg-white/70">&#10094;</button>
-  <button type="button" onclick="nextSlide()" class="absolute p-2 transform -translate-y-1/2 rounded-full right-2 top-1/2 bg-white/70">&#10095;</button>
-</div>
-
-<!-- Amenities Section -->
-<section class="mt-10">
-  <h2 class="mb-4 text-2xl font-semibold text-center text-teal-700">Amenities</h2>
-  <div class="p-6 bg-white border shadow-md rounded-xl">
-    <ul id="amenitiesList" class="space-y-3 text-base text-gray-700">
-      <li class="italic text-gray-500">Loading amenities...</li>
-    </ul>
-  </div>
-</section>
-
     <!-- Calendar -->
     <div class="flex justify-center mt-8">
       <div class="flex flex-col gap-4 p-6 bg-white rounded-lg shadow-md md:flex-row">
         <div class="relative">
-          <input type="date" name="check_in_date" id="checkIn"
-            class="w-56 px-4 pt-5 pb-2 text-gray-900 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <input type="date" name="check_in_date" id="checkIn" class="w-56 px-4 pt-5 pb-2 text-gray-900 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
           <label for="checkIn" class="absolute text-sm text-gray-500 transition-all left-4 top-2 peer-focus:text-teal-600">Check-In</label>
         </div>
 
         <div class="relative">
-          <input type="date" name="check_out_date" id="checkOut"
-            class="w-56 px-4 pt-5 pb-2 text-gray-900 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <input type="date" name="check_out_date" id="checkOut" class="w-56 px-4 pt-5 pb-2 text-gray-900 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
           <label for="checkOut" class="absolute text-sm text-gray-500 transition-all left-4 top-2 peer-focus:text-teal-600">Check-Out</label>
         </div>
       </div>
@@ -99,14 +67,12 @@
       <h2 class="mb-6 text-2xl font-semibold text-center">Booking Info</h2>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div class="relative">
-          <input type="text" name="full_name" placeholder=" "
-            class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <input type="text" name="full_name" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
           <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">Full Name</label>
         </div>
 
         <div class="relative">
-          <select name="pax" id="pax"
-            class="w-full px-4 pt-5 pb-2 text-gray-500 bg-white border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-600">
+          <select name="pax" id="pax" class="w-full px-4 pt-5 pb-2 text-gray-500 bg-white border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-600">
             <option value="" disabled selected hidden></option>
             <option value="1">1</option>
             <option value="2">2</option>
@@ -115,198 +81,62 @@
         </div>
 
         <div class="relative">
-          <input type="email" name="email" placeholder=" "
-            class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <input type="email" name="email" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
           <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">E-mail</label>
         </div>
 
         <div class="relative">
-          <input type="tel" name="phone_number" placeholder=" "
-            class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <input type="tel" name="phone_number" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
           <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">Phone No</label>
         </div>
       </div>
     </section>
 
-    <!--Terms and Conditions Checkbox-->
-      <label class="flex justify-center gap-2 mt-6 text-sm text-gray-700 items-centers">
-        <input type="checkbox" id="agreeCheckbox" name="agree" class="text-teal-600 focus:ring-teal-500">
-        <span>
-          I agree to the
-          <a href="#" onclick="openTermsModal()" class="font-medium text-teal-600 hover:underline">
-            Terms and Conditions
-          </a>
-        </span>
-      </label>
+    <label class="flex justify-center gap-2 mt-6 text-sm text-gray-700 items-centers">
+      <input type="checkbox" id="agreeCheckbox" name="agree" class="text-teal-600 focus:ring-teal-500" />
+      <span>
+        I agree to the
+        <a href="#" onclick="openTermsModal()" class="font-medium text-teal-600 hover:underline">Terms and Conditions</a>
+      </span>
+    </label>
 
-    <!-- Review & Confirm Booking -->
     <div class="flex justify-center mt-10 mb-12">
-      <button type="button" onclick="openConfirmationModal()"
-        class="px-10 py-3 text-lg font-semibold text-white transition bg-teal-600 rounded-lg shadow-md hover:bg-teal-700 hover:scale-105">
+      <button type="button" onclick="openConfirmationModal()" class="px-10 py-3 text-lg font-semibold text-white transition bg-teal-600 rounded-lg shadow-md hover:bg-teal-700 hover:scale-105">
         Review & Confirm Booking
       </button>
     </div>
   </form>
 
-  <!-- Terms and Conditions Modal -->
-<div id="termsModal" 
-     class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/40 backdrop-blur-sm">
-
-  <!-- Modal Box -->
-  <div class="relative bg-white rounded-2xl w-[90%] max-w-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
-    
-    <!-- Header (fixed at top) -->
-      <div class="sticky top-0 z-10 flex items-center justify-between px-6 py-3 bg-teal-600 border-b">
-      <h2 class="text-lg font-semibold text-white">Terms and Conditions</h2>
-      <button onclick="closeTermsModal()" class="text-gray-500 hover:text-gray-800">✕</button>
-    </div>
-
-    <!-- Scrollable Content -->
-    <div class="flex-1 px-6 py-4 overflow-y-auto text-sm leading-relaxed text-gray-700">
-      <h3 class="font-semibold text-teal-700">Lola Sayong GreenLink – Lola Sayong Eco Surf-Farm</h3>
-      <p>By using the Lola Sayong GreenLink website to make a booking, you agree to follow the rules below.</p>
-
-      <h4 class="mt-4 font-semibold">1. General Rules</h4>
-      <p>These rules apply to everyone who makes a booking on our website. We may change these rules anytime without prior notice.</p>
-
-      <h4 class="mt-4 font-semibold">2. Strictly Follow Camp Rules</h4>
-      <ul class="list-disc list-inside">
-        <li>SILENCE IS NECESSARY</li>
-        <li>NO SPEAKERS</li>
-        <li>DRINKING & SMOKING AT THE BAR ONLY</li>
-        <li>Controlled BONFIRE</li>
-        <li>NO NIGHT SWIMMING</li>
-        <li>NO SINGLE USE PLASTIC</li>
-      </ul>
-      <p>Minor offense: Verbal warning.<br>Moderate offense: Verbal warning and offense fee.<br>Major offense: Kick-out or ban from the camp.</p>
-
-      <h4 class="mt-4 font-semibold">3. Booking Confirmation</h4>
-      <p>Your booking or order is confirmed only after full or partial payment. If GCash is under maintenance, you may choose "Reserve Now, Pay Later" within 24 hours.</p>
-
-      <h4 class="mt-4 font-semibold">4. Payments</h4>
-      <p>Payments can be made through GCash or cash on arrival. Prices are in PHP and may include taxes.</p>
-
-      <h4 class="mt-4 font-semibold">5. Cancellation Policy</h4>
-      <p>Cancellations made at least 3 days before booking date are fully refundable. Less than 3 days are non-refundable.</p>
-
-      <h4 class="mt-4 font-semibold">6. Check-In and Use of Services</h4>
-      <p>Arrive at the time provided in your confirmation email and follow camp rules during your stay.</p>
-
-      <h4 class="mt-4 font-semibold">7. Guest Conduct and Responsibility</h4>
-      <p>Please respect other guests, staff, and the environment. Any damage caused may incur additional charges.</p>
-
-      <h4 class="mt-4 font-semibold">8. Unexpected Events</h4>
-      <p>In case of emergencies or natural disasters, bookings may be modified or canceled for safety reasons.</p>
-
-      <h4 class="mt-4 font-semibold">9. Privacy</h4>
-      <p>Your personal information is used only to process your booking and will remain private and secure.</p>
-    </div>
-
-    <!-- Footer -->
-    <div class="sticky bottom-0 z-10 flex justify-center px-6 py-3 bg-white border-t">
-      <button onclick="closeTermsModal()" 
-              class="px-5 py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">
-        Close
-      </button>
-    </div>
-    </div>
-</div>
-
-
- <!-- Confirmation Modal -->
-<div id="confirmationModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/50">
-  <div class="relative w-full max-w-md p-6 mx-4 bg-white shadow-xl rounded-2xl">
-    <!-- Close Button -->
-    <button type="button" onclick="closeConfirmationModal()"
-      class="absolute text-xl font-bold text-gray-500 top-3 right-3 hover:text-gray-800">
-      &times;
-    </button>
-
-    <!-- Header -->
-    <h2 class="mb-4 text-xl font-semibold text-center text-teal-700">Booking Summary</h2>
-
-    <!-- Summary Info -->
-    <div id="confirmationSummary" class="mb-6 space-y-1 text-sm text-gray-700">
-      <p class="italic text-center text-gray-500">Loading summary...</p>
-    </div>
-
-    <!-- Payment Options -->
-    <div class="flex flex-col gap-3 sm:flex-row">
-      <button type="button"
-        onclick="proceedToPayment('down')"
-        class="w-full px-4 py-2 font-medium text-white transition bg-teal-500 rounded-lg hover:bg-yellow-600 sm:w-1/2">
-        Proceed to Down Payment
-      </button>
-
-      <button type="button"
-        onclick="proceedToPayment('full')"
-        class="w-full px-4 py-2 font-medium text-white transition bg-teal-600 rounded-lg hover:bg-teal-700 sm:w-1/2">
-        Proceed to Full Payment
-      </button>
-    </div>
-  </div>
-</div>
-
-
-
-<!-- Payment Modal -->
-<div id="paymentModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/50">
-  <div class="relative p-6 bg-white shadow-xl rounded-2xl w-96">
-    <button type="button" onclick="closePaymentModal()" 
-      class="absolute text-xl font-bold text-gray-500 top-3 right-3 hover:text-gray-800">
-      &times;
-    </button>
-
-    <h2 class="mb-4 text-xl font-semibold text-center text-teal-700">Booking Summary</h2>
-
-    <div id="paymentSummary" class="mb-4 space-y-1 text-sm text-gray-700"></div>
-
-    <div class="flex justify-center">
-      <button type="button" class="px-6 py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">
-        Pay Now
-      </button>
-    </div>
-  </div>
-</div>
-
- <!-- Footer -->
-<footer class="relative left-1/2 right-1/2 -mx-[50vw] w-screen mt-20 text-gray-300 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 ">
-  <div class="grid grid-cols-1 gap-8 px-8 py-10 mx-auto max-w-7xl md:grid-cols-3">
-    <!-- About -->
-    <div>
-      <h3 class="mb-3 text-lg font-semibold text-white">About Us</h3>
-      <p class="text-sm leading-relaxed text-gray-400">
-        Lola Sayong Eco Surf-Farm is a community-driven space in Sorsogon where nature,
-        culture, and people come together. We offer eco-friendly venues for celebrations,
-        farm-to-table dining, event booking, and room reservations — giving you a relaxing
-        escape by the sea.
-      </p>
-    </div>
-
-    <!-- Contact -->
-    <div>
-      <h3 class="mb-3 text-lg font-semibold text-white">Contact</h3>
-      <ul class="space-y-1 text-sm text-gray-400">
-        <li>📍 Brgy. Buenavista, Gubat, Sorsogon</li>
-        <li>📞 +63 939 907 6136</li>
-        <li>✉️ lolasayong.org@gmail.com</li>
-      </ul>
-    </div>
-
-    <!-- Follow Us -->
-    <div>
-      <h3 class="mb-3 text-lg font-semibold text-white">Follow Us</h3>
-      <div class="flex gap-4">
-        <a href="https://www.facebook.com/Lola.Sayong.Surf.Camp" class="hover:text-white">Facebook</a>
-        <a href="https://www.instagram.com/lolasayong.and.thesimplethings/" class="hover:text-white">Instagram</a>
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="hidden fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative mx-4">
+      <button type="button" onclick="closeConfirmationModal()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+      <h2 class="text-xl font-semibold text-center text-teal-700 mb-4">Booking Summary</h2>
+      <div id="confirmationSummary" class="text-gray-700 text-sm space-y-1 mb-6">
+        <p class="text-gray-500 italic text-center">Loading summary...</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button type="button" onclick="proceedToPayment('down')" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded-lg transition w-full sm:w-1/2">
+          Proceed to Down Payment
+        </button>
+        <button type="button" onclick="proceedToPayment('full')" class="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg transition w-full sm:w-1/2">
+          Proceed to Full Payment
+        </button>
       </div>
     </div>
   </div>
 
-  <div class="py-4 text-sm text-center text-gray-500 border-t border-gray-700">
-    © 2025 Lola Sayong Eco-Surf Camp. All rights reserved.
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/50">
+    <div class="relative p-6 bg-white shadow-xl rounded-2xl w-96">
+      <button type="button" onclick="closePaymentModal()" class="absolute text-xl font-bold text-gray-500 top-3 right-3 hover:text-gray-800">&times;</button>
+      <h2 class="mb-4 text-xl font-semibold text-center text-teal-700">Booking Summary</h2>
+      <div id="paymentSummary" class="mb-4 space-y-1 text-sm text-gray-700"></div>
+      <div class="flex justify-center">
+        <button id="payNowBtn" type="button" class="px-6 py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">Pay Now</button>
+      </div>
+    </div>
   </div>
-</footer>
 
   <script src="../scripts/squareRoom.js"></script>
   <script src="../global_scripts/loginScript.js" defer></script>
