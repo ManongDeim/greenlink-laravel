@@ -14,8 +14,14 @@
 
   <!-- Top Bar -->
   <header class="flex items-center justify-between px-6 py-3 text-white bg-teal-700 shadow">
-    <h1 class="text-lg font-semibold">Lola Sayong GreenLink</h1>
-    <p>Admin, <span class="font-bold">John Arriega</span></p>
+      <!-- Right: Auth Section -->
+<div id="auth-section" class="flex items-center">
+  <a id="loginBtn"
+     class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm hover:bg-gray-100">
+    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
+    <span class="text-sm font-medium">Log-in</span>
+  </a>
+</div>
   </header>
 
   <div class="flex">
@@ -355,7 +361,8 @@
     }
   };
 </script>
- <script src="./scripts/adminPage.js"></script>
-
+<script src="./scripts/adminPage.js"></script>
+<script src="./global_scripts/loginScript.js" defer></script>
+<script src="./global_scripts/authLogin.js"></script>
 </body>
 </html>
