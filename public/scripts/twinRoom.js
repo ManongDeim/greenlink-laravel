@@ -153,6 +153,6 @@ function closeOrderModal() {
   });
 });
 
- function goBack() {
-    window.history.back();
+function goBack() {
+    window.location.href = "../pages/RoomReser.html";
  }

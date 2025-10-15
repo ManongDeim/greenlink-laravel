@@ -51,4 +51,5 @@ class User extends Authenticatable
     {
         return $this->hasOne(GoogleUser::class, 'user_id', 'id');
     }
+
 }

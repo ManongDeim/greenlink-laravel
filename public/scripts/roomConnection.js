@@ -200,3 +200,64 @@ bookNowButtons.forEach(btn => {
 });
 
 });
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const container = document.getElementById("roomsContainer");
+
+  try {
+    // Adjust to your actual Laravel API URL
+    const response = await fetch("https://greenlinklolasayong.site/api/rooms");
+    const rooms = await response.json();
+
+    rooms.forEach(room => {
+      // Create card
+      const card = document.createElement("div");
+      card.className =
+        "bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-[1.02] transition cursor-pointer";
+      card.innerHTML = `
+        <img src="${room.image}" alt="${room.room_name}" class="object-cover w-full h-56">
+        <div class="p-4 text-center">
+          <h2 class="text-xl font-bold text-gray-800">${room.room_name}</h2>
+          <p class="mt-2 text-sm text-gray-600">${room.description}</p>
+          <p class="mt-2 text-lg font-semibold text-teal-700">₱${parseFloat(room.price).toLocaleString()}</p>
+        </div>
+      `;
+
+      // Create modal
+      const modal = document.createElement("div");
+      modal.className =
+        "fixed inset-0 z-50 flex items-center justify-center hidden bg-black/40 backdrop-blur-sm";
+      modal.innerHTML = `
+        <div class="relative w-full max-w-lg p-6 bg-white shadow-lg rounded-2xl">
+          <button type="button" class="absolute text-gray-600 top-3 right-3 hover:text-gray-900 close-modal">&times;</button>
+          <h2 class="mb-4 text-2xl font-bold text-gray-800">${room.room_name}</h2>
+          <img src="${room.image}" alt="${room.room_name}" class="mb-4 rounded-xl">
+          <p class="mb-2 text-gray-700">${room.description}</p>
+          <p class="mb-4 text-lg font-semibold text-teal-700">₱${parseFloat(room.price).toLocaleString()}</p>
+          <button type="button" class="absolute px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 bottom-3 right-3 rounded-xl book-now-btn">
+            Book Now!
+          </button>
+        </div>
+      `;
+
+      // Card click → open modal
+      card.addEventListener("click", () => modal.classList.remove("hidden"));
+
+      // Close modal logic
+      modal.querySelector(".close-modal").addEventListener("click", () => modal.classList.add("hidden"));
+      modal.addEventListener("click", e => {
+        if (e.target === modal) modal.classList.add("hidden");
+      });
+
+      // Book Now → redirect
+      modal.querySelector(".book-now-btn").addEventListener("click", () => {
+        window.location.href = `../pages/roomBooking.html?id=${room.id}`;;
+      });
+
+      container.appendChild(card);
+      document.body.appendChild(modal);
+    });
+  } catch (err) {
+    console.error("Failed to load rooms:", err);
+  }
+});

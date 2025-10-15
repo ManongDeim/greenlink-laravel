@@ -1,3 +1,103 @@
+// === Dynamic Room Data Loader ===
+
+// Get room ID from URL (e.g. roomBooking.html?id=2)
+const params = new URLSearchParams(window.location.search);
+const roomId = params.get("id") || 1; // default fallback room ID
+
+async function loadRoomData() {
+  try {
+    const response = await fetch(`https://greenlinklolasayong.site/api/rooms/${roomId}`);
+    if (!response.ok) throw new Error("Failed to fetch room data");
+
+    const room = await response.json();
+
+    // --- Update room name ---
+    document.getElementById("roomName").textContent = room.room_name;
+    document.getElementById("roomInput").value = room.room_name;
+
+    // --- Update price ---
+    const priceElement = document.querySelector(".text-teal-800");
+    if (priceElement) {
+      priceElement.innerHTML = `Only ₱${room.price.toLocaleString()} <span class="font-medium text-gray-600">/ night</span>`;
+    }
+
+    // --- Update description / amenities (if needed) ---
+    // You can add dynamic updates here if you have room-specific amenities
+
+    // --- Build Carousel ---
+    const carousel = document.getElementById("carousel");
+    const indicators = document.getElementById("indicators");
+
+    carousel.innerHTML = ""; // clear existing images
+    indicators.innerHTML = "";
+
+    room.carousel_images.forEach((imgUrl, index) => {
+      const img = document.createElement("img");
+      img.src = imgUrl;
+      img.alt = `${room.name} image ${index + 1}`;
+      img.className = "w-full h-[400px] object-cover rounded-xl flex-shrink-0 bg-gray-100 shadow-md";
+      carousel.appendChild(img);
+
+      // Add indicator dot
+      const dot = document.createElement("span");
+      dot.style.width = dot.style.height = "10px";
+      dot.style.borderRadius = "50%";
+      dot.style.display = "inline-block";
+      dot.style.background = index === 0 ? "teal" : "#ccc";
+      dot.addEventListener("click", () => goToSlide(index));
+      indicators.appendChild(dot);
+    });
+
+    // Reinitialize carousel logic
+    initializeCarousel();
+
+  } catch (error) {
+    console.error("Error loading room data:", error);
+    showAlert("Unable to load room details. Please try again later.");
+  }
+}
+
+// --- Carousel setup logic (wrapped in a function so it can be re-initialized) ---
+function initializeCarousel() {
+  const carousel = document.getElementById("carousel");
+  const slides = carousel.querySelectorAll("img");
+  const indicators = document.getElementById("indicators");
+  let currentSlide = 0;
+
+  function goToSlide(index) {
+    currentSlide = index;
+    carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+    updateIndicators();
+  }
+
+  function updateIndicators() {
+    [...indicators.children].forEach((dot, i) => {
+      dot.style.background = i === currentSlide ? "teal" : "#ccc";
+    });
+  }
+
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % slides.length;
+    goToSlide(currentSlide);
+  }
+
+  function prevSlide() {
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    goToSlide(currentSlide);
+  }
+
+  // Auto slide
+  setInterval(nextSlide, 3000);
+
+  // Expose these globally (so your buttons still work)
+  window.nextSlide = nextSlide;
+  window.prevSlide = prevSlide;
+  window.goToSlide = goToSlide;
+}
+
+document.addEventListener("DOMContentLoaded", loadRoomData);
+
+
 //Carousel Script
 const carousel = document.getElementById("carousel");
   const slides = carousel.querySelectorAll("img");
@@ -155,6 +255,6 @@ function closeOrderModal() {
   });
 });
 
- function goBack() {
-    window.history.back();
+function goBack() {
+    window.location.href = "../pages/RoomReser.html";
  }

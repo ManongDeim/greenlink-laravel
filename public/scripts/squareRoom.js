@@ -155,5 +155,5 @@ function closeOrderModal() {
 });
 
  function goBack() {
-    window.history.back();
+    window.location.href = "../pages/RoomReser.html";
  }

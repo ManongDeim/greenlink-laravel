@@ -155,6 +155,6 @@ function closeOrderModal() {
   document.body.classList.remove("overflow-hidden"); // re-enable scroll
 }
 
- function goBack() {
-    window.history.back();
+function goBack() {
+    window.location.href = "../pages/RoomReser.html";
  }

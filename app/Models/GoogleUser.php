@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\User; 
+
 
 class GoogleUser extends Model
 {
     use HasFactory;
 
     protected $table = 'google_users';
-    protected $primaryKey = 'user_id'; // 👈 change to real PK
+    protected $primaryKey = 'user_id'; 
     public $incrementing = true;
     protected $keyType = 'int';
 

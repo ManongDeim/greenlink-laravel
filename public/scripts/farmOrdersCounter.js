@@ -1,15 +1,19 @@
-// Store counters for all 6 items
-    const counters = { counter1: 0, counter2: 0, counter3: 0, counter4: 0, counter5: 0, counter6: 0 };
+let productData = {};
+let userId = null;
+window.counters = {};
+
 
     function incrementCounter(id) {
-      counters[id]++;
-      document.getElementById(id).textContent = counters[id];
+      if (!window.counters[id]) window.counters[id] = 0;
+  window.counters[id]++;
+  document.getElementById(id).textContent = window.counters[id];
     }
 
     function decrementCounter(id) {
-      if (counters[id] > 0) {
-        counters[id]--;
-        document.getElementById(id).textContent = counters[id];
+      if (!window.counters[id]) window.counters[id] = 0;
+  if (window.counters[id] > 0) {
+    window.counters[id]--;
+    document.getElementById(id).textContent = window.counters[id];
       }
     }
 
@@ -36,7 +40,7 @@
     let cart = [];
 
 // Add item to cart
-function addItem(itemName, counterId) {
+function addItem(itemName, counterId, price) {
   event.preventDefault();
   let qty = parseInt(document.getElementById(counterId).textContent);
 
@@ -45,14 +49,12 @@ function addItem(itemName, counterId) {
     if (existing) {
       existing.qty += qty;
     } else {
-      cart.push({ name: itemName, qty: qty });
+      cart.push({ name: itemName, qty: qty, price: getPrice(itemName) });
     }
 
     // reset counter
     document.getElementById(counterId).textContent = 0;
-    if (typeof counters !== "undefined") {
-      counters[counterId] = 0; 
-    }
+    counters[counterId] = 0;
 
     updateCartBadge();
     updateModal();
@@ -90,7 +92,7 @@ function updateModal() {
   let total = 0;
 
   cart.forEach((item, index) => {
-    let price = getPrice(item.name);
+    let price = parseFloat(item.price || getPrice(item.name));
     let itemTotal = price * item.qty;
     total += itemTotal;
 
@@ -165,87 +167,116 @@ function confirmOrder() {
 }
 
 
-
-// Send to Laravel
-
-function sendOrder(paymentMethod) {
-
+// Send to Laravel + login guard
+async function sendOrder(paymentMethod) {
   console.log("sendOrder triggered with:", paymentMethod);
 
-  let orderData = cart.map(item => ({
-    name: item.name,
-    qty: item.qty,
-    price: getPrice(item.name)
-  }));
+ if (!window.userId) {
+    try {
+      const userRes = await fetch("https://greenlinklolasayong.site/api/user-info", {
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+   
+      
 
-  console.log("Sending to backend:", {
-  cart: orderData,
-  payment_method: paymentMethod
-});
+      if (!userRes.ok) {
+        console.error("Failed to fetch user:", await userRes.text());
+        openLoginModal();
+        return;
+      }
 
-  fetch("http://greenlinklolasayong.site/api/farmOrder/create-link", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    body: JSON.stringify({
-      cart: orderData,
-      payment_method: paymentMethod
-    })
-  })
-  .then(res => res.json())
-.then(data => {
-  console.log("PayMongo response:", data); // 👀 debug in console
-  if (data.payment_url) {
-    window.location.href = data.payment_url; // ✅ redirect to PayMongo checkout
-  } else {
-    showAlert("No payment URL returned.");
+      const data = await userRes.json();
+
+      window.userId = data.user.id;
+      console.log("✅ Retrieved user_id:", window.userId);
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+      openLoginModal();
+      return;
+    }
   }
-})
-.catch(err => {
-  console.error("Error:", err);
-  showAlert("Failed to place order.");
-});
-  
-}
 
-document.addEventListener("DOMContentLoaded", () => {
-document.getElementById("checkoutBtn").addEventListener("click", (e) => {
-    e.preventDefault();
-     if (cart.length === 0) {
-    showAlert("Your cart is empty.");
+  if (!window.isLoggedIn) {
+    openLoginModal();
     return;
   }
-    openModal(); // this shows the modal with Cash & GCash options
+
+  const orderData = cart.map((item) => ({
+    name: item.name,
+    qty: item.qty,
+    price: getPrice(item.name),
+  }));
+
+  console.log("Sending order with user_id:", window.userId);
+
+  fetch("https://greenlinklolasayong.site/api/farmOrder/create-link", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      user_id: window.userId,
+      cart: orderData,
+      payment_method: paymentMethod,
+    }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("PayMongo response:", data);
+      if (data.payment_url) {
+        window.location.href = data.payment_url;
+      } else {
+        showAlert("No payment URL returned.");
+      }
+    })
+    .catch((err) => {
+      console.error("Error:", err);
+      showAlert("Failed to place order.");
+    });
+}
+
+// --- DOMContentLoaded Event ---
+document.addEventListener("DOMContentLoaded", () => {
+  // Checkout button opens cart modal
+  document.getElementById("checkoutBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    if (cart.length === 0) {
+      showAlert("Your cart is empty.");
+      return;
+    }
+    openModal();
   });
 
-   const gcashBtn = document.getElementById("gcashPayment");
-  if (gcashBtn) {
-    gcashBtn.addEventListener("click", (e) => {
+  // Proceed to payment (PayMongo)
+  const paymongoBtn = document.getElementById("paymongoBtn");
+  if (paymongoBtn) {
+    paymongoBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log("✅ GCash button clicked");
-      sendOrder("GCash");
+
+      if (!window.isLoggedIn) {
+        openLoginModal();
+        return;
+      }
+
+      sendOrder("PayMongo");
     });
   } else {
-    console.error("❌ GCash button not found in DOM");
+    console.error("❌ paymongoBtn not found");
   }
 });
+
 
  
 
 // Price list
 function getPrice(itemName) {
-  switch(itemName) {
-    case "Bangus": return 200;
-    case "Egg": return 8.5;
-    case "Mud Crab": return 240;
-    case "Native Chicken": return 350;
-    case "Native Pork": return 350;
-    case "Squash": return 100;
-    default: return 0;
-  }
+  return parseFloat(productData[itemName]) || 0;
 }
 
 
@@ -339,3 +370,38 @@ document.addEventListener("keydown", function (event) {
 
 
 
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const response = await fetch('https://greenlinklolasayong.site/api/farmProducts'); 
+    const products = await response.json();
+    const grid = document.getElementById('productGrid');
+
+    
+    products.forEach((product, index) => {
+      productData[product.productName] = parseFloat(product.price); 
+      const counterId = `counter_${product.id}`;
+      window.counters[counterId] = 0;
+
+      const card = document.createElement('div');
+      card.className = "overflow-hidden transition bg-white shadow-md rounded-xl w-80 hover:shadow-xl";
+      card.innerHTML = `
+        <img src="${product.productPicture}" alt="${product.productName}" class="object-cover w-full h-48">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold">${product.productName}</h3>
+          <p class="text-gray-500">₱${product.price}</p>
+          <div class="flex items-center mt-4 space-x-4">
+            <div class="flex items-center space-x-4">
+              <button type="button" class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full hover:bg-teal-600 hover:text-white" onclick="decrementCounter('${counterId}')">−</button>
+              <span id="${counterId}" class="w-10 py-1 text-lg font-semibold text-center bg-gray-100 rounded-lg">0</span>
+              <button type="button" class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full hover:bg-teal-600 hover:text-white" onclick="incrementCounter('${counterId}')">+</button>
+            </div>
+            <button type="button" class="px-4 py-2 text-white bg-teal-600 rounded-lg shadow hover:bg-teal-700" onclick="addItem('${product.productName}', '${counterId}', ${product.price})">Add Item</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  } catch (error) {
+    console.error('Failed to load products:', error);
+  }
+});

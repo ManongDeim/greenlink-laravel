@@ -14,6 +14,8 @@ class FarmOrderModel extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'user_id',
+        'farmOrder_id',
         'bangus_order',
         'eggs_order',
         'mudCrab_order',
@@ -22,7 +24,12 @@ class FarmOrderModel extends Model
         'squash_order',
         'total_bill',
         'payment_method',
+        'payment_status',
         'order_status',
         'ref_number'
     ];
+
+    public function user() {
+    return $this->belongsTo(User::class, 'user_id', 'id');
+}
 }
