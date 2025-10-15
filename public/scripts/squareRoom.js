@@ -257,18 +257,34 @@ function openTermsModal() {
 
   // --- Room Payment (Down / Full) ---
 async function sendRoomPayment(paymentType) {
-  if (!window.bookingDetails) {
+  if (!window.bookingDetails || !window.bookingDetails.roomName) {
     alert("Booking details are missing. Please fill out the form again.");
     return;
   }
 
+  const checkIn = document.querySelector("input[name='check_in_date']").value;
+  const checkOut = document.querySelector("input[name='check_out_date']").value;
+
+  if (!checkIn || !checkOut) {
+    alert("Please select both check-in and check-out dates.");
+    return;
+  }
+
   const { roomName, fullName, pax, email, phone, total, finalTotal } = window.bookingDetails;
+
+   // Fallback if somehow roomName is empty
+  const safeRoomName = roomName || "Unknown Room";
   const totalBill = finalTotal || total;
+
+  if (!totalBill) {
+    alert("Total bill is not calculated. Please check your booking.");
+    return;
+  }
 
   const data = {
     room: roomName,
-    check_in_date: document.querySelector("input[name='check_in_date']").value,
-    check_out_date: document.querySelector("input[name='check_out_date']").value,
+    check_in_date: checkIn,
+    check_out_date: checkOut,
     full_name: fullName,
     pax: pax,
     email: email,
@@ -277,28 +293,29 @@ async function sendRoomPayment(paymentType) {
     payment_method: paymentType === "down" ? "Down Payment" : "Full Payment"
   };
 
+  if (!roomName) {
+  console.error("Room name is missing!");
+  alert("Room info is missing. Please refresh the page.");
+  return;
+}
+
   console.log("💳 Sending room payment data:", data);
 
   try {
     const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
-      },
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
       credentials: "include",
       body: JSON.stringify(data)
     });
 
+    const result = await response.json();
+
     if (!response.ok) {
-      const text = await response.text();
-      console.error("HTTP Error:", response.status, text);
-      alert("Failed to initiate payment. Please try again.");
+      console.error("HTTP Error:", response.status, result);
+      alert(result.message || "Failed to initiate payment.");
       return;
     }
-
-    const result = await response.json();
-    console.log("✅ PayMongo response:", result);
 
     if (result.payment_url) {
       window.location.href = result.payment_url;

@@ -43,7 +43,7 @@ public function createPaymentLink(Request $request)
     $reservation = RoomModel::create([
         'room_reser_id' => $roomReserId,
         'user_id' => $user->id,
-        'room_name' => $validated['room'],
+        'room' => $validated['room'],
         'check_in_date' => $validated['check_in_date'],
         'check_out_date' => $validated['check_out_date'],
         'full_name' => $validated['full_name'],
