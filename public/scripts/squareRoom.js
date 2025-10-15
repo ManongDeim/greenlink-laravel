@@ -295,3 +295,34 @@ function openTermsModal() {
     }
   });
 });
+document.addEventListener("DOMContentLoaded", () => {
+  const fields = [
+    document.getElementById("checkIn"), // date input
+    document.getElementById("checkOut"), // date input
+    document.querySelector("input[name='full_name']"), // text input
+    document.getElementById("pax"), // select
+    document.querySelector("input[name='email']"), // email input
+    document.querySelector("input[name='phone_number']") // phone input
+  ];
+
+  const checkbox = document.getElementById("agreeCheckbox");
+  const reviewBtn = document.getElementById("reviewBookingBtn");
+
+  // Run once at start
+  checkForm();
+
+  function checkForm() {
+    const allFilled = fields.every(field => field && field.value.trim() !== "");
+    const agreed = checkbox && checkbox.checked;
+    reviewBtn.disabled = !(allFilled && agreed);
+  }
+
+  fields.forEach(field => {
+    if (field) {
+      field.addEventListener("input", checkForm);
+      field.addEventListener("change", checkForm);
+    }
+  });
+
+  if (checkbox) checkbox.addEventListener("change", checkForm);
+});
