@@ -280,11 +280,15 @@ document.getElementById("payNowBtn").addEventListener("click", async () => {
 
   try {
     // ✅ Fixed endpoint and JSON parsing
-    const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+    const response = await fetch("/api/create-room-payment", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  },
+  credentials: "include", // ✅ ensures Laravel gets session/cookies for auth middleware
+  body: JSON.stringify(data),
+});
 
     // Handle non-JSON responses gracefully
     const text = await response.text();
