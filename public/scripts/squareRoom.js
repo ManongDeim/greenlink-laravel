@@ -249,4 +249,41 @@ function openTermsModal() {
         return;
       }
       openPaymentModal();
-    }z
+    }
+
+    // ✅ PayMongo Redirect
+document.getElementById("payNowBtn").addEventListener("click", async () => {
+  const form = document.getElementById("roomBookingForm");
+  const data = {
+    room: document.querySelector("#roomName").innerText,
+    check_in_date: form.querySelector("input[name='check_in_date']").value,
+    check_out_date: form.querySelector("input[name='check_out_date']").value,
+    full_name: form.querySelector("input[name='full_name']").value,
+    email: form.querySelector("input[name='email']").value,
+    phone_number: form.querySelector("input[name='phone_number']").value,
+    pax: form.querySelector("select[name='pax']").value,
+    total_bill: finalTotal,
+    payment_method: selectedPaymentType === "down" ? "Down Payment" : "Full Payment",
+  };
+
+  try {
+    const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+    if (result.checkout_url) {
+      window.location.href = result.checkout_url;
+    } else {
+      alert("Payment initialization failed.");
+      console.error(result);
+    }
+  } catch (err) {
+    console.error("Error:", err);
+    alert("An error occurred while processing your payment.");
+  }
+});
