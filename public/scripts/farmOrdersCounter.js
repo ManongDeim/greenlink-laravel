@@ -180,8 +180,6 @@ async function sendOrder(paymentMethod) {
         },
       });
    
-      
-
       if (!userRes.ok) {
         console.error("Failed to fetch user:", await userRes.text());
         openLoginModal();

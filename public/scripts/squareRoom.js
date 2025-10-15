@@ -150,78 +150,74 @@ function initCarousel(totalSlides) {
   window.prevSlide = prevSlide;
 }
 
-// Open confirmation modal first
+let selectedPaymentType = "full"; 
+let computedBill = 0; 
+let originalTotal = 0;
+
+// 🟢 Open Confirmation Modal
 function openConfirmationModal() {
   const form = document.getElementById("roomBookingForm");
-  const roomName = document.querySelector("#roomName").innerText;
-  const price = parseFloat(document.querySelector("#roomPrice").innerText.replace(/[^\d.]/g, "")) || 0;
+  const formData = new FormData(form);
 
-  const checkIn = new Date(form.querySelector("input[name='check_in_date']").value);
-  const checkOut = new Date(form.querySelector("input[name='check_out_date']").value);
-  const fullName = form.querySelector("input[name='full_name']").value;
-  const pax = form.querySelector("select[name='pax']").value;
-  const email = form.querySelector("input[name='email']").value;
-  const phone = form.querySelector("input[name='phone_number']").value;
+  const checkIn = formData.get("check_in_date");
+  const checkOut = formData.get("check_out_date");
+  const pax = formData.get("pax");
+  const name = formData.get("full_name");
+  const email = formData.get("email");
+  const phone = formData.get("phone_number");
 
-  const nights = Math.max((checkOut - checkIn) / (1000 * 60 * 60 * 24), 1);
-  const total = price * nights;
+  if (!checkIn || !checkOut || !pax || !name || !email || !phone) {
+    alert("Please complete all booking details before proceeding.");
+    return;
+  }
 
-  const summaryHtml = `
-    <p><strong>Room:</strong> ${roomName}</p>
-    <p><strong>Price per Night:</strong> ₱${price.toLocaleString()}</p>
-    <p><strong>Check-In:</strong> ${form.querySelector("input[name='check_in_date']").value}</p>
-    <p><strong>Check-Out:</strong> ${form.querySelector("input[name='check_out_date']").value}</p>
-    <p><strong>Nights:</strong> ${nights}</p>
-    <p><strong>Total Bill:</strong> <span class="text-teal-600 font-semibold">₱${total.toLocaleString()}</span></p>
-    <hr class="my-2">
-    <p><strong>Full Name:</strong> ${fullName}</p>
+  const priceText = document.getElementById("roomPrice").textContent.replace(/[₱,/ ]/g, "");
+  const nightlyRate = parseFloat(priceText) || 0;
+
+  const days = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
+  originalTotal = nightlyRate * days;
+
+  const summaryHTML = `
+    <p><strong>Room:</strong> ${document.getElementById("roomName").textContent}</p>
+    <p><strong>Check-in:</strong> ${checkIn}</p>
+    <p><strong>Check-out:</strong> ${checkOut}</p>
+    <p><strong>Nights:</strong> ${days}</p>
     <p><strong>Pax:</strong> ${pax}</p>
-    <p><strong>Email:</strong> ${email}</p>
-    <p><strong>Phone:</strong> ${phone}</p>
+    <p><strong>Total Bill:</strong> ₱${originalTotal.toLocaleString()}</p>
   `;
 
-  document.getElementById("confirmationSummary").innerHTML = summaryHtml;
+  document.getElementById("confirmationSummary").innerHTML = summaryHTML;
 
-  // Show confirmation modal
   document.getElementById("confirmationModal").classList.remove("hidden");
-  document.body.style.overflow = "hidden";
-
-  // Save total for payment stage
-  window.bookingDetails = { roomName, price, nights, total, fullName, pax, email, phone };
 }
 
-// Proceed to payment modal
-function proceedToPayment(type) {
-  const paymentModal = document.getElementById("paymentModal");
-  const confirmationModal = document.getElementById("confirmationModal");
-  const summary = document.getElementById("paymentSummary");
-
-  const { roomName, price, nights, total, fullName, pax, email, phone } = window.bookingDetails;
-
-  let finalTotal = type === "down" ? total * 0.5 : total;
-  const paymentTypeLabel = type === "down" ? "50% Down Payment" : "Full Payment";
-
-  summary.innerHTML = `
-    <p><strong>Room:</strong> ${roomName}</p>
-    <p><strong>Price per Night:</strong> ₱${price.toLocaleString()}</p>
-    <p><strong>Nights:</strong> ${nights}</p>
-    <p><strong>${paymentTypeLabel}:</strong> <span class="text-teal-600 font-semibold">₱${finalTotal.toLocaleString()}</span></p>
-    <hr class="my-2">
-    <p><strong>Full Name:</strong> ${fullName}</p>
-    <p><strong>Pax:</strong> ${pax}</p>
-    <p><strong>Email:</strong> ${email}</p>
-    <p><strong>Phone:</strong> ${phone}</p>
-  `;
-
-  // Hide confirmation modal, show payment modal
-  confirmationModal.classList.add("hidden");
-  paymentModal.classList.remove("hidden");
-}
-
-// Close confirmation modal
+// 🟢 Close Confirmation Modal
 function closeConfirmationModal() {
   document.getElementById("confirmationModal").classList.add("hidden");
-  document.body.style.overflow = "auto";
+}
+
+// 🟢 Proceed to Payment Modal (handles 50% or 100%)
+function proceedToPayment(type) {
+  selectedPaymentType = type;
+  closeConfirmationModal();
+
+  const finalBill = type === "down" ? originalTotal * 0.5 : originalTotal;
+  computedBill = finalBill;
+
+  const updatedSummary =
+    document.getElementById("confirmationSummary").innerHTML +
+    `<p class="mt-3 font-semibold text-center text-teal-700">
+      ${type === "down" ? "Down Payment (50%)" : "Full Payment (100%)"}: ₱${finalBill.toLocaleString()}
+    </p>`;
+
+  document.getElementById("paymentSummary").innerHTML = updatedSummary;
+
+  document.getElementById("paymentModal").classList.remove("hidden");
+}
+
+// 🟢 Close Payment Modal
+function closePaymentModal() {
+  document.getElementById("paymentModal").classList.add("hidden");
 }
 
 
@@ -250,3 +246,54 @@ function openTermsModal() {
       }
       openPaymentModal();
     }
+
+    // Handle Room Payment
+
+  document.querySelector("#paymentModal button").addEventListener("click", async () => {
+  const form = document.getElementById("roomBookingForm");
+  const formData = new FormData(form);
+  const userId = localStorage.getItem("user_id") || null;
+  const roomId = new URLSearchParams(window.location.search).get("id");
+
+  const randomSuffix = Math.floor(Math.random() * 9000) + 1000;
+  const roomReserId = `ROOM-${Date.now()}${randomSuffix}`;
+  const referenceNo = `REF-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+  const data = {
+    user_id: userId,
+    room_reser_id: roomReserId,
+    room_id: roomId,
+    check_in_date: formData.get("check_in_date"),
+    check_out_date: formData.get("check_out_date"),
+    pax: formData.get("pax"),
+    full_name: formData.get("full_name"),
+    email: formData.get("email"),
+    phone_number: formData.get("phone_number"),
+    total_bill: computedBill,
+    payment_method: selectedPaymentType === "down" ? "Down Payment" : "Full Payment",
+    payment_status: "Pending",
+    reference_no: referenceNo,
+  };
+
+  try {
+    const response = await fetch("/create-room-payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (result.status === "success" && result.redirect_url) {
+      window.location.href = result.redirect_url; // redirect to PayMongo
+    } else {
+      alert("Payment creation failed. Please try again.");
+      console.error(result);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("An unexpected error occurred. Please try again.");
+  }
+});
