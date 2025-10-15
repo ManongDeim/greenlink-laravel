@@ -36,8 +36,8 @@ public function createPaymentLink(Request $request)
 
     // Determine final amount based on payment type
     $finalTotal = $validated['payment_method'] === 'Down Payment'
-        ? $validated['total_bill'] * 0.5
-        : $validated['total_bill'];
+         ? round($validated['total_bill'] * 0.5, 2)
+         : round($validated['total_bill'], 2);
 
     // Save initial booking
     $reservation = RoomModel::create([

@@ -201,7 +201,7 @@ function proceedToPayment(type) {
   window.selectedPaymentType = type; // ✅ store payment type globally
 
 
-  let finalTotal = type === "down" ? total * 0.5 : total;
+  let finalTotal = type === "down" ? +(total * 0.5).toFixed(2) : +total.toFixed(2);
   window.bookingDetails.finalTotal = finalTotal; // ✅ store total globally
   const paymentTypeLabel = type === "down" ? "50% Down Payment" : "Full Payment";
 
