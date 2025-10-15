@@ -198,7 +198,11 @@ function proceedToPayment(type) {
 
   const { roomName, price, nights, total, fullName, pax, email, phone } = window.bookingDetails;
 
+  window.selectedPaymentType = type; // ✅ store payment type globally
+
+
   let finalTotal = type === "down" ? total * 0.5 : total;
+  window.bookingDetails.finalTotal = finalTotal; // ✅ store total globally
   const paymentTypeLabel = type === "down" ? "50% Down Payment" : "Full Payment";
 
   summary.innerHTML = `
@@ -258,11 +262,17 @@ document.getElementById("payNowBtn").addEventListener("click", async () => {
     return;
   }
 
-  // Extract details
-  const { roomName, fullName, pax, email, phone, finalTotal } = window.bookingDetails;
-  const selectedPaymentType = window.selectedPaymentType || "full";
+  // ✅ Ensure payment type and total are stored properly
+  const selectedPaymentType = window.selectedPaymentType || window.bookingDetails.paymentType || "full";
+  const finalTotal =
+    selectedPaymentType === "down"
+      ? window.bookingDetails.total * 0.5
+      : window.bookingDetails.total;
 
-  // Gather form data
+  // ✅ Extract details
+  const { roomName, fullName, pax, email, phone } = window.bookingDetails;
+
+  // ✅ Gather form data
   const form = document.getElementById("roomBookingForm");
   const data = {
     room: roomName,
@@ -276,41 +286,52 @@ document.getElementById("payNowBtn").addEventListener("click", async () => {
     payment_method: selectedPaymentType === "down" ? "Down Payment" : "Full Payment",
   };
 
-  console.log("Sending payment data:", data);
+  console.log("💳 Sending payment data:", data);
 
   try {
-    // ✅ Fixed endpoint and JSON parsing
-    const response = await fetch("/api/create-room-payment", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-  },
-  credentials: "include", // ✅ ensures Laravel gets session/cookies for auth middleware
-  body: JSON.stringify(data),
-});
-
-    // Handle non-JSON responses gracefully
-    const text = await response.text();
-    let result;
-
-    try {
-      result = JSON.parse(text);
-    } catch {
-      console.error("Server returned non-JSON:", text);
-      throw new Error("Invalid JSON response from server");
+  const response = await fetch(
+    "https://greenlinklolasayong.site/api/create-room-payment",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
     }
+  );
 
-    console.log("Server response:", result);
+  console.log("HTTP status:", response.status);
 
-    if (result.checkout_url) {
-      // ✅ Redirect to PayMongo checkout
-      window.location.href = result.checkout_url;
-    } else {
-      alert("Payment initialization failed. Please try again.");
-    }
+  let text = "";
+  try {
+    text = await response.text();
+    console.log("Raw server response:", text);
   } catch (err) {
-    console.error("Payment redirect error:", err);
-    alert("An error occurred while redirecting to payment. Please try again.");
+    console.error("Failed to read response text:", err);
   }
+
+  let result;
+  try {
+    result = JSON.parse(text);
+  } catch {
+    console.error("⚠️ Server returned non-JSON:", text);
+    throw new Error("Invalid JSON response from server");
+  }
+
+  console.log("✅ Server response:", result);
+
+  if (result.checkout_url) {
+    window.location.href = result.checkout_url;
+  } else {
+    alert("Payment initialization failed. Please try again.");
+  }
+} catch (err) {
+  console.error("💥 Payment redirect error:", err);
+  alert(
+    "An error occurred while redirecting to payment. Please check the console."
+  );
+}
 });
+

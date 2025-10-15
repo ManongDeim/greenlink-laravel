@@ -48,11 +48,8 @@ class RoomController extends Controller
             'payment_status' => 'Pending',
         ]);
 
-        // PayMongo secret key
-        $paymongoKey = config('services.paymongo.secret');
-
         // Create checkout session
-        $response = Http::withBasicAuth($paymongoKey, '')
+        $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'),  '')
             ->post('https://api.paymongo.com/v1/checkout_sessions', [
                 'data' => [
                     'attributes' => [
