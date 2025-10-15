@@ -95,47 +95,57 @@ public function createPaymentLink(Request $request)
     // ✅ Handle successful payment
     public function paymentSuccess(Request $request)
 {
+     // Grab the ref number from query
     $ref = $request->query('ref');
 
-    // Log the incoming request
-    Log::info('Room payment success hit', [
-        'full_url' => $request->fullUrl(),
-        'query' => $request->query()
+    // Log incoming redirect (for debugging)
+    Log::info('Payment redirect hit', [
+        'ref' => $ref,
+        'full_url' => $request->fullUrl()
     ]);
 
+    // Find the reservation by ref_number
     $reservation = RoomModel::where('ref_number', $ref)->first();
 
+    // If no reservation found, redirect to failed page
     if (!$reservation) {
-        Log::warning("No reservation found for ref: {$ref}");
+        Log::warning("Reservation not found for ref: {$ref}");
         return redirect('/pages/paymentFailed.html');
     }
 
+    // Update payment_status to Paid
     $reservation->update(['payment_status' => 'Paid']);
-
     Log::info("Reservation updated to Paid for ref: {$ref}");
 
+    // Redirect to success page
     return redirect('/pages/paymentSuccess.html');
 }
 
 public function paymentFailed(Request $request)
 {
+     // Grab the ref number from query
     $ref = $request->query('ref');
 
-    // Log the incoming request
-    Log::info('Room payment failed hit', [
-        'full_url' => $request->fullUrl(),
-        'query' => $request->query()
+    // Log incoming redirect (for debugging)
+    Log::info('Payment redirect hit', [
+        'ref' => $ref,
+        'full_url' => $request->fullUrl()
     ]);
 
-    if ($ref) {
-        $updated = RoomModel::where('ref_number', $ref)
-            ->update(['payment_status' => 'Failed']);
+    // Find the reservation by ref_number
+    $reservation = RoomModel::where('ref_number', $ref)->first();
 
-        Log::info("Reservation updated to Failed for ref: {$ref}, rows affected: {$updated}");
-    } else {
-        Log::warning('No ref parameter in failed payment redirect.');
+    // If no reservation found, redirect to failed page
+    if (!$reservation) {
+        Log::warning("Reservation not found for ref: {$ref}");
+        return redirect('/pages/paymentFailed.html');
     }
 
+    // Update payment_status to Paid
+    $reservation->update(['payment_status' => 'Failed']);
+    Log::info("Reservation updated to Paid for ref: {$ref}");
+
+    // Redirect to success page
     return redirect('/pages/paymentFailed.html');
 }
 }
