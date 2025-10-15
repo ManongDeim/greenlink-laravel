@@ -87,6 +87,6 @@ Route::get('/rooms/{id}', function($id) {
 });
 
 // Room Reservation routes
-Route::post('/create-room-payment', [RoomController::class, 'createPaymentLink'])->middleware('auth');
+Route::post('/api/create-room-payment', [RoomController::class, 'createPaymentLink'])->middleware('auth');
 Route::get('/paymentSuccess', [RoomController::class, 'paymentSuccess']);
 Route::get('/paymentFailed', [RoomController::class, 'paymentFailed']);
