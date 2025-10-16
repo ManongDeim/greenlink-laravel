@@ -141,6 +141,29 @@ const farmOrderCardTemplate = order => {
   `;
 };
 
+// Room Reservation template
+const roomReservationTemplate = reservation => `
+<div class="space-y-3 text-gray-700 p-6 bg-white shadow-md rounded-2xl">
+  <h2 class="mb-4 text-xl font-bold text-teal-700">Room Reservation</h2>
+  <p><span class="font-semibold">Reservation ID:</span> ${reservation.room_reser_id}</p>
+  <p><span class="font-semibold">Room Type:</span> ${reservation.room}</p>
+  <p><span class="font-semibold">Check in Date:</span> ${reservation.check_in_date}</p>
+  <p><span class="font-semibold">Check out Date:</span> ${reservation.check_out_date}</p>
+  <p><span class="font-semibold">Full Name:</span> ${reservation.full_name}</p>
+  <p><span class="font-semibold">E-mail:</span> ${reservation.email}</p>
+  <p><span class="font-semibold">Phone Number:</span> ${reservation.phone_number}</p>
+  <p><span class="font-semibold">Number of Pax:</span> ${reservation.pax}</p>
+  <p><span class="font-semibold">Payment Status:</span> ${reservation.payment_status}</p>
+
+  <div class="flex justify-end gap-4 mt-6">
+    <button class="px-5 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">Checked-in</button>
+    <button class="px-5 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Checked-out</button>
+    <button class="px-5 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancelled</button>
+  </div>
+</div>
+`;
+
+
   // Reusable render function
 
   /**
@@ -260,3 +283,35 @@ async function fetchAndRenderFarmOrders() {
 }
 
 });
+
+async function fetchAndRenderRoomReservations() {
+  const containerId = 'content'; // Main content container
+  const container = document.getElementById(containerId);
+  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+
+  try {
+    const res = await fetch('/api/roomReser'); // Your API endpoint
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      container.innerHTML = `<p class="text-gray-500">No room reservations found.</p>`;
+      return;
+    }
+
+    // Render each reservation
+    container.innerHTML = data.map(roomReservationTemplate).join('');
+
+    // Attach approve/disapprove events
+    container.querySelectorAll('.approve-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleRoomApproval(btn.dataset.id, 'Approved'));
+    });
+    container.querySelectorAll('.disapprove-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleRoomApproval(btn.dataset.id, 'Disapproved'));
+    });
+
+  } catch (err) {
+    console.error('Failed to load room reservations:', err);
+    container.innerHTML = `<p class="text-red-500">Failed to load room reservations.</p>`;
+  }
+}
+

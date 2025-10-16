@@ -148,4 +148,9 @@ public function paymentFailed(Request $request)
     // Redirect to success page
     return redirect('/pages/paymentFailed.html');
 }
+
+      public function index()
+    {
+        return response()->json(RoomModel::all());
+    }
 }

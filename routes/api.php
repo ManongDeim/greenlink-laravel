@@ -87,8 +87,7 @@ Route::get('/rooms/{id}', function($id) {
 
     return response()->json($room);
 });
-
-// Room Reservation routes
 Route::post('/create-room-payment', [RoomController::class, 'createPaymentLink'])->middleware('auth:sanctum');
 Route::get('/paymentSuccess', [RoomController::class, 'paymentSuccess']);
 Route::get('/paymentFailed', [RoomController::class, 'paymentFailed']);
+Route::get('roomReser', [RoomController::class, 'index']);
