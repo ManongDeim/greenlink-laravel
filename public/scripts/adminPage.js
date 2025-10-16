@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
      farm: { render: fetchAndRenderFarm },
      foodOrders: { render: fetchAndRenderFoodOrders },
      farmOrders: { render: fetchAndRenderFarmOrders },
+     room: {render: fetchAndRenderRoomReservations},
     event: { 
       custom: `
        <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>
@@ -214,7 +215,7 @@ function renderOrders(containerId, orders, templateFn) {
 // Fetch and render
 
  async function fetchAndRenderFood() {
-  const containerId = 'food-container';
+  const containerId = 'content';
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -236,7 +237,7 @@ function renderOrders(containerId, orders, templateFn) {
 }
 
 async function fetchAndRenderFarm() {
-  const containerId = 'food-container'; // You can reuse the same container
+  const containerId = 'content'; // You can reuse the same container
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -256,7 +257,7 @@ async function fetchAndRenderFarm() {
 }
 
 async function fetchAndRenderFoodOrders() {
-  const containerId = 'foodOrders-container'; // Create this div in your HTML
+  const containerId = 'content'; // Create this div in your HTML
   try {
     const res = await fetch('/api/foodOrder'); // Your API endpoint
     const data = await res.json();
@@ -293,8 +294,6 @@ async function fetchAndRenderFarmOrders() {
   }
 }
 
-});
-
 async function fetchAndRenderRoomReservations() {
   const containerId = 'content'; // Main content container
   const container = document.getElementById(containerId);
@@ -325,4 +324,6 @@ async function fetchAndRenderRoomReservations() {
     container.innerHTML = `<p class="text-red-500">Failed to load room reservations.</p>`;
   }
 }
+});
+
 
