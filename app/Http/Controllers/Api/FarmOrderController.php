@@ -174,4 +174,9 @@ class FarmOrderController extends Controller
     return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
     
     }
+
+      public function index()
+    {
+        return response()->json(FarmOrderModel::all());
+    }
 }

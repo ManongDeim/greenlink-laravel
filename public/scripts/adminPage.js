@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     food: { render: fetchAndRenderFood },
      farm: { render: fetchAndRenderFarm },
      foodOrders: { render: fetchAndRenderFoodOrders },
+     farmOrders: { render: fetchAndRenderFarmOrders },
     event: { 
       custom: `
        <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>
@@ -57,7 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-  // Food template & render function
   const foodCardTemplate = item => `
   <div class="p-4 transition bg-white shadow rounded-2xl hover:shadow-lg">
     <img src="${item.productPicture}" alt="${item.productName}" class="object-cover w-full h-48 mb-4 rounded-lg">
@@ -115,6 +115,31 @@ const foodOrderTemplate = order => {
   `;
 };
 
+// Farm order card template
+const farmOrderCardTemplate = order => {
+  // Collect ordered items dynamically
+  const items = [];
+  if (order.bangus_order > 0) items.push(`${order.bangus_order}x Bangus`);
+  if (order.eggs_order > 0) items.push(`${order.eggs_order}x Eggs`);
+  if (order.mudCrab_order > 0) items.push(`${order.mudCrab_order}x Mud Crab`);
+  if (order.nativeChicken_order > 0) items.push(`${order.nativeChicken_order}x Native Chicken`);
+  if (order.nativePork_order > 0) items.push(`${order.nativePork_order}x Native Pork`);
+  if (order.squash_order > 0) items.push(`${order.squash_order}x Squash`);
+
+  return `
+    <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-gray-800">Order #${order.farmOrder_id}</h3>
+        <span class="px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full">${order.payment_status}</span>
+      </div>
+      <ul class="mt-2 text-sm text-gray-700 list-disc list-inside">
+        ${items.map(i => `<li>${i}</li>`).join('')}
+      </ul>
+      <p class="mt-2 text-sm text-gray-700 font-semibold">Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}</p>
+      <p class="text-sm text-gray-700 font-semibold">Payment Method: ${order.payment_method}</p>
+    </div>
+  `;
+};
 
   // Reusable render function
 
@@ -199,7 +224,7 @@ async function fetchAndRenderFarm() {
 async function fetchAndRenderFoodOrders() {
   const containerId = 'foodOrders-container'; // Create this div in your HTML
   try {
-    const res = await fetch('/api/foodOrders'); // Your API endpoint
+    const res = await fetch('/api/foodOrder'); // Your API endpoint
     const data = await res.json();
 
     renderOrders(containerId, data, foodOrderTemplate);
@@ -209,6 +234,29 @@ async function fetchAndRenderFoodOrders() {
   }
 }
 
+async function fetchAndRenderFarmOrders() {
+  const container = document.getElementById('content'); // render in main content
+  container.innerHTML = `<p class="text-gray-500">Loading farm orders...</p>`;
 
+  try {
+    const res = await fetch('/api/farmOrder'); // endpoint for farm orders
+    const data = await res.json();
+
+    if (!data.length) {
+      container.innerHTML = `<p class="text-gray-500">No farm orders found.</p>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <h2 class="mb-6 text-2xl font-bold text-teal-700">Farm Orders</h2>
+      <div class="space-y-4">
+        ${data.map(farmOrderCardTemplate).join('')}
+      </div>
+    `;
+  } catch (err) {
+    console.error('Failed to load farm orders:', err);
+    container.innerHTML = `<p class="text-red-500">Failed to load farm orders.</p>`;
+  }
+}
 
 });
