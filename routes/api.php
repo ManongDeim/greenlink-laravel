@@ -70,6 +70,7 @@ Route::get('/paymentFailed', [FarmOrderController::class, 'paymentFailed']);
 Route::get('/paymentSuccess', [FoodOrderController::class, 'paymentSuccess']);
 Route::get('/paymentFailed', [FoodOrderController::class, 'paymentFailed']);
 Route::get('foodProducts', [FoodProductController::class, 'index']);
+Route::get('foodOrder', [FoodOrderController::class, 'index']);
 
 
 // Room Routes
