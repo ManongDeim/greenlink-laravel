@@ -155,66 +155,37 @@ function closeOrderModal() {
     }
 
 
-  //Pages  
-
-  //Room Reservation Page
   document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("roomReser");
+  const reservationModal = document.getElementById("reservationModal");
+  const orderModal = document.getElementById("orderModal");
 
+  // Delegation for order modal buttons
+  if (orderModal) {
+    orderModal.addEventListener("click", (e) => {
+      const target = e.target;
 
-  btn.addEventListener("click", () => {
-    window.location.href = "./RoomReser.html"; // go to another page
-  });
+      if (target.id === "foodOrder") {
+        window.location.href = "./FoodOrders.html";
+      } else if (target.id === "farmOrder") {
+        window.location.href = "./FarmOrders.html";
+      }
+    });
+  }
+
+  // Delegation for reservation modal buttons
+  if (reservationModal) {
+    reservationModal.addEventListener("click", (e) => {
+      const target = e.target;
+
+      if (target.id === "roomReser") {
+        window.location.href = "./RoomReser.html";
+      } else if (target.id === "eventReser") {
+        window.location.href = "./EventReser.html";
+      }
+    });
+  }
 });
 
-  //Cottage Reservation Page
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("cottageReser");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "#"; // go to another page
-  });
-});
-
-//Event Reservation Page
-
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("eventReser");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "./EventReser.html"; // go to another page
-  });
-});
-
-
-//Food Order Page
-
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("foodOrder");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "./FarmOrders.html"; // go to another page
-  });
-});
-
-//Farm Order Page
-
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("farmOrder");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "./FarmOrders.html"; // go to another page
-  });
-});
 
  // --- Close Modal When Clicking Outside ---
 document.addEventListener("click", function (event) {
