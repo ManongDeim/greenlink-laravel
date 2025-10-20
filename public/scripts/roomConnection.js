@@ -169,7 +169,7 @@ for (const [btnId, url] of Object.entries(reserRoutes)) {
 
 // --- Order Modal Navigation ---
 const orderRoutes = {
-  foodOrderPage: "FarmOrders.html",
+  foodOrderPage: "FoodOrders.html",
   farmOrderPage: "FarmOrders.html"
 };
 

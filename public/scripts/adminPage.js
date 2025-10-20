@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
      farm: { render: fetchAndRenderFarm },
      foodOrders: { render: fetchAndRenderFoodOrders },
      farmOrders: { render: fetchAndRenderFarmOrders },
-     room: { render: fetchAndRenderRoomReservations },
+     room: {render: fetchAndRenderRoomReservations},
     event: { 
       custom: `
        <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>
@@ -59,20 +59,31 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-  const foodCardTemplate = item => `
-  <div class="p-4 transition bg-white shadow rounded-2xl hover:shadow-lg">
+const foodCardTemplate = item => `
+  <div class="p-4 transition bg-white justify-between shadow rounded-2xl hover:shadow-lg w-full">
     <img src="${item.productPicture}" alt="${item.productName}" class="object-cover w-full h-48 mb-4 rounded-lg">
     <h3 class="text-lg font-bold text-gray-800">${item.productName}</h3>
-    <p class="text-sm text-gray-600">Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span></p>
+    <p class="text-sm text-gray-600">
+      Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span>
+    </p>
     <div class="flex items-center mt-4 space-x-3">
-      <input type="number" value="0" min="0" class="w-16 p-2 text-center border rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none">
-      <button class="flex-1 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500">Add Stock</button>
+      <input
+        type="number"
+        value="0"
+        min="0"
+        class="w-16 p-2 text-center border rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"
+      >
+      <button
+        class="flex-1 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500"
+      >
+        Add Stock
+      </button>
     </div>
   </div>
 `;
 
 const farmCardTemplate = item => `
-  <div class="p-4 transition bg-white shadow rounded-2xl hover:shadow-lg">
+  <div class="p-4 transition bg-white justify-between shadow rounded-2xl hover:shadow-lg w-full">
     <img src="${item.productPicture}" alt="${item.productName}" class="object-cover w-full h-48 mb-4 rounded-lg">
     <h3 class="text-lg font-bold text-gray-800">${item.productName}</h3>
     <p class="text-sm text-gray-600">Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span></p>
@@ -101,7 +112,7 @@ const foodOrderTemplate = order => {
     .map(i => `<li>${order[i.key]}x ${i.name}</li>`).join('');
 
   return `
-  <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500" data-id="${order.foodOrder_id}">
+  <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full" data-id="${order.foodOrder_id}">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-bold text-gray-800">Order #${order.foodOrder_id}</h3>
       <span class="px-2 py-1 text-xs font-semibold ${order.payment_status === 'Paid' ? 'text-green-700 bg-green-100' : 'text-teal-700 bg-teal-100'} rounded-full">
@@ -128,7 +139,7 @@ const farmOrderCardTemplate = order => {
   if (order.squash_order > 0) items.push(`${order.squash_order}x Squash`);
 
   return `
-    <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500">
+    <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-bold text-gray-800">Order #${order.farmOrder_id}</h3>
         <span class="px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full">${order.payment_status}</span>
@@ -182,7 +193,7 @@ function renderItems(containerId, sections, itemTemplateFn) {
 
   container.innerHTML = sections.map(section => `
     <h3 class="mb-4 text-xl font-semibold text-gray-800">${section.category}</h3>
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       ${section.items.map(itemTemplateFn).join('')}
     </div>
   `).join('');
@@ -202,7 +213,7 @@ function renderOrders(containerId, orders, templateFn) {
 // Fetch and render
 
  async function fetchAndRenderFood() {
-  const containerId = 'food-container';
+  const containerId = 'content';
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -224,7 +235,7 @@ function renderOrders(containerId, orders, templateFn) {
 }
 
 async function fetchAndRenderFarm() {
-  const containerId = 'food-container'; // You can reuse the same container
+  const containerId = 'content'; // You can reuse the same container
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -244,7 +255,7 @@ async function fetchAndRenderFarm() {
 }
 
 async function fetchAndRenderFoodOrders() {
-  const containerId = 'foodOrders-container'; // Create this div in your HTML
+  const containerId = 'content'; // Create this div in your HTML
   try {
     const res = await fetch('/api/foodOrder'); // Your API endpoint
     const data = await res.json();
@@ -281,8 +292,6 @@ async function fetchAndRenderFarmOrders() {
   }
 }
 
-});
-
 async function fetchAndRenderRoomReservations() {
   try {
     const res = await fetch('/api/roomReser'); // Make sure this endpoint returns all room reservations
@@ -299,4 +308,6 @@ async function fetchAndRenderRoomReservations() {
     document.getElementById('roomReservations-container').innerHTML = `<p class="text-red-500">Failed to load room reservations</p>`;
   }
 }
+});
+
 
