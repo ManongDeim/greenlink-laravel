@@ -60,23 +60,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 const foodCardTemplate = item => `
-  <div class="p-4 transition bg-white justify-between shadow rounded-2xl hover:shadow-lg w-full">
+    <div class="p-4 transition bg-white justify-between shadow rounded-2xl hover:shadow-lg w-full">
     <img src="${item.productPicture}" alt="${item.productName}" class="object-cover w-full h-48 mb-4 rounded-lg">
+    
     <h3 class="text-lg font-bold text-gray-800">${item.productName}</h3>
+    <p class="text-sm text-gray-600 mb-2">
+      Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
+    </p>
     <p class="text-sm text-gray-600">
       Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span>
     </p>
-    <div class="flex items-center mt-4 space-x-3">
-      <input
-        type="number"
-        value="0"
-        min="0"
-        class="w-16 p-2 text-center border rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"
-      >
+
+    <div class="flex flex-wrap gap-2 mt-4">
+      <!-- Edit Name -->
       <button
         class="flex-1 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500"
+        onclick="editName(${item.id})"
       >
-        Add Stock
+        Edit Name
+      </button>
+
+      <!-- Edit Price -->
+      <button
+        class="flex-1 px-4 py-2 text-teal-700 bg-teal-100 rounded-lg hover:bg-teal-200 focus:ring-2 focus:ring-teal-400"
+        onclick="editPrice(${item.id})"
+      >
+        Edit Price
+      </button>
+
+      <!-- Add Photo -->
+      <button
+        class="flex-1 px-4 py-2 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500"
+        onclick="addPhoto(${item.id})"
+      >
+        Add Photo
+      </button>
+
+      <!-- Remove Photo -->
+      <button
+        class="flex-1 px-4 py-2 text-white bg-rose-600 rounded-lg hover:bg-rose-700 focus:ring-2 focus:ring-rose-500"
+        onclick="removePhoto(${item.id})"
+      >
+        Remove Photo
       </button>
     </div>
   </div>
@@ -85,11 +110,47 @@ const foodCardTemplate = item => `
 const farmCardTemplate = item => `
   <div class="p-4 transition bg-white justify-between shadow rounded-2xl hover:shadow-lg w-full">
     <img src="${item.productPicture}" alt="${item.productName}" class="object-cover w-full h-48 mb-4 rounded-lg">
+    
     <h3 class="text-lg font-bold text-gray-800">${item.productName}</h3>
-    <p class="text-sm text-gray-600">Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span></p>
-    <div class="flex items-center mt-4 space-x-3">
-      <input type="number" value="0" min="0" class="w-16 p-2 text-center border rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none">
-      <button class="flex-1 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500">Add Stock</button>
+    <p class="text-sm text-gray-600 mb-2">
+      Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
+    </p>
+    <p class="text-sm text-gray-600">
+      Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span>
+    </p>
+
+    <div class="flex flex-wrap gap-2 mt-4">
+      <!-- Edit Name -->
+      <button
+        class="flex-1 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500"
+        onclick="editFarmName(${item.id})"
+      >
+        Edit Name
+      </button>
+
+      <!-- Edit Price -->
+      <button
+        class="flex-1 px-4 py-2 text-teal-700 bg-teal-100 rounded-lg hover:bg-teal-200 focus:ring-2 focus:ring-teal-400"
+        onclick="editFarmPrice(${item.id})"
+      >
+        Edit Price
+      </button>
+
+      <!-- Add Photo -->
+      <button
+        class="flex-1 px-4 py-2 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500"
+        onclick="addFarmPhoto(${item.id})"
+      >
+        Add Photo
+      </button>
+
+      <!-- Remove Photo -->
+      <button
+        class="flex-1 px-4 py-2 text-white bg-rose-600 rounded-lg hover:bg-rose-700 focus:ring-2 focus:ring-rose-500"
+        onclick="removeFarmPhoto(${item.id})"
+      >
+        Remove Photo
+      </button>
     </div>
   </div>
 `;
@@ -153,26 +214,28 @@ const farmOrderCardTemplate = order => {
   `;
 };
 
-const RoomReservationTemplate = reservation => `
-<div class="p-5 transition bg-white border border-gray-200 shadow-md rounded-2xl hover:shadow-lg">
-  <div class="space-y-2 text-gray-700">
-    <p><span class="font-semibold">Reservation ID:</span> ${reservation.room_reser_id}</p>
-    <p><span class="font-semibold">Room Type:</span> ${reservation.room}</p>
-    <p><span class="font-semibold">Check-in Date:</span> ${reservation.check_in_date}</p>
-    <p><span class="font-semibold">Check-out Date:</span> ${reservation.check_out_date}</p>
-    <p><span class="font-semibold">Full Name:</span> ${reservation.full_name}</p>
-    <p><span class="font-semibold">E-mail:</span> ${reservation.email}</p>
-    <p><span class="font-semibold">Phone Number:</span> ${reservation.phone_number}</p>
-    <p><span class="font-semibold">Number of Pax:</span> ${reservation.pax}</p>
-    <p><span class="font-semibold">Payment Status:</span> ${reservation.payment_status}</p>
-  </div>
-  <div class="flex justify-end gap-4 mt-4">
-    <button class="px-5 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">Checked-In</button>
-    <button class="px-5 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Checked-Out</button>
-    <button class="px-5 py-2 text-red-600 bg-red-100 rounded-lg hover:bg-red-200">Cancelled</button>
+// Room Reservation template
+const roomReservationTemplate = reservation => `
+<div class="space-y-3 text-gray-700 p-6 bg-white shadow-md rounded-2xl">
+  <h2 class="mb-4 text-xl font-bold text-teal-700">Room Reservation</h2>
+  <p><span class="font-semibold">Reservation ID:</span> ${reservation.room_reser_id}</p>
+  <p><span class="font-semibold">Room Type:</span> ${reservation.room}</p>
+  <p><span class="font-semibold">Check in Date:</span> ${reservation.check_in_date}</p>
+  <p><span class="font-semibold">Check out Date:</span> ${reservation.check_out_date}</p>
+  <p><span class="font-semibold">Full Name:</span> ${reservation.full_name}</p>
+  <p><span class="font-semibold">E-mail:</span> ${reservation.email}</p>
+  <p><span class="font-semibold">Phone Number:</span> ${reservation.phone_number}</p>
+  <p><span class="font-semibold">Number of Pax:</span> ${reservation.pax}</p>
+  <p><span class="font-semibold">Payment Status:</span> ${reservation.payment_status}</p>
+
+  <div class="flex justify-end gap-4 mt-6">
+    <button class="px-5 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">Checked-in</button>
+    <button class="px-5 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Checked-out</button>
+    <button class="px-5 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancelled</button>
   </div>
 </div>
 `;
+
 
   // Reusable render function
 
@@ -293,19 +356,33 @@ async function fetchAndRenderFarmOrders() {
 }
 
 async function fetchAndRenderRoomReservations() {
+  const containerId = 'content'; // Main content container
+  const container = document.getElementById(containerId);
+  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+
   try {
-    const res = await fetch('/api/roomReser'); // Make sure this endpoint returns all room reservations
+    const res = await fetch('/api/roomReser'); // Your API endpoint
     const data = await res.json();
 
-    const container = document.getElementById('roomReservations-container');
-    if (!container) return;
+    if (!Array.isArray(data) || data.length === 0) {
+      container.innerHTML = `<p class="text-gray-500">No room reservations found.</p>`;
+      return;
+    }
 
-    container.innerHTML = data.length
-      ? data.map(RoomReservationTemplate).join('')
-      : `<p class="text-gray-500">No reservations found.</p>`;
+    // Render each reservation
+    container.innerHTML = data.map(roomReservationTemplate).join('');
+
+    // Attach approve/disapprove events
+    container.querySelectorAll('.approve-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleRoomApproval(btn.dataset.id, 'Approved'));
+    });
+    container.querySelectorAll('.disapprove-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleRoomApproval(btn.dataset.id, 'Disapproved'));
+    });
+
   } catch (err) {
     console.error('Failed to load room reservations:', err);
-    document.getElementById('roomReservations-container').innerHTML = `<p class="text-red-500">Failed to load room reservations</p>`;
+    container.innerHTML = `<p class="text-red-500">Failed to load room reservations.</p>`;
   }
 }
 });
