@@ -286,7 +286,7 @@ async function sendRoomPayment(paymentType) {
   console.log("💳 Sending room payment data:", data);
 
   try {
-    const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
+    const response = await fetch("https://greenlinklolasayong.site/create-room-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       credentials: "include",
