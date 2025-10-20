@@ -161,15 +161,21 @@ public function paymentFailed(Request $request)
         $bookedDates = [];
 
         foreach ($reservations as $r) {
-            $start = strtotime($r->check_in);
-            $end = strtotime($r->check_out);
+        // Parse using correct format (Y-d-m)
+        $start = \DateTime::createFromFormat('Y-d-m', $r->check_in);
+        $end = \DateTime::createFromFormat('Y-d-m', $r->check_out);
 
-            // Generate all dates in the range
-            for ($d = $start; $d <= $end; $d += 86400) {
-                $bookedDates[] = date('Y-m-d', $d);
-            }
+        if (!$start || !$end) continue; // skip invalid entries
+
+        $startTimestamp = $start->getTimestamp();
+        $endTimestamp = $end->getTimestamp();
+
+        // Generate all dates in range
+        for ($d = $startTimestamp; $d <= $endTimestamp; $d += 86400) {
+            $bookedDates[] = date('Y-m-d', $d);
         }
+    }
 
-        return response()->json($bookedDates);
+    return response()->json($bookedDates);
     }
 }
