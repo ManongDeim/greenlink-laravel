@@ -160,18 +160,13 @@ public function paymentFailed(Request $request)
 
         $bookedDates = [];
 
-       foreach ($reservations as $r) {
-            $start = strtotime($r->check_in_date);
-            $end = strtotime($r->check_out_date);
+        $bookedRanges = $reservations->map(function ($r) {
+            return [
+                'from' => $r->check_in_date,
+                'to' => $r->check_out_date,
+            ];
+        });
 
-            if (!$start || !$end) continue;
-
-            for ($d = $start; $d <= $end; $d += 86400) {
-                $bookedDates[] = date('Y-m-d', $d);
-            }
-        }
-
-
-    return response()->json($bookedDates);
+        return response()->json($bookedRanges);
     }
 }
