@@ -286,7 +286,7 @@ async function sendRoomPayment(paymentType) {
   console.log("💳 Sending room payment data:", data);
 
   try {
-    const response = await fetch("https://greenlinklolasayong.site/create-room-payment", {
+    const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       credentials: "include",
@@ -416,8 +416,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
+    // 🏠 Get the currently selected room_id (adjust selector if needed)
+    const roomSelect = document.getElementById("roomSelect"); // your dropdown for rooms
+    const roomId = roomSelect ? roomSelect.value : 1; // fallback room id
+
     // 🔹 Fetch reserved date ranges from Laravel
-    const response = await fetch("https://greenlinklolasayong.site/api/booked-dates?room_id=${roomId}");
+    const response = await fetch(`https://greenlinklolasayong.site/api/booked-dates?room_id=${roomId}`);
     const bookedRanges = await response.json();
 
     // 🗓️ Initialize Flatpickr Range Picker
@@ -433,14 +437,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       disable: bookedRanges, // from backend
       showMonths: 2,
       onOpen: function () {
-        // Keep previously selected check-in when reopening
         if (lastCheckIn) {
           picker.setDate([lastCheckIn], false);
         }
       },
       onClose: function (selectedDates) {
         if (selectedDates.length === 2) {
-          // Enforce minimum 1-night stay
           if (selectedDates[1].getTime() === selectedDates[0].getTime()) {
             const nextDay = new Date(selectedDates[0]);
             nextDay.setDate(nextDay.getDate() + 1);
@@ -448,10 +450,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             selectedDates[1] = nextDay;
           }
 
-          // Save check-in for reopening logic
           lastCheckIn = selectedDates[0];
 
-          // Update textboxes
           checkInInput.value = selectedDates[0].toISOString().split("T")[0];
           checkOutInput.value = selectedDates[1].toISOString().split("T")[0];
         }
@@ -463,6 +463,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (lastCheckIn) picker.setDate([lastCheckIn], false);
       picker.open();
     });
+
+    // 🌀 Optional: Reload disabled dates when room changes
+    if (roomSelect) {
+      roomSelect.addEventListener("change", async () => {
+        const newRoomId = roomSelect.value;
+        const response = await fetch(`https://greenlinklolasayong.site/api/booked-dates?room_id=${newRoomId}`);
+        const newBookedRanges = await response.json();
+        picker.set("disable", newBookedRanges);
+      });
+    }
 
   } catch (error) {
     console.error("Error loading booked dates:", error);

@@ -11,6 +11,7 @@ class RoomModel extends Model
 
     protected $fillable = [
         'user_id',
+        'room_id',
         'room_reser_id',
         'check_in_date', 
         'check_out_date',

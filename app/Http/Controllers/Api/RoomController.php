@@ -20,6 +20,7 @@ public function createPaymentLink(Request $request)
     }
 
     $validated = $request->validate([
+         'room_id' => 'nullable|integer|exists:rooms,id',
         'room' => 'required|string',
         'check_in_date' => 'required|date',
         'check_out_date' => 'required|date|after_or_equal:check_in_date',
@@ -41,6 +42,7 @@ public function createPaymentLink(Request $request)
 
     // Save initial booking
     $reservation = RoomModel::create([
+        'room_id' => $validated['room_id'] ?? null,
         'room_reser_id' => $roomReserId,
         'user_id' => $user->id,
         'room' => $validated['room'],
