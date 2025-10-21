@@ -286,7 +286,7 @@ async function sendRoomPayment(paymentType) {
   console.log("💳 Sending room payment data:", data);
 
   try {
-    const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
+    const response = await fetch("https://greenlinklolasayong.site/create-room-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       credentials: "include",
@@ -412,4 +412,33 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   if (checkbox) checkbox.addEventListener("change", checkForm);
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    // Fetch reserved date ranges from Laravel
+    const response = await fetch("https://greenlinklolasayong.site/api/booked-dates");
+    const bookedRanges = await response.json();
+
+    // Initialize the check-in calendar
+    const checkin = flatpickr("#checkIn", {
+      dateFormat: "Y-m-d",
+      minDate: "today",
+      disable: bookedRanges, // disable full ranges
+      onChange: function(selectedDates, dateStr) {
+        // Update checkout calendar when check-in selected
+        checkout.set("minDate", dateStr);
+      }
+    });
+
+    // Initialize the check-out calendar
+    const checkout = flatpickr("#checkOut", {
+      dateFormat: "Y-m-d",
+      minDate: "today",
+      disable: bookedRanges, // same disabled ranges
+    });
+
+  } catch (error) {
+    console.error("Error loading booked dates:", error);
+  }
 });

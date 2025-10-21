@@ -91,3 +91,4 @@ Route::post('/create-room-payment', [RoomController::class, 'createPaymentLink']
 Route::get('/paymentSuccess', [RoomController::class, 'paymentSuccess']);
 Route::get('/paymentFailed', [RoomController::class, 'paymentFailed']);
 Route::get('roomReser', [RoomController::class, 'index']);
+Route::get('/booked-dates', [RoomController::class, 'getBookedDates']);

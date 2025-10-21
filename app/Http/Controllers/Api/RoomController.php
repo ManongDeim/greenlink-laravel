@@ -153,4 +153,20 @@ public function paymentFailed(Request $request)
     {
         return response()->json(RoomModel::all());
     }
+
+      public function getBookedDates()
+    {
+        $reservations = RoomModel::select('check_in_date', 'check_out_date')->get();
+
+        $bookedDates = [];
+
+        $bookedRanges = $reservations->map(function ($r) {
+            return [
+                'from' => $r->check_in_date,
+                'to' => $r->check_out_date,
+            ];
+        });
+
+        return response()->json($bookedRanges);
+    }
 }

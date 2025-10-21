@@ -60,23 +60,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 const foodCardTemplate = item => `
-  <div class="p-4 transition bg-white justify-between shadow rounded-2xl hover:shadow-lg w-full">
+    <div class="p-4 transition bg-white justify-between shadow rounded-2xl hover:shadow-lg w-full">
     <img src="${item.productPicture}" alt="${item.productName}" class="object-cover w-full h-48 mb-4 rounded-lg">
+    
     <h3 class="text-lg font-bold text-gray-800">${item.productName}</h3>
+    <p class="text-sm text-gray-600 mb-2">
+      Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
+    </p>
     <p class="text-sm text-gray-600">
       Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span>
     </p>
-    <div class="flex items-center mt-4 space-x-3">
-      <input
-        type="number"
-        value="0"
-        min="0"
-        class="w-16 p-2 text-center border rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"
-      >
+
+    <div class="flex flex-wrap gap-2 mt-4">
+      <!-- Edit Name -->
       <button
         class="flex-1 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500"
+        onclick="editName(${item.id})"
       >
-        Add Stock
+        Edit Name
+      </button>
+
+      <!-- Edit Price -->
+      <button
+        class="flex-1 px-4 py-2 text-teal-700 bg-teal-100 rounded-lg hover:bg-teal-200 focus:ring-2 focus:ring-teal-400"
+        onclick="editPrice(${item.id})"
+      >
+        Edit Price
+      </button>
+
+      <!-- Add Photo -->
+      <button
+        class="flex-1 px-4 py-2 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500"
+        onclick="addPhoto(${item.id})"
+      >
+        Add Photo
+      </button>
+
+      <!-- Remove Photo -->
+      <button
+        class="flex-1 px-4 py-2 text-white bg-rose-600 rounded-lg hover:bg-rose-700 focus:ring-2 focus:ring-rose-500"
+        onclick="removePhoto(${item.id})"
+      >
+        Remove Photo
       </button>
     </div>
   </div>
@@ -85,11 +110,47 @@ const foodCardTemplate = item => `
 const farmCardTemplate = item => `
   <div class="p-4 transition bg-white justify-between shadow rounded-2xl hover:shadow-lg w-full">
     <img src="${item.productPicture}" alt="${item.productName}" class="object-cover w-full h-48 mb-4 rounded-lg">
+    
     <h3 class="text-lg font-bold text-gray-800">${item.productName}</h3>
-    <p class="text-sm text-gray-600">Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span></p>
-    <div class="flex items-center mt-4 space-x-3">
-      <input type="number" value="0" min="0" class="w-16 p-2 text-center border rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none">
-      <button class="flex-1 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500">Add Stock</button>
+    <p class="text-sm text-gray-600 mb-2">
+      Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
+    </p>
+    <p class="text-sm text-gray-600">
+      Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span>
+    </p>
+
+    <div class="flex flex-wrap gap-2 mt-4">
+      <!-- Edit Name -->
+      <button
+        class="flex-1 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500"
+        onclick="editFarmName(${item.id})"
+      >
+        Edit Name
+      </button>
+
+      <!-- Edit Price -->
+      <button
+        class="flex-1 px-4 py-2 text-teal-700 bg-teal-100 rounded-lg hover:bg-teal-200 focus:ring-2 focus:ring-teal-400"
+        onclick="editFarmPrice(${item.id})"
+      >
+        Edit Price
+      </button>
+
+      <!-- Add Photo -->
+      <button
+        class="flex-1 px-4 py-2 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500"
+        onclick="addFarmPhoto(${item.id})"
+      >
+        Add Photo
+      </button>
+
+      <!-- Remove Photo -->
+      <button
+        class="flex-1 px-4 py-2 text-white bg-rose-600 rounded-lg hover:bg-rose-700 focus:ring-2 focus:ring-rose-500"
+        onclick="removeFarmPhoto(${item.id})"
+      >
+        Remove Photo
+      </button>
     </div>
   </div>
 `;
