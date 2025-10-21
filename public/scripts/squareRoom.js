@@ -416,29 +416,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    // Fetch reserved date ranges from Laravel
+    // 🔹 Fetch reserved date ranges from Laravel
     const response = await fetch("https://greenlinklolasayong.site/api/booked-dates");
     const bookedRanges = await response.json();
 
-    // Initialize the check-in calendar
-    const checkin = flatpickr("#checkIn", {
+    // 🗓️ Initialize Flatpickr Range Picker
+    const checkInInput = document.getElementById("checkIn");
+    const checkOutInput = document.getElementById("checkOut");
+
+    let lastCheckIn = null;
+
+    const picker = flatpickr(checkInInput, {
+      mode: "range",
       dateFormat: "Y-m-d",
       minDate: "today",
-      disable: bookedRanges, // disable full ranges
-      onChange: function(selectedDates, dateStr) {
-        // Update checkout calendar when check-in selected
-        checkout.set("minDate", dateStr);
+      disable: bookedRanges, // from backend
+      showMonths: 2,
+      onOpen: function () {
+        // Keep previously selected check-in when reopening
+        if (lastCheckIn) {
+          picker.setDate([lastCheckIn], false);
+        }
+      },
+      onClose: function (selectedDates) {
+        if (selectedDates.length === 2) {
+          // Enforce minimum 1-night stay
+          if (selectedDates[1].getTime() === selectedDates[0].getTime()) {
+            const nextDay = new Date(selectedDates[0]);
+            nextDay.setDate(nextDay.getDate() + 1);
+            picker.setDate([selectedDates[0], nextDay], true);
+            selectedDates[1] = nextDay;
+          }
+
+          // Save check-in for reopening logic
+          lastCheckIn = selectedDates[0];
+
+          // Update textboxes
+          checkInInput.value = selectedDates[0].toISOString().split("T")[0];
+          checkOutInput.value = selectedDates[1].toISOString().split("T")[0];
+        }
       }
     });
 
-    // Initialize the check-out calendar
-    const checkout = flatpickr("#checkOut", {
-      dateFormat: "Y-m-d",
-      minDate: "today",
-      disable: bookedRanges, // same disabled ranges
+    // Clicking check-out reopens the same picker
+    checkOutInput.addEventListener("click", () => {
+      if (lastCheckIn) picker.setDate([lastCheckIn], false);
+      picker.open();
     });
 
   } catch (error) {
     console.error("Error loading booked dates:", error);
   }
 });
+  
+

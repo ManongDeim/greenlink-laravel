@@ -6,6 +6,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="../src/Pictures/LogoLolasayong2.png" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  
   <title>Room Booking</title>
 </head>
 <body class="w-full overflow-x-hidden bg-white">
@@ -75,13 +78,13 @@
     <div class="flex justify-center mt-8">
       <div class="flex flex-col gap-4 p-6 bg-white rounded-lg shadow-md md:flex-row">
         <div class="relative">
-          <input type="date" name="check_in_date" id="checkIn" class="w-56 px-4 pt-5 pb-2 text-gray-900 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          <label for="checkIn" class="absolute text-sm text-gray-500 transition-all left-4 top-2 peer-focus:text-teal-600">Check-In</label>
+          <input type="text" id="checkIn" name="check_in_date" readonly placeholder="Select check-in date"
+  class="w-56 px-4 pt-5 pb-2 text-gray-900 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500">
         </div>
 
         <div class="relative">
-          <input type="date" name="check_out_date" id="checkOut" class="w-56 px-4 pt-5 pb-2 text-gray-900 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          <label for="checkOut" class="absolute text-sm text-gray-500 transition-all left-4 top-2 peer-focus:text-teal-600">Check-Out</label>
+          <input type="text" id="checkOut" name="check_out_date" readonly placeholder="Select check-out date"
+  class="w-56 px-4 pt-5 pb-2 text-gray-900 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500">
         </div>
       </div>
     </div>
