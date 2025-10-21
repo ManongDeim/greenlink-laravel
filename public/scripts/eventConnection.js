@@ -117,7 +117,7 @@ function closeOrderModal() {
     const event_type = form.querySelector("select[name='event_type']").value;
     const pax = form.querySelector("input[name='pax']").value;
     const email = form.querySelector("input[name='email']").value;
-    const phone = form.querySelector("input[name='phone_number']").value;
+    const phone = form.querySelector("input[name='phone']").value;
     const to_bring = form.querySelector("textarea[name='to_bring']").value;
 
     // Build summary HTML 
@@ -244,3 +244,74 @@ document.addEventListener("keydown", function (event) {
  function goBack() {
     window.history.back();
  }
+
+ // --- Validation (on click only) ---
+const fullnameInput = document.getElementById('fullname');
+const nameError = document.getElementById('nameError');
+const confirmButton = document.getElementById('confirmBooking');
+const phoneInput = document.getElementById('phone');
+const phoneError = document.getElementById('phoneError');
+const emailInput = document.getElementById('email');
+const emailError = document.getElementById('emailError');
+
+
+
+
+// Real-time cleanup
+fullnameInput.addEventListener('input', () => {
+  fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, '');
+});
+phoneInput.addEventListener('input', () => {
+  phoneInput.value = phoneInput.value.replace(/[^0-9]/g, '');
+  if (phoneInput.value.length > 11) phoneInput.value = phoneInput.value.slice(0, 11);
+});
+
+// Validation when clicking “Review & Confirm Booking”
+function validateForm() {
+  let isValid = true;
+
+ // Full name
+if (fullnameInput.value.trim() === '') {
+  // Show "Required" message if empty
+  nameError.textContent = 'Full name is required.';
+  nameError.classList.remove('hidden');
+  fullnameInput.classList.add('border-red-500');
+  isValid = false;
+} else if (!/^[A-Za-z\s]+$/.test(fullnameInput.value.trim())) {
+  // Show invalid format message only if not empty
+  nameError.textContent = 'Names can only include letters. Please try again.';
+  nameError.classList.remove('hidden');
+  fullnameInput.classList.add('border-red-500');
+  isValid = false;
+} else {
+  // Valid input
+  nameError.classList.add('hidden');
+  fullnameInput.classList.remove('border-red-500');
+}
+
+
+  // Phone
+  if (!/^\d{11}$/.test(phoneInput.value.trim())) {
+    phoneError.classList.remove('hidden');
+    phoneInput.classList.add('border-red-500');
+    isValid = false;
+  } else {
+    phoneError.classList.add('hidden');
+    phoneInput.classList.remove('border-red-500');
+  }
+
+  // Gmail
+  if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailInput.value.trim())) {
+    emailError.classList.remove('hidden');
+    emailInput.classList.add('border-red-500');
+    isValid = false;
+  } else {
+    emailError.classList.add('hidden');
+    emailInput.classList.remove('border-red-500');
+  }
+
+  // Only open modal if valid
+  if (isValid) {
+    openConfirmationModal();
+  }
+}
