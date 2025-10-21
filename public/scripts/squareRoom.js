@@ -417,7 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     // 🔹 Fetch reserved date ranges from Laravel
-    const response = await fetch("https://greenlinklolasayong.site/api/booked-dates");
+    const response = await fetch("https://greenlinklolasayong.site/api/booked-dates?room_id=${roomId}");
     const bookedRanges = await response.json();
 
     // 🗓️ Initialize Flatpickr Range Picker
@@ -468,5 +468,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error loading booked dates:", error);
   }
 });
-  
-

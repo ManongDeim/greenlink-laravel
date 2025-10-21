@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\RoomSeederModel;
 
 class RoomModel extends Model
 {
@@ -25,4 +26,10 @@ class RoomModel extends Model
         ];
 
     public $timestamps = false; 
+
+    public function room()
+{
+    return $this->belongsTo(RoomSeederModel::class, 'room_id');
+}
+
 }

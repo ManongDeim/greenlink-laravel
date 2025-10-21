@@ -156,9 +156,15 @@ public function paymentFailed(Request $request)
 
       public function getBookedDates()
     {
-        $reservations = RoomModel::select('check_in_date', 'check_out_date')->get();
+        $roomId = request()->query('room_id');
 
-        $bookedDates = [];
+        $query = RoomModel::select('check_in_date', 'check_out_date');
+
+        if($roomId){
+            $query->where('room_id', $roomId);
+        }
+
+        $reservations = $query->get();
 
         $bookedRanges = $reservations->map(function ($r) {
             return [
