@@ -62,14 +62,16 @@ Route::patch('/reservations/{id}/approval', [EventAdminReservationController::cl
 
 // Farm Order routes
 Route::get('farmProducts', [FarmProductController::class, 'index']);
-Route::get('/paymentSuccess', [FarmOrderController::class, 'paymentSuccess']);
-Route::get('/paymentFailed', [FarmOrderController::class, 'paymentFailed']);
+Route::get('/paymentSuccessFarm', [FarmOrderController::class, 'paymentSuccess']);
+Route::get('/paymentFailedFarm', [FarmOrderController::class, 'paymentFailed']);
+Route::get('farmOrder', [FarmOrderController::class, 'index']);
 
 // Food Order routes
 
-Route::get('/paymentSuccess', [FoodOrderController::class, 'paymentSuccess']);
-Route::get('/paymentFailed', [FoodOrderController::class, 'paymentFailed']);
+Route::get('/paymentSuccessFood', [FoodOrderController::class, 'paymentSuccess']);
+Route::get('/paymentFailedFood', [FoodOrderController::class, 'paymentFailed']);
 Route::get('foodProducts', [FoodProductController::class, 'index']);
+Route::get('foodOrder', [FoodOrderController::class, 'index']);
 
 
 // Room Routes
@@ -85,3 +87,8 @@ Route::get('/rooms/{id}', function($id) {
 
     return response()->json($room);
 });
+Route::post('/create-room-payment', [RoomController::class, 'createPaymentLink'])->middleware('auth:sanctum');
+Route::get('/paymentSuccess', [RoomController::class, 'paymentSuccess']);
+Route::get('/paymentFailed', [RoomController::class, 'paymentFailed']);
+Route::get('roomReser', [RoomController::class, 'index']);
+Route::get('/booked-dates', [RoomController::class, 'getBookedDates']);

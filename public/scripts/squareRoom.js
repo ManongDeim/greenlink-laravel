@@ -1,20 +1,128 @@
-//Carousel Script
-const carousel = document.getElementById("carousel");
-  const slides = carousel.querySelectorAll("img");
+document.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const roomId = params.get("id") || 1;
+
+  if (!roomId) return;
+
+  try {
+    const response = await fetch(`https://greenlinklolasayong.site/api/rooms/${roomId}`);
+    const room = await response.json();
+    console.log("Loaded room:", room);
+
+    // 🏠 Room Details
+    document.getElementById("roomName").textContent = room.room_name;
+    document.getElementById("roomPrice").textContent = `₱${room.price} / night`;
+    document.getElementById("roomDesc").textContent = room.description;
+
+       // ✅ Dynamically populate Pax dropdown
+    const paxSelect = document.getElementById("pax");
+    paxSelect.innerHTML = ""; // clear existing options
+
+    const min = parseInt(room.min_capacity) || 1;
+    const max = parseInt(room.max_capacity) || 1;
+
+    for (let i = min; i <= max; i++) {
+      const option = document.createElement("option");
+      option.value = i;
+      option.textContent = i;
+      paxSelect.appendChild(option);
+    }
+
+    // Add a default disabled "Select" placeholder at the top
+    const placeholder = document.createElement("option");
+    placeholder.textContent = "Select pax";
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    paxSelect.prepend(placeholder);
+
+    // 🖼️ Handle Carousel Images
+    let images = [];
+    if (Array.isArray(room.carousel_images)) {
+      images = room.carousel_images;
+    } else {
+      try {
+        images = JSON.parse(room.carousel_images);
+        if (!Array.isArray(images)) images = [room.image];
+      } catch {
+        images = [room.image];
+      }
+    }
+
+    const carousel = document.getElementById("carousel");
+    carousel.innerHTML = "";
+
+    images.forEach((imgPath) => {
+      const img = document.createElement("img");
+      img.src = imgPath.replace(/\\\//g, "/");
+      img.className =
+        "w-full h-[400px] object-cover rounded-xl flex-shrink-0 bg-gray-100 shadow-md";
+      carousel.appendChild(img);
+    });
+
+    initCarousel(images.length);
+
+    // Handle Amenities (moved inside async)
+    const amenitiesList = document.getElementById("amenitiesList");
+    if (amenitiesList) {
+      let amenities = [];
+
+      try {
+        let rawAmenities = room.amenities;
+
+        if (typeof rawAmenities === "string") {
+          rawAmenities = rawAmenities.trim().replace(/\r?\n/g, "").replace(/\\r\\n/g, "");
+
+          if (rawAmenities.startsWith("[") && rawAmenities.endsWith("]")) {
+            amenities = JSON.parse(rawAmenities);
+          } else {
+            amenities = rawAmenities.split(",").map((item) => item.trim());
+          }
+        } else if (Array.isArray(rawAmenities)) {
+          amenities = rawAmenities;
+        }
+      } catch (e) {
+        console.error("Failed to parse amenities:", e, room.amenities);
+      }
+
+      if (amenities.length > 0) {
+        amenitiesList.innerHTML = amenities
+          .map(
+            (item) => `
+            <li class="flex items-center gap-3">
+              <span class="text-lg text-teal-600">•</span>${item}
+            </li>`
+          )
+          .join("");
+      } else {
+        amenitiesList.innerHTML = `<li class="text-gray-500 italic">No amenities listed for this room.</li>`;
+      }
+    }
+  } catch (error) {
+    console.error("Error loading room:", error);
+  }
+});
+
+// ✅ Fixed carousel logic
+function initCarousel(totalSlides) {
+  const carousel = document.getElementById("carousel");
   const indicators = document.getElementById("indicators");
+  indicators.innerHTML = "";
 
   let currentSlide = 0;
 
-  // Create indicators
-  slides.forEach((_, i) => {
+  for (let i = 0; i < totalSlides; i++) {
     const dot = document.createElement("span");
     dot.style.width = dot.style.height = "10px";
     dot.style.borderRadius = "50%";
     dot.style.display = "inline-block";
     dot.style.background = i === 0 ? "teal" : "#ccc";
-    dot.addEventListener("click", () => goToSlide(i));
+    dot.style.cursor = "pointer";
+    dot.addEventListener("click", (e) => {
+      e.preventDefault();
+      goToSlide(i);
+    });
     indicators.appendChild(dot);
-  });
+  }
 
   function goToSlide(index) {
     currentSlide = index;
@@ -29,131 +137,344 @@ const carousel = document.getElementById("carousel");
   }
 
   function nextSlide() {
-    currentSlide = (currentSlide + 1) % slides.length;
+    currentSlide = (currentSlide + 1) % totalSlides;
     goToSlide(currentSlide);
   }
 
-  setInterval(nextSlide, 3000); // Auto slide every 3s
   function prevSlide() {
-  currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-  goToSlide(currentSlide);
+    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+    goToSlide(currentSlide);
   }
 
-  function openPaymentModal() {
+  window.nextSlide = nextSlide;
+  window.prevSlide = prevSlide;
+}
 
-    const form = document.getElementById("roomBookingForm");
+// Open confirmation modal first
+function openConfirmationModal() {
+  const form = document.getElementById("roomBookingForm");
+  const roomName = document.querySelector("#roomName").innerText;
+  const price = parseFloat(document.querySelector("#roomPrice").innerText.replace(/[^\d.]/g, "")) || 0;
 
-    const room = document.querySelector("#roomName").innerText;
-    const check_in_date = form.querySelector("input[name='check_in_date']").value;
-    const check_out_date = form.querySelector("input[name='check_out_date']").value;
-    const fullName = form.querySelector("input[name='full_name']").value;
-    const pax = form.querySelector("select[name='pax']").value;
-    const email = form.querySelector("input[name='email']").value;
-    const phone = form.querySelector("input[name='phone_number']").value;
+  const checkIn = new Date(form.querySelector("input[name='check_in_date']").value);
+  const checkOut = new Date(form.querySelector("input[name='check_out_date']").value);
+  const fullName = form.querySelector("input[name='full_name']").value;
+  const pax = form.querySelector("select[name='pax']").value;
+  const email = form.querySelector("input[name='email']").value;
+  const phone = form.querySelector("input[name='phone_number']").value;
 
-    // Build summary HTML 
-    const summaryHtml = `
-    <p><strong>Cottage:</strong> ${room}</p>
-    <p><strong>Check-In:</strong> ${check_in_date}</p>
-    <p><strong>Check-Out:</strong> ${check_out_date}</p>
+  const nights = Math.max((checkOut - checkIn) / (1000 * 60 * 60 * 24), 1);
+  const total = price * nights;
+
+  const summaryHtml = `
+    <p><strong>Room:</strong> ${roomName}</p>
+    <p><strong>Price per Night:</strong> ₱${price.toLocaleString()}</p>
+    <p><strong>Check-In:</strong> ${form.querySelector("input[name='check_in_date']").value}</p>
+    <p><strong>Check-Out:</strong> ${form.querySelector("input[name='check_out_date']").value}</p>
+    <p><strong>Nights:</strong> ${nights}</p>
+    <p><strong>Total Bill:</strong> <span class="text-teal-600 font-semibold">₱${total.toLocaleString()}</span></p>
+    <hr class="my-2">
     <p><strong>Full Name:</strong> ${fullName}</p>
     <p><strong>Pax:</strong> ${pax}</p>
     <p><strong>Email:</strong> ${email}</p>
     <p><strong>Phone:</strong> ${phone}</p>
-    `;
+  `;
 
-      // Insert into modal
-      document.getElementById("paymentSummary").innerHTML = summaryHtml;
+  document.getElementById("confirmationSummary").innerHTML = summaryHtml;
 
-      // Open modal
-      document.getElementById('paymentModal').classList.remove('hidden');
-       document.body.style.overflow = 'hidden';
+  // Show confirmation modal
+  document.getElementById("confirmationModal").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+
+  // Save total for payment stage
+  window.bookingDetails = { roomName, price, nights, total, fullName, pax, email, phone };
+}
+
+// Proceed to payment modal
+function proceedToPayment(type) {
+  const paymentModal = document.getElementById("paymentModal");
+  const confirmationModal = document.getElementById("confirmationModal");
+  const summary = document.getElementById("paymentSummary");
+
+  const { roomName, price, nights, total, fullName, pax, email, phone } = window.bookingDetails;
+
+  window.selectedPaymentType = type; // store payment type globally
+
+  // Calculate display total only
+  const displayTotal = type === "down" ? +(total * 0.5).toFixed(2) : +total.toFixed(2);
+  const paymentTypeLabel = type === "down" ? "50% Down Payment" : "Full Payment";
+
+  summary.innerHTML = `
+    <p><strong>Room:</strong> ${roomName}</p>
+    <p><strong>Price per Night:</strong> ₱${price.toLocaleString()}</p>
+    <p><strong>Nights:</strong> ${nights}</p>
+    <p><strong>${paymentTypeLabel}:</strong> <span class="text-teal-600 font-semibold">₱${displayTotal.toLocaleString()}</span></p>
+    <hr class="my-2">
+    <p><strong>Full Name:</strong> ${fullName}</p>
+    <p><strong>Pax:</strong> ${pax}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Phone:</strong> ${phone}</p>
+  `;
+
+  // Hide confirmation modal, show payment modal
+  confirmationModal.classList.add("hidden");
+  paymentModal.classList.remove("hidden");
+}
+
+// Close confirmation modal
+function closeConfirmationModal() {
+  document.getElementById("confirmationModal").classList.add("hidden");
+  document.body.style.overflow = "auto";
+}
+
+
+function closePaymentModal() {
+  document.getElementById("paymentModal").classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+function goBack() {
+  window.location.href = "../pages/RoomReser.html";
+}
+
+function openTermsModal() {
+      document.getElementById('termsModal').classList.remove('hidden');
+      document.getElementById('termsModal').classList.add('flex');
     }
-    function closePaymentModal() {
-      document.getElementById('paymentModal').classList.add('hidden');
-       document.body.style.overflow = '';
+    function closeTermsModal() {
+      document.getElementById('termsModal').classList.add('hidden');
+    }
+    function handleReviewClick() {
+      const checkbox = document.getElementById('termsCheckbox');
+      if (!checkbox.checked) {
+        document.getElementById('alertMessage').textContent = 'Please agree to the Terms and Conditions before proceeding.';
+        document.getElementById('alertModal').classList.remove('hidden');
+        return;
+      }
+      openPaymentModal();
     }
 
-    
-    function showAlert(message) {
-  document.getElementById("alertMessage").textContent = message;
-  document.getElementById("alertModal").classList.remove("hidden");
-}
+     // --- Room Payment (Down / Full) ---
+async function sendRoomPayment(paymentType) {
+  if (!window.bookingDetails || !window.bookingDetails.roomName) {
+    alert("Booking details are missing. Please fill out the form again.");
+    return;
+  }
 
-    function closeAlert() {
-  document.getElementById("alertModal").classList.add("hidden");
+  const checkIn = document.querySelector("input[name='check_in_date']").value;
+  const checkOut = document.querySelector("input[name='check_out_date']").value;
+
+  if (!checkIn || !checkOut) {
+    alert("Please select both check-in and check-out dates.");
+    return;
+  }
+
+  const { roomName, fullName, pax, email, phone, total } = window.bookingDetails;
+
+  const data = {
+    room: roomName,
+    check_in_date: checkIn,
+    check_out_date: checkOut,
+    full_name: fullName,
+    pax: pax,
+    email: email,
+    phone_number: phone,
+    total_bill: total, // always full total
+    payment_method: paymentType === "down" ? "Down Payment" : "Full Payment"
+  };
+
+  console.log("💳 Sending room payment data:", data);
+
+  try {
+    const response = await fetch("https://greenlinklolasayong.site/api/create-room-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "include",
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("HTTP Error:", response.status, result);
+      alert(result.message || "Failed to initiate payment.");
+      return;
     }
 
-    // --- Modal Functions ---
-function openReserModal() {
-  document.getElementById('reservationModal').classList.remove('hidden');
-  document.body.classList.add("overflow-hidden"); // disable scroll
+    if (result.payment_url) {
+      window.location.href = result.payment_url;
+    } else {
+      alert("Payment URL not returned. Please try again.");
+    }
+  } catch (err) {
+    console.error("💥 Room payment error:", err);
+    alert("An error occurred while processing the payment. Please try again.");
+  }
 }
 
-function closeReserModal() {
-  document.getElementById('reservationModal').classList.add('hidden');
-  document.body.classList.remove("overflow-hidden"); // re-enable scroll
-}
-
-function openOrderModal() {
-  document.getElementById('orderModal').classList.remove('hidden');
-  document.body.classList.add("overflow-hidden"); // disable scroll
-}
-
-function closeOrderModal() {
-  document.getElementById('orderModal').classList.add('hidden');
-  document.body.classList.remove("overflow-hidden"); // re-enable scroll
-}
-      //Pages  
-
-  //Room Reservation Page
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("roomReser");
+// --- Button Event Listeners ---
+const payDownBtn = document.getElementById("payDownBtn");
+const payFullBtn = document.getElementById("payFullBtn");
+const payNowBtn = document.getElementById("payNowBtn");
 
 
-  btn.addEventListener("click", () => {
-    window.location.href = "../pages/RoomReser.html"; // go to another page
+if (payDownBtn) {
+  payDownBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    sendRoomPayment("down");
   });
-});
+}
 
-//Event Reservation Page
-
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("eventReser");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "../pages/EventReser.html"; // go to another page
+if (payFullBtn) {
+  payFullBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    sendRoomPayment("full");
   });
+}
+
+payNowBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  const selectedType = window.selectedPaymentType || "full"; // Default to full if not set
+  sendRoomPayment(selectedType);
 });
 
 
-//Food Order Page
-
   document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("foodOrder");
+  const checkInInput = document.querySelector("input[name='check_in_date']");
+  const checkOutInput = document.querySelector("input[name='check_out_date']");
 
+  if (!checkInInput || !checkOutInput) return;
 
-  btn.addEventListener("click", () => {
-    window.location.href = "../pages/FarmOrders.html"; // go to another page
+  // 🔒 Disable past dates for both inputs
+  const today = new Date().toISOString().split("T")[0];
+  checkInInput.min = today;
+  checkOutInput.min = today;
+
+  // 🗓️ When check-in date changes
+  checkInInput.addEventListener("change", () => {
+    const checkInDate = new Date(checkInInput.value);
+
+    if (isNaN(checkInDate)) return;
+
+    // Update checkout minimum to be at least the next day
+    const minCheckOut = new Date(checkInDate);
+    minCheckOut.setDate(minCheckOut.getDate() + 1);
+
+    const minCheckOutStr = minCheckOut.toISOString().split("T")[0];
+    checkOutInput.min = minCheckOutStr;
+
+    // If checkout date is invalid or same day → auto-adjust it
+    if (!checkOutInput.value || new Date(checkOutInput.value) <= checkInDate) {
+      checkOutInput.value = minCheckOutStr;
+    }
+  });
+
+  // 🗓️ When checkout changes (just safety check)
+  checkOutInput.addEventListener("change", () => {
+    const checkInDate = new Date(checkInInput.value);
+    const checkOutDate = new Date(checkOutInput.value);
+
+    // If checkout = checkin → push to next day
+    if (checkOutDate <= checkInDate) {
+      const nextDay = new Date(checkInDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      checkOutInput.value = nextDay.toISOString().split("T")[0];
+    }
   });
 });
+document.addEventListener("DOMContentLoaded", () => {
+  const fields = [
+    document.getElementById("checkIn"), // date input
+    document.getElementById("checkOut"), // date input
+    document.querySelector("input[name='full_name']"), // text input
+    document.getElementById("pax"), // select
+    document.querySelector("input[name='email']"), // email input
+    document.querySelector("input[name='phone_number']") // phone input
+  ];
 
-//Farm Order Page
+  const checkbox = document.getElementById("agreeCheckbox");
+  const reviewBtn = document.getElementById("reviewBookingBtn");
 
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("farmOrder");
+  // Run once at start
+  checkForm();
 
+  function checkForm() {
+    const allFilled = fields.every(field => field && field.value.trim() !== "");
+    const agreed = checkbox && checkbox.checked;
+    reviewBtn.disabled = !(allFilled && agreed);
+  }
 
-  btn.addEventListener("click", () => {
-    window.location.href = "../pages/FarmOrders.html"; // go to another page
+  fields.forEach(field => {
+    if (field) {
+      field.addEventListener("input", checkForm);
+      field.addEventListener("change", checkForm);
+    }
   });
+
+  if (checkbox) checkbox.addEventListener("change", checkForm);
 });
 
- function goBack() {
-    window.location.href = "../pages/RoomReser.html";
- }
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    // 🏠 Get the currently selected room_id (adjust selector if needed)
+    const roomSelect = document.getElementById("roomSelect"); // your dropdown for rooms
+    const roomId = roomSelect ? roomSelect.value : 1; // fallback room id
+
+    // 🔹 Fetch reserved date ranges from Laravel
+    const response = await fetch(`https://greenlinklolasayong.site/api/booked-dates?room_id=${roomId}`);
+    const bookedRanges = await response.json();
+
+    // 🗓️ Initialize Flatpickr Range Picker
+    const checkInInput = document.getElementById("checkIn");
+    const checkOutInput = document.getElementById("checkOut");
+
+    let lastCheckIn = null;
+
+    const picker = flatpickr(checkInInput, {
+      mode: "range",
+      dateFormat: "Y-m-d",
+      minDate: "today",
+      disable: bookedRanges, // from backend
+      showMonths: 2,
+      onOpen: function () {
+        if (lastCheckIn) {
+          picker.setDate([lastCheckIn], false);
+        }
+      },
+      onClose: function (selectedDates) {
+        if (selectedDates.length === 2) {
+          if (selectedDates[1].getTime() === selectedDates[0].getTime()) {
+            const nextDay = new Date(selectedDates[0]);
+            nextDay.setDate(nextDay.getDate() + 1);
+            picker.setDate([selectedDates[0], nextDay], true);
+            selectedDates[1] = nextDay;
+          }
+
+          lastCheckIn = selectedDates[0];
+
+          checkInInput.value = selectedDates[0].toISOString().split("T")[0];
+          checkOutInput.value = selectedDates[1].toISOString().split("T")[0];
+        }
+      }
+    });
+
+    // Clicking check-out reopens the same picker
+    checkOutInput.addEventListener("click", () => {
+      if (lastCheckIn) picker.setDate([lastCheckIn], false);
+      picker.open();
+    });
+
+    // 🌀 Optional: Reload disabled dates when room changes
+    if (roomSelect) {
+      roomSelect.addEventListener("change", async () => {
+        const newRoomId = roomSelect.value;
+        const response = await fetch(`https://greenlinklolasayong.site/api/booked-dates?room_id=${newRoomId}`);
+        const newBookedRanges = await response.json();
+        picker.set("disable", newBookedRanges);
+      });
+    }
+
+  } catch (error) {
+    console.error("Error loading booked dates:", error);
+  }
+});

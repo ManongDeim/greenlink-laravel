@@ -103,8 +103,8 @@ class FarmOrderController extends Controller
                         'currency' => 'PHP',
                         'show_line_items' => true,
                         'show_description' => true,
-                        'success_url' => 'https://greenlinklolasayong.site/api/paymentSuccess?ref=' . $order->ref_number,
-                        'cancel_url' => 'https://greenlinklolasayong.site/api/paymentFailed?ref=' . $order->ref_number,
+                        'success_url' => 'https://greenlinklolasayong.site/api/paymentSuccessFarm?ref=' . $order->ref_number,
+                        'cancel_url' => 'https://greenlinklolasayong.site/api/paymentFailedFarm?ref=' . $order->ref_number,
                     ]
                 ]
             ]);
@@ -173,5 +173,10 @@ class FarmOrderController extends Controller
 
     return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
     
+    }
+
+      public function index()
+    {
+        return response()->json(FarmOrderModel::all());
     }
 }

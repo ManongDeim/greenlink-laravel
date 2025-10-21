@@ -99,8 +99,8 @@ class FoodOrderController extends Controller
                         'currency' => 'PHP',
                         'show_line_items' => true,
                         'show_description' => true,
-                        'success_url' => 'https://greenlinklolasayong.site/api/paymentSuccess?ref=' . $order->ref_number,
-                        'cancel_url' => 'https://greenlinklolasayong.site/api/paymentFailed?ref=' . $order->ref_number,
+                        'success_url' => 'https://greenlinklolasayong.site/api/paymentSuccessFood?ref=' . $order->ref_number,
+                        'cancel_url' => 'https://greenlinklolasayong.site/api/paymentFailedFood?ref=' . $order->ref_number,
                     ]
                 ]
             ]);
@@ -169,5 +169,10 @@ class FoodOrderController extends Controller
 
     return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
     
+    }
+
+     public function index()
+    {
+        return response()->json(FoodOrderModel::all());
     }
 }

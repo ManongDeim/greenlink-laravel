@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Api\FarmOrderController;
 use App\Http\Controllers\Api\FoodOrderController;
+use App\Http\Controllers\Api\RoomController;
 
 Route::get('/check-key', function () {
     return env('APP_KEY');
@@ -64,3 +65,8 @@ Route::post('/api/farmOrder/create-link', [FarmOrderController::class, 'createPa
 // Food Order routes
 Route::post('/api/foodOrder/create-link', [FoodOrderController::class, 'createPaymentLink'])
     ->middleware('auth');
+
+// Room Reservation routes
+Route::post('/create-room-payment', [RoomController::class, 'createPaymentLink'])->middleware('auth');
+Route::get('/paymentSuccess', [RoomController::class, 'paymentSuccess']);
+Route::get('/paymentFailed', [RoomController::class, 'paymentFailed']);

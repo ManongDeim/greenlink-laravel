@@ -169,7 +169,7 @@ for (const [btnId, url] of Object.entries(reserRoutes)) {
 
 // --- Order Modal Navigation ---
 const orderRoutes = {
-  foodOrderPage: "FarmOrders.html",
+  foodOrderPage: "FoodOrders.html",
   farmOrderPage: "FarmOrders.html"
 };
 
@@ -251,7 +251,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Book Now → redirect
       modal.querySelector(".book-now-btn").addEventListener("click", () => {
-        window.location.href = `../pages/roomBooking.html?id=${room.id}`;;
+        window.location.href = `../pages/SquareRoom.html?id=${room.id}`;
       });
 
       container.appendChild(card);
