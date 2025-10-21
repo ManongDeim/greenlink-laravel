@@ -137,47 +137,122 @@ document.head.appendChild(flatpickrScript);
 flatpickrScript.onload = () => {
   const checkInInput = document.getElementById("checkIn");
   const checkOutInput = document.getElementById("checkOut");
+  const reservationType = document.querySelector("select");
+  const container = document.getElementById("availableRoomsContainer");
+  const roomList = document.getElementById("availableRoomsList");
+  const searchBtn = document.querySelector(".bg-white.rounded-lg.shadow-md.hover\\:bg-teal-600");
 
+  // Create a div for event calendar dynamically
+  const eventCalendarContainer = document.createElement("div");
+  eventCalendarContainer.className = "relative hidden w-full max-w-4xl mx-auto mt-6"; // widened container
+  eventCalendarContainer.innerHTML = `
+    <label class="block mb-4 text-center text-xl font-semibold text-gray-800">Available Event Dates</label>
+    <div id="eventCalendarWrapper" 
+         class="flex justify-center p-4 bg-white border rounded-2xl shadow-lg">
+      <input id="eventDatePicker" type="text" readonly
+        class="w-full max-w-3xl px-4 py-2 text-center bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+        placeholder="Select an available event date">
+    </div>
+  `;
+  container.parentNode.insertBefore(eventCalendarContainer, container.nextSibling);
 
-  let lastCheckIn = null; // store last check-in date
+  // --- Room date picker (Check-in/Check-out) ---
+  let lastCheckIn = null;
 
   const picker = flatpickr(checkInInput, {
     mode: "range",
     dateFormat: "Y-m-d",
     minDate: "today",
     showMonths: 2,
-    onOpen: function () {
-      // When opening from check-out, keep check-in selected
-      if (lastCheckIn) {
-        picker.setDate([lastCheckIn], false);
-      }
-    },
     onClose: function (selectedDates) {
       if (selectedDates.length === 2) {
-        // Enforce min 1-night stay
         if (selectedDates[1].getTime() === selectedDates[0].getTime()) {
           const nextDay = new Date(selectedDates[0]);
           nextDay.setDate(nextDay.getDate() + 1);
           picker.setDate([selectedDates[0], nextDay], true);
           selectedDates[1] = nextDay;
         }
-
-        // Save last check-in date for future use
         lastCheckIn = selectedDates[0];
-
-        // Update inputs
         checkInInput.value = selectedDates[0].toLocaleDateString();
         checkOutInput.value = selectedDates[1].toLocaleDateString();
       }
     }
   });
 
-  // Make Check-Out input open calendar but keep check-in date
   checkOutInput.addEventListener("click", () => {
-    if (lastCheckIn) {
-      picker.setDate([lastCheckIn], false); // Pre-select last check-in date
-    }
+    if (lastCheckIn) picker.setDate([lastCheckIn], false);
     picker.open();
   });
-};
 
+  // --- Sample room data ---
+  const allRooms = [
+    { name: "Square Room", capacity: 2, price: "₱700/night", image: "./src/Pictures/Room/Square 1-2 pax with or eithout meals/328a158b-bae7-48f0-ae5e-95b28e7b1a3f.png", link: "./pages/SquareRoom.html" },
+    { name: "Twin Room", capacity: 2, price: "₱1,150/night", image: "./src/Pictures/Room/Twin room 1-2 pax with or without meals/9f410870-4f54-4573-8bb8-bf3e582c97ca.png", link: "./pages/TwinRoom.html" },
+    { name: "Bree 2", capacity: 3, price: "₱2,500/night", image: "./src/Pictures/Room/Bree 2 without meals/c7bde137-1e79-4dbf-a197-845ec0df24fb.png", link: "./pages/SquareRoom.html" },
+    { name: "Bree 1", capacity: 2, price: "₱2,500/night", image: "./src/Pictures/Room/Villavictoria/VillaVictoria1.jpg", link: "./pages/SquareRoom.html" },
+    { name: "Aircon Cabin 2", capacity: 3, price: "₱3,000/night", image: "./src/Pictures/Room/Aircon rooms without meals/Old MCR (copy).png", link: "./pages/SquareRoom.html" },
+    { name: "Josie", capacity: 6, price: "₱6,000/night", image: "./src/Pictures/Room/Aircon rooms without meals/AC Room Josie 1&2.png", link: "./pages/SquareRoom.html" },
+  ];
+
+  // --- Sample event available dates ---
+  const availableEventDates = [
+    "2025-11-10",
+    "2025-11-17",
+    "2025-12-05",
+    "2025-12-20",
+    "2026-01-15"
+  ];
+
+  // --- Flatpickr for Event Dates ---
+  const eventPicker = flatpickr("#eventDatePicker", {
+    dateFormat: "Y-m-d",
+    minDate: "today",
+    enable: availableEventDates, // only allow these
+    inline: true
+  });
+
+  // --- Search button logic ---
+  searchBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    const type = reservationType.value;
+
+    if (type === "Room Reservation") {
+      if (!checkInInput.value || !checkOutInput.value) {
+        alert("Please select both Check-In and Check-Out dates first.");
+        return;
+      }
+      eventCalendarContainer.classList.add("hidden");
+      container.classList.remove("hidden");
+      populateRooms();
+    } 
+    else if (type === "Event Reservation") {
+      container.classList.add("hidden");
+      eventCalendarContainer.classList.remove("hidden");
+    }
+  });
+
+  // --- Populate Rooms ---
+  function populateRooms() {
+    roomList.innerHTML = "";
+    const available = allRooms.filter(() => true);
+    if (available.length === 0) {
+      roomList.innerHTML = `<div class="p-4 text-center text-gray-500">No rooms available for the selected dates.</div>`;
+      return;
+    }
+
+    available.forEach(room => {
+      const card = document.createElement("div");
+      card.className = "flex items-center gap-4 p-3 transition duration-150 cursor-pointer hover:bg-teal-50";
+      card.innerHTML = `
+        <img src="${room.image}" alt="${room.name}" class="w-20 h-20 object-cover rounded-lg shadow">
+        <div>
+          <h3 class="font-semibold text-gray-800">${room.name}</h3>
+          <p class="text-sm text-gray-600">${room.capacity} pax • ${room.price}</p>
+        </div>
+      `;
+      card.addEventListener("click", () => window.location.href = room.link);
+      roomList.appendChild(card);
+    });
+  }
+};

@@ -85,8 +85,22 @@
       <div class="flex items-center">
         <button class="px-6 py-2 mt-6 text-black transition duration-200 bg-white rounded-lg shadow-md hover:bg-teal-600 hover:text-white"> Search</button>
       </div>
+
+      <!-- Available Rooms with Image Cards (shows after Search) -->
+<div id="availableRoomsContainer" class="relative w-full max-w-2xl mx-auto mt-6 hidden">
+  <label class="block mb-2 text-center font-semibold text-gray-800">
+    Available Rooms
+  </label>
+
+  <div id="availableRoomsList"
+       class="max-h-80 overflow-y-auto border border-gray-300 rounded-lg bg-white shadow-lg divide-y divide-gray-200 transition-all duration-300">
+    <!-- Room cards will be injected here -->
+  </div>
+</div>
     </div>
   </div>
+  
+  
 
   <!--Events-->
   <section class="px-6 py-16 text-gray-800 bg-white">
@@ -216,6 +230,25 @@
       animation: fadeIn 0.3s ease-out;
     }
   </style>
+
+  <style>
+  /* Make Flatpickr calendar wide and centered */
+  .flatpickr-calendar.inline {
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+
+  .flatpickr-innerContainer {
+    justify-content: center;
+  }
+
+  .flatpickr-days {
+    width: 100%;
+  }
+</style>
 
 </body>
 </html>
