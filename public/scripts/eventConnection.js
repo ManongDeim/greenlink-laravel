@@ -278,4 +278,3 @@ if (eventTypeInput.value === '') {
     openConfirmationModal();
   }
 }
-}
