@@ -129,7 +129,7 @@ function closeOrderModal() {
     <p><strong>Pax:</strong> ${pax}</p>
     <p><strong>Email:</strong> ${email}</p>
     <p><strong>Phone:</strong> ${phone}</p>
-    <p><strong>Thing to be brought:</strong> ${to_bring}</p>
+    <p><strong>Things to be brought:</strong> ${to_bring}</p>
     `;
 
       // Insert into modal
@@ -216,7 +216,7 @@ document.addEventListener("keydown", function (event) {
     window.history.back();
  }
 
- // --- Validation (on click only) ---
+ // Validation (on click only) 
 const fullnameInput = document.getElementById('fullname');
 const nameError = document.getElementById('nameError');
 const confirmButton = document.getElementById('confirmBooking');
@@ -224,6 +224,10 @@ const phoneInput = document.getElementById('phone');
 const phoneError = document.getElementById('phoneError');
 const emailInput = document.getElementById('email');
 const emailError = document.getElementById('emailError');
+const paxInput = document.getElementById('pax');
+const paxError = document.getElementById('paxError');
+const eventTypeInput = document.getElementById('event_type');
+const eventTypeError = document.getElementById('eventTypeError');
 
 
 
@@ -280,6 +284,26 @@ if (fullnameInput.value.trim() === '') {
     emailError.classList.add('hidden');
     emailInput.classList.remove('border-red-500');
   }
+
+  // Pax
+if (paxInput.value.trim() === '' || isNaN(paxInput.value) || paxInput.value <= 0) {
+  paxError.classList.remove('hidden');
+  paxInput.classList.add('border-red-500');
+  isValid = false;
+} else {
+  paxError.classList.add('hidden');
+  paxInput.classList.remove('border-red-500');
+}
+
+// Event Type
+if (eventTypeInput.value === '') {
+  eventTypeError.classList.remove('hidden');
+  eventTypeInput.classList.add('border-red-500');
+  isValid = false;
+} else {
+  eventTypeError.classList.add('hidden');
+  eventTypeInput.classList.remove('border-red-500');
+}
 
   // Only open modal if valid
   if (isValid) {
