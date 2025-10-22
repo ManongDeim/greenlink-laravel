@@ -123,8 +123,8 @@ function openConfirmationModal() {
     <p><strong>Pax:</strong> ${pax}</p>
     <p><strong>Email:</strong> ${email}</p>
     <p><strong>Phone:</strong> ${phone}</p>
-    <p><strong>Thing to be brought:</strong> ${to_bring}</p>
-  `;
+    <p><strong>Things to be brought:</strong> ${to_bring}</p>
+    `;
 
   document.getElementById("confirmationSummary").innerHTML = summaryHtml;
   document.getElementById("confirmationModal").classList.remove("hidden");
@@ -196,13 +196,17 @@ function goBack() {
 }
 
 
-// --- Validation ---
+// Validation 
 const fullnameInput = document.getElementById("fullname");
 const nameError = document.getElementById("nameError");
 const phoneInput = document.getElementById("phone");
 const phoneError = document.getElementById("phoneError");
 const emailInput = document.getElementById("email");
 const emailError = document.getElementById("emailError");
+const paxInput = document.getElementById('pax');
+const paxError = document.getElementById('paxError');
+const eventTypeInput = document.getElementById('event_type');
+const eventTypeError = document.getElementById('eventTypeError');
 
 fullnameInput.addEventListener("input", () => {
   fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, "");
@@ -230,6 +234,8 @@ function validateForm() {
     fullnameInput.classList.remove("border-red-500");
   }
 
+
+  // Phone
   if (!/^\d{11}$/.test(phoneInput.value.trim())) {
     phoneError.classList.remove("hidden");
     phoneInput.classList.add("border-red-500");
@@ -247,6 +253,26 @@ function validateForm() {
     emailError.classList.add("hidden");
     emailInput.classList.remove("border-red-500");
   }
+
+  // Pax
+if (paxInput.value.trim() === '' || isNaN(paxInput.value) || paxInput.value <= 0) {
+  paxError.classList.remove('hidden');
+  paxInput.classList.add('border-red-500');
+  isValid = false;
+} else {
+  paxError.classList.add('hidden');
+  paxInput.classList.remove('border-red-500');
+}
+
+// Event Type
+if (eventTypeInput.value === '') {
+  eventTypeError.classList.remove('hidden');
+  eventTypeInput.classList.add('border-red-500');
+  isValid = false;
+} else {
+  eventTypeError.classList.add('hidden');
+  eventTypeInput.classList.remove('border-red-500');
+}
 
   if (isValid) {
     openConfirmationModal();
