@@ -1,101 +1,151 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="../output.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/png" href="../src/Pictures/LogoLolasayong2.png" />
+  <title>Customer Dashboard</title>
 </head>
-<body class="min-h-screen bg-gray-50">
 
-<!-- Header (same as your current site) -->
-<header class="relative z-50 flex items-center justify-between px-8 py-3 bg-white shadow-md">
-  <!-- Left: Logo + Navigation -->
-  <div class="flex items-center gap-10">
-    <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo" class="object-contain w-auto h-20">
-    <nav class="flex gap-8 text-lg font-medium">
-      <a href="../index.html" class="text-gray-700 transition hover:text-teal-600">Home</a>
-      <button onclick="openReserModal()" class="text-gray-700 transition hover:text-teal-600">Booking</button>
-      <button onclick="openOrderModal()" class="text-gray-700 transition hover:text-teal-600">Order</button>
-    </nav>
+<body class="min-h-screen font-sans bg-gray-50">
+  <!-- Header -->
+  <header class="flex items-center justify-between px-8 py-3 bg-white shadow-md">
+    <div class="flex items-center gap-8">
+      <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo" class="object-contain w-auto h-16">
+      <h1 class="text-2xl font-semibold text-teal-700">Customer Dashboard</h1>
+    </div>
+
+    <!-- Right: Login / Dashboard Button -->
+    <div id="auth-section" class="flex items-center gap-4">
+      <button onclick="window.location.href='../index.html'" 
+        class="px-4 py-2 text-white transition bg-teal-600 rounded-full shadow hover:bg-teal-700">
+        Home
+      </button>
+      <a id="loginBtn"
+        class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm cursor-pointer hover:bg-gray-100">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
+        <span class="text-sm font-medium">Log-in</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Dashboard Layout -->
+  <div class="flex min-h-[calc(100vh-5rem)]">
+    <!-- Sidebar -->
+    <aside class="w-64 p-5 bg-white shadow-lg">
+      <h2 class="mb-6 text-lg font-semibold text-gray-700">Menu</h2>
+      <nav class="space-y-2">
+        <button data-section="farmOrders" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 rounded-lg sidebar-btn hover:bg-teal-600 hover:text-white">
+          🌾 Farm Orders
+        </button>
+        <button data-section="foodOrders" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 rounded-lg sidebar-btn hover:bg-teal-600 hover:text-white">
+          🍴 Food Orders
+        </button>
+        <button data-section="room" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 rounded-lg sidebar-btn hover:bg-teal-600 hover:text-white">
+          🏡 Room Reservations
+        </button>
+        <button data-section="event" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 rounded-lg sidebar-btn hover:bg-teal-600 hover:text-white">
+          📅 Event Reservations
+        </button>
+        <button data-section="cancel" class="flex items-center w-full px-4 py-2 text-red-700 transition bg-red-100 rounded-lg sidebar-btn hover:bg-red-600 hover:text-white">
+          ❌ Cancellations
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="content" class="flex-1 p-8">
+      <h2 class="mb-6 text-2xl font-bold text-gray-800">Welcome to Your Dashboard!</h2>
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div class="p-6 transition bg-white shadow rounded-xl hover:shadow-lg">
+          <h3 class="mb-3 text-lg font-semibold text-gray-800">Farm Orders</h3>
+          <p class="mb-4 text-sm text-gray-600">View your farm product purchases and delivery status.</p>
+          <button onclick="openSection('farmOrders')" class="w-full py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">
+            View
+          </button>
+        </div>
+
+        <div class="p-6 transition bg-white shadow rounded-xl hover:shadow-lg">
+          <h3 class="mb-3 text-lg font-semibold text-gray-800">Food Orders</h3>
+          <p class="mb-4 text-sm text-gray-600">Track your food orders and history.</p>
+          <button onclick="openSection('foodOrders')" class="w-full py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">
+            View
+          </button>
+        </div>
+
+        <div class="p-6 transition bg-white shadow rounded-xl hover:shadow-lg">
+          <h3 class="mb-3 text-lg font-semibold text-gray-800">Room Reservations</h3>
+          <p class="mb-4 text-sm text-gray-600">See and manage your upcoming room bookings.</p>
+          <button onclick="openSection('room')" class="w-full py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">
+            View
+          </button>
+        </div>
+
+        <div class="p-6 transition bg-white shadow rounded-xl hover:shadow-lg">
+          <h3 class="mb-3 text-lg font-semibold text-gray-800">Event Reservations</h3>
+          <p class="mb-4 text-sm text-gray-600">Review your upcoming and past event reservations.</p>
+          <button onclick="openSection('event')" class="w-full py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">
+            View
+          </button>
+        </div>
+
+        <div class="p-6 transition bg-white shadow rounded-xl hover:shadow-lg">
+          <h3 class="mb-3 text-lg font-semibold text-red-700">Cancellations</h3>
+          <p class="mb-4 text-sm text-gray-600">Manage or view any cancellations you’ve made.</p>
+          <button onclick="openSection('cancel')" class="w-full py-2 text-white transition bg-red-600 rounded-lg hover:bg-red-700">
+            View
+          </button>
+        </div>
+      </div>
+    </main>
   </div>
 
-  <!-- Right: Login + Dashboard Button -->
-  <div class="flex items-center gap-4">
-    <button onclick="window.location.href='customerDashboard.html'" 
-      class="px-4 py-2 text-white transition bg-teal-600 rounded-full shadow hover:bg-teal-700">
-      Dashboard
-    </button>
-    <button class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm hover:bg-gray-100">
-      <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
-      <span class="text-sm font-medium">Log-in</span>
-    </button>
-  </div>
-</header>
-
-<!-- Dashboard Section -->
-<main class="max-w-6xl px-6 py-12 mx-auto">
-  <h1 class="mb-10 text-3xl font-bold text-center text-gray-800">My Dashboard</h1>
-
-  <!-- Grid Layout for Cards -->
-  <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-    <!-- Farm Orders -->
-    <div class="p-6 transition bg-white shadow-md cursor-pointer rounded-2xl hover:shadow-lg">
-      <h2 class="mb-4 text-xl font-semibold text-gray-800">Farm Orders</h2>
-      <p class="mb-6 text-sm text-gray-600">View your farm product purchases and delivery status.</p>
-      <button class="w-full py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">View Farm Orders</button>
-    </div>
-
-    <!-- Food Orders -->
-    <div class="p-6 transition bg-white shadow-md cursor-pointer rounded-2xl hover:shadow-lg">
-      <h2 class="mb-4 text-xl font-semibold text-gray-800">Food Orders</h2>
-      <p class="mb-6 text-sm text-gray-600">Check the status of your food orders and history.</p>
-      <button class="w-full py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">View Food Orders</button>
-    </div>
-
-    <!-- Room Reservations -->
-    <div class="p-6 transition bg-white shadow-md cursor-pointer rounded-2xl hover:shadow-lg">
-      <h2 class="mb-4 text-xl font-semibold text-gray-800">Room Reservations</h2>
-      <p class="mb-6 text-sm text-gray-600">Track your upcoming stays and manage your bookings.</p>
-      <button class="w-full py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">View Room Reservations</button>
-    </div>
-
-    <!-- Event Reservations -->
-    <div class="p-6 transition bg-white shadow-md cursor-pointer rounded-2xl hover:shadow-lg">
-      <h2 class="mb-4 text-xl font-semibold text-gray-800">Event Reservations</h2>
-      <p class="mb-6 text-sm text-gray-600">See details of your event bookings and participation.</p>
-      <button class="w-full py-2 text-white transition bg-teal-600 rounded-lg hover:bg-teal-700">View Event Reservations</button>
-    </div>
-  </div>
-</main>
-
-<!-- Footer (same as your current site) -->
-<footer class="mt-12 text-gray-300 bg-gray-900">
-  <div class="grid max-w-6xl grid-cols-1 gap-6 px-6 py-8 mx-auto md:grid-cols-3">
-    <div>
-      <h3 class="mb-3 text-lg font-semibold">About Us</h3>
-      <p class="text-sm leading-relaxed">
-        We provide the perfect venue for your weddings, birthdays, team buildings, and family gatherings.
-      </p>
-    </div>
-    <div>
-      <h3 class="mb-3 text-lg font-semibold">Contact</h3>
-      <p class="text-sm">📍 Brgy. XYZ, City</p>
-      <p class="text-sm">📞 +63 912 345 6789</p>
-      <p class="text-sm">✉️ info@lolasayong.com</p>
-    </div>
-    <div>
-      <h3 class="mb-3 text-lg font-semibold">Follow Us</h3>
-      <div class="flex gap-3">
-        <a href="https://www.facebook.com/Lola.Sayong.Surf.Camp" class="hover:text-white">Facebook</a>
-        <a href="https://www.instagram.com/lolasayong.and.thesimplethings/" class="hover:text-white">Instagram</a>
+  <!-- Footer -->
+  <footer class="mt-8 text-gray-300 bg-gray-900">
+    <div class="grid max-w-6xl grid-cols-1 gap-6 px-6 py-8 mx-auto md:grid-cols-3">
+      <div>
+        <h3 class="mb-3 text-lg font-semibold">About Us</h3>
+        <p class="text-sm leading-relaxed">
+          We provide the perfect venue for your weddings, birthdays, team buildings, and family gatherings.
+        </p>
+      </div>
+      <div>
+        <h3 class="mb-3 text-lg font-semibold">Contact</h3>
+        <p class="text-sm">📍 Brgy. XYZ, City</p>
+        <p class="text-sm">📞 +63 912 345 6789</p>
+        <p class="text-sm">✉️ info@lolasayong.com</p>
+      </div>
+      <div>
+        <h3 class="mb-3 text-lg font-semibold">Follow Us</h3>
+        <div class="flex gap-3">
+          <a href="https://www.facebook.com/Lola.Sayong.Surf.Camp" class="hover:text-white">Facebook</a>
+          <a href="https://www.instagram.com/lolasayong.and.thesimplethings/" class="hover:text-white">Instagram</a>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="py-4 text-sm text-center border-t border-gray-700">
-    © 2025 Lola Sayong Eco-Surf Camp. All rights reserved.
-  </div>
-</footer>
+    <div class="py-4 text-sm text-center border-t border-gray-700">
+      © 2025 Lola Sayong Eco-Surf Camp. All rights reserved.
+    </div>
+  </footer>
 
+  <script>
+    // Sidebar navigation logic
+    document.querySelectorAll('.sidebar-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const section = btn.dataset.section;
+        openSection(section);
+      });
+    });
+
+    function openSection(section) {
+      // For now, just simulate navigation
+      window.location.href = `./customerDashboard.html?section=${section}`;
+    }
+  </script>
+
+  <script src="../scripts/customerDashboard.js"></script>
+  <script src="../global_scripts/loginScript.js" defer></script>
+  <script src="../global_scripts/authLogin.js"></script>
 </body>
 </html>
