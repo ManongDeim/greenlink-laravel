@@ -160,21 +160,24 @@ public function paymentFailed(Request $request)
     {
         $roomId = request()->query('room_id');
 
-        $query = RoomModel::select('check_in_date', 'check_out_date');
+    // ✅ Use the reservations table, not RoomModel
+    $query = RoomModel::select('check_in_date', 'check_out_date')
+        ->where('payment_status', 'Paid'); // only include Paid
 
-        if($roomId){
-            $query->where('room_id', $roomId);
-        }
+    if ($roomId) {
+        $query->where('room_id', $roomId);
+    }
 
-        $reservations = $query->get();
+    $reservations = $query->get();
 
-        $bookedRanges = $reservations->map(function ($r) {
-            return [
-                'from' => $r->check_in_date,
-                'to' => $r->check_out_date,
-            ];
-        });
+    // ✅ Format data for Flatpickr
+    $bookedRanges = $reservations->map(function ($r) {
+        return [
+            'from' => $r->check_in_date,
+            'to' => $r->check_out_date,
+        ];
+    });
 
-        return response()->json($bookedRanges);
+    return response()->json($bookedRanges);
     }
 }
