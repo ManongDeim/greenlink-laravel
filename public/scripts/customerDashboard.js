@@ -53,7 +53,7 @@ function closeOrderModal() {
 
 
   btn.addEventListener("click", () => {
-    window.location.href = "../pages/FarmOrders.html"; // go to another page
+    window.location.href = "../pages/FoodOrders.html"; // go to another page
   });
 });
 
