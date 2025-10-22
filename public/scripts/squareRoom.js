@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   const roomId = params.get("id") || 1;
+  window.roomId = roomId;
 
   if (!roomId) return;
 
@@ -272,6 +273,7 @@ async function sendRoomPayment(paymentType) {
   const { roomName, fullName, pax, email, phone, total } = window.bookingDetails;
 
   const data = {
+    room_id: window.roomId,
     room: roomName,
     check_in_date: checkIn,
     check_out_date: checkOut,
@@ -416,13 +418,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    // 🏠 Get the currently selected room_id (adjust selector if needed)
-    const roomSelect = document.getElementById("roomSelect"); // your dropdown for rooms
-    const roomId = roomSelect ? roomSelect.value : 1; // fallback room id
+    // ✅ Get roomId from URL (like booking.html?id=3)
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get("id");
+
+    if (!roomId) {
+      console.warn("No room ID found in URL.");
+      return;
+    }
 
     // 🔹 Fetch reserved date ranges from Laravel
     const response = await fetch(`https://greenlinklolasayong.site/api/booked-dates?room_id=${roomId}`);
     const bookedRanges = await response.json();
+
+    console.log("Fetched booked ranges:", bookedRanges);
 
     // 🗓️ Initialize Flatpickr Range Picker
     const checkInInput = document.getElementById("checkIn");
@@ -451,7 +460,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
 
           lastCheckIn = selectedDates[0];
-
           checkInInput.value = selectedDates[0].toISOString().split("T")[0];
           checkOutInput.value = selectedDates[1].toISOString().split("T")[0];
         }
@@ -463,16 +471,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (lastCheckIn) picker.setDate([lastCheckIn], false);
       picker.open();
     });
-
-    // 🌀 Optional: Reload disabled dates when room changes
-    if (roomSelect) {
-      roomSelect.addEventListener("change", async () => {
-        const newRoomId = roomSelect.value;
-        const response = await fetch(`https://greenlinklolasayong.site/api/booked-dates?room_id=${newRoomId}`);
-        const newBookedRanges = await response.json();
-        picker.set("disable", newBookedRanges);
-      });
-    }
 
   } catch (error) {
     console.error("Error loading booked dates:", error);
