@@ -171,6 +171,8 @@ const paxInput = document.getElementById('pax');
 const paxError = document.getElementById('paxError');
 const eventTypeInput = document.getElementById('event_type');
 const eventTypeError = document.getElementById('eventTypeError');
+const agreeCheckbox = document.getElementById("agreeCheckbox");
+const termsError = document.getElementById("termsError");
 
 fullnameInput.addEventListener("input", () => {
   fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, "");
@@ -183,6 +185,18 @@ phoneInput.addEventListener("input", () => {
 function validateForm() {
   let isValid = true;
 
+   // ✅ Terms and Conditions validation
+  if (!agreeCheckbox.checked) {
+    termsError.classList.remove("hidden");
+    isValid = false;
+  } else {
+    termsError.classList.add("hidden");
+  }
+
+  
+
+
+  // Full Name
   if (fullnameInput.value.trim() === "") {
     nameError.textContent = "Full name is required.";
     nameError.classList.remove("hidden");
@@ -209,14 +223,14 @@ function validateForm() {
     phoneInput.classList.remove("border-red-500");
   }
 
-if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailInput.value.trim())) {
-  emailError.classList.remove("hidden");
-  emailInput.classList.add("border-red-500");
-  isValid = false;
-} else {
-  emailError.classList.add("hidden");
-  emailInput.classList.remove("border-red-500");
-}
+  if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailInput.value.trim())) {
+    emailError.classList.remove("hidden");
+    emailInput.classList.add("border-red-500");
+    isValid = false;
+  } else {
+    emailError.classList.add("hidden");
+    emailInput.classList.remove("border-red-500");
+  }
 
   // Pax
 if (paxInput.value.trim() === '' || isNaN(paxInput.value) || paxInput.value <= 0) {
@@ -273,7 +287,7 @@ document.addEventListener("DOMContentLoaded", function () {
       eventData = await response.json(); // ✅ store it here
 
       // Populate dropdown
-      select.innerHTML = '<option value="" disabled selected>Select Event Type</option>';
+      select.innerHTML = '<option disabled selected>Select Event Type</option>';
       eventData.forEach((event) => {
         const option = document.createElement("option");
         option.value = event.id;
