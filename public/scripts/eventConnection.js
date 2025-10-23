@@ -265,6 +265,9 @@ function openTermsModal() {
 document.addEventListener("DOMContentLoaded", function () 
 {
   const select = document.getElementById("event_type");
+  const paxInput = document.getElementById("pax");
+  const paxError = document.getElementById("paxError");
+  let eventData = [];
 
   async function fetchEvents()
   {
@@ -287,6 +290,28 @@ document.addEventListener("DOMContentLoaded", function ()
     console.error("Error loading event types:", error);
     select.innerHTML = '<option disabled>Error loading event types</option>';
   }
+
+    // When event type changes
+  select.addEventListener("change", function () {
+    const selectedType = eventData.find(e => e.id == select.value);
+    if (selectedType) {
+      paxInput.max = selectedType.max_pax;
+      paxError.textContent = `Maximum allowed pax: ${selectedType.max_pax}`;
+      paxError.classList.remove("hidden");
+      paxInput.value = ""; // reset input
+    }
+  });
+
+    // Validate input against max pax
+  paxInput.addEventListener("input", function () {
+    const selectedType = eventData.find(e => e.id == select.value);
+    if (!selectedType) return;
+
+    if (paxInput.value > selectedType.max_pax) {
+      paxError.textContent = `Maximum allowed pax: ${selectedType.max_pax}`;
+      paxInput.value = selectedType.max_pax;
+    }
+  });
   }
 
   fetchEvents();

@@ -8,6 +8,7 @@ class EventSeederModel extends Model
 {
     protected $table = 'events';
     protected $fillable = [
-        'event_name'
+        'event_name',
+        'max_pax'
     ];
 }
