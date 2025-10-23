@@ -162,7 +162,7 @@ function openConfirmationModal() {
   const fullName = form.querySelector("input[name='full_name']").value;
   const pax = form.querySelector("select[name='pax']").value;
   const email = form.querySelector("input[name='email']").value;
-  const phone = form.querySelector("input[name='phone_number']").value;
+  const phone = form.querySelector("input[name='phone']").value;
 
   const nights = Math.max((checkOut - checkIn) / (1000 * 60 * 60 * 24), 1);
   const total = price * nights;
@@ -384,7 +384,8 @@ payNowBtn.addEventListener("click", (e) => {
     }
   });
 });
-document.addEventListener("DOMContentLoaded", () => {
+
+  document.addEventListener("DOMContentLoaded", () => {
   const fields = [
     document.getElementById("checkIn"), // date input
     document.getElementById("checkOut"), // date input
@@ -397,25 +398,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const checkbox = document.getElementById("agreeCheckbox");
   const reviewBtn = document.getElementById("reviewBookingBtn");
 
-  // Run once at start
-  checkForm();
 
-  function checkForm() {
-    const allFilled = fields.every(field => field && field.value.trim() !== "");
-    const agreed = checkbox && checkbox.checked;
-    reviewBtn.disabled = !(allFilled && agreed);
-  }
+  // 🗓️ When checkout changes (just safety check)
+  checkOut.addEventListener("change", () => {
+    const checkInDate = new Date(checkIn.value);
+    const checkOutDate = new Date(checkOut.value);
 
-  fields.forEach(field => {
-    if (field) {
-      field.addEventListener("input", checkForm);
-      field.addEventListener("change", checkForm);
+    // If checkout = checkin → push to next day
+    if (checkOutDate <= checkInDate) {
+      const nextDay = new Date(checkInDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      checkOutInput.value = nextDay.toISOString().split("T")[0];
     }
   });
-
-  if (checkbox) checkbox.addEventListener("change", checkForm);
-});
-
+  });
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     // ✅ Get roomId from URL (like booking.html?id=3)
@@ -426,6 +422,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.warn("No room ID found in URL.");
       return;
     }
+    
 
     // 🔹 Fetch reserved date ranges from Laravel
     const response = await fetch(`https://greenlinklolasayong.site/api/booked-dates?room_id=${roomId}`);
@@ -475,4 +472,89 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     console.error("Error loading booked dates:", error);
   }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const emailInput = document.getElementById("email");
+  const checkbox = document.getElementById("useDefaultEmail");
+  const fullnameInput = document.getElementById("fullname");
+  const nameError = document.getElementById("nameError");
+  const phoneInput = document.getElementById("phone");
+  const phoneError = document.getElementById("phoneError");
+  const emailError = document.getElementById("emailError");
+  const paxInput = document.getElementById("pax");
+  const paxError = document.getElementById("paxError");
+
+  // ✅ Checkbox autofill logic
+  if (checkbox && emailInput) {
+    checkbox.addEventListener("change", function () {
+      if (this.checked) {
+        emailInput.value = "usingemail@gmail.com";
+        emailInput.setAttribute("readonly", true);
+      } else {
+        emailInput.value = "";
+        emailInput.removeAttribute("readonly");
+      }
+    });
+  }
+
+  // ✅ Input restrictions
+  fullnameInput.addEventListener("input", () => {
+    fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, "");
+  });
+
+  phoneInput.addEventListener("input", () => {
+    phoneInput.value = phoneInput.value.replace(/[^0-9]/g, "");
+    if (phoneInput.value.length > 11) phoneInput.value = phoneInput.value.slice(0, 11);
+  });
+
+  window.validateForm = function () {
+  let isValid = true;
+
+  if (fullnameInput.value.trim() === "") {
+    nameError.textContent = "Full name is required.";
+    nameError.classList.remove("hidden");
+    fullnameInput.classList.add("border-red-500");
+    isValid = false;
+  } else {
+    nameError.classList.add("hidden");
+    fullnameInput.classList.remove("border-red-500");
+  }
+
+  if (!/^\d{11}$/.test(phoneInput.value.trim())) {
+    phoneError.classList.remove("hidden");
+    phoneInput.classList.add("border-red-500");
+    isValid = false;
+  } else {
+    phoneError.classList.add("hidden");
+    phoneInput.classList.remove("border-red-500");
+  }
+
+  if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailInput.value.trim())) {
+    emailError.classList.remove("hidden");
+    emailInput.classList.add("border-red-500");
+    isValid = false;
+  } else {
+    emailError.classList.add("hidden");
+    emailInput.classList.remove("border-red-500");
+  }
+
+  if (paxInput.value.trim() === "" || isNaN(paxInput.value) || paxInput.value <= 0) {
+    paxError.classList.remove("hidden");
+    paxInput.classList.add("border-red-500");
+    isValid = false;
+  } else {
+    paxError.classList.add("hidden");
+    paxInput.classList.remove("border-red-500");
+  }
+
+  // ✅ Insert this here:
+  if (!isValid) {
+    const firstError = document.querySelector('.border-red-500');
+    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return; // Stop here if not valid
+  }
+
+  openConfirmationModal(); // ✅ Only open if all fields are valid
+};
 });

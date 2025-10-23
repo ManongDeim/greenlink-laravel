@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -94,8 +94,9 @@
       <h2 class="mb-6 text-2xl font-semibold text-center">Booking Info</h2>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div class="relative">
-          <input type="text" name="full_name"  placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          <input id="fullname" type="text" name="full_name"  placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
           <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">Full Name</label>
+          <p id="nameError" class="hidden mt-1 text-sm text-red-600">Names can only include letters. Please try again.</p>
         </div>
 
         <div class="relative">
@@ -105,16 +106,29 @@
             <option value="2">2</option>
           </select>
           <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">Pax</label>
+          <p id="paxError" class="hidden mt-1 text-sm text-red-600">
+    Please select a valid number of pax.
+  </p>
         </div>
 
         <div class="relative">
-          <input type="email" name="email" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          <input id="email" type="email" name="email" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
           <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">E-mail</label>
-        </div>
+            <div class="absolute flex items-center -translate-y-1/2 right-3 top-1/2">
+              <input type="checkbox" id="useDefaultEmail"
+            class="w-4 h-4 text-teal-500 border-gray-300 rounded cursor-pointer focus:ring-teal-500"
+            title="Use default email" /> 
+           </div>
+           <p id="emailError" class="hidden mt-1 text-sm text-red-600">Please enter a valid email address (e.g. name@gmail.com).</p></div>
+       
+        
 
         <div class="relative">
-          <input type="tel" name="phone_number" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          <input id="phone" type="tel" name="phone" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
           <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">Phone No</label>
+          <p id="phoneError" class="hidden mt-1 text-sm text-red-600">
+    Please enter a valid phone number.
+  </p>
         </div>
       </div>
     </section>
@@ -128,7 +142,7 @@
     </label>
 
     <div class="flex justify-center mt-10 mb-12">
-      <button id="reviewBookingBtn" type="button" onclick="openConfirmationModal()" class="px-10 py-3 text-lg font-semibold text-white transition bg-teal-600 rounded-lg shadow-md hover:bg-teal-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+      <button type="button" onclick="validateForm()" class="px-10 py-3 text-lg font-semibold text-white transition bg-teal-600 rounded-lg shadow-md hover:bg-teal-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
         Review & Confirm Booking
       </button>
     </div>
