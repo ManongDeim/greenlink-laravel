@@ -209,14 +209,14 @@ function validateForm() {
     phoneInput.classList.remove("border-red-500");
   }
 
-  if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailInput.value.trim())) {
-    emailError.classList.remove("hidden");
-    emailInput.classList.add("border-red-500");
-    isValid = false;
-  } else {
-    emailError.classList.add("hidden");
-    emailInput.classList.remove("border-red-500");
-  }
+if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailInput.value.trim())) {
+  emailError.classList.remove("hidden");
+  emailInput.classList.add("border-red-500");
+  isValid = false;
+} else {
+  emailError.classList.add("hidden");
+  emailInput.classList.remove("border-red-500");
+}
 
   // Pax
 if (paxInput.value.trim() === '' || isNaN(paxInput.value) || paxInput.value <= 0) {
@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
       eventData = await response.json(); // ✅ store it here
 
       // Populate dropdown
-      select.innerHTML = '<option disabled selected>Select Event Type</option>';
+      select.innerHTML = '<option value="" disabled selected>Select Event Type</option>';
       eventData.forEach((event) => {
         const option = document.createElement("option");
         option.value = event.id;
