@@ -9,25 +9,31 @@
 </head>
 
 <body class="min-h-screen font-sans bg-gray-50">
-  <!-- Header -->
-  <header class="flex items-center justify-between px-8 py-3 bg-white shadow-md">
-    <div class="flex items-center gap-8">
-      <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo" class="object-contain w-auto h-16">
-      <h1 class="text-2xl font-semibold text-teal-700">Customer Dashboard</h1>
+<!-- Header -->
+  <header class="relative flex items-center justify-between px-8 py-3 shadow-md bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500">
+    <!-- Left: Logo + Navigation -->
+    <div class="flex items-center gap-10">
+      <!-- Logo -->
+     <a href="../homePage.html">
+    <img src="../src/Pictures/LogoLolasayong2.png" alt="Logo"class="object-contain w-auto h-20 transition-transform duration-300 cursor-pointer hover:scale-105 hover:drop-shadow-lg">
+      </a>
+
+      <!-- Navigation -->
+      <nav class="flex gap-6 text-lg font-medium">
+        <a href="../homePage.html" class="text-white transition hover:text-gray-200">Home</a>
+        <a onclick="openReserModal()" class="text-white transition hover:text-gray-200">Booking</a>
+        <a onclick="openOrderModal()" class="text-white transition hover:text-gray-200">Order</a>
+      </nav>
     </div>
 
-    <!-- Right: Login / Dashboard Button -->
-    <div id="auth-section" class="flex items-center gap-4">
-      <button onclick="window.location.href='../index.html'" 
-        class="px-4 py-2 text-white transition bg-teal-600 rounded-full shadow hover:bg-teal-700">
-        Home
-      </button>
-      <a id="loginBtn"
-        class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm cursor-pointer hover:bg-gray-100">
-        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
-        <span class="text-sm font-medium">Log-in</span>
-      </a>
-    </div>
+        <!-- Right: Auth Section -->
+<div id="auth-section" class="flex items-center">
+  <a id="loginBtn"
+     class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm hover:bg-gray-100">
+    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
+    <span class="text-sm font-medium">Log-in</span>
+  </a>
+</div>
   </header>
 
   <!-- Dashboard Layout -->
