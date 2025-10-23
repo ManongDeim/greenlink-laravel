@@ -260,35 +260,59 @@ function openTermsModal() {
       openPaymentModal();
     }
 
-// Event Type Seeder
-
-document.addEventListener("DOMContentLoaded", function () 
-{
+// --- Event Type Seeder + Max Pax Limiter ---
+document.addEventListener("DOMContentLoaded", function () {
   const select = document.getElementById("event_type");
+  const paxInput = document.getElementById("pax");
+  const paxError = document.getElementById("paxError");
+  let eventData = [];
 
-  async function fetchEvents()
-  {
-    try
-  {
-    const response = await fetch('https://greenlinklolasayong.site/api/events');
-    const eventTypes = await response.json();
+  async function fetchEvents() {
+    try {
+      const response = await fetch("https://greenlinklolasayong.site/api/events");
+      eventData = await response.json(); // ✅ store it here
 
-    select.innerHTML = '<option disabled selected>Select Event Type</option>';
-
-    eventTypes.forEach(event => 
-    {
-      const option = document.createElement("option");
-      option.value = event.id;
-      option.textContent = event.event_name;
-      select.appendChild(option);
-    });
-  } catch (error)
-  {
-    console.error("Error loading event types:", error);
-    select.innerHTML = '<option disabled>Error loading event types</option>';
+      // Populate dropdown
+      select.innerHTML = '<option disabled selected>Select Event Type</option>';
+      eventData.forEach((event) => {
+        const option = document.createElement("option");
+        option.value = event.id;
+        option.textContent = event.event_name;
+        select.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error loading event types:", error);
+      select.innerHTML = '<option disabled>Error loading event types</option>';
+    }
   }
-  }
+
+  // When user selects an event type
+  select.addEventListener("change", function () {
+    const selectedType = eventData.find((e) => e.id == select.value);
+    if (selectedType) {
+      paxInput.max = selectedType.max_pax; // ✅ set HTML max attribute
+      paxError.textContent = `Maximum allowed pax: ${selectedType.max_pax}`;
+      paxError.classList.remove("hidden");
+      paxInput.value = ""; // reset pax input
+    }
+  });
+
+  // When user types pax
+  paxInput.addEventListener("input", function () {
+    const selectedType = eventData.find((e) => e.id == select.value);
+    if (!selectedType) return;
+
+    const max = parseInt(selectedType.max_pax);
+    const val = parseInt(paxInput.value);
+
+    if (val > max) {
+      paxInput.value = max; // ✅ enforce limit
+      paxError.textContent = `Maximum allowed pax: ${max}`;
+      paxError.classList.remove("hidden");
+    } else {
+      paxError.classList.add("hidden");
+    }
+  });
 
   fetchEvents();
-
 });

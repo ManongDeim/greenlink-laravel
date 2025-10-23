@@ -51,6 +51,7 @@ Route::get('/logout', function () {
 Route::get('/auth-status', function () {
     return response()->json([
         'logged_in' => Auth::check(),
+        'email' => Auth::check() ? Auth::user()->email : null
     ]);
 });
 

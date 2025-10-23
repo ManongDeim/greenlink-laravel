@@ -7,7 +7,15 @@ document.addEventListener("DOMContentLoaded", async function () {
   try {
     const response = await fetch("/auth-status");
     const data = await response.json();
+
     window.isLoggedIn = data.logged_in;
+
+    if(data.logged_in && data.email)
+      {
+        window.currentUser = { email: data.email };
+        localStorage.setItem("userEmail", data.email);
+        console.log("Logged in as:", data.email);
+      }
   } catch (error) {
     console.error("Error fetching auth status:", error);
   }
