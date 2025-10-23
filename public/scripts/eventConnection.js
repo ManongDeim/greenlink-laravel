@@ -44,43 +44,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-// --- For Event Reservation ---
-async function sendReservation() {
-  let formE1 = document.getElementById("eventBookingForm");
-  let form = new FormData(formE1);
-
-  try {
-    let response = await fetch("http://greenlinklolasayong.site/laravel/api/eventReservation", {
-      method: "POST",
-      body: form
-    });
-
-    if (!response.ok) {
-      throw new Error("HTTP error! Status: " + response.status);
-    }
-
-    let result = await response.json();
-    showAlert("✅ " + result.message + " ");
-    console.log("Success:", result);
-
-    // Clear form after success
-    formE1.reset();
-
-    // Close modal after success
-    closeConfirmationModal();
-  } catch (error) {
-    console.error("Error:", error);
-    showAlert("❌ An error occurred. Please try again." + error.message);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("confirmBtn").addEventListener("click", () => {
-    console.log("Confirm clicked");
-    sendReservation();
-  });
-});
-
 
 // --- Modals ---
 function openReserModal() {
@@ -297,4 +260,35 @@ function openTermsModal() {
       openPaymentModal();
     }
 
+// Event Type Seeder
 
+document.addEventListener("DOMContentLoaded", function () 
+{
+  const select = document.getElementById("event_type");
+
+  async function fetchEvents()
+  {
+    try
+  {
+    const response = await fetch('https://greenlinklolasayong.site/api/events');
+    const eventTypes = await response.json();
+
+    select.innerHTML = '<option disabled selected>Select Event Type</option>';
+
+    eventTypes.forEach(event => 
+    {
+      const option = document.createElement("option");
+      option.value = event.id;
+      option.textContent = event.event_name;
+      select.appendChild(option);
+    });
+  } catch (error)
+  {
+    console.error("Error loading event types:", error);
+    select.innerHTML = '<option disabled>Error loading event types</option>';
+  }
+  }
+
+  fetchEvents();
+
+});

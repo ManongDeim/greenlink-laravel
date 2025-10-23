@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\FoodOrderController;
 use App\Http\Controllers\Api\EventAdminReservationController;
 use App\Http\Controllers\Api\FarmProductController;
 use App\Http\Controllers\Api\FoodProductController;
+use App\Http\Controllers\Api\EventSeederController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 
@@ -92,3 +93,6 @@ Route::get('/paymentSuccess', [RoomController::class, 'paymentSuccess']);
 Route::get('/paymentFailed', [RoomController::class, 'paymentFailed']);
 Route::get('roomReser', [RoomController::class, 'index']);
 Route::get('/booked-dates', [RoomController::class, 'getBookedDates']);
+
+// Event Seeder Routes
+Route::get('events', [EventSeederController::class, 'index']);
