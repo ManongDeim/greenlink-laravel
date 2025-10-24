@@ -60,96 +60,126 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 const foodCardTemplate = item => `
-    <div class="p-4 transition bg-white justify-between shadow rounded-2xl hover:shadow-lg w-full">
-    <img src="${item.productPicture}" alt="${item.productName}" class="object-cover w-full h-48 mb-4 rounded-lg">
-    
-    <h3 class="text-lg font-bold text-gray-800">${item.productName}</h3>
-    <p class="text-sm text-gray-600 mb-2">
+  <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
+    <img src="${item.productPicture}" alt="${item.productName}" 
+      class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
+
+    <h3 class="text-lg font-semibold text-gray-800 mb-1">${item.productName}</h3>
+    <p class="text-sm text-gray-600 mb-1">
       Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
     <p class="text-sm text-gray-600">
       Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span>
     </p>
 
-    <div class="flex flex-wrap gap-2 mt-4">
+    <!-- Button Group -->
+    <div class="grid grid-cols-2 gap-3 mt-5">
       <!-- Edit Name -->
       <button
-        class="flex-1 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500"
         onclick="editName(${item.id})"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl shadow-sm hover:from-teal-600 hover:to-teal-700 transition-all duration-300 active:scale-95"
       >
-        Edit Name
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2M12 5v14m7 0H5"/>
+        </svg>
+        <span>Edit Name</span>
       </button>
 
       <!-- Edit Price -->
       <button
-        class="flex-1 px-4 py-2 text-teal-700 bg-teal-100 rounded-lg hover:bg-teal-200 focus:ring-2 focus:ring-teal-400"
         onclick="editPrice(${item.id})"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-100 to-teal-100 text-teal-700 rounded-xl shadow-sm hover:from-cyan-200 hover:to-teal-200 transition-all duration-300 active:scale-95"
       >
-        Edit Price
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:-rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3v1h6v-1c0-1.657-1.343-3-3-3z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14v6H5z"/>
+        </svg>
+        <span>Edit Price</span>
       </button>
 
       <!-- Add Photo -->
       <button
-        class="flex-1 px-4 py-2 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500"
         onclick="addPhoto(${item.id})"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl shadow-sm hover:from-emerald-600 hover:to-green-700 transition-all duration-300 active:scale-95"
       >
-        Add Photo
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>Add Photo</span>
       </button>
 
       <!-- Remove Photo -->
       <button
-        class="flex-1 px-4 py-2 text-white bg-rose-600 rounded-lg hover:bg-rose-700 focus:ring-2 focus:ring-rose-500"
         onclick="removePhoto(${item.id})"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-red-600 text-white rounded-xl shadow-sm hover:from-rose-600 hover:to-red-700 transition-all duration-300 active:scale-95"
       >
-        Remove Photo
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:rotate-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+        <span>Remove Photo</span>
       </button>
     </div>
   </div>
 `;
 
 const farmCardTemplate = item => `
-  <div class="p-4 transition bg-white justify-between shadow rounded-2xl hover:shadow-lg w-full">
-    <img src="${item.productPicture}" alt="${item.productName}" class="object-cover w-full h-48 mb-4 rounded-lg">
-    
-    <h3 class="text-lg font-bold text-gray-800">${item.productName}</h3>
-    <p class="text-sm text-gray-600 mb-2">
+  <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
+    <img src="${item.productPicture}" alt="${item.productName}" 
+      class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
+
+    <h3 class="text-lg font-semibold text-gray-800 mb-1">${item.productName}</h3>
+    <p class="text-sm text-gray-600 mb-1">
       Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
     <p class="text-sm text-gray-600">
       Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span>
     </p>
 
-    <div class="flex flex-wrap gap-2 mt-4">
+    <!-- Button Grid -->
+    <div class="grid grid-cols-2 gap-3 mt-5">
       <!-- Edit Name -->
       <button
-        class="flex-1 px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500"
         onclick="editFarmName(${item.id})"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl shadow-sm hover:from-teal-600 hover:to-teal-700 transition-all duration-300 active:scale-95"
       >
-        Edit Name
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2M12 5v14m7 0H5"/>
+        </svg>
+        <span>Edit Name</span>
       </button>
 
       <!-- Edit Price -->
       <button
-        class="flex-1 px-4 py-2 text-teal-700 bg-teal-100 rounded-lg hover:bg-teal-200 focus:ring-2 focus:ring-teal-400"
         onclick="editFarmPrice(${item.id})"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-100 to-teal-100 text-teal-700 rounded-xl shadow-sm hover:from-cyan-200 hover:to-teal-200 transition-all duration-300 active:scale-95"
       >
-        Edit Price
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:-rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3v1h6v-1c0-1.657-1.343-3-3-3z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14v6H5z"/>
+        </svg>
+        <span>Edit Price</span>
       </button>
 
-      <!-- Add Photo -->
+      <!-- Replace Picture -->
       <button
-        class="flex-1 px-4 py-2 text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500"
-        onclick="addFarmPhoto(${item.id})"
+        onclick="replaceFarmPhoto(${item.id})"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-xl shadow-sm hover:from-amber-600 hover:to-yellow-700 transition-all duration-300 active:scale-95"
       >
-        Add Photo
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v16h16V4H4zm4 4l8 8m0-8l-8 8"/>
+        </svg>
+        <span>Replace Picture</span>
       </button>
 
-      <!-- Remove Photo -->
+      <!-- Add Stock -->
       <button
-        class="flex-1 px-4 py-2 text-white bg-rose-600 rounded-lg hover:bg-rose-700 focus:ring-2 focus:ring-rose-500"
-        onclick="removeFarmPhoto(${item.id})"
+        onclick="addFarmStock(${item.id})"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl shadow-sm hover:from-emerald-600 hover:to-green-700 transition-all duration-300 active:scale-95"
       >
-        Remove Photo
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:rotate-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>Add Stock</span>
       </button>
     </div>
   </div>
