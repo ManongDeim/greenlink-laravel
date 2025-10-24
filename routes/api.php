@@ -35,9 +35,6 @@ Route::middleware(['auth:sanctum'])->get('/user-info', function (Request $reques
 
 
 Route::post('cottageReservation', [RoomController::class, 'store']);
-
-Route::post('eventReservation', [EventController::class, 'store']);
-
 Route::post('foodOrder', [FoodOrderController::class, 'store']);
 
 
@@ -96,3 +93,7 @@ Route::get('/booked-dates', [RoomController::class, 'getBookedDates']);
 
 // Event Seeder Routes
 Route::get('events', [EventSeederController::class, 'index']);
+
+// Event Routes
+
+Route::middleware('auth:sanctum')->post('/event-reservations', [EventController::class, 'store']);

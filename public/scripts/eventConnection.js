@@ -93,23 +93,33 @@ function openConfirmationModal() {
 
   const start_date = form.querySelector("input[name='start_date']").value;
   const end_date = form.querySelector("input[name='end_date']").value;
+  const start_time = form.querySelector("input[name='start_time']").value;
+  const end_time = form.querySelector("input[name='end_time']").value;
   const fullName = form.querySelector("input[name='full_name']").value;
-  const event_type = form.querySelector("select[name='event_type']").value;
+  const event_type_id = form.querySelector("select[name='event_type']").value;
   const pax = form.querySelector("input[name='pax']").value;
   const email = form.querySelector("input[name='email']").value;
   const phone = form.querySelector("input[name='phone']").value;
   const to_bring = form.querySelector("textarea[name='to_bring']").value;
 
+  // ✅ Find event name using stored eventData (from fetchEvents)
+  let event_name = "Unknown Event";
+  if (window.eventData && window.eventData.length > 0) {
+    const selectedEvent = window.eventData.find(e => e.id == event_type_id);
+    if (selectedEvent) event_name = selectedEvent.event_name;
+  }
+
+  // ✅ Build summary with times and proper event name
   const summaryHtml = `
-    <p><strong>Check-In:</strong> ${start_date}</p>
-    <p><strong>Check-Out:</strong> ${end_date}</p>
+    <p><strong>Check-In:</strong> ${start_date} (${start_time})</p>
+    <p><strong>Check-Out:</strong> ${end_date} (${end_time})</p>
     <p><strong>Full Name:</strong> ${fullName}</p>
-    <p><strong>Event Type:</strong> ${event_type}</p>
+    <p><strong>Event Type:</strong> ${event_name}</p>
     <p><strong>Pax:</strong> ${pax}</p>
     <p><strong>Email:</strong> ${email}</p>
     <p><strong>Phone:</strong> ${phone}</p>
-    <p><strong>Things to be brought:</strong> ${to_bring}</p>
-    `;
+    <p><strong>Things to be brought:</strong> ${to_bring || "None"}</p>
+  `;
 
   document.getElementById("confirmationSummary").innerHTML = summaryHtml;
   document.getElementById("confirmationModal").classList.remove("hidden");
@@ -307,6 +317,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const response = await fetch("https://greenlinklolasayong.site/api/events");
       eventData = await response.json(); // ✅ store it here
+      window.eventData = eventData;
 
       // Populate dropdown
       select.innerHTML = '<option disabled selected>Select Event Type</option>';
@@ -352,3 +363,66 @@ document.addEventListener("DOMContentLoaded", function () {
 
   fetchEvents();
 });
+
+// Store and send to database
+
+document.getElementById("confirmBtn").addEventListener("click", async function () {
+  const form = document.getElementById("eventBookingForm");
+
+  const payload = {
+    event_id: form.querySelector("select[name='event_type']").value,
+    start_datetime: combineDateTime(
+      form.querySelector("input[name='start_date']").value,
+      form.querySelector("input[name='start_time']").value
+    ),
+    end_datetime: combineDateTime(
+      form.querySelector("input[name='end_date']").value,
+      form.querySelector("input[name='end_time']").value
+    ),
+    full_name: form.querySelector("input[name='full_name']").value,
+    event_type: getEventName(form.querySelector("select[name='event_type']").value),
+    email: form.querySelector("input[name='email']").value,
+    phone_number: form.querySelector("input[name='phone']").value,
+    pax: form.querySelector("input[name='pax']").value,
+    to_bring: form.querySelector("textarea[name='to_bring']").value,
+  };
+
+  try {
+    const response = await fetch("https://greenlinklolasayong.site/api/event-reservations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      credentials: "include", // ✅ send session cookie for authentication
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("✅ Reservation submitted successfully!");
+      closeConfirmationModal();
+      form.reset();
+    } else {
+      alert("❌ Error: " + (data.message || "Something went wrong"));
+    }
+  } catch (error) {
+    console.error("Error submitting reservation:", error);
+    alert("⚠️ Network error. Please try again.");
+  }
+});
+
+// 🧩 Helper: Combine date + time into MySQL DATETIME
+function combineDateTime(date, time) {
+  return `${date} ${time}:00`;
+}
+
+// 🧩 Helper: Get event name from global eventData
+function getEventName(eventId) {
+  if (window.eventData) {
+    const event = window.eventData.find((e) => e.id == eventId);
+    return event ? event.event_name : "Unknown";
+  }
+  return "Unknown";
+}
