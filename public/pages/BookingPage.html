@@ -112,16 +112,23 @@
         </div>
 
         <div class="relative">
-          <input id="email" type="email" name="email" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">E-mail</label>
-            <div class="absolute flex items-center -translate-y-1/2 right-3 top-1/2">
-              <input type="checkbox" id="useDefaultEmail"
-            class="w-4 h-4 text-teal-500 border-gray-300 rounded cursor-pointer focus:ring-teal-500"
-            title="Use default email" /> 
-           </div>
-           <p id="emailError" class="hidden mt-1 text-sm text-red-600">Please enter a valid email address (e.g. name@mail.com).</p></div>
-       
-        
+  <!-- Input + label + checkbox grouped separately -->
+        <div class="relative">
+          <input id="email" type="email" name="email" placeholder=" "
+          class="w-full px-4 pr-10 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+          <label for="email"
+          class="absolute text-sm text-gray-500 transition-all left-4 top-2">E-mail
+          </label>
+
+    <!-- Checkbox stays fixed inside input -->
+            <input type="checkbox" id="useDefaultEmail" title="Use default email"
+            class="absolute top-1/2 right-3 -translate-y-1/2 w-4 h-4 text-teal-500 border-gray-300 rounded cursor-pointer focus:ring-teal-500"/>
+          </div>
+
+  <!-- Error message won't affect checkbox position -->
+          <p id="emailError" class="hidden mt-1 text-sm text-red-600">
+           Please enter a valid email address (e.g. name@mail.com).</p>
+          </div>
 
         <div class="relative">
           <input id="phone" type="tel" name="phone" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
@@ -140,6 +147,7 @@
         <a href="#" onclick="openTermsModal()" class="font-medium text-teal-600 hover:underline">Terms and Conditions</a>
       </span>
     </label>
+    <p id="termsError" class="text-red-500 text-sm text-center mt-1 hidden"> You must agree to the terms and conditions.</p>
 
     <div class="flex justify-center mt-10 mb-12">
       <button type="button" onclick="validateForm()" class="px-10 py-3 text-lg font-semibold text-white transition bg-teal-600 rounded-lg shadow-md hover:bg-teal-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -181,13 +189,13 @@
       <p>Minor offense: Verbal warning.<br>Moderate offense: Verbal warning and offense fee.<br>Major offense: Kick-out or ban from the camp.</p>
 
       <h4 class="mt-4 font-semibold">3. Booking Confirmation</h4>
-      <p>Your booking or order is confirmed only after full or partial payment. If GCash is under maintenance, you may choose "Reserve Now, Pay Later" within 24 hours.</p>
+      <p>Your booking or order is confirmed only after full or partial payment.</p>
 
       <h4 class="mt-4 font-semibold">4. Payments</h4>
-      <p>Payments can be made through GCash or cash on arrival. Prices are in PHP and may include taxes.</p>
+      <p>Payments can be made through GCash. Prices are in PHP and may include taxes.</p>
 
       <h4 class="mt-4 font-semibold">5. Cancellation Policy</h4>
-      <p>Cancellations made at least 3 days before booking date are fully refundable. Less than 3 days are non-refundable.</p>
+      <p>Cancellations made at least 1 day/s before booking date are fully refundable. Less than 1 day/s are non-refundable.</p>
 
       <h4 class="mt-4 font-semibold">6. Check-In and Use of Services</h4>
       <p>Arrive at the time provided in your confirmation email and follow camp rules during your stay.</p>

@@ -198,13 +198,26 @@ const nameError = document.getElementById("nameError");
 const phoneInput = document.getElementById("phone");
 const phoneError = document.getElementById("phoneError");
 const emailInput = document.getElementById("email");
-const emailError = document.getElementById("emailError");
+const useDefaultEmail = document.getElementById("useDefaultEmail");
 const paxInput = document.getElementById('pax');
 const paxError = document.getElementById('paxError');
 const eventTypeInput = document.getElementById('event_type');
 const eventTypeError = document.getElementById('eventTypeError');
 const agreeCheckbox = document.getElementById("agreeCheckbox");
 const termsError = document.getElementById("termsError");
+
+ // ✅ Checkbox autofill logic
+  if (useDefaultEmail && emailInput) {
+  useDefaultEmail.addEventListener("change", function () {
+    if (this.checked) {
+      emailInput.value = "using@email.com"; // ✅ default email
+      emailInput.setAttribute("readonly", true); // lock the input
+    } else {
+      emailInput.value = ""; // clear it when unchecked
+      emailInput.removeAttribute("readonly"); // unlock input
+    }
+    });
+  }
 
 fullnameInput.addEventListener("input", () => {
   fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, "");
@@ -255,7 +268,7 @@ function validateForm() {
     phoneInput.classList.remove("border-red-500");
   }
 
-  if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailInput.value.trim())) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailInput.value.trim())) {
     emailError.classList.remove("hidden");
     emailInput.classList.add("border-red-500");
     isValid = false;
@@ -320,7 +333,7 @@ document.addEventListener("DOMContentLoaded", function () {
       window.eventData = eventData;
 
       // Populate dropdown
-      select.innerHTML = '<option disabled selected>Select Event Type</option>';
+      select.innerHTML = '<option value="" disabled selected>Select Event Type</option>';
       eventData.forEach((event) => {
         const option = document.createElement("option");
         option.value = event.id;
