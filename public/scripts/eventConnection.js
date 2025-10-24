@@ -17,8 +17,11 @@ document.addEventListener("DOMContentLoaded", function () {
   function initFlatpickr() {
     const rangePicker = flatpickr(startInput, {
       mode: "range",
-      dateFormat: "Y-m-d",
-      minDate: "today",
+      enableTime: true,                // ✅ Enable time picker
+      time_24hr: true,                 // 24-hour format
+      dateFormat: "Y-m-d H:i",         // Format includes date + time
+      minDate: "today",                // No past dates
+      minuteIncrement: 15,             // Optional: step for time
       showMonths: 2,
       onClose: function (selectedDates) {
         if (selectedDates.length === 2) {
@@ -30,12 +33,13 @@ document.addEventListener("DOMContentLoaded", function () {
             selectedDates[1] = nextDay;
           }
           lastStart = selectedDates[0];
-          startInput.value = selectedDates[0].toLocaleDateString();
-          endInput.value = selectedDates[1].toLocaleDateString();
+          startInput.value = flatpickr.formatDate(selectedDates[0], "Y-m-d H:i");
+          endInput.value = flatpickr.formatDate(selectedDates[1], "Y-m-d H:i");
         }
       }
     });
 
+    // When clicking the end field, reopen range picker starting from last start
     endInput.addEventListener("click", () => {
       if (lastStart) rangePicker.setDate([lastStart], false);
       rangePicker.open();
@@ -171,6 +175,8 @@ const paxInput = document.getElementById('pax');
 const paxError = document.getElementById('paxError');
 const eventTypeInput = document.getElementById('event_type');
 const eventTypeError = document.getElementById('eventTypeError');
+const agreeCheckbox = document.getElementById("agreeCheckbox");
+const termsError = document.getElementById("termsError");
 
 fullnameInput.addEventListener("input", () => {
   fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, "");
@@ -183,6 +189,18 @@ phoneInput.addEventListener("input", () => {
 function validateForm() {
   let isValid = true;
 
+   // ✅ Terms and Conditions validation
+  if (!agreeCheckbox.checked) {
+    termsError.classList.remove("hidden");
+    isValid = false;
+  } else {
+    termsError.classList.add("hidden");
+  }
+
+  
+
+
+  // Full Name
   if (fullnameInput.value.trim() === "") {
     nameError.textContent = "Full name is required.";
     nameError.classList.remove("hidden");

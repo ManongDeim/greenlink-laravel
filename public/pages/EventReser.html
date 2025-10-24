@@ -52,19 +52,19 @@
 <form id="eventBookingForm" class="max-w-2xl p-6 mx-auto mt-8 space-y-6 bg-white shadow-md rounded-xl">
 
   <!-- ✅ Replaced with Flatpickr Calendar -->
-  <div class="flex flex-wrap justify-center gap-4 p-6 mt-6 ">
-    <div class="flex flex-col">
-      <label class="mb-1 font-medium text-gray-700">Start Date</label>
-      <input id="startDate" name="start_date" type="text" readonly placeholder="Select start date"
-        class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-    </div>
-
-    <div class="flex flex-col">
-      <label class="mb-1 font-medium text-gray-700">End Date</label>
-      <input id="endDate" name="end_date" type="text" readonly placeholder="Select end date"
-        class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-    </div>
+  <div class="flex flex-wrap justify-center gap-4 p-6 mt-6">
+  <div class="flex flex-col">
+    <label class="mb-1 font-medium text-gray-700">Start Date & Time</label>
+    <input id="startDate" name="start_date" type="text" readonly placeholder="Select start date & time"
+      class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
   </div>
+
+  <div class="flex flex-col">
+    <label class="mb-1 font-medium text-gray-700">End Date & Time</label>
+    <input id="endDate" name="end_date" type="text" readonly placeholder="Select end date & time"
+      class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+  </div>
+</div>
 
   <!-- Booking Info -->
   <section class="space-y-4">
@@ -135,6 +135,7 @@
         <a href="#" onclick="openTermsModal()" class="font-medium text-teal-600 hover:underline">Terms and Conditions</a>
       </span>
     </label>
+    <p id="termsError" class="text-red-500 text-sm text-center mt-1 hidden"> You must agree to the terms and conditions.</p>
 
 
   <!-- Submit Button -->
