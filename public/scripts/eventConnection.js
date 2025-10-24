@@ -1,10 +1,11 @@
 // ✅ --- Flatpickr Date Range Replacement ---
 document.addEventListener("DOMContentLoaded", function () {
-  const startInput = document.getElementById("startDate");
-  const endInput = document.getElementById("endDate");
-  let lastStart = null;
+  const startDateInput = document.getElementById("startDate");
+  const endDateInput = document.getElementById("endDate");
+  const startTimeInput = document.getElementById("startTime");
+  const endTimeInput = document.getElementById("endTime");
 
-  // Load Flatpickr dynamically if not already included
+  // Dynamically load Flatpickr if not yet included
   if (typeof flatpickr === "undefined") {
     const flatpickrScript = document.createElement("script");
     flatpickrScript.src = "https://cdn.jsdelivr.net/npm/flatpickr";
@@ -15,37 +16,54 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function initFlatpickr() {
-    const rangePicker = flatpickr(startInput, {
+    // ✅ Calendar for date range
+    const datePicker = flatpickr(startDateInput, {
       mode: "range",
-      enableTime: true,                // ✅ Enable time picker
-      time_24hr: true,                 // 24-hour format
-      dateFormat: "Y-m-d H:i",         // Format includes date + time
-      minDate: "today",                // No past dates
-      minuteIncrement: 15,             // Optional: step for time
+      dateFormat: "Y-m-d",
+      minDate: "today",
       showMonths: 2,
       onClose: function (selectedDates) {
         if (selectedDates.length === 2) {
-          // Auto-extend 1 day if same start/end selected
+          // Handle same start & end date
           if (selectedDates[1].getTime() === selectedDates[0].getTime()) {
             const nextDay = new Date(selectedDates[0]);
             nextDay.setDate(nextDay.getDate() + 1);
-            rangePicker.setDate([selectedDates[0], nextDay], true);
+            datePicker.setDate([selectedDates[0], nextDay], true);
             selectedDates[1] = nextDay;
           }
-          lastStart = selectedDates[0];
-          startInput.value = flatpickr.formatDate(selectedDates[0], "Y-m-d H:i");
-          endInput.value = flatpickr.formatDate(selectedDates[1], "Y-m-d H:i");
+
+          // Fill start & end date fields
+          startDateInput.value = flatpickr.formatDate(selectedDates[0], "Y-m-d");
+          endDateInput.value = flatpickr.formatDate(selectedDates[1], "Y-m-d");
         }
       }
     });
 
-    // When clicking the end field, reopen range picker starting from last start
-    endInput.addEventListener("click", () => {
-      if (lastStart) rangePicker.setDate([lastStart], false);
-      rangePicker.open();
+    // ✅ Separate time picker for start time
+    flatpickr(startTimeInput, {
+      enableTime: true,
+      noCalendar: true,
+      time_24hr: true,
+      dateFormat: "H:i",
+      minuteIncrement: 5
+    });
+
+    // ✅ Separate time picker for end time
+    flatpickr(endTimeInput, {
+      enableTime: true,
+      noCalendar: true,
+      time_24hr: true,
+      dateFormat: "H:i",
+      minuteIncrement: 5
+    });
+
+    // Reopen range picker when clicking end date field
+    endDateInput.addEventListener("click", () => {
+      datePicker.open();
     });
   }
 });
+
 
 
 
