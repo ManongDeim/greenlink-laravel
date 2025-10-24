@@ -52,19 +52,36 @@
 <form id="eventBookingForm" class="max-w-2xl p-6 mx-auto mt-8 space-y-6 bg-white shadow-md rounded-xl">
 
   <!-- ✅ Replaced with Flatpickr Calendar -->
-  <div class="flex flex-wrap justify-center gap-4 p-6 mt-6">
+<div class="flex flex-wrap justify-center gap-4 p-6 mt-6">
+  <!-- Start Date -->
   <div class="flex flex-col">
-    <label class="mb-1 font-medium text-gray-700">Start Date & Time</label>
-    <input id="startDate" name="start_date" type="text" readonly placeholder="Select start date & time"
+    <label class="mb-1 font-medium text-gray-700">Start Date</label>
+    <input id="startDate" name="start_date" type="text" readonly placeholder="Select start date"
       class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
   </div>
 
+  <!-- End Date -->
   <div class="flex flex-col">
-    <label class="mb-1 font-medium text-gray-700">End Date & Time</label>
-    <input id="endDate" name="end_date" type="text" readonly placeholder="Select end date & time"
+    <label class="mb-1 font-medium text-gray-700">End Date</label>
+    <input id="endDate" name="end_date" type="text" readonly placeholder="Select end date"
+      class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+  </div>
+
+  <!-- Start Time -->
+  <div class="flex flex-col">
+    <label class="mb-1 font-medium text-gray-700">Start Time</label>
+    <input id="startTime" name="start_time" type="text" readonly placeholder="Select start time"
+      class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+  </div>
+
+  <!-- End Time -->
+  <div class="flex flex-col">
+    <label class="mb-1 font-medium text-gray-700">End Time</label>
+    <input id="endTime" name="end_time" type="text" readonly placeholder="Select end time"
       class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
   </div>
 </div>
+
 
   <!-- Booking Info -->
   <section class="space-y-4">
@@ -90,16 +107,31 @@
   </p>
     </div>
 
-    <!-- Email -->
-    <div>
-      <label for="email" class="block mb-1 font-medium text-gray-700">E-mail</label>
-      <input type="email" name="email" id="email" placeholder="name@mail.com"
-        class="w-full px-3 py-2 text-sm transition border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600">
-       <p id="emailError" class="mt-1 text-sm text-red-600 hidden">
+    <div class="relative">
+  <label for="email" class="block mb-1 font-medium text-gray-700">E-mail</label>
+
+  <!-- Wrap input + checkbox in a relative container -->
+  <div class="relative">
+    <input
+      id="email"
+      type="email"
+      name="email"
+      class="w-full px-3 pr-10 py-2 text-sm transition border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600"
+    />
+
+    <!-- Absolutely centered checkbox -->
+    <input
+      type="checkbox"
+      id="useDefaultEmail"
+      title="Use default email"
+      class="absolute top-1/2 right-3 -translate-y-1/2 w-4 h-4 text-teal-500 border-gray-300 rounded cursor-pointer focus:ring-teal-500"
+    />
+  </div>
+
+  <p id="emailError" class="hidden mt-1 text-sm text-red-600">
     Please enter a valid email address (e.g. name@mail.com).
   </p>
-      </div>
-
+</div>
     <!-- Phone No -->
     <div>
       <label for="phone" class="block mb-1 font-medium text-gray-700">Phone No</label>
@@ -135,7 +167,7 @@
         <a href="#" onclick="openTermsModal()" class="font-medium text-teal-600 hover:underline">Terms and Conditions</a>
       </span>
     </label>
-    <p id="termsError" class="text-red-500 text-sm text-center mt-1 hidden"> You must agree to the terms and conditions.</p>
+    <p id="termsError" class="text-red-500 text-sm mt-1 text-center hidden"> You must agree to the terms and conditions.</p>
 
 
   <!-- Submit Button -->
@@ -255,13 +287,13 @@
       <p>Minor offense: Verbal warning.<br>Moderate offense: Verbal warning and offense fee.<br>Major offense: Kick-out or ban from the camp.</p>
 
       <h4 class="mt-4 font-semibold">3. Booking Confirmation</h4>
-      <p>Your booking or order is confirmed only after full or partial payment. If GCash is under maintenance, you may choose "Reserve Now, Pay Later" within 24 hours.</p>
+      <p>Your booking or order is confirmed only after full or partial payment.</p>
 
       <h4 class="mt-4 font-semibold">4. Payments</h4>
-      <p>Payments can be made through GCash or cash on arrival. Prices are in PHP and may include taxes.</p>
+      <p>Payments can be made through GCash. Prices are in PHP and may include taxes.</p>
 
       <h4 class="mt-4 font-semibold">5. Cancellation Policy</h4>
-      <p>Cancellations made at least 3 days before booking date are fully refundable. Less than 3 days are non-refundable.</p>
+      <p>Cancellations made at least 1/s day before booking date are fully refundable. Less than 1 day/s are non-refundable.</p>
 
       <h4 class="mt-4 font-semibold">6. Check-In and Use of Services</h4>
       <p>Arrive at the time provided in your confirmation email and follow camp rules during your stay.</p>
@@ -332,7 +364,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="../scripts/eventConnection.js"></script>
   <script src="../global_scripts/loginScript.js" defer></script>
+   <script src="../scripts/eventConnection.js"></script>
 </body>
 </html>

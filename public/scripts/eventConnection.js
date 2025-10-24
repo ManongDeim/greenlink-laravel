@@ -1,10 +1,11 @@
 // ✅ --- Flatpickr Date Range Replacement ---
 document.addEventListener("DOMContentLoaded", function () {
-  const startInput = document.getElementById("startDate");
-  const endInput = document.getElementById("endDate");
-  let lastStart = null;
+  const startDateInput = document.getElementById("startDate");
+  const endDateInput = document.getElementById("endDate");
+  const startTimeInput = document.getElementById("startTime");
+  const endTimeInput = document.getElementById("endTime");
 
-  // Load Flatpickr dynamically if not already included
+  // Dynamically load Flatpickr if not yet included
   if (typeof flatpickr === "undefined") {
     const flatpickrScript = document.createElement("script");
     flatpickrScript.src = "https://cdn.jsdelivr.net/npm/flatpickr";
@@ -15,37 +16,54 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function initFlatpickr() {
-    const rangePicker = flatpickr(startInput, {
+    // ✅ Calendar for date range
+    const datePicker = flatpickr(startDateInput, {
       mode: "range",
-      enableTime: true,                // ✅ Enable time picker
-      time_24hr: true,                 // 24-hour format
-      dateFormat: "Y-m-d H:i",         // Format includes date + time
-      minDate: "today",                // No past dates
-      minuteIncrement: 15,             // Optional: step for time
+      dateFormat: "Y-m-d",
+      minDate: "today",
       showMonths: 2,
       onClose: function (selectedDates) {
         if (selectedDates.length === 2) {
-          // Auto-extend 1 day if same start/end selected
+          // Handle same start & end date
           if (selectedDates[1].getTime() === selectedDates[0].getTime()) {
             const nextDay = new Date(selectedDates[0]);
             nextDay.setDate(nextDay.getDate() + 1);
-            rangePicker.setDate([selectedDates[0], nextDay], true);
+            datePicker.setDate([selectedDates[0], nextDay], true);
             selectedDates[1] = nextDay;
           }
-          lastStart = selectedDates[0];
-          startInput.value = flatpickr.formatDate(selectedDates[0], "Y-m-d H:i");
-          endInput.value = flatpickr.formatDate(selectedDates[1], "Y-m-d H:i");
+
+          // Fill start & end date fields
+          startDateInput.value = flatpickr.formatDate(selectedDates[0], "Y-m-d");
+          endDateInput.value = flatpickr.formatDate(selectedDates[1], "Y-m-d");
         }
       }
     });
 
-    // When clicking the end field, reopen range picker starting from last start
-    endInput.addEventListener("click", () => {
-      if (lastStart) rangePicker.setDate([lastStart], false);
-      rangePicker.open();
+    // ✅ Separate time picker for start time
+    flatpickr(startTimeInput, {
+      enableTime: true,
+      noCalendar: true,
+      time_24hr: true,
+      dateFormat: "H:i",
+      minuteIncrement: 5
+    });
+
+    // ✅ Separate time picker for end time
+    flatpickr(endTimeInput, {
+      enableTime: true,
+      noCalendar: true,
+      time_24hr: true,
+      dateFormat: "H:i",
+      minuteIncrement: 5
+    });
+
+    // Reopen range picker when clicking end date field
+    endDateInput.addEventListener("click", () => {
+      datePicker.open();
     });
   }
 });
+
 
 
 
@@ -75,23 +93,33 @@ function openConfirmationModal() {
 
   const start_date = form.querySelector("input[name='start_date']").value;
   const end_date = form.querySelector("input[name='end_date']").value;
+  const start_time = form.querySelector("input[name='start_time']").value;
+  const end_time = form.querySelector("input[name='end_time']").value;
   const fullName = form.querySelector("input[name='full_name']").value;
-  const event_type = form.querySelector("select[name='event_type']").value;
+  const event_type_id = form.querySelector("select[name='event_type']").value;
   const pax = form.querySelector("input[name='pax']").value;
   const email = form.querySelector("input[name='email']").value;
   const phone = form.querySelector("input[name='phone']").value;
   const to_bring = form.querySelector("textarea[name='to_bring']").value;
 
+  // ✅ Find event name using stored eventData (from fetchEvents)
+  let event_name = "Unknown Event";
+  if (window.eventData && window.eventData.length > 0) {
+    const selectedEvent = window.eventData.find(e => e.id == event_type_id);
+    if (selectedEvent) event_name = selectedEvent.event_name;
+  }
+
+  // ✅ Build summary with times and proper event name
   const summaryHtml = `
-    <p><strong>Check-In:</strong> ${start_date}</p>
-    <p><strong>Check-Out:</strong> ${end_date}</p>
+    <p><strong>Check-In:</strong> ${start_date} (${start_time})</p>
+    <p><strong>Check-Out:</strong> ${end_date} (${end_time})</p>
     <p><strong>Full Name:</strong> ${fullName}</p>
-    <p><strong>Event Type:</strong> ${event_type}</p>
+    <p><strong>Event Type:</strong> ${event_name}</p>
     <p><strong>Pax:</strong> ${pax}</p>
     <p><strong>Email:</strong> ${email}</p>
     <p><strong>Phone:</strong> ${phone}</p>
-    <p><strong>Things to be brought:</strong> ${to_bring}</p>
-    `;
+    <p><strong>Things to be brought:</strong> ${to_bring || "None"}</p>
+  `;
 
   document.getElementById("confirmationSummary").innerHTML = summaryHtml;
   document.getElementById("confirmationModal").classList.remove("hidden");
@@ -170,13 +198,26 @@ const nameError = document.getElementById("nameError");
 const phoneInput = document.getElementById("phone");
 const phoneError = document.getElementById("phoneError");
 const emailInput = document.getElementById("email");
-const emailError = document.getElementById("emailError");
+const useDefaultEmail = document.getElementById("useDefaultEmail");
 const paxInput = document.getElementById('pax');
 const paxError = document.getElementById('paxError');
 const eventTypeInput = document.getElementById('event_type');
 const eventTypeError = document.getElementById('eventTypeError');
 const agreeCheckbox = document.getElementById("agreeCheckbox");
 const termsError = document.getElementById("termsError");
+
+ // ✅ Checkbox autofill logic
+  if (useDefaultEmail && emailInput) {
+  useDefaultEmail.addEventListener("change", function () {
+    if (this.checked) {
+      emailInput.value = "using@email.com"; // ✅ default email
+      emailInput.setAttribute("readonly", true); // lock the input
+    } else {
+      emailInput.value = ""; // clear it when unchecked
+      emailInput.removeAttribute("readonly"); // unlock input
+    }
+    });
+  }
 
 fullnameInput.addEventListener("input", () => {
   fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, "");
@@ -227,7 +268,7 @@ function validateForm() {
     phoneInput.classList.remove("border-red-500");
   }
 
-  if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailInput.value.trim())) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailInput.value.trim())) {
     emailError.classList.remove("hidden");
     emailInput.classList.add("border-red-500");
     isValid = false;
@@ -289,9 +330,10 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const response = await fetch("https://greenlinklolasayong.site/api/events");
       eventData = await response.json(); // ✅ store it here
+      window.eventData = eventData;
 
       // Populate dropdown
-      select.innerHTML = '<option disabled selected>Select Event Type</option>';
+      select.innerHTML = '<option value="" disabled selected>Select Event Type</option>';
       eventData.forEach((event) => {
         const option = document.createElement("option");
         option.value = event.id;
@@ -334,3 +376,66 @@ document.addEventListener("DOMContentLoaded", function () {
 
   fetchEvents();
 });
+
+// Store and send to database
+
+document.getElementById("confirmBtn").addEventListener("click", async function () {
+  const form = document.getElementById("eventBookingForm");
+
+  const payload = {
+    event_id: form.querySelector("select[name='event_type']").value,
+    start_datetime: combineDateTime(
+      form.querySelector("input[name='start_date']").value,
+      form.querySelector("input[name='start_time']").value
+    ),
+    end_datetime: combineDateTime(
+      form.querySelector("input[name='end_date']").value,
+      form.querySelector("input[name='end_time']").value
+    ),
+    full_name: form.querySelector("input[name='full_name']").value,
+    event_type: getEventName(form.querySelector("select[name='event_type']").value),
+    email: form.querySelector("input[name='email']").value,
+    phone_number: form.querySelector("input[name='phone']").value,
+    pax: form.querySelector("input[name='pax']").value,
+    to_bring: form.querySelector("textarea[name='to_bring']").value,
+  };
+
+  try {
+    const response = await fetch("https://greenlinklolasayong.site/api/event-reservations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      credentials: "include", // ✅ send session cookie for authentication
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("✅ Reservation submitted successfully!");
+      closeConfirmationModal();
+      form.reset();
+    } else {
+      alert("❌ Error: " + (data.message || "Something went wrong"));
+    }
+  } catch (error) {
+    console.error("Error submitting reservation:", error);
+    alert("⚠️ Network error. Please try again.");
+  }
+});
+
+// 🧩 Helper: Combine date + time into MySQL DATETIME
+function combineDateTime(date, time) {
+  return `${date} ${time}:00`;
+}
+
+// 🧩 Helper: Get event name from global eventData
+function getEventName(eventId) {
+  if (window.eventData) {
+    const event = window.eventData.find((e) => e.id == eventId);
+    return event ? event.event_name : "Unknown";
+  }
+  return "Unknown";
+}
