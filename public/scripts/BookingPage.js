@@ -484,6 +484,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const emailError = document.getElementById("emailError");
   const paxInput = document.getElementById("pax");
   const paxError = document.getElementById("paxError");
+  const agreeCheckbox = document.getElementById("agreeCheckbox");
+  const termsError = document.getElementById("termsError");
+
 
   // ✅ Checkbox autofill logic
   if (checkbox && emailInput) {
@@ -510,6 +513,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.validateForm = function () {
   let isValid = true;
+
+  // ✅ Terms and Conditions validation
+  if (!agreeCheckbox.checked) {
+    termsError.classList.remove("hidden");
+    isValid = false;
+  } else {
+    termsError.classList.add("hidden");
+  }
+
 
   if (fullnameInput.value.trim() === "") {
     nameError.textContent = "Full name is required.";
