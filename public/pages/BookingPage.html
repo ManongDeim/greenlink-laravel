@@ -112,16 +112,23 @@
         </div>
 
         <div class="relative">
-          <input id="email" type="email" name="email" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">E-mail</label>
-            <div class="absolute flex items-center -translate-y-1/2 right-3 top-1/2">
-              <input type="checkbox" id="useDefaultEmail"
-            class="w-4 h-4 text-teal-500 border-gray-300 rounded cursor-pointer focus:ring-teal-500"
-            title="Use default email" /> 
-           </div>
-           <p id="emailError" class="hidden mt-1 text-sm text-red-600">Please enter a valid email address (e.g. name@mail.com).</p></div>
-       
-        
+  <!-- Input + label + checkbox grouped separately -->
+        <div class="relative">
+          <input id="email" type="email" name="email" placeholder=" "
+          class="w-full px-4 pr-10 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+          <label for="email"
+          class="absolute text-sm text-gray-500 transition-all left-4 top-2">E-mail
+          </label>
+
+    <!-- Checkbox stays fixed inside input -->
+            <input type="checkbox" id="useDefaultEmail" title="Use default email"
+            class="absolute top-1/2 right-3 -translate-y-1/2 w-4 h-4 text-teal-500 border-gray-300 rounded cursor-pointer focus:ring-teal-500"/>
+          </div>
+
+  <!-- Error message won't affect checkbox position -->
+          <p id="emailError" class="hidden mt-1 text-sm text-red-600">
+           Please enter a valid email address (e.g. name@mail.com).</p>
+          </div>
 
         <div class="relative">
           <input id="phone" type="tel" name="phone" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
