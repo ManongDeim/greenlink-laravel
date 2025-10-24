@@ -10,6 +10,7 @@ class EventModel extends Model
     use HasFactory;
 
     protected $table = 'event_reservation';
+     public $timestamps = false;
 
     protected $fillable = [
         'user_id',
