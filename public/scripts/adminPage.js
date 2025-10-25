@@ -68,9 +68,6 @@ const foodCardTemplate = item => `
     <p class="text-sm text-gray-600 mb-1">
       Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
-    <p class="text-sm text-gray-600">
-      Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span>
-    </p>
 
     <!-- Button Group -->
     <div class="grid grid-cols-2 gap-3 mt-5">
