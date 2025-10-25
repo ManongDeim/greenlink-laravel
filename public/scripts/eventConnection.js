@@ -27,9 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
           // Handle same start & end date
           if (selectedDates[1].getTime() === selectedDates[0].getTime()) {
             const nextDay = new Date(selectedDates[0]);
-            nextDay.setDate(nextDay.getDate() + 1);
             datePicker.setDate([selectedDates[0], nextDay], true);
-            selectedDates[1] = nextDay;
           }
 
           // Fill start & end date fields
