@@ -14,28 +14,28 @@ class CustomerDashboardController extends Controller
     public function getFoodOrders(Request $request)
     {
         $user = $request->user();
-        $orders = FoodOrderModel::where('user_id', $user->id)->latest()->get();
+        $orders = FoodOrderModel::where('user_id', $user->id)  ->orderBy('id', 'desc')->get();
         return response()->json($orders);
     }
 
      public function getFarmOrders(Request $request)
     {
         $user = $request->user();
-        $orders = FarmOrderModel::where('user_id', $user->id)->latest()->get();
+        $orders = FarmOrderModel::where('user_id', $user->id)  ->orderBy('id', 'desc')->get();
         return response()->json($orders);
     }
 
      public function getRoomReservations(Request $request)
     {
         $user = $request->user();
-        $reservations = RoomModel::where('user_id', $user->id)->latest()->get();
+        $reservations = RoomModel::where('user_id', $user->id)  ->orderBy('id', 'desc')->get();
         return response()->json($reservations);
     }
 
     public function getEventReservations(Request $request)
     {
         $user = $request->user();
-        $reservations = EventModel::where('user_id', $user->id)->latest()->get();
+        $reservations = EventModel::where('user_id', $user->id)  ->orderBy('id', 'desc')->get();
         return response()->json($reservations);
     }
 }
