@@ -160,6 +160,7 @@ function createCard(item, type) {
       return `
         <div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
           <h3 class="text-lg font-semibold text-teal-700">${item.room}</h3>
+          <p class="text-gray-600">Reservation ID: <span class="font-medium">${item.room_reser_id}</span></p>
           <p class="text-gray-600 mt-2">Check-in: ${item.check_in_date}</p>
           <p class="text-gray-600">Check-out: ${item.check_out_date}</p>
           <p class="text-gray-600">Total: ₱${item.total_bill}</p>
@@ -169,6 +170,7 @@ function createCard(item, type) {
       return `
         <div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
           <h3 class="text-lg font-semibold text-teal-700">${item.event_type}</h3>
+          <p class="text-gray-600">Reservation ID: <span class="font-medium">${item.event_reservation_id}</span></p>
           <p class="text-gray-600 mt-2">From: ${item.start_datetime}</p>
           <p class="text-gray-600">To: ${item.end_datetime}</p>
           <p class="text-gray-600">Guests: ${item.pax}</p>
