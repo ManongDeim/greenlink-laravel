@@ -115,14 +115,14 @@
   <!-- Input + label + checkbox grouped separately -->
         <div class="relative">
           <input id="email" type="email" name="email" placeholder=" "
-          class="w-full px-4 pr-10 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+          class="w-full px-4 pt-5 pb-2 pr-10 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500"/>
           <label for="email"
           class="absolute text-sm text-gray-500 transition-all left-4 top-2">E-mail
           </label>
 
     <!-- Checkbox stays fixed inside input -->
             <input type="checkbox" id="useDefaultEmail" title="Use default email"
-            class="absolute top-1/2 right-3 -translate-y-1/2 w-4 h-4 text-teal-500 border-gray-300 rounded cursor-pointer focus:ring-teal-500"/>
+            class="absolute w-4 h-4 text-teal-500 -translate-y-1/2 border-gray-300 rounded cursor-pointer top-1/2 right-3 focus:ring-teal-500"/>
           </div>
 
   <!-- Error message won't affect checkbox position -->
@@ -147,7 +147,7 @@
         <a href="#" onclick="openTermsModal()" class="font-medium text-teal-600 hover:underline">Terms and Conditions</a>
       </span>
     </label>
-    <p id="termsError" class="text-red-500 text-sm text-center mt-1 hidden"> You must agree to the terms and conditions.</p>
+    <p id="termsError" class="hidden mt-1 text-sm text-center text-red-500"> You must agree to the terms and conditions.</p>
 
     <div class="flex justify-center mt-10 mb-12">
       <button type="button" onclick="validateForm()" class="px-10 py-3 text-lg font-semibold text-white transition bg-teal-600 rounded-lg shadow-md hover:bg-teal-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -195,7 +195,7 @@
       <p>Payments can be made through GCash. Prices are in PHP and may include taxes.</p>
 
       <h4 class="mt-4 font-semibold">5. Cancellation Policy</h4>
-      <p>Cancellations made at least 1 day/s before booking date are fully refundable. Less than 1 day/s are non-refundable.</p>
+      <p>Cancellations made at least 1 day before booking date are fully refundable. Less than 1 day are non-refundable.</p>
 
       <h4 class="mt-4 font-semibold">6. Check-In and Use of Services</h4>
       <p>Arrive at the time provided in your confirmation email and follow camp rules during your stay.</p>
