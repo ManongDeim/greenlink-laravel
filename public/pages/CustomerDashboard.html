@@ -98,23 +98,10 @@
     </div>
   </footer>
 
-  <script>
-    // Sidebar navigation logic
-    document.querySelectorAll('.sidebar-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const section = btn.dataset.section;
-        openSection(section);
-      });
-    });
 
-    function openSection(section) {
-      // For now, just simulate navigation
-      window.location.href = `./customerDashboard.html?section=${section}`;
-    }
-  </script>
-
-  <script src="../scripts/customerDashboard.js"></script>
+ 
   <script src="../global_scripts/loginScript.js" defer></script>
   <script src="../global_scripts/authLogin.js"></script>
+  <script src="../scripts/customerDashboard.js"></script>
 </body>
 </html>
