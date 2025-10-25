@@ -570,3 +570,21 @@ if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailInput.value.trim())) {
   openConfirmationModal(); // ✅ Only open if all fields are valid
 };
 });
+
+function toggleDefaultEmail() {
+  const icon = document.getElementById("defaultEmailIcon");
+  const emailInput = document.getElementById("email");
+
+  // Toggle state visually and functionally
+  const isUsingDefault = icon.classList.toggle("text-teal-600");
+
+  if (isUsingDefault) {
+    emailInput.value = "default@mail.com"; // Example default
+    emailInput.disabled = true;
+    emailInput.classList.add("bg-gray-100", "cursor-not-allowed");
+  } else {
+    emailInput.disabled = false;
+    emailInput.classList.remove("bg-gray-100", "cursor-not-allowed");
+    emailInput.value = "";
+  }
+}

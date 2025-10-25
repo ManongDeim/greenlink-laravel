@@ -90,55 +90,109 @@
     </div>
 
     <!-- Booking Info -->
-    <section class="mt-10">
-      <h2 class="mb-6 text-2xl font-semibold text-center">Booking Info</h2>
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div class="relative">
-          <input id="fullname" type="text" name="full_name"  placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">Full Name</label>
-          <p id="nameError" class="hidden mt-1 text-sm text-red-600">Names can only include letters. Please try again.</p>
-        </div>
+<section class="mt-10">
+  <h2 class="mb-6 text-2xl font-semibold text-center">Booking Info</h2>
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 
-        <div class="relative">
-          <select name="pax" id="pax" class="w-full px-4 pt-5 pb-2 text-gray-500 bg-white border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-600">
-            <option value="" disabled selected hidden></option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-          </select>
-          <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">Pax</label>
-          <p id="paxError" class="hidden mt-1 text-sm text-red-600">
-    Please select a valid number of pax.
-  </p>
-        </div>
+    <!-- Full Name -->
+    <div class="relative">
+      <input
+        id="fullname"
+        type="text"
+        name="full_name"
+        placeholder=" "
+        class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500"
+      />
+      <label
+        for="fullname"
+        class="absolute text-sm text-gray-500 transition-all duration-200 left-4 top-2 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400"
+      >
+        Full Name
+      </label>
+      <p id="nameError" class="hidden mt-1 text-sm text-red-600">
+        Names can only include letters. Please try again.
+      </p>
+    </div>
 
-        <div class="relative">
-  <!-- Input + label + checkbox grouped separately -->
-        <div class="relative">
-          <input id="email" type="email" name="email" placeholder=" "
-          class="w-full px-4 pt-5 pb-2 pr-10 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500"/>
-          <label for="email"
-          class="absolute text-sm text-gray-500 transition-all left-4 top-2">E-mail
-          </label>
+    <!-- Pax -->
+    <div class="relative">
+      <select
+        name="pax"
+        id="pax"
+        class="w-full px-4 pt-5 pb-2 text-gray-700 bg-white border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-600"
+      >
+        <option value="" disabled selected hidden></option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+      </select>
+      <label
+        for="pax"
+        class="absolute text-sm text-gray-500 transition-all duration-200 left-4 top-2 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400"
+      >
+        Pax
+      </label>
+      <p id="paxError" class="hidden mt-1 text-sm text-red-600">
+        Please select a valid number of pax.
+      </p>
+    </div>
 
-    <!-- Checkbox stays fixed inside input -->
-            <input type="checkbox" id="useDefaultEmail" title="Use default email"
-            class="absolute w-4 h-4 text-teal-500 -translate-y-1/2 border-gray-300 rounded cursor-pointer top-1/2 right-3 focus:ring-teal-500"/>
-          </div>
+    <!-- Email (with icon) -->
+    <div class="relative">
+      <div class="relative">
+        <input
+          id="email"
+          type="email"
+          name="email"
+          placeholder=" "
+          class="w-full px-4 pt-5 pb-2 pr-10 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500"
+        />
+        <label
+          for="email"
+          class="absolute text-sm text-gray-500 transition-all duration-200 left-4 top-2 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400"
+        >
+          E-mail
+        </label>
 
-  <!-- Error message won't affect checkbox position -->
-          <p id="emailError" class="hidden mt-1 text-sm text-red-600">
-           Please enter a valid email address (e.g. name@mail.com).</p>
-          </div>
-
-        <div class="relative">
-          <input id="phone" type="tel" name="phone" placeholder=" " class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          <label class="absolute text-sm text-gray-500 transition-all left-4 top-2">Phone No</label>
-          <p id="phoneError" class="hidden mt-1 text-sm text-red-600">
-    Please enter a valid phone number.
-  </p>
-        </div>
+        <!-- Modern Icon Button -->
+        <button
+          type="button"
+          id="useDefaultEmailBtn"
+          title="Use default email"
+          class="absolute text-gray-400 transition-colors duration-200 -translate-y-1/2 top-1/2 right-3 hover:text-teal-600"
+          onclick="toggleDefaultEmail()"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" id="defaultEmailIcon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l9 6 9-6M3 8v8a2 2 0 002 2h14a2 2 0 002-2V8m-9 6L3 8" />
+          </svg>
+        </button>
       </div>
-    </section>
+      <p id="emailError" class="hidden mt-1 text-sm text-red-600">
+        Please enter a valid email address (e.g. name@mail.com).
+      </p>
+    </div>
+
+    <!-- Phone No -->
+    <div class="relative">
+      <input
+        id="phone"
+        type="tel"
+        name="phone"
+        placeholder=" "
+        class="w-full px-4 pt-5 pb-2 border rounded-lg shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-500"
+      />
+      <label
+        for="phone"
+        class="absolute text-sm text-gray-500 transition-all duration-200 left-4 top-2 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400"
+      >
+        Phone No
+      </label>
+      <p id="phoneError" class="hidden mt-1 text-sm text-red-600">
+        Please enter a valid phone number.
+      </p>
+    </div>
+
+  </div>
+</section>
 
     <label class="flex justify-center gap-2 mt-6 text-sm text-gray-700 items-centers">
       <input type="checkbox" id="agreeCheckbox" name="agree" class="text-teal-600 focus:ring-teal-500" />
