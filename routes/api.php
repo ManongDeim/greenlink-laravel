@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\EventAdminReservationController;
 use App\Http\Controllers\Api\FarmProductController;
 use App\Http\Controllers\Api\FoodProductController;
 use App\Http\Controllers\Api\EventSeederController;
+use App\Http\Controllers\Api\CustomerDashboardController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 
@@ -97,3 +98,12 @@ Route::get('events', [EventSeederController::class, 'index']);
 // Event Routes
 
 Route::middleware('auth:sanctum')->post('/event-reservations', [EventController::class, 'store']);
+
+// Customer Dashboard Routes
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/customer/food-orders', [CustomerDashboardController::class, 'getFoodOrders']);
+    Route::get('/customer/farm-orders', [CustomerDashboardController::class, 'getFarmOrders']);
+    Route::get('/customer/room-reservations', [CustomerDashboardController::class, 'getRoomReservations']);
+    Route::get('/customer/event-reservations', [CustomerDashboardController::class, 'getEventReservations']);
+});

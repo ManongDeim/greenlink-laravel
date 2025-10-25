@@ -15,6 +15,7 @@ class EventModel extends Model
     protected $fillable = [
         'user_id',
         'event_id',
+        'event_reservation_id',
         'start_datetime',
         'end_datetime',
         'full_name',
@@ -29,5 +30,19 @@ class EventModel extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+     protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($reservation) {
+            // Generate until unique
+            do {
+                $code = 'EVENT-' . random_int(10000, 99999);
+            } while (self::where('event_reservation_id', $code)->exists());
+
+            $reservation->event_reservation_id = $code;
+        });
     }
 }
