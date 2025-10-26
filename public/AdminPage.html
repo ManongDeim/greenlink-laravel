@@ -87,19 +87,22 @@
 
   // Food Order Details Modal
 
-  <div id="foodOrderModal" class="fixed inset-0 hidden items-center justify-center bg-black/50 z-50">
-  <div class="bg-white rounded-2xl p-5 w-full max-w-lg relative">
-    <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">&times;</button>
-    <h3 class="text-xl font-bold mb-3" id="modalTitle"></h3>
-    <ul class="text-gray-700 list-disc list-inside mb-3" id="modalItems"></ul>
-    <p class="text-gray-800 font-semibold" id="modalTotal"></p>
-    <p class="text-gray-800 font-semibold mb-3" id="modalRef"></p>
-    <div id="modalButtons" class="flex gap-3">
-      <button id="completeOrderBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Complete Order</button>
-      <button id="cancelOrderBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Cancel Order</button>
+  <div id="foodOrderModal" class="hidden fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+  <div class="bg-white rounded-2xl p-6 w-full max-w-lg relative shadow-lg">
+    <button id="closeModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">✖</button>
+    
+    <h2 id="modalTitle" class="text-xl font-bold text-gray-800 mb-4"></h2>
+    <ul id="modalItems" class="list-disc list-inside text-gray-700 mb-4"></ul>
+    <p id="modalTotal" class="font-semibold text-gray-800 mb-2"></p>
+    <p id="modalRef" class="text-gray-600 mb-4"></p>
+    
+    <div id="modalButtons" class="flex gap-4 mt-4">
+      <button id="completeOrderBtn" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">Complete</button>
+      <button id="cancelOrderBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Cancel</button>
     </div>
   </div>
 </div>
+
 
 <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
 

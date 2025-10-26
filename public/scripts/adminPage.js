@@ -247,6 +247,13 @@ function renderOrders(containerId, orders, templateFn) {
   container.innerHTML = orders.length
     ? orders.map(templateFn).join('')
     : `<p class="text-gray-500">No orders found.</p>`;
+
+  orders.forEach(order => {
+    const card = container.querySelector(`.order-item[data-id="${order.foodOrder_id}"]`);
+    if (card) {
+      card.addEventListener('click', () => openFoodOrderModal(order));
+    }
+  });
 }
 
 
@@ -635,6 +642,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 });
+});
 
 // ================= Modals =================
 
@@ -653,7 +661,7 @@ const cancelOrderBtn = document.getElementById('cancelOrderBtn');
 closeModal.addEventListener('click', () => foodOrderModal.classList.add('hidden'));
 
 // Function to open modal for a selected order
-function openFoodOrderModal(order, showButtons = true) {
+function openFoodOrderModal(order) {
   modalTitle.textContent = `Order #${order.foodOrder_id}`;
   modalRef.textContent = `Reference: ${order.ref_number}`;
 
@@ -673,28 +681,47 @@ function openFoodOrderModal(order, showButtons = true) {
 
   modalTotal.textContent = `Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}`;
 
-  modalButtons.style.display = showButtons ? 'flex' : 'none';
-  foodOrderModal.classList.remove('hidden');
+  // Hide buttons if order is already completed or cancelled
+  if (order.order_status === 'Completed' || order.order_status === 'Cancelled') {
+    modalButtons.style.display = 'none';
+  } else {
+    modalButtons.style.display = 'flex';
+    completeOrderBtn.onclick = () => updateOrderStatus(order.foodOrder_id, 'Completed');
+    cancelOrderBtn.onclick = () => updateOrderStatus(order.foodOrder_id, 'Cancelled');
+  }
 
-  // Set button actions
-  completeOrderBtn.onclick = () => updateOrderStatus(order.foodOrder_id, 'Completed');
-  cancelOrderBtn.onclick = () => updateOrderStatus(order.foodOrder_id, 'Cancelled');
+  foodOrderModal.classList.remove('hidden');
 }
 
 // Update order status
 function updateOrderStatus(foodOrderId, status) {
   fetch(`/api/foodOrder/${foodOrderId}/update-status`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ order_status: status })
   })
   .then(res => res.json())
   .then(data => {
-    alert(data.message);
+    showToast(data.message); // optional toast instead of alert
     foodOrderModal.classList.add('hidden');
-    // Optionally reload or refresh your order list
-    location.reload();
+
+    // Update the order card on the page if it exists
+    const card = document.querySelector(`.order-item[data-id="${foodOrderId}"]`);
+    if (card) {
+      // Update status text
+      const statusBadge = card.querySelector('span');
+      if (statusBadge) {
+        statusBadge.textContent = status;
+        if (status === 'Completed') {
+          statusBadge.className = 'px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full';
+        } else if (status === 'Cancelled') {
+          statusBadge.className = 'px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full';
+        } else {
+          statusBadge.className = 'px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full';
+        }
+      }
+    }
   })
   .catch(err => console.error(err));
 }
-});
+
