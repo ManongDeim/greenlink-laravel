@@ -232,24 +232,26 @@ const farmOrderCardTemplate = order => {
 
 // Room Reservation template
 const roomReservationTemplate = reservation => `
-<div class="space-y-3 text-gray-700 p-6 bg-white shadow-md rounded-2xl">
-  <h2 class="mb-4 text-xl font-bold text-teal-700">Room Reservation</h2>
-  <p><span class="font-semibold">Reservation ID:</span> ${reservation.room_reser_id}</p>
-  <p><span class="font-semibold">Room Type:</span> ${reservation.room}</p>
-  <p><span class="font-semibold">Check in Date:</span> ${reservation.check_in_date}</p>
-  <p><span class="font-semibold">Check out Date:</span> ${reservation.check_out_date}</p>
-  <p><span class="font-semibold">Full Name:</span> ${reservation.full_name}</p>
-  <p><span class="font-semibold">E-mail:</span> ${reservation.email}</p>
-  <p><span class="font-semibold">Phone Number:</span> ${reservation.phone_number}</p>
-  <p><span class="font-semibold">Number of Pax:</span> ${reservation.pax}</p>
-  <p><span class="font-semibold">Payment Status:</span> ${reservation.payment_status}</p>
+  <div class="mb-6"> <!-- Adds space between cards -->
+    <div class="space-y-3 text-gray-700 p-6 bg-white shadow-md rounded-2xl border border-gray-200">
+      <h2 class="mb-4 text-xl font-bold text-teal-700">Room Reservation</h2>
+      <p><span class="font-semibold">Reservation ID:</span> ${reservation.room_reser_id}</p>
+      <p><span class="font-semibold">Room Type:</span> ${reservation.room}</p>
+      <p><span class="font-semibold">Check in Date:</span> ${reservation.check_in_date}</p>
+      <p><span class="font-semibold">Check out Date:</span> ${reservation.check_out_date}</p>
+      <p><span class="font-semibold">Full Name:</span> ${reservation.full_name}</p>
+      <p><span class="font-semibold">E-mail:</span> ${reservation.email}</p>
+      <p><span class="font-semibold">Phone Number:</span> ${reservation.phone_number}</p>
+      <p><span class="font-semibold">Number of Pax:</span> ${reservation.pax}</p>
+      <p><span class="font-semibold">Payment Status:</span> ${reservation.payment_status}</p>
 
-  <div class="flex justify-end gap-4 mt-6">
-    <button class="px-5 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">Checked-in</button>
-    <button class="px-5 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Checked-out</button>
-    <button class="px-5 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancelled</button>
+      <div class="flex justify-end gap-4 mt-6">
+        <button class="px-5 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">Checked-in</button>
+        <button class="px-5 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Checked-out</button>
+        <button class="px-5 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancelled</button>
+      </div>
+    </div>
   </div>
-</div>
 `;
 
 

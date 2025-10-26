@@ -42,6 +42,7 @@ class VerifyCsrfToken
     protected $except = [
         'api/*',
         '/logout',
+        'api/farm/*',
     ];
 
     /**
