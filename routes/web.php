@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Api\FarmOrderController;
 use App\Http\Controllers\Api\FoodOrderController;
+use App\Http\Controllers\Api\FarmProductController;
 use App\Http\Controllers\Api\RoomController;
 
 Route::get('/check-key', function () {
@@ -72,3 +73,12 @@ Route::post('/api/foodOrder/create-link', [FoodOrderController::class, 'createPa
 Route::post('/create-room-payment', [RoomController::class, 'createPaymentLink'])->middleware('auth');
 Route::get('/paymentSuccess', [RoomController::class, 'paymentSuccess']);
 Route::get('/paymentFailed', [RoomController::class, 'paymentFailed']);
+
+// Farm Product routes
+
+Route::prefix('api/farm')->group(function () {
+    Route::post('/edit-name/{id}', [FarmProductController::class, 'editName']);
+    Route::post('/edit-price/{id}', [FarmProductController::class, 'editPrice']);
+    Route::post('/replace-photo/{id}', [FarmProductController::class, 'replacePhoto']);
+    Route::post('/add-stock/{id}', [FarmProductController::class, 'addStock']);
+});

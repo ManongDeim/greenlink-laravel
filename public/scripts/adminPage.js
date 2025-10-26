@@ -405,9 +405,37 @@ async function fetchAndRenderRoomReservations() {
 
 // CURD for Farm Products
 
-async function editFarmName(id) {
-  const newName = prompt("Enter new product name:");
-  if (!newName) return;
+function closeAllInputBoxes() {
+  document.querySelectorAll(".inline-editor").forEach(el => el.remove());
+}
+
+// ✅ Edit Product Name
+function editFarmName(id) {
+  closeAllInputBoxes();
+
+  const button = event.target.closest("button");
+  const parent = button.parentElement;
+
+  const container = document.createElement("div");
+  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+
+  container.innerHTML = `
+    <input type="text" id="editNameInput${id}" 
+           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-teal-500"
+           placeholder="Enter new name">
+    <button class="bg-teal-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-teal-700 transition"
+            onclick="saveFarmName(${id})">Save</button>
+    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+            onclick="closeAllInputBoxes()">Cancel</button>
+  `;
+
+  parent.insertAdjacentElement("afterend", container);
+}
+
+async function saveFarmName(id) {
+  const input = document.getElementById(`editNameInput${id}`);
+  const newName = input.value.trim();
+  if (!newName) return alert("Please enter a name");
 
   const response = await fetch(`/api/farm/edit-name/${id}`, {
     method: "POST",
@@ -417,12 +445,37 @@ async function editFarmName(id) {
 
   const result = await response.json();
   alert(result.message);
+  closeAllInputBoxes();
   location.reload();
 }
 
-async function editFarmPrice(id) {
-  const newPrice = prompt("Enter new price:");
-  if (!newPrice || isNaN(newPrice)) return alert("Invalid price");
+// ✅ Edit Product Price
+function editFarmPrice(id) {
+  closeAllInputBoxes();
+
+  const button = event.target.closest("button");
+  const parent = button.parentElement;
+
+  const container = document.createElement("div");
+  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+
+  container.innerHTML = `
+    <input type="number" id="editPriceInput${id}" 
+           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-cyan-500"
+           placeholder="Enter new price">
+    <button class="bg-cyan-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-cyan-700 transition"
+            onclick="saveFarmPrice(${id})">Save</button>
+    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+            onclick="closeAllInputBoxes()">Cancel</button>
+  `;
+
+  parent.insertAdjacentElement("afterend", container);
+}
+
+async function saveFarmPrice(id) {
+  const input = document.getElementById(`editPriceInput${id}`);
+  const newPrice = input.value.trim();
+  if (!newPrice || isNaN(newPrice)) return alert("Please enter a valid price");
 
   const response = await fetch(`/api/farm/edit-price/${id}`, {
     method: "POST",
@@ -432,10 +485,54 @@ async function editFarmPrice(id) {
 
   const result = await response.json();
   alert(result.message);
+  closeAllInputBoxes();
   location.reload();
 }
 
-async function replaceFarmPhoto(id) {
+// ✅ Add Stock
+function addFarmStock(id) {
+  closeAllInputBoxes();
+
+  const button = event.target.closest("button");
+  const parent = button.parentElement;
+
+  const container = document.createElement("div");
+  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+
+  container.innerHTML = `
+    <input type="number" id="addStockInput${id}" 
+           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-green-500"
+           placeholder="Enter quantity to add">
+    <button class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-700 transition"
+            onclick="saveFarmStock(${id})">Save</button>
+    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+            onclick="closeAllInputBoxes()">Cancel</button>
+  `;
+
+  parent.insertAdjacentElement("afterend", container);
+}
+
+async function saveFarmStock(id) {
+  const input = document.getElementById(`addStockInput${id}`);
+  const qty = input.value.trim();
+  if (!qty || isNaN(qty) || qty <= 0) return alert("Please enter a valid quantity");
+
+  const response = await fetch(`/api/farm/add-stock/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ qty: parseInt(qty) }),
+  });
+
+  const result = await response.json();
+  alert(result.message);
+  closeAllInputBoxes();
+  location.reload();
+}
+
+// ✅ Replace Picture stays as file upload popup
+function replaceFarmPhoto(id) {
+  closeAllInputBoxes();
+
   const fileInput = document.createElement("input");
   fileInput.type = "file";
   fileInput.accept = "image/*";
@@ -458,19 +555,4 @@ async function replaceFarmPhoto(id) {
   };
 
   fileInput.click();
-}
-
-async function addFarmStock(id) {
-  const qty = prompt("Enter quantity to add:");
-  if (!qty || isNaN(qty) || qty <= 0) return alert("Invalid quantity");
-
-  const response = await fetch(`/api/farm/add-stock/${id}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ qty: parseInt(qty) }),
-  });
-
-  const result = await response.json();
-  alert(result.message);
-  location.reload();
 }
