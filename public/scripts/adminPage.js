@@ -460,7 +460,7 @@ function editFarmPrice(id) {
   container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
 
   container.innerHTML = `
-    <input type="number" id="editPriceInput${id}" 
+    <input type="text" id="editPriceInput${id}" 
            class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-cyan-500"
            placeholder="Enter new price">
     <button class="bg-cyan-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-cyan-700 transition"
@@ -502,7 +502,8 @@ function addFarmStock(id) {
   container.innerHTML = `
     <input type="number" id="addStockInput${id}" 
            class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-green-500"
-           placeholder="Enter quantity to add">
+           placeholder="Enter quantity to add"
+           min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
     <button class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-700 transition"
             onclick="saveFarmStock(${id})">Save</button>
     <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
