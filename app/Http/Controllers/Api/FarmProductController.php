@@ -35,35 +35,33 @@ class FarmProductController extends Controller
         return response()->json(['success' => true, 'message' => 'Product price updated']);
     }
 
-    public function replacePhoto(Request $request, $id)
+   public function replacePhoto(Request $request, $id)
 {
-    $request->validate([
-        'productPicture' => 'required|file|image|max:2048',
-    ]);
+    $request->validate(['productPicture' => 'required|file|image|max:2048']);
 
     $product = FarmProduct::findOrFail($id);
 
-    // Ensure the destination folder exists
+    // ✅ Define a public path (Hostinger visible folder)
     $destinationPath = public_path('farm_products');
+
+    // ✅ Create folder if it doesn’t exist
     if (!file_exists($destinationPath)) {
-        mkdir($destinationPath, 0777, true);
+        mkdir($destinationPath, 0775, true);
     }
 
-    // Generate a unique file name
-    $fileName = uniqid() . '.' . $request->file('productPicture')->getClientOriginalExtension();
+    // ✅ Create unique file name
+    $filename = uniqid() . '.' . $request->file('productPicture')->getClientOriginalExtension();
 
-    // Move the uploaded image directly into /public_html/farm_products
-    $request->file('productPicture')->move($destinationPath, $fileName);
+    // ✅ Move file directly to public_html/farm_products
+    $request->file('productPicture')->move($destinationPath, $filename);
 
-    // Save the public URL path to the database
-    $product->productPicture = '/farm_products/' . $fileName;
+    // ✅ Save the public URL path
+    $product->productPicture = '/farm_products/' . $filename;
     $product->save();
 
-    return response()->json([
-        'success' => true,
-        'message' => '✅ Product photo replaced successfully',
-    ]);
+    return response()->json(['success' => true, 'message' => 'Product photo replaced successfully']);
 }
+
 
 
     public function addStock(Request $request, $id)
