@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\FarmOrderModel;
+use App\Models\FarmProduct;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -144,6 +145,28 @@ class FarmOrderController extends Controller
         
 
         $order->update(['payment_status' => 'Paid']);
+
+        $productsToUpdate = [
+        'Bangus' => $order->bangus_order,
+        'Egg' => $order->eggs_order,
+        'Mud Crab' => $order->mudCrab_order,
+        'Native Chicken' => $order->nativeChicken_order,
+        'Native Pork' => $order->nativePork_order,
+        'Squash' => $order->squash_order,
+        ];
+
+    foreach ($productsToUpdate as $name => $orderedQty) {
+    if ($orderedQty > 0) {
+        $product = FarmProduct::where('productName', $name)->first();
+        if ($product) {
+            $newQty = max(0, $product->qty - $orderedQty); // prevent negative stock
+            $product->update(['qty' => $newQty]);
+        }
+    }
+}
+
+        Log::info("✅ Stock successfully deducted for ref: {$refNumber}");
+
         Log::info("Payment marked successful with reference number: {$refNumber}");
         return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
         
