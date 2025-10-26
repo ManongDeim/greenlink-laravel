@@ -83,6 +83,24 @@
     </main>
   </div>
 
+  // ================= Modals ================= //
+
+  // Food Order Details Modal
+
+  <div id="foodOrderModal" class="fixed inset-0 hidden items-center justify-center bg-black/50 z-50">
+  <div class="bg-white rounded-2xl p-5 w-full max-w-lg relative">
+    <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">&times;</button>
+    <h3 class="text-xl font-bold mb-3" id="modalTitle"></h3>
+    <ul class="text-gray-700 list-disc list-inside mb-3" id="modalItems"></ul>
+    <p class="text-gray-800 font-semibold" id="modalTotal"></p>
+    <p class="text-gray-800 font-semibold mb-3" id="modalRef"></p>
+    <div id="modalButtons" class="flex gap-3">
+      <button id="completeOrderBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Complete Order</button>
+      <button id="cancelOrderBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Cancel Order</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
 
 <script src="./scripts/adminPage.js"></script>

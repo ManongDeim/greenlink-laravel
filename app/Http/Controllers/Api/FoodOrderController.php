@@ -173,6 +173,7 @@ class FoodOrderController extends Controller
 
      public function index()
     {
-        return response()->json(FoodOrderModel::all());
+       
+    return response()->json(FoodOrderModel::orderBy('created_at', 'desc')->get());
     }
 }

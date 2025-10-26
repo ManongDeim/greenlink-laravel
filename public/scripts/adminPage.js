@@ -635,4 +635,66 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 });
+
+// ================= Modals =================
+
+// Food Order Details Modal
+
+const foodOrderModal = document.getElementById('foodOrderModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalItems = document.getElementById('modalItems');
+const modalTotal = document.getElementById('modalTotal');
+const modalRef = document.getElementById('modalRef');
+const modalButtons = document.getElementById('modalButtons');
+const closeModal = document.getElementById('closeModal');
+const completeOrderBtn = document.getElementById('completeOrderBtn');
+const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+
+closeModal.addEventListener('click', () => foodOrderModal.classList.add('hidden'));
+
+// Function to open modal for a selected order
+function openFoodOrderModal(order, showButtons = true) {
+  modalTitle.textContent = `Order #${order.foodOrder_id}`;
+  modalRef.textContent = `Reference: ${order.ref_number}`;
+
+  // Populate items
+  const items = [
+    { key: 'smokedFish_order', name: 'Smoked Fish' },
+    { key: 'deviledFish_order', name: 'Deviled Fish' },
+    { key: 'seaSig_order', name: 'SeaSig' },
+    { key: 'blueCraze_order', name: 'Blue Craze' },
+    { key: 'chickenSheet_order', name: 'Chicken Sheet' },
+    { key: 'blackMeal_order', name: 'Black Meal' }
+  ];
+
+  modalItems.innerHTML = items
+    .filter(i => order[i.key] && order[i.key] > 0)
+    .map(i => `<li>${order[i.key]}x ${i.name}</li>`).join('');
+
+  modalTotal.textContent = `Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}`;
+
+  modalButtons.style.display = showButtons ? 'flex' : 'none';
+  foodOrderModal.classList.remove('hidden');
+
+  // Set button actions
+  completeOrderBtn.onclick = () => updateOrderStatus(order.foodOrder_id, 'Completed');
+  cancelOrderBtn.onclick = () => updateOrderStatus(order.foodOrder_id, 'Cancelled');
+}
+
+// Update order status
+function updateOrderStatus(foodOrderId, status) {
+  fetch(`/api/foodOrder/${foodOrderId}/update-status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+    body: JSON.stringify({ order_status: status })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+    foodOrderModal.classList.add('hidden');
+    // Optionally reload or refresh your order list
+    location.reload();
+  })
+  .catch(err => console.error(err));
+}
 });
