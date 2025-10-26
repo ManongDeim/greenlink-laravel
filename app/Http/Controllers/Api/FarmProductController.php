@@ -37,27 +37,34 @@ class FarmProductController extends Controller
 
     public function replacePhoto(Request $request, $id)
 {
-    $request->validate(['productPicture' => 'required|file|image|max:2048']);
+    $request->validate([
+        'productPicture' => 'required|file|image|max:2048',
+    ]);
+
     $product = FarmProduct::findOrFail($id);
 
-    // Store to Laravel storage
-    $path = $request->file('productPicture')->store('farm_products', 'public');
-
-    // Also copy file to public_html/storage/farm_products
-    $publicPath = public_path('storage/farm_products');
-    if (!file_exists($publicPath)) {
-        mkdir($publicPath, 0777, true);
+    // Ensure the destination folder exists
+    $destinationPath = public_path('farm_products');
+    if (!file_exists($destinationPath)) {
+        mkdir($destinationPath, 0777, true);
     }
 
-    $filename = basename($path);
-    copy(storage_path('app/public/' . $path), $publicPath . '/' . $filename);
+    // Generate a unique file name
+    $fileName = uniqid() . '.' . $request->file('productPicture')->getClientOriginalExtension();
 
-    // Save path for browser access
-    $product->productPicture = "/storage/farm_products/" . $filename;
+    // Move the uploaded image directly into /public_html/farm_products
+    $request->file('productPicture')->move($destinationPath, $fileName);
+
+    // Save the public URL path to the database
+    $product->productPicture = '/farm_products/' . $fileName;
     $product->save();
 
-    return response()->json(['success' => true, 'message' => 'Product photo replaced']);
+    return response()->json([
+        'success' => true,
+        'message' => '✅ Product photo replaced successfully',
+    ]);
 }
+
 
     public function addStock(Request $request, $id)
     {
