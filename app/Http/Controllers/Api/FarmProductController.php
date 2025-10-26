@@ -35,32 +35,29 @@ class FarmProductController extends Controller
         return response()->json(['success' => true, 'message' => 'Product price updated']);
     }
 
-   public function replacePhoto(Request $request, $id)
+  public function replacePhoto(Request $request, $id)
 {
     $request->validate(['productPicture' => 'required|file|image|max:2048']);
 
     $product = FarmProduct::findOrFail($id);
 
-    // ✅ Define a public path (Hostinger visible folder)
-    $destinationPath = public_path('farm_products');
+    // ✅ Save directly into Hostinger's public_html folder
+    $destinationPath = base_path('../public_html/farm_products');
 
-    // ✅ Create folder if it doesn’t exist
     if (!file_exists($destinationPath)) {
         mkdir($destinationPath, 0775, true);
     }
 
-    // ✅ Create unique file name
     $filename = uniqid() . '.' . $request->file('productPicture')->getClientOriginalExtension();
-
-    // ✅ Move file directly to public_html/farm_products
     $request->file('productPicture')->move($destinationPath, $filename);
 
-    // ✅ Save the public URL path
+    // ✅ Store correct public URL path
     $product->productPicture = '/farm_products/' . $filename;
     $product->save();
 
     return response()->json(['success' => true, 'message' => 'Product photo replaced successfully']);
 }
+
 
 
 
