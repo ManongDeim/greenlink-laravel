@@ -11,7 +11,7 @@ class FoodOrderModel extends Model
 
     protected $table = 'food_orders';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'user_id',
