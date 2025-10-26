@@ -49,8 +49,8 @@ async function loadUserProfile() {
   <!-- Dropdown Menu -->
   <div id="userDropdown" 
        class="hidden shadow-sm absolute right-0 w-44 bg-white rounded-xl overflow-hidden origin-top scale-95 opacity-0 transition-all duration-200">
-      <a href="/pages/CustomerDashboard.html" 
-         class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+      <a href="${user.role === 'admin' ? '/AdminPage.html' : '/pages/CustomerDashboard.html'}" 
+   class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m-4 0h8" />
          </svg>

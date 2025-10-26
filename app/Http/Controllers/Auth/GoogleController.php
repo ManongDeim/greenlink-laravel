@@ -46,11 +46,6 @@ class GoogleController extends Controller
     // ✅ Log in the main User model
     Auth::login($user);
 
-    // Redirect based on role
-    if ($googleUser->role === 'admin') {
-        return redirect('/AdminPage.html');
-    }
-
     return redirect('/');
 }
 

@@ -35,6 +35,7 @@ Route::get('/api/user', function () {
             'name' => $user->name,
             'email' => $user->email,
             'avatar' => $user->googleAccount->avatar ?? null,
+            'role' => $user->googleAccount->role ?? 'customer'
         ]);
     }
     return response()->json(null, 401);
