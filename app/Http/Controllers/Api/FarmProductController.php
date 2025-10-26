@@ -45,30 +45,25 @@ public function replacePhoto(Request $request, $id)
 
     $product = FarmProduct::findOrFail($id);
 
-    // ✅ Absolute path to your real public_html folder (outside Laravel)
-    $destinationPath = base_path('../public_html/farm_products');
+    // ✅ Corrected absolute path to the real public_html/farm_products
+    $destinationPath = realpath(base_path('../')) . '/farm_products';
 
-    // ✅ Create folder if missing
     if (!file_exists($destinationPath)) {
         mkdir($destinationPath, 0775, true);
     }
 
-    // ✅ Unique filename
     $filename = uniqid() . '.' . $request->file('productPicture')->getClientOriginalExtension();
 
-    // ✅ Move file to actual Hostinger public_html folder
+    // ✅ Move file correctly
     $request->file('productPicture')->move($destinationPath, $filename);
 
-    // ✅ Update DB with the correct public URL
     $product->productPicture = '/farm_products/' . $filename;
     $product->save();
 
-    Log::info('✅ File moved to actual Hostinger folder:', ['path' => $destinationPath . '/' . $filename]);
+    Log::info('✅ File moved correctly to:', ['path' => $destinationPath . '/' . $filename]);
 
     return response()->json(['success' => true, 'message' => 'Product photo replaced successfully']);
 }
-
-
 
 
 
