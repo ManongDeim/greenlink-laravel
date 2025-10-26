@@ -121,6 +121,21 @@ document.addEventListener("click", (e) => {
 }
 
 async function logout() {
-    await fetch("/logout", { credentials: "include" });
-    location.reload();
+    try {
+    const response = await fetch("/logout", {
+      method: "POST", // Use POST so Laravel handles it properly
+      credentials: "include",
+    });
+
+    if (!response.ok) throw new Error("Logout failed");
+
+    // Clear any client-side session flags
+    window.isLoggedIn = false;
+    window.userId = null;
+
+    // ✅ Redirect to home page
+    window.location.href = "/";
+  } catch (err) {
+    console.error("❌ Logout error:", err);
+  }
 }
