@@ -403,4 +403,74 @@ async function fetchAndRenderRoomReservations() {
 }
 });
 
+// CURD for Farm Products
 
+async function editFarmName(id) {
+  const newName = prompt("Enter new product name:");
+  if (!newName) return;
+
+  const response = await fetch(`/api/farm/edit-name/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productName: newName }),
+  });
+
+  const result = await response.json();
+  alert(result.message);
+  location.reload();
+}
+
+async function editFarmPrice(id) {
+  const newPrice = prompt("Enter new price:");
+  if (!newPrice || isNaN(newPrice)) return alert("Invalid price");
+
+  const response = await fetch(`/api/farm/edit-price/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ price: newPrice }),
+  });
+
+  const result = await response.json();
+  alert(result.message);
+  location.reload();
+}
+
+async function replaceFarmPhoto(id) {
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = "image/*";
+
+  fileInput.onchange = async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("productPicture", file);
+
+    const response = await fetch(`/api/farm/replace-photo/${id}`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+    alert(result.message);
+    location.reload();
+  };
+
+  fileInput.click();
+}
+
+async function addFarmStock(id) {
+  const qty = prompt("Enter quantity to add:");
+  if (!qty || isNaN(qty) || qty <= 0) return alert("Invalid quantity");
+
+  const response = await fetch(`/api/farm/add-stock/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ qty: parseInt(qty) }),
+  });
+
+  const result = await response.json();
+  alert(result.message);
+  location.reload();
+}
