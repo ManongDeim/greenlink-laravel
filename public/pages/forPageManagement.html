@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Page Management</title>
+</head>
+<body class="relative flex justify-center min-h-screen p-10 bg-gradient-to-br from-gray-100 via-white to-gray-200">
+
+  <!-- Main Container -->
+  <div class="w-full max-w-6xl overflow-hidden border border-gray-200 shadow-2xl backdrop-blur-xl bg-white/70 rounded-3xl">
+    
+    <!-- Header -->
+    <header class="p-6 text-white bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500">
+      <h1 class="text-3xl font-bold tracking-wide">Page Management</h1>
+      <p class="mt-1 text-sm text-teal-100">Edit or add items for your website sections</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="p-8 space-y-10">
+
+      <!-- Farm Product -->
+      <section class="p-6 transition bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md">
+        <h2 class="flex items-center gap-2 mb-5 text-xl font-semibold text-gray-800">
+          🌾 Farm Product
+        </h2>
+        <div class="grid gap-6 md:grid-cols-2">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Product Name</label>
+            <input type="text" placeholder="Enter product name"
+              class="w-full px-4 py-2 mt-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Price</label>
+            <input type="text" placeholder="Enter product price"
+              class="w-full px-4 py-2 mt-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          </div>
+          <div class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700">Upload Picture</label>
+            <input type="file"
+              class="w-full p-2 mt-2 text-sm transition border border-gray-300 cursor-pointer rounded-xl bg-gray-50 hover:bg-gray-100" />
+          </div>
+        </div>
+        <button class="mt-6 bg-teal-600 text-white px-6 py-2.5 rounded-xl font-medium shadow-md hover:bg-teal-700 hover:scale-[1.03] active:scale-100 transition">
+          ➕ Add Product
+        </button>
+      </section>
+
+      <!-- Food Product -->
+      <section class="p-6 transition bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md">
+        <h2 class="flex items-center gap-2 mb-5 text-xl font-semibold text-gray-800">
+          🍽️ Food Product
+        </h2>
+        <div class="grid gap-6 md:grid-cols-2">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Food Name</label>
+            <input type="text" placeholder="Enter food name"
+              class="w-full px-4 py-2 mt-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Price</label>
+            <input type="text" placeholder="Enter price"
+              class="w-full px-4 py-2 mt-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          </div>
+          <div class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700">Upload Image</label>
+            <input type="file"
+              class="w-full p-2 mt-2 text-sm transition border border-gray-300 cursor-pointer rounded-xl bg-gray-50 hover:bg-gray-100" />
+          </div>
+        </div>
+        <button class="mt-6 bg-teal-600 text-white px-6 py-2.5 rounded-xl font-medium shadow-md hover:bg-teal-700 hover:scale-[1.03] active:scale-100 transition">
+          ➕ Add Food Product
+        </button>
+      </section>
+
+      <!-- Add Room -->
+      <section class="p-6 transition bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md">
+        <h2 class="flex items-center gap-2 mb-5 text-xl font-semibold text-gray-800">
+          🏡 Add Room
+        </h2>
+        <div class="grid gap-6 md:grid-cols-2">
+          <input type="text" placeholder="Room Name" class="px-4 py-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          <input type="text" placeholder="Description" class="px-4 py-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          <input type="number" placeholder="Min Capacity" class="px-4 py-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          <input type="number" placeholder="Max Capacity" class="px-4 py-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          <input type="text" placeholder="Price" class="px-4 py-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          <input type="file" class="p-2 text-sm transition border border-gray-300 cursor-pointer rounded-xl bg-gray-50 hover:bg-gray-100" />
+          <input type="file" multiple class="p-2 text-sm transition border border-gray-300 cursor-pointer rounded-xl bg-gray-50 hover:bg-gray-100" />
+          <input type="text" placeholder="Amenities" class="px-4 py-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+        </div>
+        <button class="mt-6 bg-teal-600 text-white px-6 py-2.5 rounded-xl font-medium shadow-md hover:bg-teal-700 hover:scale-[1.03] active:scale-100 transition">
+          ➕ Add Room
+        </button>
+      </section>
+
+      <!-- Events -->
+      <section class="p-6 transition bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md">
+        <h2 class="flex items-center gap-2 mb-5 text-xl font-semibold text-gray-800">
+          🎉 Event Types
+        </h2>
+        <div class="grid gap-6 md:grid-cols-2">
+          <input type="text" placeholder="Event Name" class="px-4 py-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          <input type="number" placeholder="Capacity" class="px-4 py-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+        </div>
+        <button class="mt-6 bg-teal-600 text-white px-6 py-2.5 rounded-xl font-medium shadow-md hover:bg-teal-700 hover:scale-[1.03] active:scale-100 transition">
+          ➕ Add Event
+        </button>
+      </section>
+
+      <!-- Homepage -->
+      <section class="p-6 transition bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md">
+        <h2 class="flex items-center gap-2 mb-5 text-xl font-semibold text-gray-800">
+          🏠 Homepage
+        </h2>
+        <div class="grid gap-6 md:grid-cols-2">
+          <input type="text" placeholder="Event Title" class="px-4 py-2 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+          <textarea placeholder="Event Description" class="h-24 px-4 py-2 transition border border-gray-300 resize-none rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"></textarea>
+        </div>
+        <button class="mt-6 bg-teal-600 text-white px-6 py-2.5 rounded-xl font-medium shadow-md hover:bg-teal-700 hover:scale-[1.03] active:scale-100 transition">
+          ➕ Add to Homepage
+        </button>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Floating Save Button -->
+  <button id="saveChangesBtn" class="fixed flex items-center gap-2 px-6 py-3 font-semibold text-white transition rounded-full shadow-xl bottom-8 right-8 bg-gradient-to-r from-teal-600 to-teal-500 hover:scale-105 hover:shadow-2xl">
+    💾 Save All Changes
+  </button>
+
+  <script>
+    // Example save animation
+    document.getElementById("saveChangesBtn").addEventListener("click", () => {
+      const btn = document.getElementById("saveChangesBtn");
+      btn.innerText = "✅ Saved!";
+      btn.classList.add("bg-green-600");
+      setTimeout(() => {
+        btn.innerText = "💾 Save All Changes";
+        btn.classList.remove("bg-green-600");
+      }, 2000);
+    });
+  </script>
+
+</body>
+</html>
