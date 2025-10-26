@@ -110,15 +110,15 @@ const foodCardTemplate = item => `
 
 const farmCardTemplate = item => `
   <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
-    <img src="${item.productPicture}" alt="${item.productName}" 
+    <img id="farm-photo-${item.id}" src="${item.productPicture}" alt="${item.productName}" 
       class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
 
-    <h3 class="text-lg font-semibold text-gray-800 mb-1">${item.productName}</h3>
+    <h3 id="farm-name-${item.id}" class="text-lg font-semibold text-gray-800 mb-1">${item.productName}</h3>
     <p class="text-sm text-gray-600 mb-1">
-      Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
+      Price: <span id="farm-price-${item.id}" class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
     <p class="text-sm text-gray-600">
-      Available Stock: <span class="font-semibold text-teal-700">${item.qty}</span>
+      Available Stock: <span id="farm-stock-${item.id}" class="font-semibold text-teal-700">${item.qty}</span>
     </p>
 
     <!-- Button Grid -->
@@ -447,9 +447,14 @@ async function saveFarmName(id) {
 
   const result = await response.json();
   alert(result.message);
+
+  // ✅ Update UI instantly
+  const nameEl = document.getElementById(`farm-name-${id}`);
+  if (nameEl) nameEl.textContent = newName;
+
   closeAllInputBoxes();
-  location.reload();
 }
+
 
 // ✅ Edit Product Price
 function editFarmPrice(id) {
@@ -487,9 +492,14 @@ async function saveFarmPrice(id) {
 
   const result = await response.json();
   alert(result.message);
+
+  // ✅ Update price text
+  const priceEl = document.getElementById(`farm-price-${id}`);
+  if (priceEl) priceEl.textContent = `₱${newPrice}`;
+
   closeAllInputBoxes();
-  location.reload();
 }
+
 
 // ✅ Add Stock
 function addFarmStock(id) {
@@ -528,9 +538,17 @@ async function saveFarmStock(id) {
 
   const result = await response.json();
   alert(result.message);
+
+  // ✅ Update stock count
+  const stockEl = document.getElementById(`farm-stock-${id}`);
+  if (stockEl) {
+    const current = parseInt(stockEl.textContent);
+    stockEl.textContent = current + parseInt(qty);
+  }
+
   closeAllInputBoxes();
-  location.reload();
 }
+
 
 // ✅ Replace Picture stays as file upload popup
 function replaceFarmPhoto(id) {
@@ -554,7 +572,12 @@ function replaceFarmPhoto(id) {
 
     const result = await response.json();
     alert(result.message);
-    location.reload();
+
+    // ✅ Update image instantly
+    const imgEl = document.getElementById(`farm-photo-${id}`);
+    if (imgEl && result.path) {
+      imgEl.src = result.path + `?t=${Date.now()}`; // cache-buster
+    }
   };
 
   fileInput.click();
