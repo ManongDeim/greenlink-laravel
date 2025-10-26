@@ -1,3 +1,27 @@
+// Toast Function
+
+function showToast(message, type = "success", duration = 3000) {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+
+  container.appendChild(toast);
+
+  // Trigger fade-in
+  setTimeout(() => toast.classList.add("show"), 100);
+
+  // Auto-remove after duration
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+
+// Side Buttons Logic
 document.addEventListener("DOMContentLoaded", () => {
   const sidebarButtons = document.querySelectorAll(".sidebar-btn");
   const content = document.getElementById("content");
@@ -58,6 +82,26 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+
+const foodOrdersBtn = document.getElementById('foodOrdersBtn');
+const foodOrdersSubmenu = document.getElementById('foodOrdersSubmenu');
+
+if (foodOrdersBtn && foodOrdersSubmenu) {
+  foodOrdersBtn.addEventListener('click', () => {
+    foodOrdersSubmenu.classList.toggle('hidden');
+  });
+}
+
+document.querySelectorAll('#foodOrdersSubmenu button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const status = btn.getAttribute('data-status');
+    document.querySelectorAll('#foodOrdersSubmenu button').forEach(b =>
+      b.classList.remove('bg-teal-500', 'text-white')
+    );
+    btn.classList.add('bg-teal-500', 'text-white');
+    fetchAndRenderFoodOrders(status);
+  });
+});
 
 const foodCardTemplate = item => `
   <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
@@ -255,6 +299,8 @@ const roomReservationTemplate = reservation => `
 `;
 
 
+
+
   // Reusable render function
 
   /**
@@ -335,16 +381,20 @@ async function fetchAndRenderFarm() {
   }
 }
 
-async function fetchAndRenderFoodOrders() {
-  const containerId = 'content'; // Create this div in your HTML
+async function fetchAndRenderFoodOrders(status = null) {
+  const containerId = 'content';
   try {
-    const res = await fetch('/api/foodOrder'); // Your API endpoint
+    const res = await fetch('/api/foodOrder');
     const data = await res.json();
 
-    renderOrders(containerId, data, foodOrderTemplate);
+    // ✅ Filter based on status if provided
+    const filteredData = status ? data.filter(o => o.order_status === status) : data;
+
+    renderOrders(containerId, filteredData, foodOrderTemplate);
   } catch (err) {
     console.error('Failed to load food orders:', err);
-    document.getElementById(containerId).innerHTML = `<p class="text-red-500">Failed to load orders</p>`;
+    document.getElementById(containerId).innerHTML =
+      `<p class="text-red-500">Failed to load orders</p>`;
   }
 }
 
@@ -437,7 +487,7 @@ function editFarmName(id) {
 async function saveFarmName(id) {
   const input = document.getElementById(`editNameInput${id}`);
   const newName = input.value.trim();
-  if (!newName) return alert("Please enter a name");
+  if (!newName) return showToast("Please enter a name");
 
   const response = await fetch(`/api/farm/edit-name/${id}`, {
     method: "POST",
@@ -446,7 +496,7 @@ async function saveFarmName(id) {
   });
 
   const result = await response.json();
-  alert(result.message);
+  showToast(result.message);
 
   // ✅ Update UI instantly
   const nameEl = document.getElementById(`farm-name-${id}`);
@@ -482,7 +532,7 @@ function editFarmPrice(id) {
 async function saveFarmPrice(id) {
   const input = document.getElementById(`editPriceInput${id}`);
   const newPrice = input.value.trim();
-  if (!newPrice || isNaN(newPrice)) return alert("Please enter a valid price");
+  if (!newPrice || isNaN(newPrice)) return showToast("Please enter a valid price");
 
   const response = await fetch(`/api/farm/edit-price/${id}`, {
     method: "POST",
@@ -491,7 +541,7 @@ async function saveFarmPrice(id) {
   });
 
   const result = await response.json();
-  alert(result.message);
+  showToast(result.message);
 
   // ✅ Update price text
   const priceEl = document.getElementById(`farm-price-${id}`);
@@ -528,7 +578,7 @@ function addFarmStock(id) {
 async function saveFarmStock(id) {
   const input = document.getElementById(`addStockInput${id}`);
   const qty = input.value.trim();
-  if (!qty || isNaN(qty) || qty <= 0) return alert("Please enter a valid quantity");
+  if (!qty || isNaN(qty) || qty <= 0) return showToast("Please enter a valid quantity");
 
   const response = await fetch(`/api/farm/add-stock/${id}`, {
     method: "POST",
@@ -537,7 +587,7 @@ async function saveFarmStock(id) {
   });
 
   const result = await response.json();
-  alert(result.message);
+  showToast(result.message);
 
   // ✅ Update stock count
   const stockEl = document.getElementById(`farm-stock-${id}`);
@@ -571,7 +621,7 @@ function replaceFarmPhoto(id) {
     });
 
     const result = await response.json();
-    alert(result.message);
+    showToast(result.message);
 
     // ✅ Update image instantly
     const imgEl = document.getElementById(`farm-photo-${id}`);

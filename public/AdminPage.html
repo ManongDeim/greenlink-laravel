@@ -40,6 +40,14 @@
         <button data-section="foodOrders" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           🛒 Food Orders
         </button>
+
+        <!-- Submenu (hidden by default) -->
+      <div id="foodOrdersSubmenu" class="hidden ml-6 mt-2 space-y-2">
+       <button data-status="Pending" class="block w-full text-left px-3 py-2 text-sm text-gray-700 rounded-md bg-gray-50 hover:bg-teal-100">Pending Food Orders</button>
+       <button data-status="Completed" class="block w-full text-left px-3 py-2 text-sm text-gray-700 rounded-md bg-gray-50 hover:bg-teal-100">Completed Food Orders</button>
+       <button data-status="Cancelled" class="block w-full text-left px-3 py-2 text-sm text-gray-700 rounded-md bg-gray-50 hover:bg-teal-100">Cancelled Food Orders</button>
+      </div>
+
         <button data-section="farmOrders" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           🚜 Farm Orders
         </button>
@@ -63,6 +71,9 @@
       
     </main>
   </div>
+
+<div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
+
 <script src="./scripts/adminPage.js"></script>
 <script src="./global_scripts/loginScript.js" defer></script>
 <script src="./global_scripts/authLogin.js"></script>
