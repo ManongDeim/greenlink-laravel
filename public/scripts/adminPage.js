@@ -1,5 +1,4 @@
-// Toast Function
-
+// ================= Toast Function =================
 function showToast(message, type = "success", duration = 3000) {
   const container = document.getElementById("toast-container");
   if (!container) return;
@@ -10,98 +9,15 @@ function showToast(message, type = "success", duration = 3000) {
 
   container.appendChild(toast);
 
-  // Trigger fade-in
   setTimeout(() => toast.classList.add("show"), 100);
 
-  // Auto-remove after duration
   setTimeout(() => {
     toast.classList.remove("show");
     setTimeout(() => toast.remove(), 300);
   }, duration);
 }
 
-
-// Side Buttons Logic
-document.addEventListener("DOMContentLoaded", () => {
-  const sidebarButtons = document.querySelectorAll(".sidebar-btn");
-  const content = document.getElementById("content");
-
-  // Sections definition
-  const sections = {
-    food: { render: fetchAndRenderFood },
-     farm: { render: fetchAndRenderFarm },
-     foodOrders: { render: fetchAndRenderFoodOrders },
-     farmOrders: { render: fetchAndRenderFarmOrders },
-     room: {render: fetchAndRenderRoomReservations},
-    event: { 
-      custom: `
-       <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>
-        <div class="space-y-3 text-gray-700">
-          <p><span class="font-semibold">Reservation ID:</span> <span id="reservationID"></span></p>
-          <p><span class="font-semibold">Event Start Date:</span> <span id="eventStart"></span></p>
-          <p><span class="font-semibold">Event End Date:</span> <span id="eventEnd"></span></p>
-          <p><span class="font-semibold">Full Name:</span> <span id="fullName"></span></p>
-          <p><span class="font-semibold">Event Type:</span> <span id="email"></span></p>
-          <p><span class="font-semibold">E-mail: </span> <span id="phoneNumber"></span></p>
-          <p><span class="font-semibold">Phone Number:</span> <span id="pax"></span></p>
-          <p><span class="font-semibold">Number of Pax:</span> <span id="toBring"></span></p>
-          <p><span class="font-semibold">Things to be brought:</span> <span id="toBring"></span></p>
-          <p><span class="font-semibold">Approval Status:</span> <span id="approvalStat"></span></p>
-        </div>
-        <div class="flex justify-end gap-4 mt-20">
-          <button class="px-5 py-2 text-gray-700 bg-gray-300 rounded-lg disapprove-btn hover:bg-gray-400">Disapprove</button>
-          <button class="px-5 py-2 text-white bg-teal-600 rounded-lg approve-btn hover:bg-teal-700">Approve</button>
-        </div>
-      `
-    },
-    cancel: {
-      title: "Cancellation",
-      text: "This is the Cancellation section. Manage cancellations and refund requests here."
-    }
-  };
-
-  // Sidebar button click logic
-  sidebarButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    // Reset styles
-    sidebarButtons.forEach(b => {
-      b.classList.remove("bg-teal-600","text-white","hover:bg-teal-700","hover:border-teal-700");
-      if (!b.classList.contains("text-red-700")) {
-        b.classList.add("bg-gray-100","text-gray-700","hover:bg-gray-200","hover:border-gray-400");
-      }
-    });
-
-    btn.classList.remove("bg-gray-100","text-gray-700","hover:bg-gray-200","hover:border-gray-400");
-    btn.classList.add("bg-teal-600","text-white","hover:bg-teal-700","hover:border-teal-700");
-
-    const section = sections[btn.dataset.section];
-    if (section.render) section.render();
-    else if (section.custom) content.innerHTML = section.custom;
-    else content.innerHTML = `<h2 class="mb-4 text-xl font-bold text-teal-700">${section.title}</h2>
-                             <p class="text-gray-700">${section.text}</p>`;
-  });
-});
-
-
-const foodOrdersBtn = document.getElementById('foodOrdersBtn');
-const foodOrdersSubmenu = document.getElementById('foodOrdersSubmenu');
-
-if (foodOrdersBtn && foodOrdersSubmenu) {
-  foodOrdersBtn.addEventListener('click', () => {
-    foodOrdersSubmenu.classList.toggle('hidden');
-  });
-}
-
-document.querySelectorAll('#foodOrdersSubmenu button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const status = btn.getAttribute('data-status');
-    document.querySelectorAll('#foodOrdersSubmenu button').forEach(b =>
-      b.classList.remove('bg-teal-500', 'text-white')
-    );
-    btn.classList.add('bg-teal-500', 'text-white');
-    fetchAndRenderFoodOrders(status);
-  });
-});
+// ================= Templates =================
 
 const foodCardTemplate = item => `
   <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
@@ -233,7 +149,7 @@ const foodOrderTemplate = order => {
     .map(i => `<li>${order[i.key]}x ${i.name}</li>`).join('');
 
   return `
-  <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full" data-id="${order.foodOrder_id}">
+  <div class=" mb-4 p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full" data-id="${order.foodOrder_id}">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-bold text-gray-800">Order #${order.foodOrder_id}</h3>
       <span class="px-2 py-1 text-xs font-semibold ${order.payment_status === 'Paid' ? 'text-green-700 bg-green-100' : 'text-teal-700 bg-teal-100'} rounded-full">
@@ -244,6 +160,7 @@ const foodOrderTemplate = order => {
       ${orderedItems}
     </ul>
     <p class="mt-2 text-sm font-semibold text-gray-800">Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}</p>
+    <p class="mt-2 text-sm font-semibold text-gray-800">Order Status: ${order.order_status}</p>
   </div>
   `;
 };
@@ -298,10 +215,7 @@ const roomReservationTemplate = reservation => `
   </div>
 `;
 
-
-
-
-  // Reusable render function
+// ================= Reusable Render Functions =================
 
   /**
  * Renders items in a container
@@ -336,126 +250,9 @@ function renderOrders(containerId, orders, templateFn) {
 }
 
 
+// ================= CRUD Functions =================
 
-// Fetch and render
-
- async function fetchAndRenderFood() {
-  const containerId = 'content';
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
-  // Show loading
-  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
-
-  try {
-    const res = await fetch('/api/foodProducts'); // Must return array of categories
-    const data = await res.json();
-
-    // Ensure the API returns: [{ category: 'Granny\'s Grub Originals', items: [...] }, ...]
-    const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Food Inventory", items: data }];
-
-    renderItems(containerId, dataSections, foodCardTemplate);
-  } catch (err) {
-    console.error('Failed to load food inventory:', err);
-    container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
-  }
-}
-
-async function fetchAndRenderFarm() {
-  const containerId = 'content'; // You can reuse the same container
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
-  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
-
-  try {
-    const res = await fetch('/api/farmProducts'); // your API endpoint
-    const data = await res.json();
-
-    const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Farm Inventory", items: data }];
-
-    renderItems(containerId, dataSections, farmCardTemplate);
-  } catch (err) {
-    console.error('Failed to load farm inventory:', err);
-    container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
-  }
-}
-
-async function fetchAndRenderFoodOrders(status = null) {
-  const containerId = 'content';
-  try {
-    const res = await fetch('/api/foodOrder');
-    const data = await res.json();
-
-    // ✅ Filter based on status if provided
-    const filteredData = status ? data.filter(o => o.order_status === status) : data;
-
-    renderOrders(containerId, filteredData, foodOrderTemplate);
-  } catch (err) {
-    console.error('Failed to load food orders:', err);
-    document.getElementById(containerId).innerHTML =
-      `<p class="text-red-500">Failed to load orders</p>`;
-  }
-}
-
-async function fetchAndRenderFarmOrders() {
-  const container = document.getElementById('content'); // render in main content
-  container.innerHTML = `<p class="text-gray-500">Loading farm orders...</p>`;
-
-  try {
-    const res = await fetch('/api/farmOrder'); // endpoint for farm orders
-    const data = await res.json();
-
-    if (!data.length) {
-      container.innerHTML = `<p class="text-gray-500">No farm orders found.</p>`;
-      return;
-    }
-
-    container.innerHTML = `
-      <h2 class="mb-6 text-2xl font-bold text-teal-700">Farm Orders</h2>
-      <div class="space-y-4">
-        ${data.map(farmOrderCardTemplate).join('')}
-      </div>
-    `;
-  } catch (err) {
-    console.error('Failed to load farm orders:', err);
-    container.innerHTML = `<p class="text-red-500">Failed to load farm orders.</p>`;
-  }
-}
-
-async function fetchAndRenderRoomReservations() {
-  const containerId = 'content'; // Main content container
-  const container = document.getElementById(containerId);
-  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
-
-  try {
-    const res = await fetch('/api/roomReser'); // Your API endpoint
-    const data = await res.json();
-
-    if (!Array.isArray(data) || data.length === 0) {
-      container.innerHTML = `<p class="text-gray-500">No room reservations found.</p>`;
-      return;
-    }
-
-    // Render each reservation
-    container.innerHTML = data.map(roomReservationTemplate).join('');
-
-    // Attach approve/disapprove events
-    container.querySelectorAll('.approve-btn').forEach(btn => {
-      btn.addEventListener('click', () => handleRoomApproval(btn.dataset.id, 'Approved'));
-    });
-    container.querySelectorAll('.disapprove-btn').forEach(btn => {
-      btn.addEventListener('click', () => handleRoomApproval(btn.dataset.id, 'Disapproved'));
-    });
-
-  } catch (err) {
-    console.error('Failed to load room reservations:', err);
-    container.innerHTML = `<p class="text-red-500">Failed to load room reservations.</p>`;
-  }
-}
-});
-
-// CURD for Farm Products
+// ----------- Farm Product Editing -----------
 
 function closeAllInputBoxes() {
   document.querySelectorAll(".inline-editor").forEach(el => el.remove());
@@ -632,3 +429,210 @@ function replaceFarmPhoto(id) {
 
   fileInput.click();
 }
+
+
+// ================= Fetch & Render Functions =================
+ async function fetchAndRenderFood() {
+  const containerId = 'content';
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  // Show loading
+  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+
+  try {
+    const res = await fetch('/api/foodProducts'); // Must return array of categories
+    const data = await res.json();
+
+    // Ensure the API returns: [{ category: 'Granny\'s Grub Originals', items: [...] }, ...]
+    const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Food Inventory", items: data }];
+
+    renderItems(containerId, dataSections, foodCardTemplate);
+  } catch (err) {
+    console.error('Failed to load food inventory:', err);
+    container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
+  }
+}
+
+async function fetchAndRenderFarm() {
+  const containerId = 'content'; // You can reuse the same container
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+
+  try {
+    const res = await fetch('/api/farmProducts'); // your API endpoint
+    const data = await res.json();
+
+    const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Farm Inventory", items: data }];
+
+    renderItems(containerId, dataSections, farmCardTemplate);
+  } catch (err) {
+    console.error('Failed to load farm inventory:', err);
+    container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
+  }
+}
+
+async function fetchAndRenderFoodOrders(status = null) {
+  const containerId = "content";
+  const container = document.getElementById(containerId);
+
+  try {
+    const res = await fetch("/api/foodOrder"); // fetch all orders
+    const data = await res.json();
+
+    // Filter by status if provided
+    const filteredData = status ? data.filter(order => order.order_status === status) : data;
+
+    // Render filtered orders
+    renderOrders(containerId, filteredData, foodOrderTemplate);
+  } catch (err) {
+    console.error("Failed to load food orders:", err);
+    if (container) container.innerHTML = `<p class="text-red-500">Failed to load orders</p>`;
+  }
+}
+
+async function fetchAndRenderFarmOrders() {
+  const container = document.getElementById('content'); // render in main content
+  container.innerHTML = `<p class="text-gray-500">Loading farm orders...</p>`;
+
+  try {
+    const res = await fetch('/api/farmOrder'); // endpoint for farm orders
+    const data = await res.json();
+
+    if (!data.length) {
+      container.innerHTML = `<p class="text-gray-500">No farm orders found.</p>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <h2 class="mb-6 text-2xl font-bold text-teal-700">Farm Orders</h2>
+      <div class="space-y-4">
+        ${data.map(farmOrderCardTemplate).join('')}
+      </div>
+    `;
+  } catch (err) {
+    console.error('Failed to load farm orders:', err);
+    container.innerHTML = `<p class="text-red-500">Failed to load farm orders.</p>`;
+  }
+}
+
+async function fetchAndRenderRoomReservations() {
+  const containerId = 'content'; // Main content container
+  const container = document.getElementById(containerId);
+  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+
+  try {
+    const res = await fetch('/api/roomReser'); // Your API endpoint
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      container.innerHTML = `<p class="text-gray-500">No room reservations found.</p>`;
+      return;
+    }
+
+    // Render each reservation
+    container.innerHTML = data.map(roomReservationTemplate).join('');
+
+    // Attach approve/disapprove events
+    container.querySelectorAll('.approve-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleRoomApproval(btn.dataset.id, 'Approved'));
+    });
+    container.querySelectorAll('.disapprove-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleRoomApproval(btn.dataset.id, 'Disapproved'));
+    });
+
+  } catch (err) {
+    console.error('Failed to load room reservations:', err);
+    container.innerHTML = `<p class="text-red-500">Failed to load room reservations.</p>`;
+  }
+}
+
+
+
+
+// Side Buttons Logic
+document.addEventListener("DOMContentLoaded", () => {
+  const sidebarButtons = document.querySelectorAll(".sidebar-btn");
+  const content = document.getElementById("content");
+
+  // Sections definition
+  const sections = {
+    food: { render: fetchAndRenderFood },
+     farm: { render: fetchAndRenderFarm },
+     foodOrders: { render: fetchAndRenderFoodOrders },
+     farmOrders: { render: fetchAndRenderFarmOrders },
+     room: {render: fetchAndRenderRoomReservations},
+    event: { 
+      custom: `
+       <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>
+        <div class="space-y-3 text-gray-700">
+          <p><span class="font-semibold">Reservation ID:</span> <span id="reservationID"></span></p>
+          <p><span class="font-semibold">Event Start Date:</span> <span id="eventStart"></span></p>
+          <p><span class="font-semibold">Event End Date:</span> <span id="eventEnd"></span></p>
+          <p><span class="font-semibold">Full Name:</span> <span id="fullName"></span></p>
+          <p><span class="font-semibold">Event Type:</span> <span id="email"></span></p>
+          <p><span class="font-semibold">E-mail: </span> <span id="phoneNumber"></span></p>
+          <p><span class="font-semibold">Phone Number:</span> <span id="pax"></span></p>
+          <p><span class="font-semibold">Number of Pax:</span> <span id="toBring"></span></p>
+          <p><span class="font-semibold">Things to be brought:</span> <span id="toBring"></span></p>
+          <p><span class="font-semibold">Approval Status:</span> <span id="approvalStat"></span></p>
+        </div>
+        <div class="flex justify-end gap-4 mt-20">
+          <button class="px-5 py-2 text-gray-700 bg-gray-300 rounded-lg disapprove-btn hover:bg-gray-400">Disapprove</button>
+          <button class="px-5 py-2 text-white bg-teal-600 rounded-lg approve-btn hover:bg-teal-700">Approve</button>
+        </div>
+      `
+    },
+    cancel: {
+      title: "Cancellation",
+      text: "This is the Cancellation section. Manage cancellations and refund requests here."
+    }
+  };
+
+  // Sidebar button click logic
+  sidebarButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    // Reset styles
+    sidebarButtons.forEach(b => {
+      b.classList.remove("bg-teal-600","text-white","hover:bg-teal-700","hover:border-teal-700");
+      if (!b.classList.contains("text-red-700")) {
+        b.classList.add("bg-gray-100","text-gray-700","hover:bg-gray-200","hover:border-gray-400");
+      }
+    });
+
+    btn.classList.remove("bg-gray-100","text-gray-700","hover:bg-gray-200","hover:border-gray-400");
+    btn.classList.add("bg-teal-600","text-white","hover:bg-teal-700","hover:border-teal-700");
+
+    const section = sections[btn.dataset.section];
+    if (section.render) section.render();
+    else if (section.custom) content.innerHTML = section.custom;
+    else content.innerHTML = `<h2 class="mb-4 text-xl font-bold text-teal-700">${section.title}</h2>
+                             <p class="text-gray-700">${section.text}</p>`;
+  });
+
+ // =================== Sub-buttons ====================
+
+  // Food Orders Submenu Logic
+
+ const foodOrdersBtn = document.getElementById("foodOrdersBtn");
+  const submenu = document.getElementById("foodOrdersSubmenu");
+
+  if (foodOrdersBtn && submenu) {
+    // Toggle submenu visibility
+    foodOrdersBtn.addEventListener("click", () => {
+      submenu.classList.toggle("hidden");
+    });
+
+    // Handle submenu clicks
+    submenu.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const status = btn.dataset.status;
+        await fetchAndRenderFoodOrders(status);
+      });
+    });
+  }
+
+});
+});

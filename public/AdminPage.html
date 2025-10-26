@@ -42,15 +42,21 @@
         <button data-section="farm" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           🌾 Farm Inventory
         </button>
-        <button data-section="foodOrders" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+        <button data-section="foodOrders" id="foodOrdersBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           🛒 Food Orders
         </button>
 
         <!-- Submenu (hidden by default) -->
       <div id="foodOrdersSubmenu" class="hidden ml-6 mt-2 space-y-2">
-       <button data-status="Pending" class="block w-full text-left px-3 py-2 text-sm text-gray-700 rounded-md bg-gray-50 hover:bg-teal-100">Pending Food Orders</button>
-       <button data-status="Completed" class="block w-full text-left px-3 py-2 text-sm text-gray-700 rounded-md bg-gray-50 hover:bg-teal-100">Completed Food Orders</button>
-       <button data-status="Cancelled" class="block w-full text-left px-3 py-2 text-sm text-gray-700 rounded-md bg-gray-50 hover:bg-teal-100">Cancelled Food Orders</button>
+        <button data-status="Pending" class="block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-teal-100">
+        Pending Food Orders
+        </button>
+        <button data-status="Completed" class="block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-green-100">
+        Completed Food Orders
+        </button>
+        <button data-status="Cancelled" class="block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-red-100">
+        Cancelled Food Orders
+        </button>
       </div>
 
         <button data-section="farmOrders" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
