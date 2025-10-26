@@ -122,55 +122,65 @@ class FarmOrderController extends Controller
     }
 
     public function paymentSuccess(Request $request)
-    {
-
-  Log::info("✅ paymentSuccess route hit", [
+{
+    Log::info("✅ paymentSuccess route hit", [
         'full_url' => $request->fullUrl(),
         'ref' => $request->query('ref')
     ]);
 
-        $refNumber = $request->query('ref');
+    $refNumber = $request->query('ref');
 
-        if(!$refNumber) {
-            Log::warning("No ref number provided in paymentSuccess");
-            return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
-        }
-
-        $order = FarmOrderModel::where('ref_number', $refNumber)->first();
-
-        if (!$order) {
-             return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
-        }
-
-        
-
-        $order->update(['payment_status' => 'Paid']);
-
-        $productsToUpdate = [
-        'Bangus' => $order->bangus_order,
-        'Egg' => $order->eggs_order,
-        'Mud Crab' => $order->mudCrab_order,
-        'Native Chicken' => $order->nativeChicken_order,
-        'Native Pork' => $order->nativePork_order,
-        'Squash' => $order->squash_order,
-        ];
-
-    foreach ($productsToUpdate as $name => $orderedQty) {
-    if ($orderedQty > 0) {
-        $product = FarmProduct::where('productName', $name)->first();
-        if ($product) {
-            $newQty = max(0, $product->qty - $orderedQty); // prevent negative stock
-            $product->update(['qty' => $newQty]);
-        }
+    if (!$refNumber) {
+        Log::warning("No ref number provided in paymentSuccess");
+        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
     }
-}
 
-        Log::info("✅ Stock successfully deducted for ref: {$refNumber}");
+    $order = FarmOrderModel::where('ref_number', $refNumber)->first();
+
+    if (!$order) {
+        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
+    }
+
+    // ✅ Only run this once if payment not yet processed
+    if ($order->payment_status !== 'Paid') {
+        $order->update([
+            'payment_status' => 'Paid',
+            'order_status' => 'Completed'
+        ]);
 
         Log::info("Payment marked successful with reference number: {$refNumber}");
-        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
-        
+
+        // ✅ Deduct product quantities only once
+        $productsToUpdate = [
+            'Bangus' => $order->bangus_order,
+            'Egg' => $order->eggs_order,
+            'Mud Crab' => $order->mudCrab_order,
+            'Native Chicken' => $order->nativeChicken_order,
+            'Native Pork' => $order->nativePork_order,
+            'Squash' => $order->squash_order,
+        ];
+
+        foreach ($productsToUpdate as $name => $orderedQty) {
+            if ($orderedQty > 0) {
+                $product = \App\Models\FarmProduct::where('productName', $name)->first();
+
+                if ($product) {
+                    $newQty = max(0, $product->qty - $orderedQty);
+                    $product->update(['qty' => $newQty]);
+                    Log::info("✅ Deducted {$orderedQty} from {$name}, new stock: {$newQty}");
+                } else {
+                    Log::warning("⚠️ Product not found: {$name}");
+                }
+            }
+        }
+
+        Log::info("✅ Stock successfully deducted for ref: {$refNumber}");
+    } else {
+        Log::info("⚠️ Payment already marked as Paid for ref: {$refNumber}, skipping deduction.");
     }
+
+    return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
+}
 
     // Step 2b: If payment fails
     public function paymentFailed(Request $request)
