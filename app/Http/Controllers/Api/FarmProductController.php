@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\FarmProduct;
+
 
 class FarmProductController extends Controller
 {
@@ -35,29 +37,33 @@ class FarmProductController extends Controller
         return response()->json(['success' => true, 'message' => 'Product price updated']);
     }
 
-  public function replacePhoto(Request $request, $id)
+
+
+public function replacePhoto(Request $request, $id)
 {
     $request->validate(['productPicture' => 'required|file|image|max:2048']);
 
     $product = FarmProduct::findOrFail($id);
 
-    // ✅ Save directly into Hostinger's public_html folder
-    $destinationPath = base_path('../public_html/farm_products');
+    // ✅ Corrected absolute path to the real public_html/farm_products
+    $destinationPath = realpath(base_path('../')) . '/farm_products';
 
     if (!file_exists($destinationPath)) {
         mkdir($destinationPath, 0775, true);
     }
 
     $filename = uniqid() . '.' . $request->file('productPicture')->getClientOriginalExtension();
+
+    // ✅ Move file correctly
     $request->file('productPicture')->move($destinationPath, $filename);
 
-    // ✅ Store correct public URL path
     $product->productPicture = '/farm_products/' . $filename;
     $product->save();
 
+    Log::info('✅ File moved correctly to:', ['path' => $destinationPath . '/' . $filename]);
+
     return response()->json(['success' => true, 'message' => 'Product photo replaced successfully']);
 }
-
 
 
 
