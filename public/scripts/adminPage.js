@@ -199,18 +199,18 @@ const farmOrderCardTemplate = order => {
 // Room Reservation template
 const roomReservationTemplate = reservation => `
   <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
-       data-id="${reservation.room_reser_id}" data-status="${reservation.status ?? 'Pending'}">
+       data-id="${reservation.room_reser_id}" data-payment-status="${reservation.payment_status ?? 'Pending'}">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-bold text-gray-800">Reservation #${reservation.room_reser_id}</h3>
       <span class="px-2 py-1 text-xs font-semibold ${
-        reservation.status === 'Checked-in'
+        reservation.payment_status === 'Paid'
           ? 'text-green-700 bg-green-100'
-          : reservation.status === 'Checked-out'
+          : reservation.payment_status === 'Refunded'
           ? 'text-blue-700 bg-blue-100'
-          : reservation.status === 'Cancelled'
+          : reservation.payment_status === 'Failed'
           ? 'text-red-700 bg-red-100'
           : 'text-teal-700 bg-teal-100'
-      } rounded-full">${reservation.status ?? 'Pending'}</span>
+      } rounded-full">${reservation.payment_status ?? 'Pending'}</span>
     </div>
     <ul class="mt-2 text-sm text-gray-700 list-disc list-inside">
       <li>Room: ${reservation.room}</li>
@@ -218,7 +218,7 @@ const roomReservationTemplate = reservation => `
       <li>Check-in: ${reservation.check_in_date}</li>
       <li>Check-out: ${reservation.check_out_date}</li>
     </ul>
-    <p class="mt-2 text-sm text-gray-700 font-semibold">Payment: ${reservation.payment_status}</p>
+    <p class="mt-2 text-sm text-gray-700 font-semibold">Status: ${reservation.status}</p>
   </div>
 `;
 
