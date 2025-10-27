@@ -1,63 +1,23 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const sidebarButtons = document.querySelectorAll(".sidebar-btn");
-  const content = document.getElementById("content");
+// ================= Toast Function =================
+function showToast(message, type = "success", duration = 3000) {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
 
-  // Sections definition
-  const sections = {
-    food: { render: fetchAndRenderFood },
-     farm: { render: fetchAndRenderFarm },
-     foodOrders: { render: fetchAndRenderFoodOrders },
-     farmOrders: { render: fetchAndRenderFarmOrders },
-     room: {render: fetchAndRenderRoomReservations},
-    event: { 
-      custom: `
-       <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>
-        <div class="space-y-3 text-gray-700">
-          <p><span class="font-semibold">Reservation ID:</span> <span id="reservationID"></span></p>
-          <p><span class="font-semibold">Event Start Date:</span> <span id="eventStart"></span></p>
-          <p><span class="font-semibold">Event End Date:</span> <span id="eventEnd"></span></p>
-          <p><span class="font-semibold">Full Name:</span> <span id="fullName"></span></p>
-          <p><span class="font-semibold">Event Type:</span> <span id="email"></span></p>
-          <p><span class="font-semibold">E-mail: </span> <span id="phoneNumber"></span></p>
-          <p><span class="font-semibold">Phone Number:</span> <span id="pax"></span></p>
-          <p><span class="font-semibold">Number of Pax:</span> <span id="toBring"></span></p>
-          <p><span class="font-semibold">Things to be brought:</span> <span id="toBring"></span></p>
-          <p><span class="font-semibold">Approval Status:</span> <span id="approvalStat"></span></p>
-        </div>
-        <div class="flex justify-end gap-4 mt-20">
-          <button class="px-5 py-2 text-gray-700 bg-gray-300 rounded-lg disapprove-btn hover:bg-gray-400">Disapprove</button>
-          <button class="px-5 py-2 text-white bg-teal-600 rounded-lg approve-btn hover:bg-teal-700">Approve</button>
-        </div>
-      `
-    },
-    cancel: {
-      title: "Cancellation",
-      text: "This is the Cancellation section. Manage cancellations and refund requests here."
-    }
-  };
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
 
-  // Sidebar button click logic
-  sidebarButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    // Reset styles
-    sidebarButtons.forEach(b => {
-      b.classList.remove("bg-teal-600","text-white","hover:bg-teal-700","hover:border-teal-700");
-      if (!b.classList.contains("text-red-700")) {
-        b.classList.add("bg-gray-100","text-gray-700","hover:bg-gray-200","hover:border-gray-400");
-      }
-    });
+  container.appendChild(toast);
 
-    btn.classList.remove("bg-gray-100","text-gray-700","hover:bg-gray-200","hover:border-gray-400");
-    btn.classList.add("bg-teal-600","text-white","hover:bg-teal-700","hover:border-teal-700");
+  setTimeout(() => toast.classList.add("show"), 100);
 
-    const section = sections[btn.dataset.section];
-    if (section.render) section.render();
-    else if (section.custom) content.innerHTML = section.custom;
-    else content.innerHTML = `<h2 class="mb-4 text-xl font-bold text-teal-700">${section.title}</h2>
-                             <p class="text-gray-700">${section.text}</p>`;
-  });
-});
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
 
+// ================= Templates =================
 
 const foodCardTemplate = item => `
   <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
@@ -117,6 +77,9 @@ const farmCardTemplate = item => `
     <p class="text-sm text-gray-600 mb-1">
       Price: <span id="farm-price-${item.id}" class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
+    <p class="text-sm text-gray-600 mb-1">
+  Measurement: <span id="farm-measurement-${item.id}" class="font-semibold text-teal-700">${item.measurement || ''}</span>
+</p>
     <p class="text-sm text-gray-600">
       Available Stock: <span id="farm-stock-${item.id}" class="font-semibold text-teal-700">${item.qty}</span>
     </p>
@@ -189,7 +152,7 @@ const foodOrderTemplate = order => {
     .map(i => `<li>${order[i.key]}x ${i.name}</li>`).join('');
 
   return `
-  <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full" data-id="${order.foodOrder_id}">
+  <div class=" mb-4 p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full" data-id="${order.foodOrder_id}">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-bold text-gray-800">Order #${order.foodOrder_id}</h3>
       <span class="px-2 py-1 text-xs font-semibold ${order.payment_status === 'Paid' ? 'text-green-700 bg-green-100' : 'text-teal-700 bg-teal-100'} rounded-full">
@@ -200,6 +163,7 @@ const foodOrderTemplate = order => {
       ${orderedItems}
     </ul>
     <p class="mt-2 text-sm font-semibold text-gray-800">Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}</p>
+    <p class="mt-2 text-sm font-semibold text-gray-800">Order Status: ${order.order_status}</p>
   </div>
   `;
 };
@@ -254,8 +218,7 @@ const roomReservationTemplate = reservation => `
   </div>
 `;
 
-
-  // Reusable render function
+// ================= Reusable Render Functions =================
 
   /**
  * Renders items in a container
@@ -287,12 +250,226 @@ function renderOrders(containerId, orders, templateFn) {
   container.innerHTML = orders.length
     ? orders.map(templateFn).join('')
     : `<p class="text-gray-500">No orders found.</p>`;
+
+  orders.forEach(order => {
+    const card = container.querySelector(`.order-item[data-id="${order.foodOrder_id}"]`);
+    if (card) {
+      card.addEventListener('click', () => openFoodOrderModal(order));
+    }
+  });
 }
 
 
+// ================= CRUD Functions =================
 
-// Fetch and render
+// ----------- Farm Product Editing -----------
 
+function closeAllInputBoxes() {
+  document.querySelectorAll(".inline-editor").forEach(el => el.remove());
+}
+
+// ✅ Edit Product Name
+function editFarmName(id) {
+  closeAllInputBoxes();
+
+  const button = event.target.closest("button");
+  const parent = button.parentElement;
+
+  const container = document.createElement("div");
+  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+
+  container.innerHTML = `
+    <input type="text" id="editNameInput${id}" 
+           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-teal-500"
+           placeholder="Enter new name">
+    <button class="bg-teal-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-teal-700 transition"
+            onclick="saveFarmName(${id})">Save</button>
+    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+            onclick="closeAllInputBoxes()">Cancel</button>
+  `;
+
+  parent.insertAdjacentElement("afterend", container);
+}
+
+async function saveFarmName(id) {
+  const input = document.getElementById(`editNameInput${id}`);
+  const newName = input.value.trim();
+  if (!newName) return showToast("Please enter a name");
+
+  const response = await fetch(`/api/farm/edit-name/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productName: newName }),
+  });
+
+  const result = await response.json();
+  showToast(result.message);
+
+  // ✅ Update UI instantly
+  const nameEl = document.getElementById(`farm-name-${id}`);
+  if (nameEl) nameEl.textContent = newName;
+
+  closeAllInputBoxes();
+}
+
+
+// ✅ Edit Product Price
+function editFarmPrice(id) {
+  closeAllInputBoxes();
+
+  const button = event.target.closest("button");
+  const parent = button.parentElement;
+
+  // 🧾 Get current displayed price and measurement
+  const priceEl = document.getElementById(`farm-price-${id}`);
+  const currentPrice = priceEl ? priceEl.textContent.replace("₱", "").trim() : "";
+
+  const measurementEl = document.getElementById(`farm-measurement-${id}`);
+  const currentMeasurement = measurementEl ? measurementEl.textContent.trim() : "";
+
+  const container = document.createElement("div");
+  container.className = "inline-editor col-span-2 mt-2 flex flex-col gap-2";
+
+  container.innerHTML = `
+    <div class="flex items-center gap-2">
+      <input type="text" id="editPriceInput${id}"
+             value="${currentPrice}"
+             class="border border-gray-300 rounded-lg px-3 py-1 w-1/2 text-sm focus:ring-2 focus:ring-cyan-500"
+             placeholder="Enter new price">
+
+      <input type="text" id="editMeasurementInput${id}"
+             value="${currentMeasurement || ''}"
+             class="border border-gray-300 rounded-lg px-3 py-1 w-1/2 text-sm focus:ring-2 focus:ring-teal-500"
+             placeholder="e.g. per 1/2 kg">
+    </div>
+
+    <div class="flex gap-2">
+      <button class="bg-cyan-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-cyan-700 transition"
+              onclick="saveFarmPrice(${id})">Save</button>
+      <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+              onclick="closeAllInputBoxes()">Cancel</button>
+    </div>
+  `;
+
+  parent.insertAdjacentElement("afterend", container);
+}
+
+async function saveFarmPrice(id) {
+  const priceInput = document.getElementById(`editPriceInput${id}`);
+  const measurementInput = document.getElementById(`editMeasurementInput${id}`);
+
+  const newPrice = priceInput.value.trim();
+  const newMeasurement = measurementInput.value.trim();
+
+  if (!newPrice || isNaN(newPrice)) return showToast("Please enter a valid price");
+
+  const response = await fetch(`/api/farm/edit-price/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      price: newPrice,
+      measurement: newMeasurement,
+    }),
+  });
+
+  const result = await response.json();
+  showToast(result.message);
+
+  // ✅ Update price and measurement text
+  const priceEl = document.getElementById(`farm-price-${id}`);
+  if (priceEl) priceEl.textContent = `₱${newPrice}`;
+
+  const measureEl = document.getElementById(`farm-measurement-${id}`);
+  if (measureEl) measureEl.textContent = newMeasurement || "";
+
+  closeAllInputBoxes();
+}
+
+
+// ✅ Add Stock
+function addFarmStock(id) {
+  closeAllInputBoxes();
+
+  const button = event.target.closest("button");
+  const parent = button.parentElement;
+
+  const container = document.createElement("div");
+  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+
+  container.innerHTML = `
+    <input type="number" id="addStockInput${id}" 
+           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-green-500"
+           placeholder="Enter quantity to add"
+           min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+    <button class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-700 transition"
+            onclick="saveFarmStock(${id})">Save</button>
+    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+            onclick="closeAllInputBoxes()">Cancel</button>
+  `;
+
+  parent.insertAdjacentElement("afterend", container);
+}
+
+async function saveFarmStock(id) {
+  const input = document.getElementById(`addStockInput${id}`);
+  const qty = input.value.trim();
+  if (!qty || isNaN(qty) || qty <= 0) return showToast("Please enter a valid quantity");
+
+  const response = await fetch(`/api/farm/add-stock/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ qty: parseInt(qty) }),
+  });
+
+  const result = await response.json();
+  showToast(result.message);
+
+  // ✅ Update stock count
+  const stockEl = document.getElementById(`farm-stock-${id}`);
+  if (stockEl) {
+    const current = parseInt(stockEl.textContent);
+    stockEl.textContent = current + parseInt(qty);
+  }
+
+  closeAllInputBoxes();
+}
+
+
+// ✅ Replace Picture stays as file upload popup
+function replaceFarmPhoto(id) {
+  closeAllInputBoxes();
+
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = "image/*";
+
+  fileInput.onchange = async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("productPicture", file);
+
+    const response = await fetch(`/api/farm/replace-photo/${id}`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+    showToast(result.message);
+
+    // ✅ Update image instantly
+    const imgEl = document.getElementById(`farm-photo-${id}`);
+    if (imgEl && result.path) {
+      imgEl.src = result.path + `?t=${Date.now()}`; // cache-buster
+    }
+  };
+
+  fileInput.click();
+}
+
+
+// ================= Fetch & Render Functions =================
  async function fetchAndRenderFood() {
   const containerId = 'content';
   const container = document.getElementById(containerId);
@@ -335,16 +512,22 @@ async function fetchAndRenderFarm() {
   }
 }
 
-async function fetchAndRenderFoodOrders() {
-  const containerId = 'content'; // Create this div in your HTML
+async function fetchAndRenderFoodOrders(status = null) {
+  const containerId = "content";
+  const container = document.getElementById(containerId);
+
   try {
-    const res = await fetch('/api/foodOrder'); // Your API endpoint
+    const res = await fetch("/api/foodOrder"); // fetch all orders
     const data = await res.json();
 
-    renderOrders(containerId, data, foodOrderTemplate);
+    // Filter by status if provided
+    const filteredData = status ? data.filter(order => order.order_status === status) : data;
+
+    // Render filtered orders
+    renderOrders(containerId, filteredData, foodOrderTemplate);
   } catch (err) {
-    console.error('Failed to load food orders:', err);
-    document.getElementById(containerId).innerHTML = `<p class="text-red-500">Failed to load orders</p>`;
+    console.error("Failed to load food orders:", err);
+    if (container) container.innerHTML = `<p class="text-red-500">Failed to load orders</p>`;
   }
 }
 
@@ -403,182 +586,173 @@ async function fetchAndRenderRoomReservations() {
     container.innerHTML = `<p class="text-red-500">Failed to load room reservations.</p>`;
   }
 }
-});
-
-// CURD for Farm Products
-
-function closeAllInputBoxes() {
-  document.querySelectorAll(".inline-editor").forEach(el => el.remove());
-}
-
-// ✅ Edit Product Name
-function editFarmName(id) {
-  closeAllInputBoxes();
-
-  const button = event.target.closest("button");
-  const parent = button.parentElement;
-
-  const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
-
-  container.innerHTML = `
-    <input type="text" id="editNameInput${id}" 
-           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-teal-500"
-           placeholder="Enter new name">
-    <button class="bg-teal-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-teal-700 transition"
-            onclick="saveFarmName(${id})">Save</button>
-    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
-            onclick="closeAllInputBoxes()">Cancel</button>
-  `;
-
-  parent.insertAdjacentElement("afterend", container);
-}
-
-async function saveFarmName(id) {
-  const input = document.getElementById(`editNameInput${id}`);
-  const newName = input.value.trim();
-  if (!newName) return alert("Please enter a name");
-
-  const response = await fetch(`/api/farm/edit-name/${id}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ productName: newName }),
-  });
-
-  const result = await response.json();
-  alert(result.message);
-
-  // ✅ Update UI instantly
-  const nameEl = document.getElementById(`farm-name-${id}`);
-  if (nameEl) nameEl.textContent = newName;
-
-  closeAllInputBoxes();
-}
 
 
-// ✅ Edit Product Price
-function editFarmPrice(id) {
-  closeAllInputBoxes();
-
-  const button = event.target.closest("button");
-  const parent = button.parentElement;
-
-  const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
-
-  container.innerHTML = `
-    <input type="text" id="editPriceInput${id}" 
-           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-cyan-500"
-           placeholder="Enter new price">
-    <button class="bg-cyan-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-cyan-700 transition"
-            onclick="saveFarmPrice(${id})">Save</button>
-    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
-            onclick="closeAllInputBoxes()">Cancel</button>
-  `;
-
-  parent.insertAdjacentElement("afterend", container);
-}
-
-async function saveFarmPrice(id) {
-  const input = document.getElementById(`editPriceInput${id}`);
-  const newPrice = input.value.trim();
-  if (!newPrice || isNaN(newPrice)) return alert("Please enter a valid price");
-
-  const response = await fetch(`/api/farm/edit-price/${id}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ price: newPrice }),
-  });
-
-  const result = await response.json();
-  alert(result.message);
-
-  // ✅ Update price text
-  const priceEl = document.getElementById(`farm-price-${id}`);
-  if (priceEl) priceEl.textContent = `₱${newPrice}`;
-
-  closeAllInputBoxes();
-}
 
 
-// ✅ Add Stock
-function addFarmStock(id) {
-  closeAllInputBoxes();
+// Side Buttons Logic
+document.addEventListener("DOMContentLoaded", () => {
+  const sidebarButtons = document.querySelectorAll(".sidebar-btn");
+  const content = document.getElementById("content");
 
-  const button = event.target.closest("button");
-  const parent = button.parentElement;
-
-  const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
-
-  container.innerHTML = `
-    <input type="number" id="addStockInput${id}" 
-           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-green-500"
-           placeholder="Enter quantity to add"
-           min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-    <button class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-700 transition"
-            onclick="saveFarmStock(${id})">Save</button>
-    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
-            onclick="closeAllInputBoxes()">Cancel</button>
-  `;
-
-  parent.insertAdjacentElement("afterend", container);
-}
-
-async function saveFarmStock(id) {
-  const input = document.getElementById(`addStockInput${id}`);
-  const qty = input.value.trim();
-  if (!qty || isNaN(qty) || qty <= 0) return alert("Please enter a valid quantity");
-
-  const response = await fetch(`/api/farm/add-stock/${id}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ qty: parseInt(qty) }),
-  });
-
-  const result = await response.json();
-  alert(result.message);
-
-  // ✅ Update stock count
-  const stockEl = document.getElementById(`farm-stock-${id}`);
-  if (stockEl) {
-    const current = parseInt(stockEl.textContent);
-    stockEl.textContent = current + parseInt(qty);
-  }
-
-  closeAllInputBoxes();
-}
-
-
-// ✅ Replace Picture stays as file upload popup
-function replaceFarmPhoto(id) {
-  closeAllInputBoxes();
-
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.accept = "image/*";
-
-  fileInput.onchange = async () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("productPicture", file);
-
-    const response = await fetch(`/api/farm/replace-photo/${id}`, {
-      method: "POST",
-      body: formData,
-    });
-
-    const result = await response.json();
-    alert(result.message);
-
-    // ✅ Update image instantly
-    const imgEl = document.getElementById(`farm-photo-${id}`);
-    if (imgEl && result.path) {
-      imgEl.src = result.path + `?t=${Date.now()}`; // cache-buster
+  // Sections definition
+  const sections = {
+    food: { render: fetchAndRenderFood },
+     farm: { render: fetchAndRenderFarm },
+     foodOrders: { render: fetchAndRenderFoodOrders },
+     farmOrders: { render: fetchAndRenderFarmOrders },
+     room: {render: fetchAndRenderRoomReservations},
+    event: { 
+      custom: `
+       <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>
+        <div class="space-y-3 text-gray-700">
+          <p><span class="font-semibold">Reservation ID:</span> <span id="reservationID"></span></p>
+          <p><span class="font-semibold">Event Start Date:</span> <span id="eventStart"></span></p>
+          <p><span class="font-semibold">Event End Date:</span> <span id="eventEnd"></span></p>
+          <p><span class="font-semibold">Full Name:</span> <span id="fullName"></span></p>
+          <p><span class="font-semibold">Event Type:</span> <span id="email"></span></p>
+          <p><span class="font-semibold">E-mail: </span> <span id="phoneNumber"></span></p>
+          <p><span class="font-semibold">Phone Number:</span> <span id="pax"></span></p>
+          <p><span class="font-semibold">Number of Pax:</span> <span id="toBring"></span></p>
+          <p><span class="font-semibold">Things to be brought:</span> <span id="toBring"></span></p>
+          <p><span class="font-semibold">Approval Status:</span> <span id="approvalStat"></span></p>
+        </div>
+        <div class="flex justify-end gap-4 mt-20">
+          <button class="px-5 py-2 text-gray-700 bg-gray-300 rounded-lg disapprove-btn hover:bg-gray-400">Disapprove</button>
+          <button class="px-5 py-2 text-white bg-teal-600 rounded-lg approve-btn hover:bg-teal-700">Approve</button>
+        </div>
+      `
+    },
+    cancel: {
+      title: "Cancellation",
+      text: "This is the Cancellation section. Manage cancellations and refund requests here."
     }
   };
 
-  fileInput.click();
+  // Sidebar button click logic
+  sidebarButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    // Reset styles
+    sidebarButtons.forEach(b => {
+      b.classList.remove("bg-teal-600","text-white","hover:bg-teal-700","hover:border-teal-700");
+      if (!b.classList.contains("text-red-700")) {
+        b.classList.add("bg-gray-100","text-gray-700","hover:bg-gray-200","hover:border-gray-400");
+      }
+    });
+
+    btn.classList.remove("bg-gray-100","text-gray-700","hover:bg-gray-200","hover:border-gray-400");
+    btn.classList.add("bg-teal-600","text-white","hover:bg-teal-700","hover:border-teal-700");
+
+    const section = sections[btn.dataset.section];
+    if (section.render) section.render();
+    else if (section.custom) content.innerHTML = section.custom;
+    else content.innerHTML = `<h2 class="mb-4 text-xl font-bold text-teal-700">${section.title}</h2>
+                             <p class="text-gray-700">${section.text}</p>`;
+  });
+
+ // =================== Sub-buttons ====================
+
+  // Food Orders Submenu Logic
+
+ const foodOrdersBtn = document.getElementById("foodOrdersBtn");
+  const submenu = document.getElementById("foodOrdersSubmenu");
+
+  if (foodOrdersBtn && submenu) {
+    // Toggle submenu visibility
+    foodOrdersBtn.addEventListener("click", () => {
+      submenu.classList.toggle("hidden");
+    });
+
+    // Handle submenu clicks
+    submenu.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const status = btn.dataset.status;
+        await fetchAndRenderFoodOrders(status);
+      });
+    });
+  }
+
+});
+});
+
+// ================= Modals =================
+
+// Food Order Details Modal
+
+const foodOrderModal = document.getElementById('foodOrderModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalItems = document.getElementById('modalItems');
+const modalTotal = document.getElementById('modalTotal');
+const modalRef = document.getElementById('modalRef');
+const modalButtons = document.getElementById('modalButtons');
+const closeModal = document.getElementById('closeModal');
+const completeOrderBtn = document.getElementById('completeOrderBtn');
+const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+
+closeModal.addEventListener('click', () => foodOrderModal.classList.add('hidden'));
+
+// Function to open modal for a selected order
+function openFoodOrderModal(order) {
+  modalTitle.textContent = `Order #${order.foodOrder_id}`;
+  modalRef.textContent = `Reference: ${order.ref_number}`;
+
+  // Populate items
+  const items = [
+    { key: 'smokedFish_order', name: 'Smoked Fish' },
+    { key: 'deviledFish_order', name: 'Deviled Fish' },
+    { key: 'seaSig_order', name: 'SeaSig' },
+    { key: 'blueCraze_order', name: 'Blue Craze' },
+    { key: 'chickenSheet_order', name: 'Chicken Sheet' },
+    { key: 'blackMeal_order', name: 'Black Meal' }
+  ];
+
+  modalItems.innerHTML = items
+    .filter(i => order[i.key] && order[i.key] > 0)
+    .map(i => `<li>${order[i.key]}x ${i.name}</li>`).join('');
+
+  modalTotal.textContent = `Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}`;
+
+  // Hide buttons if order is already completed or cancelled
+  if (order.order_status === 'Completed' || order.order_status === 'Cancelled') {
+    modalButtons.style.display = 'none';
+  } else {
+    modalButtons.style.display = 'flex';
+    completeOrderBtn.onclick = () => updateOrderStatus(order.foodOrder_id, 'Completed');
+    cancelOrderBtn.onclick = () => updateOrderStatus(order.foodOrder_id, 'Cancelled');
+  }
+
+  foodOrderModal.classList.remove('hidden');
 }
+
+// Update order status
+function updateOrderStatus(foodOrderId, status) {
+  fetch(`/api/foodOrder/${foodOrderId}/update-status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order_status: status })
+  })
+  .then(res => res.json())
+  .then(data => {
+    showToast(data.message); // optional toast instead of alert
+    foodOrderModal.classList.add('hidden');
+
+    // Update the order card on the page if it exists
+    const card = document.querySelector(`.order-item[data-id="${foodOrderId}"]`);
+    if (card) {
+      // Update status text
+      const statusBadge = card.querySelector('span');
+      if (statusBadge) {
+        statusBadge.textContent = status;
+        if (status === 'Completed') {
+          statusBadge.className = 'px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full';
+        } else if (status === 'Cancelled') {
+          statusBadge.className = 'px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full';
+        } else {
+          statusBadge.className = 'px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full';
+        }
+      }
+    }
+  })
+  .catch(err => console.error(err));
+}
+

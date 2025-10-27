@@ -26,16 +26,23 @@ class FarmProductController extends Controller
         return response()->json(['success' => true, 'message' => 'Product name updated']);
     }
 
-    public function editPrice(Request $request, $id)
-    {
-        $request->validate(['price' => 'required|numeric|min:0']);
+   public function editPrice(Request $request, $id)
+{
+    $request->validate([
+        'price' => 'required|numeric|min:0',
+        'measurement' => 'nullable|string|max:255',
+    ]);
 
-        $product = FarmProduct::findOrFail($id);
-        $product->price = $request->price;
-        $product->save();
+    $product = FarmProduct::findOrFail($id);
+    $product->price = $request->price;
+    $product->measurement = $request->measurement;
+    $product->save();
 
-        return response()->json(['success' => true, 'message' => 'Product price updated']);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Product price and measurement updated',
+    ]);
+}
 
 
 

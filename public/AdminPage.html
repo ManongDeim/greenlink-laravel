@@ -42,9 +42,23 @@
         <button data-section="farm" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           🌾 Farm Inventory
         </button>
-        <button data-section="foodOrders" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+        <button data-section="foodOrders" id="foodOrdersBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           🛒 Food Orders
         </button>
+
+        <!-- Submenu (hidden by default) -->
+      <div id="foodOrdersSubmenu" class="hidden ml-6 mt-2 space-y-2">
+        <button data-status="Pending" class="block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-teal-100">
+        Pending Food Orders
+        </button>
+        <button data-status="Completed" class="block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-green-100">
+        Completed Food Orders
+        </button>
+        <button data-status="Cancelled" class="block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-red-100">
+        Cancelled Food Orders
+        </button>
+      </div>
+
         <button data-section="farmOrders" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           🚜 Farm Orders
         </button>
@@ -68,6 +82,30 @@
       
     </main>
   </div>
+
+ <!-- Modals -->
+
+ <!-- Food Order Modal -->
+
+  <div id="foodOrderModal" class="hidden fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+  <div class="bg-white rounded-2xl p-6 w-full max-w-lg relative shadow-lg">
+    <button id="closeModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">✖</button>
+    
+    <h2 id="modalTitle" class="text-xl font-bold text-gray-800 mb-4"></h2>
+    <ul id="modalItems" class="list-disc list-inside text-gray-700 mb-4"></ul>
+    <p id="modalTotal" class="font-semibold text-gray-800 mb-2"></p>
+    <p id="modalRef" class="text-gray-600 mb-4"></p>
+    
+    <div id="modalButtons" class="flex gap-4 mt-4">
+      <button id="completeOrderBtn" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">Complete</button>
+      <button id="cancelOrderBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
+
 <script src="./scripts/adminPage.js"></script>
 <script src="./global_scripts/loginScript.js" defer></script>
 <script src="./global_scripts/authLogin.js"></script>

@@ -2,11 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Api\FarmOrderController;
 use App\Http\Controllers\Api\FoodOrderController;
 use App\Http\Controllers\Api\FarmProductController;
 use App\Http\Controllers\Api\RoomController;
+use App\Models\FoodOrderModel;
 
 Route::get('/check-key', function () {
     return env('APP_KEY');
@@ -68,6 +70,14 @@ Route::post('/api/farmOrder/create-link', [FarmOrderController::class, 'createPa
 // Food Order routes
 Route::post('/api/foodOrder/create-link', [FoodOrderController::class, 'createPaymentLink'])
     ->middleware('auth');
+Route::post('/api/foodOrder/{id}/update-status', function(Request $request, $id) {
+    $order = FoodOrderModel::where('foodOrder_id', $id)->first();
+    if(!$order) return response()->json(['error' => 'Order not found'], 404);
+
+    $order->update(['order_status' => $request->input('order_status')]);
+    return response()->json(['message' => "Order #{$order->foodOrder_id} marked as {$request->input('order_status')}"]);
+});
+
 
 // Room Reservation routes
 Route::post('/create-room-payment', [RoomController::class, 'createPaymentLink'])->middleware('auth');
