@@ -151,21 +151,10 @@ public function paymentFailed(Request $request)
     return redirect('/pages/paymentFailed.html');
 }
 
-      public function index(Request $request)
-{
-    $status = $request->query('status'); // read ?status=Pending
-
-    $query = RoomModel::query(); // your model, adjust name if needed
-
-    // optional filter
-    if ($status) {
-        $query->where('status', $status);
+      public function index()
+    {
+        return response()->json(RoomModel::all());
     }
-
-    $reservations = $query->orderBy('created_at', 'desc')->get();
-
-    return response()->json($reservations);
-}
 
       public function getBookedDates()
     {
