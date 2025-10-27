@@ -443,3 +443,46 @@ document.addEventListener("keydown", function (event) {
     console.error('Failed to load products:', error);
   }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("pickupDate").setAttribute("min", today);
+
+    // Populate 24-hour format (00–23)
+    const hourSelect = document.getElementById("hourSelect");
+    for (let h = 0; h < 24; h++) {
+      const option = document.createElement("option");
+      option.value = h.toString().padStart(2, "0");
+      option.textContent = h.toString().padStart(2, "0");
+      hourSelect.appendChild(option);
+    }
+
+    // Populate minutes (00–59)
+    const minuteSelect = document.getElementById("minuteSelect");
+    for (let m = 0; m < 60; m += 5) {
+      const option = document.createElement("option");
+      option.value = m.toString().padStart(2, "0");
+      option.textContent = m.toString().padStart(2, "0");
+      minuteSelect.appendChild(option);
+    }
+  });
+
+  function confirmOrder() {
+    const orderType = document.querySelector('input[name="orderType"]:checked')?.value;
+    const date = document.getElementById('pickupDate').value;
+    const hour = document.getElementById('hourSelect').value;
+    const minute = document.getElementById('minuteSelect').value;
+    const time = `${hour}:${minute}`;
+
+    if (!orderType || !date || !hour || !minute) {
+      alert("Please select order type, date, and time before confirming.");
+      return;
+    }
+
+    alert(`Order confirmed!\nType: ${orderType}\nDate: ${date}\nTime: ${time}`);
+    closeModal();
+  }
+
+  function closeModal() {
+    document.getElementById("checkoutModal").classList.add("hidden");
+  }
