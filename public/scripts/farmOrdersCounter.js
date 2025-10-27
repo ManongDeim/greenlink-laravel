@@ -386,7 +386,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         <img src="${product.productPicture}" alt="${product.productName}" class="object-cover w-full h-48">
         <div class="p-4">
           <h3 class="text-lg font-semibold">${product.productName}</h3>
-          <p class="text-gray-500">₱${product.price}</p>
+          <p class="text-gray-500">
+           ₱${product.price} 
+          ${product.measurement ? `<span class="text-sm text-gray-400 ml-1">(${product.measurement})</span>` : ""}
+          </p>
           <div class="flex items-center mt-4 space-x-4">
             <div class="flex items-center space-x-4">
               <button type="button" class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full hover:bg-teal-600 hover:text-white" onclick="decrementCounter('${counterId}')">−</button>

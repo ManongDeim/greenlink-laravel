@@ -64,6 +64,8 @@ Route::get('farmProducts', [FarmProductController::class, 'index']);
 Route::get('/paymentSuccessFarm', [FarmOrderController::class, 'paymentSuccess']);
 Route::get('/paymentFailedFarm', [FarmOrderController::class, 'paymentFailed']);
 Route::get('farmOrder', [FarmOrderController::class, 'index']);
+Route::post('farmOrder/{farmOrderId}/update-status', [FarmOrderController::class, 'updateStatus']);
+
 
 // Food Order routes
 

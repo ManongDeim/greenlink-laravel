@@ -11,7 +11,7 @@ class FarmOrderModel extends Model
 
     protected $table = 'farm_orders';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'user_id',

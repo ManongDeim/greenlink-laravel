@@ -170,7 +170,6 @@ const foodOrderTemplate = order => {
 
 // Farm order card template
 const farmOrderCardTemplate = order => {
-  // Collect ordered items dynamically
   const items = [];
   if (order.bangus_order > 0) items.push(`${order.bangus_order}x Bangus`);
   if (order.eggs_order > 0) items.push(`${order.eggs_order}x Eggs`);
@@ -180,10 +179,14 @@ const farmOrderCardTemplate = order => {
   if (order.squash_order > 0) items.push(`${order.squash_order}x Squash`);
 
   return `
-    <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full">
+    <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
+         data-id="${order.farmOrder_id}" data-order-status="${order.order_status}">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-bold text-gray-800">Order #${order.farmOrder_id}</h3>
-        <span class="px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full">${order.payment_status}</span>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full" data-field="payment-status">${order.payment_status}</span>
+          <span class="px-2 py-1 text-xs text-gray-600" data-field="order-status">${order.order_status ?? ''}</span>
+        </div>
       </div>
       <ul class="mt-2 text-sm text-gray-700 list-disc list-inside">
         ${items.map(i => `<li>${i}</li>`).join('')}
@@ -193,7 +196,6 @@ const farmOrderCardTemplate = order => {
     </div>
   `;
 };
-
 // Room Reservation template
 const roomReservationTemplate = reservation => `
   <div class="mb-6"> <!-- Adds space between cards -->
@@ -550,6 +552,20 @@ async function fetchAndRenderFarmOrders() {
         ${data.map(farmOrderCardTemplate).join('')}
       </div>
     `;
+
+    setTimeout(() => {
+  // Attach click listeners to each rendered farm order card
+  const orders = container.querySelectorAll('.order-item[data-id]');
+  orders.forEach(el => {
+    // find matching order data by data-id from previously fetched "data"
+    const id = el.getAttribute('data-id');
+    // Find the order object from `data` (we still have it in this scope)
+    const orderObj = data.find(d => d.farmOrder_id === id);
+    if (!orderObj) return;
+    el.addEventListener('click', () => openFarmOrderModal(orderObj));
+  });
+}, 0);
+
   } catch (err) {
     console.error('Failed to load farm orders:', err);
     container.innerHTML = `<p class="text-red-500">Failed to load farm orders.</p>`;
@@ -756,3 +772,84 @@ function updateOrderStatus(foodOrderId, status) {
   .catch(err => console.error(err));
 }
 
+// --- Farm Modal elements (match IDs from HTML above) ---
+const farmOrderModal = document.getElementById('farmOrderModal');
+const farmModalTitle = document.getElementById('farmModalTitle');
+const farmModalRef = document.getElementById('farmModalRef');
+const farmModalItems = document.getElementById('farmModalItems');
+const farmModalTotal = document.getElementById('farmModalTotal');
+const farmModalOrderStatus = document.getElementById('farmModalOrderStatus');
+const farmModalButtons = document.getElementById('farmModalButtons');
+const farmCloseModal = document.getElementById('farmCloseModal');
+const farmCompleteBtn = document.getElementById('farmCompleteBtn');
+const farmCancelBtn = document.getElementById('farmCancelBtn');
+
+farmCloseModal?.addEventListener('click', () => farmOrderModal.classList.add('hidden'));
+
+// Open modal for farm order
+function openFarmOrderModal(order) {
+  farmModalTitle.textContent = `Order #${order.farmOrder_id}`;
+  farmModalRef.textContent = `Reference: ${order.ref_number ?? 'N/A'}`;
+
+  const items = [
+    { key: 'bangus_order', name: 'Bangus' },
+    { key: 'eggs_order', name: 'Eggs' },
+    { key: 'mudCrab_order', name: 'Mud Crab' },
+    { key: 'nativeChicken_order', name: 'Native Chicken' },
+    { key: 'nativePork_order', name: 'Native Pork' },
+    { key: 'squash_order', name: 'Squash' }
+  ];
+
+  farmModalItems.innerHTML = items
+    .filter(i => order[i.key] && order[i.key] > 0)
+    .map(i => `<li>${order[i.key]}x ${i.name}</li>`).join('');
+
+  farmModalTotal.textContent = `Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}`;
+  farmModalOrderStatus.textContent = `Order Status: ${order.order_status ?? 'N/A'}`;
+
+  // Show action buttons only for Pending orders
+  const showButtons = (order.order_status === 'Pending');
+  farmModalButtons.style.display = showButtons ? 'flex' : 'none';
+
+  // set handlers
+  farmCompleteBtn.onclick = () => updateFarmOrderStatus(order.farmOrder_id, 'Completed');
+  farmCancelBtn.onclick   = () => updateFarmOrderStatus(order.farmOrder_id, 'Cancelled');
+
+  farmOrderModal.classList.remove('hidden');
+}
+
+// Update farm order status (no reload; update DOM)
+function updateFarmOrderStatus(farmOrderId, status) {
+  fetch(`/api/farmOrder/${farmOrderId}/update-status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order_status: status })
+  })
+  .then(r => r.json())
+  .then(json => {
+    // optional toast or alert
+    showToast(json.message || 'Updated');
+
+    // update the card in-page
+    const container = document.getElementById('content');
+    if (!container) return;
+
+    const card = container.querySelector(`.order-item[data-id="${farmOrderId}"]`);
+    if (card) {
+      // update data attribute and visible status span
+      card.dataset.orderStatus = status;
+      const orderStatusEl = card.querySelector('[data-field="order-status"]');
+      if (orderStatusEl) orderStatusEl.textContent = status;
+      // hide action if it's now not pending (this affects future modal open)
+    }
+
+    // update modal UI: hide buttons and refresh display
+    farmModalOrderStatus.textContent = `Order Status: ${status}`;
+    farmModalButtons.style.display = 'none';
+    farmOrderModal.classList.add('hidden');
+  })
+  .catch(err => {
+    console.error(err);
+    showToast('Failed to update order', 'error');
+  });
+}
