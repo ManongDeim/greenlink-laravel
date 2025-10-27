@@ -320,7 +320,10 @@ function editFarmPrice(id) {
   const button = event.target.closest("button");
   const parent = button.parentElement;
 
-  // Get current displayed measurement (if any)
+  // 🧾 Get current displayed price and measurement
+  const priceEl = document.getElementById(`farm-price-${id}`);
+  const currentPrice = priceEl ? priceEl.textContent.replace("₱", "").trim() : "";
+
   const measurementEl = document.getElementById(`farm-measurement-${id}`);
   const currentMeasurement = measurementEl ? measurementEl.textContent.trim() : "";
 
@@ -330,6 +333,7 @@ function editFarmPrice(id) {
   container.innerHTML = `
     <div class="flex items-center gap-2">
       <input type="text" id="editPriceInput${id}"
+             value="${currentPrice}"
              class="border border-gray-300 rounded-lg px-3 py-1 w-1/2 text-sm focus:ring-2 focus:ring-cyan-500"
              placeholder="Enter new price">
 
