@@ -142,6 +142,24 @@ flatpickrScript.onload = () => {
   const roomList = document.getElementById("availableRoomsList");
   const searchBtn = document.querySelector(".bg-white.rounded-lg.shadow-md.hover\\:bg-teal-600");
 
+  const researchBtn = document.getElementById("researchBtn");
+
+  if (researchBtn) {
+    researchBtn.addEventListener("click", () => {
+      const checkIn = document.getElementById("checkIn").value.trim();
+      const checkOut = document.getElementById("checkOut").value.trim();
+      const welcomeText = document.getElementById("welcomeText");
+
+      // Only hide the welcome text if both fields are filled
+      if (checkIn && checkOut) {
+        if (welcomeText) welcomeText.style.display = "none";
+      } else {
+        // Keep it visible if either field is empty
+        if (welcomeText) welcomeText.style.display = "block";
+      }
+    });
+  }
+
   // Create a div for event calendar dynamically
   const eventCalendarContainer = document.createElement("div");
   eventCalendarContainer.className = "relative hidden w-full max-w-4xl mx-auto mt-6"; // widened container

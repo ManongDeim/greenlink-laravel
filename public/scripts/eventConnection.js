@@ -204,19 +204,20 @@ const eventTypeError = document.getElementById('eventTypeError');
 const agreeCheckbox = document.getElementById("agreeCheckbox");
 const termsError = document.getElementById("termsError");
 
- // ✅ Checkbox autofill logic
-  if (useDefaultEmail && emailInput) {
-  useDefaultEmail.addEventListener("change", function () {
-    if (this.checked) {
-      emailInput.value = "using@email.com"; // ✅ default email
-      emailInput.setAttribute("readonly", true); // lock the input
-    } else {
-      emailInput.value = ""; // clear it when unchecked
-      emailInput.removeAttribute("readonly"); // unlock input
-    }
+  // ✅ Checkbox autofill logic
+  if (checkbox && emailInput) {
+    checkbox.addEventListener("change", function () {
+      if (this.checked) {
+        emailInput.value = "usingemail@gmail.com";
+        emailInput.setAttribute("readonly", true);
+      } else {
+        emailInput.value = "";
+        emailInput.removeAttribute("readonly");
+      }
     });
   }
 
+// ✅ Input restrictions
 fullnameInput.addEventListener("input", () => {
   fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, "");
 });
@@ -235,8 +236,6 @@ function validateForm() {
   } else {
     termsError.classList.add("hidden");
   }
-
-  
 
 
   // Full Name
@@ -297,6 +296,25 @@ if (eventTypeInput.value === '') {
 
   if (isValid) {
     openConfirmationModal();
+  }
+}
+
+
+function toggleDefaultEmail() {
+  const icon = document.getElementById("defaultEmailIcon");
+  const emailInput = document.getElementById("email");
+
+  // Toggle state visually and functionally
+  const isUsingDefault = icon.classList.toggle("text-teal-600");
+
+  if (isUsingDefault) {
+    emailInput.value = "default@mail.com"; // Example default
+    emailInput.disabled = true;
+    emailInput.classList.add("bg-gray-100", "cursor-not-allowed");
+  } else {
+    emailInput.disabled = false;
+    emailInput.classList.remove("bg-gray-100", "cursor-not-allowed");
+    emailInput.value = "";
   }
 }
 

@@ -107,31 +107,35 @@
   </p>
     </div>
 
+
     <div class="relative">
   <label for="email" class="block mb-1 font-medium text-gray-700">E-mail</label>
-
-  <!-- Wrap input + checkbox in a relative container -->
   <div class="relative">
     <input
       id="email"
       type="email"
       name="email"
-      class="w-full px-3 py-2 pr-10 text-sm transition border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600"
+      placeholder=" "
+      class="w-full px-3 py-2 pr-10 text-sm transition border border-gray-300 rounded-md shadow-sm peer focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600"
     />
-
-    <!-- Absolutely centered checkbox -->
-    <input
-      type="checkbox"
-      id="useDefaultEmail"
+    <!-- Modern Icon Button -->
+    <button
+      type="button"
+      id="useDefaultEmailBtn"
       title="Use default email"
-      class="absolute w-4 h-4 text-teal-500 -translate-y-1/2 border-gray-300 rounded cursor-pointer top-1/2 right-3 focus:ring-teal-500"
-    />
+      class="absolute text-gray-400 transition-colors duration-200 -translate-y-1/2 top-1/2 right-3 hover:text-teal-600"
+      onclick="toggleDefaultEmail()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" id="defaultEmailIcon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l9 6 9-6M3 8v8a2 2 0 002 2h14a2 2 0 002-2V8m-9 6L3 8" />
+      </svg>
+    </button>
   </div>
-
   <p id="emailError" class="hidden mt-1 text-sm text-red-600">
     Please enter a valid email address (e.g. name@mail.com).
   </p>
 </div>
+
     <!-- Phone No -->
     <div>
       <label for="phone" class="block mb-1 font-medium text-gray-700">Phone No</label>
