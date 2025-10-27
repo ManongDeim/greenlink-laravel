@@ -180,12 +180,11 @@ const farmOrderCardTemplate = order => {
 
   return `
     <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
-         data-id="${order.farmOrder_id}" data-order-status="${order.order_status}">
+         data-id="${order.farmOrder_id}" data-order-status="${order.order_status ?? ''}">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-bold text-gray-800">Order #${order.farmOrder_id}</h3>
         <div class="flex items-center gap-2">
-          <span class="px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full" data-field="payment-status">${order.payment_status}</span>
-          <span class="px-2 py-1 text-xs text-gray-600" data-field="order-status">${order.order_status ?? ''}</span>
+          <span class="px-2 py-1 text-xs font-semibold ${order.payment_status === 'Paid' ? 'text-green-700 bg-green-100' : 'text-teal-700 bg-teal-100'} rounded-full">${order.payment_status}</span>
         </div>
       </div>
       <ul class="mt-2 text-sm text-gray-700 list-disc list-inside">
@@ -193,6 +192,7 @@ const farmOrderCardTemplate = order => {
       </ul>
       <p class="mt-2 text-sm text-gray-700 font-semibold">Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}</p>
       <p class="text-sm text-gray-700 font-semibold">Payment Method: ${order.payment_method}</p>
+      <p class="mt-2 text-sm font-semibold text-gray-800">Order Status: ${order.order_status}</p>
     </div>
   `;
 };
@@ -533,44 +533,58 @@ async function fetchAndRenderFoodOrders(status = null) {
   }
 }
 
-async function fetchAndRenderFarmOrders() {
-  const container = document.getElementById('content'); // render in main content
+async function fetchAndRenderFarmOrders(statusFilter = null) {
+  const container = document.getElementById('content');
+  if (!container) return;
   container.innerHTML = `<p class="text-gray-500">Loading farm orders...</p>`;
 
   try {
-    const res = await fetch('/api/farmOrder'); // endpoint for farm orders
-    const data = await res.json();
-
-    if (!data.length) {
+    const res = await fetch('/api/farmOrder');
+    let data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
       container.innerHTML = `<p class="text-gray-500">No farm orders found.</p>`;
+      return;
+    }
+
+    // sort by created_at if present
+    data.sort((a, b) => {
+      const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return tb - ta;
+    });
+
+    // filter if requested
+    const display = statusFilter ? data.filter(o => o.order_status === statusFilter) : data;
+
+    if (!display.length) {
+      container.innerHTML = `<p class="text-gray-500">No ${statusFilter ?? ''} orders found.</p>`;
       return;
     }
 
     container.innerHTML = `
       <h2 class="mb-6 text-2xl font-bold text-teal-700">Farm Orders</h2>
       <div class="space-y-4">
-        ${data.map(farmOrderCardTemplate).join('')}
+        ${display.map(farmOrderCardTemplate).join('')}
       </div>
     `;
 
-    setTimeout(() => {
-  // Attach click listeners to each rendered farm order card
-  const orders = container.querySelectorAll('.order-item[data-id]');
-  orders.forEach(el => {
-    // find matching order data by data-id from previously fetched "data"
-    const id = el.getAttribute('data-id');
-    // Find the order object from `data` (we still have it in this scope)
-    const orderObj = data.find(d => d.farmOrder_id === id);
-    if (!orderObj) return;
-    el.addEventListener('click', () => openFarmOrderModal(orderObj));
-  });
-}, 0);
+    // attach click handlers to cards (after render)
+    container.querySelectorAll('.order-item[data-id]').forEach(card => {
+      const id = card.getAttribute('data-id');
+      const order = display.find(o => o.farmOrder_id == id);
+      if (!order) return;
+      card.addEventListener('click', () => {
+        const showButtons = order.order_status === 'Pending';
+        openFarmOrderModal(order, showButtons);
+      });
+    });
 
   } catch (err) {
     console.error('Failed to load farm orders:', err);
     container.innerHTML = `<p class="text-red-500">Failed to load farm orders.</p>`;
   }
 }
+
 
 async function fetchAndRenderRoomReservations() {
   const containerId = 'content'; // Main content container
@@ -611,25 +625,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const sidebarButtons = document.querySelectorAll(".sidebar-btn");
   const content = document.getElementById("content");
 
-  // Sections definition
+  // =================== Section Mapping ===================
   const sections = {
     food: { render: fetchAndRenderFood },
-     farm: { render: fetchAndRenderFarm },
-     foodOrders: { render: fetchAndRenderFoodOrders },
-     farmOrders: { render: fetchAndRenderFarmOrders },
-     room: {render: fetchAndRenderRoomReservations},
-    event: { 
+    farm: { render: fetchAndRenderFarm },
+    foodOrders: { render: fetchAndRenderFoodOrders },
+    farmOrders: { render: fetchAndRenderFarmOrders },
+    room: { render: fetchAndRenderRoomReservations },
+    event: {
       custom: `
-       <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>
+        <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>
         <div class="space-y-3 text-gray-700">
           <p><span class="font-semibold">Reservation ID:</span> <span id="reservationID"></span></p>
           <p><span class="font-semibold">Event Start Date:</span> <span id="eventStart"></span></p>
           <p><span class="font-semibold">Event End Date:</span> <span id="eventEnd"></span></p>
           <p><span class="font-semibold">Full Name:</span> <span id="fullName"></span></p>
-          <p><span class="font-semibold">Event Type:</span> <span id="email"></span></p>
-          <p><span class="font-semibold">E-mail: </span> <span id="phoneNumber"></span></p>
-          <p><span class="font-semibold">Phone Number:</span> <span id="pax"></span></p>
-          <p><span class="font-semibold">Number of Pax:</span> <span id="toBring"></span></p>
+          <p><span class="font-semibold">Event Type:</span> <span id="eventType"></span></p>
+          <p><span class="font-semibold">E-mail:</span> <span id="email"></span></p>
+          <p><span class="font-semibold">Phone Number:</span> <span id="phoneNumber"></span></p>
+          <p><span class="font-semibold">Number of Pax:</span> <span id="pax"></span></p>
           <p><span class="font-semibold">Things to be brought:</span> <span id="toBring"></span></p>
           <p><span class="font-semibold">Approval Status:</span> <span id="approvalStat"></span></p>
         </div>
@@ -645,42 +659,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Sidebar button click logic
+  // =================== Sidebar Button Logic ===================
   sidebarButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    // Reset styles
-    sidebarButtons.forEach(b => {
-      b.classList.remove("bg-teal-600","text-white","hover:bg-teal-700","hover:border-teal-700");
-      if (!b.classList.contains("text-red-700")) {
-        b.classList.add("bg-gray-100","text-gray-700","hover:bg-gray-200","hover:border-gray-400");
-      }
+    btn.addEventListener("click", () => {
+      // Reset all buttons
+      sidebarButtons.forEach(b => {
+        b.classList.remove("bg-teal-600", "text-white", "hover:bg-teal-700", "hover:border-teal-700");
+        if (!b.classList.contains("text-red-700")) {
+          b.classList.add("bg-gray-100", "text-gray-700", "hover:bg-gray-200", "hover:border-gray-400");
+        }
+      });
+
+      // Highlight active
+      btn.classList.remove("bg-gray-100", "text-gray-700", "hover:bg-gray-200", "hover:border-gray-400");
+      btn.classList.add("bg-teal-600", "text-white", "hover:bg-teal-700", "hover:border-teal-700");
+
+      const section = sections[btn.dataset.section];
+      if (section.render) section.render();
+      else if (section.custom) content.innerHTML = section.custom;
+      else
+        content.innerHTML = `
+          <h2 class="mb-4 text-xl font-bold text-teal-700">${section.title}</h2>
+          <p class="text-gray-700">${section.text}</p>
+        `;
     });
-
-    btn.classList.remove("bg-gray-100","text-gray-700","hover:bg-gray-200","hover:border-gray-400");
-    btn.classList.add("bg-teal-600","text-white","hover:bg-teal-700","hover:border-teal-700");
-
-    const section = sections[btn.dataset.section];
-    if (section.render) section.render();
-    else if (section.custom) content.innerHTML = section.custom;
-    else content.innerHTML = `<h2 class="mb-4 text-xl font-bold text-teal-700">${section.title}</h2>
-                             <p class="text-gray-700">${section.text}</p>`;
   });
 
- // =================== Sub-buttons ====================
-
-  // Food Orders Submenu Logic
-
- const foodOrdersBtn = document.getElementById("foodOrdersBtn");
-  const submenu = document.getElementById("foodOrdersSubmenu");
-
-  if (foodOrdersBtn && submenu) {
-    // Toggle submenu visibility
+  // =================== Submenu Logic ===================
+  // Food Orders submenu
+  const foodOrdersBtn = document.getElementById("foodOrdersBtn");
+  const foodOrdersSubmenu = document.getElementById("foodOrdersSubmenu");
+  if (foodOrdersBtn && foodOrdersSubmenu) {
     foodOrdersBtn.addEventListener("click", () => {
-      submenu.classList.toggle("hidden");
+      foodOrdersSubmenu.classList.toggle("hidden");
     });
 
-    // Handle submenu clicks
-    submenu.querySelectorAll("button").forEach(btn => {
+    foodOrdersSubmenu.querySelectorAll("button[data-status]").forEach(btn => {
       btn.addEventListener("click", async () => {
         const status = btn.dataset.status;
         await fetchAndRenderFoodOrders(status);
@@ -688,9 +702,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-});
+  // Farm Orders submenu
+  const farmOrdersBtn = document.getElementById("farmOrdersBtn");
+  const farmOrdersSubmenu = document.getElementById("farmOrdersSubmenu");
+  if (farmOrdersBtn && farmOrdersSubmenu) {
+    farmOrdersBtn.addEventListener("click", () => {
+      farmOrdersSubmenu.classList.toggle("hidden");
+    });
+
+    farmOrdersSubmenu.querySelectorAll("button[data-status]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        farmOrdersSubmenu.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const status = btn.dataset.status;
+        await fetchAndRenderFarmOrders(status);
+      });
+    });
+  }
 });
 
+
+  
 // ================= Modals =================
 
 // Food Order Details Modal
@@ -772,7 +804,7 @@ function updateOrderStatus(foodOrderId, status) {
   .catch(err => console.error(err));
 }
 
-// --- Farm Modal elements (match IDs from HTML above) ---
+// --- Farm Modal elements (IDs must match the modal HTML) ---
 const farmOrderModal = document.getElementById('farmOrderModal');
 const farmModalTitle = document.getElementById('farmModalTitle');
 const farmModalRef = document.getElementById('farmModalRef');
@@ -787,7 +819,7 @@ const farmCancelBtn = document.getElementById('farmCancelBtn');
 farmCloseModal?.addEventListener('click', () => farmOrderModal.classList.add('hidden'));
 
 // Open modal for farm order
-function openFarmOrderModal(order) {
+function openFarmOrderModal(order, showButtons = true) {
   farmModalTitle.textContent = `Order #${order.farmOrder_id}`;
   farmModalRef.textContent = `Reference: ${order.ref_number ?? 'N/A'}`;
 
@@ -807,49 +839,55 @@ function openFarmOrderModal(order) {
   farmModalTotal.textContent = `Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}`;
   farmModalOrderStatus.textContent = `Order Status: ${order.order_status ?? 'N/A'}`;
 
-  // Show action buttons only for Pending orders
-  const showButtons = (order.order_status === 'Pending');
-  farmModalButtons.style.display = showButtons ? 'flex' : 'none';
+  const shouldShowButtons = showButtons && order.order_status === 'Pending';
+  farmModalButtons.style.display = shouldShowButtons ? 'flex' : 'none';
 
-  // set handlers
+  // set handlers (replace previous handlers if any)
   farmCompleteBtn.onclick = () => updateFarmOrderStatus(order.farmOrder_id, 'Completed');
-  farmCancelBtn.onclick   = () => updateFarmOrderStatus(order.farmOrder_id, 'Cancelled');
+  farmCancelBtn.onclick = () => updateFarmOrderStatus(order.farmOrder_id, 'Cancelled');
 
   farmOrderModal.classList.remove('hidden');
 }
 
-// Update farm order status (no reload; update DOM)
 function updateFarmOrderStatus(farmOrderId, status) {
   fetch(`/api/farmOrder/${farmOrderId}/update-status`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ order_status: status })
   })
-  .then(r => r.json())
-  .then(json => {
-    // optional toast or alert
-    showToast(json.message || 'Updated');
+    .then(r => r.json())
+    .then(json => {
+      if (json.message) showToast(json.message);
 
-    // update the card in-page
-    const container = document.getElementById('content');
-    if (!container) return;
+      // update card in DOM
+      const container = document.getElementById('content');
+      const card = container?.querySelector(`.order-item[data-id="${farmOrderId}"]`);
+      if (card) {
+        card.dataset.orderStatus = status;
+        const orderStatusEl = card.querySelector('[data-field="order-status"]');
+        if (orderStatusEl) orderStatusEl.textContent = status;
 
-    const card = container.querySelector(`.order-item[data-id="${farmOrderId}"]`);
-    if (card) {
-      // update data attribute and visible status span
-      card.dataset.orderStatus = status;
-      const orderStatusEl = card.querySelector('[data-field="order-status"]');
-      if (orderStatusEl) orderStatusEl.textContent = status;
-      // hide action if it's now not pending (this affects future modal open)
-    }
+        // adjust payment/status badge styles if you want:
+        const badge = card.querySelector('span');
+        if (badge) {
+          if (status === 'Completed') badge.className = 'px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full';
+          else if (status === 'Cancelled') badge.className = 'px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full';
+          else badge.className = 'px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full';
+        }
+      }
 
-    // update modal UI: hide buttons and refresh display
-    farmModalOrderStatus.textContent = `Order Status: ${status}`;
-    farmModalButtons.style.display = 'none';
-    farmOrderModal.classList.add('hidden');
-  })
-  .catch(err => {
-    console.error(err);
-    showToast('Failed to update order', 'error');
-  });
+      // hide modal and update modal UI
+      farmModalOrderStatus.textContent = `Order Status: ${status}`;
+      farmModalButtons.style.display = 'none';
+      farmOrderModal.classList.add('hidden');
+
+      // refresh current filter if there is an active one
+      const activeBtn = document.querySelector('#farmOrdersSubmenu button.active');
+      const activeStatus = activeBtn ? activeBtn.dataset.status : null;
+      fetchAndRenderFarmOrders(activeStatus);
+    })
+    .catch(err => {
+      console.error(err);
+      showToast('Failed to update order', 'error');
+    });
 }

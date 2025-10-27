@@ -42,26 +42,44 @@
         <button data-section="farm" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           🌾 Farm Inventory
         </button>
-        <button data-section="foodOrders" id="foodOrdersBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
-          🛒 Food Orders
-        </button>
+        <!-- Food Orders -->
+<button data-section="foodOrders" id="foodOrdersBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+  🛒 Food Orders
+</button>
 
-        <!-- Submenu (hidden by default) -->
-      <div id="foodOrdersSubmenu" class="hidden ml-6 mt-2 space-y-2">
-        <button data-status="Pending" class="block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-teal-100">
-        Pending Food Orders
-        </button>
-        <button data-status="Completed" class="block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-green-100">
-        Completed Food Orders
-        </button>
-        <button data-status="Cancelled" class="block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-red-100">
-        Cancelled Food Orders
-        </button>
-      </div>
+<!-- Food Orders Submenu -->
+<div id="foodOrdersSubmenu" class="hidden ml-6 mt-2 space-y-2">
+  <button data-status="Pending" class="food-status-btn block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-teal-100">
+    Pending Food Orders
+  </button>
+  <button data-status="Completed" class="food-status-btn block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-green-100">
+    Completed Food Orders
+  </button>
+  <button data-status="Cancelled" class="food-status-btn block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-red-100">
+    Cancelled Food Orders
+  </button>
+</div>
 
-        <button data-section="farmOrders" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
-          🚜 Farm Orders
-        </button>
+<!-- Farm Orders -->
+<button data-section="farmOrders" id="farmOrdersBtn"
+  class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+  🚜 Farm Orders
+</button>
+
+<!-- Farm Orders Submenu -->
+<div id="farmOrdersSubmenu" class="hidden ml-6 mt-2 space-y-2">
+  <button data-status="Pending" class="farm-status-btn block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-teal-100">
+    Pending Farm Orders
+  </button>
+  <button data-status="Completed" class="farm-status-btn block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-green-100">
+    Completed Farm Orders
+  </button>
+  <button data-status="Cancelled" class="farm-status-btn block w-full text-left px-4 py-2 text-gray-600 rounded-lg hover:bg-red-100">
+    Cancelled Farm Orders
+  </button>
+</div>
+
+
         <button data-section="room" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           🏡 Room Reservation
         </button>
@@ -104,13 +122,11 @@
 </div>
 
 <!-- Farm Order Details Modal -->
-<div id="farmOrderModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+<div id="farmOrderModal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4 hidden">
   <div class="w-full max-w-2xl rounded-2xl bg-white shadow-lg p-6 relative">
-    <button id="farmCloseModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
-      ✕
-    </button>
+    <button id="farmCloseModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">✕</button>
 
-    <h3 id="farmModalTitle" class="text-xl font-bold text-gray-800 mb-2"></h3>
+    <h3 id="farmModalTitle" class="text-xl font-bold text-gray-800 mb-1"></h3>
     <p id="farmModalRef" class="text-sm text-gray-600 mb-4"></p>
 
     <div>
@@ -125,7 +141,7 @@
       <button id="farmCancelBtn" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Cancel Order</button>
     </div>
   </div>
-
+</div>
 <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>
 
 <script src="./scripts/adminPage.js"></script>
