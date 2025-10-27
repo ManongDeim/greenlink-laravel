@@ -198,25 +198,25 @@ const farmOrderCardTemplate = order => {
 };
 // Room Reservation template
 const roomReservationTemplate = reservation => `
-  <div class="mb-6"> <!-- Adds space between cards -->
-    <div class="space-y-3 text-gray-700 p-6 bg-white shadow-md rounded-2xl border border-gray-200">
-      <h2 class="mb-4 text-xl font-bold text-teal-700">Room Reservation</h2>
-      <p><span class="font-semibold">Reservation ID:</span> ${reservation.room_reser_id}</p>
-      <p><span class="font-semibold">Room Type:</span> ${reservation.room}</p>
-      <p><span class="font-semibold">Check in Date:</span> ${reservation.check_in_date}</p>
-      <p><span class="font-semibold">Check out Date:</span> ${reservation.check_out_date}</p>
-      <p><span class="font-semibold">Full Name:</span> ${reservation.full_name}</p>
-      <p><span class="font-semibold">E-mail:</span> ${reservation.email}</p>
-      <p><span class="font-semibold">Phone Number:</span> ${reservation.phone_number}</p>
-      <p><span class="font-semibold">Number of Pax:</span> ${reservation.pax}</p>
-      <p><span class="font-semibold">Payment Status:</span> ${reservation.payment_status}</p>
-
-      <div class="flex justify-end gap-4 mt-6">
-        <button class="px-5 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">Checked-in</button>
-        <button class="px-5 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Checked-out</button>
-        <button class="px-5 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancelled</button>
-      </div>
+  <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
+       data-id="${reservation.room_reser_id}" data-status="${reservation.status}">
+    <div class="flex items-center justify-between">
+      <h3 class="text-lg font-bold text-gray-800">Reservation #${reservation.room_reser_id}</h3>
+      <span class="px-2 py-1 text-xs font-semibold rounded-full ${reservation.status === 'Checked-in'
+        ? 'text-green-700 bg-green-100'
+        : reservation.status === 'Checked-out'
+        ? 'text-blue-700 bg-blue-100'
+        : reservation.status === 'Cancelled'
+        ? 'text-red-700 bg-red-100'
+        : 'text-teal-700 bg-teal-100'}">${reservation.status}</span>
     </div>
+    <ul class="mt-2 text-sm text-gray-700 list-disc list-inside">
+      <li>Room Type: ${reservation.room}</li>
+      <li>Check-in: ${reservation.check_in_date}</li>
+      <li>Check-out: ${reservation.check_out_date}</li>
+      <li>Guest: ${reservation.full_name}</li>
+    </ul>
+    <p class="mt-2 text-sm text-gray-700 font-semibold">Payment Status: ${reservation.payment_status}</p>
   </div>
 `;
 
@@ -586,34 +586,19 @@ async function fetchAndRenderFarmOrders(statusFilter = null) {
 }
 
 
-async function fetchAndRenderRoomReservations() {
-  const containerId = 'content'; // Main content container
+async function fetchAndRenderRoomReservations(status = null) {
+  const containerId = "content";
   const container = document.getElementById(containerId);
-  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
 
   try {
-    const res = await fetch('/api/roomReser'); // Your API endpoint
+    const res = await fetch("/api/roomReservations"); // adjust if needed
     const data = await res.json();
 
-    if (!Array.isArray(data) || data.length === 0) {
-      container.innerHTML = `<p class="text-gray-500">No room reservations found.</p>`;
-      return;
-    }
-
-    // Render each reservation
-    container.innerHTML = data.map(roomReservationTemplate).join('');
-
-    // Attach approve/disapprove events
-    container.querySelectorAll('.approve-btn').forEach(btn => {
-      btn.addEventListener('click', () => handleRoomApproval(btn.dataset.id, 'Approved'));
-    });
-    container.querySelectorAll('.disapprove-btn').forEach(btn => {
-      btn.addEventListener('click', () => handleRoomApproval(btn.dataset.id, 'Disapproved'));
-    });
-
+    const filtered = status ? data.filter(r => r.status === status) : data;
+    renderOrders(containerId, filtered, roomReservationTemplate);
   } catch (err) {
-    console.error('Failed to load room reservations:', err);
-    container.innerHTML = `<p class="text-red-500">Failed to load room reservations.</p>`;
+    console.error("Failed to load room reservations:", err);
+    if (container) container.innerHTML = `<p class="text-red-500">Failed to load reservations</p>`;
   }
 }
 
@@ -719,6 +704,21 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+  
+  // Room Reservations submenu
+  const roomBtn = document.getElementById("roomReservationsBtn");
+  const submenu = document.getElementById("roomReservationsSubmenu");
+
+  if (roomBtn && submenu) {
+    roomBtn.addEventListener("click", () => submenu.classList.toggle("hidden"));
+    submenu.querySelectorAll("button[data-status]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const status = btn.dataset.status;
+        await fetchAndRenderRoomReservations(status);
+      });
+    });
+  }
+
 });
 
 
@@ -891,3 +891,59 @@ function updateFarmOrderStatus(farmOrderId, status) {
       showToast('Failed to update order', 'error');
     });
 }
+
+function openRoomModal(reservation) {
+  document.getElementById("roomModalTitle").textContent = `Reservation #${reservation.room_reser_id}`;
+  document.getElementById("roomModalRef").textContent = `Guest: ${reservation.full_name}`;
+  document.getElementById("roomModalItems").innerHTML = `
+    <li>Room: ${reservation.room}</li>
+    <li>Check-in: ${reservation.check_in_date}</li>
+    <li>Check-out: ${reservation.check_out_date}</li>
+    <li>Phone: ${reservation.phone_number}</li>
+    <li>Payment Status: ${reservation.payment_status}</li>
+  `;
+
+  const modalButtons = document.getElementById("roomModalButtons");
+  if (["Checked-in", "Checked-out", "Cancelled"].includes(reservation.status)) {
+    modalButtons.style.display = "none";
+  } else {
+    modalButtons.style.display = "flex";
+    document.getElementById("checkInBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Checked-in");
+    document.getElementById("checkOutBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Checked-out");
+    document.getElementById("cancelRoomBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Cancelled");
+  }
+
+  document.getElementById("roomReservationModal").classList.remove("hidden");
+}
+
+function updateRoomStatus(reservationId, status) {
+  fetch(`/api/roomReservations/${reservationId}/update-status`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status })
+  })
+    .then(res => res.json())
+    .then(data => {
+      showToast(data.message);
+      document.getElementById("roomReservationModal").classList.add("hidden");
+
+      // Update card instantly
+      const card = document.querySelector(`.order-item[data-id="${reservationId}"]`);
+      if (card) {
+        const statusBadge = card.querySelector("span");
+        if (statusBadge) {
+          statusBadge.textContent = status;
+          if (status === "Checked-in") statusBadge.className = "px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full";
+          else if (status === "Checked-out") statusBadge.className = "px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full";
+          else if (status === "Cancelled") statusBadge.className = "px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full";
+          else statusBadge.className = "px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full";
+        }
+      }
+    })
+    .catch(err => console.error(err));
+}
+
+// ✅ Close modal
+document.getElementById("closeRoomModal").addEventListener("click", () => {
+  document.getElementById("roomReservationModal").classList.add("hidden");
+});

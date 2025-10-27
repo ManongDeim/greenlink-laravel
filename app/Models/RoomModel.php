@@ -24,6 +24,7 @@ class RoomModel extends Model
         'payment_method',
         'payment_status',
         'ref_number',
+        'status'
         ];
 
     public $timestamps = false; 
