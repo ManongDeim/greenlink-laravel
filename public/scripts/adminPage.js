@@ -591,7 +591,7 @@ async function fetchAndRenderRoomReservations(status = null) {
   const container = document.getElementById(containerId);
 
   try {
-    const res = await fetch("/api/roomReservations"); // adjust if needed
+    const res = await fetch("/api/roomReser");
     const data = await res.json();
 
     const filtered = status ? data.filter(r => r.status === status) : data;
@@ -704,7 +704,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
-  
+
   // Room Reservations submenu
   const roomBtn = document.getElementById("roomReservationsBtn");
   const submenu = document.getElementById("roomReservationsSubmenu");
