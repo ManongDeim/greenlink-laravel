@@ -212,4 +212,25 @@ class FarmOrderController extends Controller
     {
         return response()->json(FarmOrderModel::all());
     }
+
+
+    public function updateStatus(Request $request, $farmOrderId)
+{
+    $status = $request->input('order_status');
+
+    if (!in_array($status, ['Pending','Completed','Cancelled'])) {
+        return response()->json(['error' => 'Invalid status'], 400);
+    }
+
+    $order = FarmOrderModel::where('farmOrder_id', $farmOrderId)->first();
+
+    if (!$order) {
+        return response()->json(['error' => 'Order not found'], 404);
+    }
+
+    $order->order_status = $status;
+    $order->save();
+
+    return response()->json(['message' => "Order {$order->farmOrder_id} updated to {$status}", 'order' => $order]);
+}
 }
