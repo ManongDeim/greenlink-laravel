@@ -93,6 +93,8 @@ Route::get('/paymentSuccess', [RoomController::class, 'paymentSuccess']);
 Route::get('/paymentFailed', [RoomController::class, 'paymentFailed']);
 Route::get('roomReser', [RoomController::class, 'index']);
 Route::get('/booked-dates', [RoomController::class, 'getBookedDates']);
+Route::post('/roomReservation/{id}/update-status', [RoomController::class, 'updateStatus']);
+
 
 // Event Seeder Routes
 Route::get('events', [EventSeederController::class, 'index']);
