@@ -183,25 +183,15 @@ public function paymentFailed(Request $request)
 
     public function updateStatus($id, Request $request)
 {
-    $reservation = RoomModel::find($id);
+    $reservation = RoomModel::where('room_reser_id', $id)->first();
 
     if (!$reservation) {
-        return response()->json(['error' => 'Reservation not found'], 404);
+        return response()->json(['message' => 'Reservation not found'], 404);
     }
 
-    $status = $request->input('status');
-    $validStatuses = ['Pending', 'Checked-in', 'Checked-out', 'Cancelled'];
-
-    if (!in_array($status, $validStatuses)) {
-        return response()->json(['error' => 'Invalid status'], 400);
-    }
-
-    $reservation->status = $status;
+    $reservation->status = $request->status;
     $reservation->save();
 
-    return response()->json([
-        'message' => "Reservation status updated to {$status}.",
-        'status' => $status
-    ]);
+    return response()->json(['message' => 'Status updated successfully']);
 }
 }

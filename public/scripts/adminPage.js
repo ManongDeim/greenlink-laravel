@@ -199,24 +199,26 @@ const farmOrderCardTemplate = order => {
 // Room Reservation template
 const roomReservationTemplate = reservation => `
   <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
-       data-id="${reservation.room_reser_id}" data-status="${reservation.status}">
+       data-id="${reservation.room_reser_id}" data-status="${reservation.status ?? 'Pending'}">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-bold text-gray-800">Reservation #${reservation.room_reser_id}</h3>
-      <span class="px-2 py-1 text-xs font-semibold rounded-full ${reservation.status === 'Checked-in'
-        ? 'text-green-700 bg-green-100'
-        : reservation.status === 'Checked-out'
-        ? 'text-blue-700 bg-blue-100'
-        : reservation.status === 'Cancelled'
-        ? 'text-red-700 bg-red-100'
-        : 'text-teal-700 bg-teal-100'}">${reservation.status}</span>
+      <span class="px-2 py-1 text-xs font-semibold ${
+        reservation.status === 'Checked-in'
+          ? 'text-green-700 bg-green-100'
+          : reservation.status === 'Checked-out'
+          ? 'text-blue-700 bg-blue-100'
+          : reservation.status === 'Cancelled'
+          ? 'text-red-700 bg-red-100'
+          : 'text-teal-700 bg-teal-100'
+      } rounded-full">${reservation.status ?? 'Pending'}</span>
     </div>
     <ul class="mt-2 text-sm text-gray-700 list-disc list-inside">
-      <li>Room Type: ${reservation.room}</li>
+      <li>Room: ${reservation.room}</li>
+      <li>Guest: ${reservation.full_name}</li>
       <li>Check-in: ${reservation.check_in_date}</li>
       <li>Check-out: ${reservation.check_out_date}</li>
-      <li>Guest: ${reservation.full_name}</li>
     </ul>
-    <p class="mt-2 text-sm text-gray-700 font-semibold">Payment Status: ${reservation.payment_status}</p>
+    <p class="mt-2 text-sm text-gray-700 font-semibold">Payment: ${reservation.payment_status}</p>
   </div>
 `;
 
@@ -589,16 +591,33 @@ async function fetchAndRenderFarmOrders(statusFilter = null) {
 async function fetchAndRenderRoomReservations(status = null) {
   const container = document.getElementById("content");
   try {
-    const url = status ? `/api/roomReser?status=${status}` : `/api/roomReser`;
-    const res = await fetch(url);
+    const res = await fetch("/api/roomReser");
     const data = await res.json();
 
-    renderOrders("content", data, roomReservationTemplate);
+    // Filter by status
+    const filtered = status ? data.filter(r => r.status === status) : data;
+
+    // Render each reservation card
+    container.innerHTML = filtered.map(roomReservationTemplate).join("");
+
+    // ✅ Store the fetched data on the container for later reference
+    container.dataset.roomReservations = JSON.stringify(data);
+
+    // ✅ Add click handlers for each card
+    document.querySelectorAll(".order-item").forEach(card => {
+      card.addEventListener("click", () => {
+        const id = card.dataset.id;
+        const allReservations = JSON.parse(container.dataset.roomReservations);
+        const reservation = allReservations.find(r => r.room_reser_id == id);
+        if (reservation) openRoomModal(reservation);
+      });
+    });
   } catch (err) {
     console.error("Error fetching room reservations:", err);
     container.innerHTML = `<p class="text-red-500">Failed to load room reservations</p>`;
   }
 }
+
 
 
 
@@ -895,7 +914,6 @@ function updateFarmOrderStatus(farmOrderId, status) {
 }
 
 function openRoomModal(reservation) {
-  const modal = document.getElementById("roomReservationModal");
   document.getElementById("roomModalTitle").textContent = `Reservation #${reservation.room_reser_id}`;
   document.getElementById("roomModalRef").textContent = `Guest: ${reservation.full_name}`;
   document.getElementById("roomModalItems").innerHTML = `
@@ -916,45 +934,36 @@ function openRoomModal(reservation) {
     document.getElementById("cancelRoomBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Cancelled");
   }
 
-  modal.classList.remove("hidden");
-  modal.classList.add("flex", "items-center", "justify-center"); // ✅ ensures perfect centering
+  document.getElementById("roomReservationModal").classList.remove("hidden");
 }
 
-// --- Update reservation status ---
-async function updateRoomStatus(reservationId, status) {
-  try {
-    const response = await fetch(`/api/roomReservation/${reservationId}/update-status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-    const data = await response.json();
-
-    showToast(data.message);
-
-    // Close modal
-    const modal = document.getElementById("roomReservationModal");
-    modal.classList.add("hidden");
-
-    // Update badge on card instantly
-    const card = document.querySelector(`.order-item[data-id="${reservationId}"]`);
-    if (card) {
-      const badge = card.querySelector("span");
-      badge.textContent = status;
-
-      badge.className =
-        "px-3 py-1 text-sm font-semibold rounded-full " +
-        (status === "Checked-in" ? "text-green-700 bg-green-100" :
-        status === "Checked-out" ? "text-blue-700 bg-blue-100" :
-        status === "Cancelled" ? "text-red-700 bg-red-100" :
-        "text-teal-700 bg-teal-100");
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-// --- Close modal ---
+// Close modal
 document.getElementById("closeRoomModal").addEventListener("click", () => {
   document.getElementById("roomReservationModal").classList.add("hidden");
 });
+
+// --- Update reservation status ---
+function updateRoomStatus(reservationId, status) {
+  fetch(`/api/roomReservation/${reservationId}/update-status`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status })
+  })
+    .then(res => res.json())
+    .then(data => {
+      showToast(data.message);
+      document.getElementById("roomReservationModal").classList.add("hidden");
+
+      // Update UI instantly
+      const card = document.querySelector(`.order-item[data-id="${reservationId}"]`);
+      if (card) {
+        const badge = card.querySelector("span");
+        badge.textContent = status;
+        if (status === "Checked-in") badge.className = "px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full";
+        else if (status === "Checked-out") badge.className = "px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full";
+        else if (status === "Cancelled") badge.className = "px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full";
+        else badge.className = "px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full";
+      }
+    })
+    .catch(err => console.error(err));
+}
