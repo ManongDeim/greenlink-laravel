@@ -19,5 +19,6 @@ class FarmProduct extends Model
         'productPicture',
         'qty',
         'price',
+        'measurement',
     ];
 }

@@ -77,6 +77,9 @@ const farmCardTemplate = item => `
     <p class="text-sm text-gray-600 mb-1">
       Price: <span id="farm-price-${item.id}" class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
+    <p class="text-sm text-gray-600 mb-1">
+  Measurement: <span id="farm-measurement-${item.id}" class="font-semibold text-teal-700">${item.measurement || ''}</span>
+</p>
     <p class="text-sm text-gray-600">
       Available Stock: <span id="farm-stock-${item.id}" class="font-semibold text-teal-700">${item.qty}</span>
     </p>
@@ -317,39 +320,63 @@ function editFarmPrice(id) {
   const button = event.target.closest("button");
   const parent = button.parentElement;
 
+  // Get current displayed measurement (if any)
+  const measurementEl = document.getElementById(`farm-measurement-${id}`);
+  const currentMeasurement = measurementEl ? measurementEl.textContent.trim() : "";
+
   const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+  container.className = "inline-editor col-span-2 mt-2 flex flex-col gap-2";
 
   container.innerHTML = `
-    <input type="text" id="editPriceInput${id}" 
-           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-cyan-500"
-           placeholder="Enter new price">
-    <button class="bg-cyan-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-cyan-700 transition"
-            onclick="saveFarmPrice(${id})">Save</button>
-    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
-            onclick="closeAllInputBoxes()">Cancel</button>
+    <div class="flex items-center gap-2">
+      <input type="text" id="editPriceInput${id}"
+             class="border border-gray-300 rounded-lg px-3 py-1 w-1/2 text-sm focus:ring-2 focus:ring-cyan-500"
+             placeholder="Enter new price">
+
+      <input type="text" id="editMeasurementInput${id}"
+             value="${currentMeasurement || ''}"
+             class="border border-gray-300 rounded-lg px-3 py-1 w-1/2 text-sm focus:ring-2 focus:ring-teal-500"
+             placeholder="e.g. per 1/2 kg">
+    </div>
+
+    <div class="flex gap-2">
+      <button class="bg-cyan-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-cyan-700 transition"
+              onclick="saveFarmPrice(${id})">Save</button>
+      <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+              onclick="closeAllInputBoxes()">Cancel</button>
+    </div>
   `;
 
   parent.insertAdjacentElement("afterend", container);
 }
 
 async function saveFarmPrice(id) {
-  const input = document.getElementById(`editPriceInput${id}`);
-  const newPrice = input.value.trim();
+  const priceInput = document.getElementById(`editPriceInput${id}`);
+  const measurementInput = document.getElementById(`editMeasurementInput${id}`);
+
+  const newPrice = priceInput.value.trim();
+  const newMeasurement = measurementInput.value.trim();
+
   if (!newPrice || isNaN(newPrice)) return showToast("Please enter a valid price");
 
   const response = await fetch(`/api/farm/edit-price/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ price: newPrice }),
+    body: JSON.stringify({
+      price: newPrice,
+      measurement: newMeasurement,
+    }),
   });
 
   const result = await response.json();
   showToast(result.message);
 
-  // ✅ Update price text
+  // ✅ Update price and measurement text
   const priceEl = document.getElementById(`farm-price-${id}`);
   if (priceEl) priceEl.textContent = `₱${newPrice}`;
+
+  const measureEl = document.getElementById(`farm-measurement-${id}`);
+  if (measureEl) measureEl.textContent = newMeasurement || "";
 
   closeAllInputBoxes();
 }
