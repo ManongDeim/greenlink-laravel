@@ -691,6 +691,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const sections = {
     food: { render: fetchAndRenderFood },
     farm: { render: fetchAndRenderFarm },
+    kitchen: { render: fetchAndRenderKitchen },
     foodOrders: { render: fetchAndRenderFoodOrders },
     farmOrders: { render: fetchAndRenderFarmOrders },
     room: { render: fetchAndRenderRoomReservations },
@@ -1041,7 +1042,7 @@ function openAddKitchenModal() {
           <input type="number" name="min_stock" placeholder="Minimum Stock" required class="w-full border rounded-lg p-2">
           <input type="number" name="current_stock" placeholder="Current Stock" required class="w-full border rounded-lg p-2">
           <div class="flex justify-end gap-3 mt-4">
-            <button type="button" onclick="closeModal('addKitchenModal')" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
+            <button type="button" onclick="closeKitchenModal('addKitchenModal')" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
             <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">Add</button>
           </div>
         </form>
@@ -1057,7 +1058,7 @@ function openAddKitchenModal() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData)
     });
-    closeModal("addKitchenModal");
+    closeKitchenModal("addKitchenModal");
     fetchAndRenderKitchen();
   };
 }
@@ -1071,7 +1072,7 @@ function openKitchenStockModal(id) {
         <form id="stockKitchenForm" class="space-y-3">
           <input type="number" name="amount" placeholder="Amount to Add" required class="w-full border rounded-lg p-2">
           <div class="flex justify-end gap-3 mt-4">
-            <button type="button" onclick="closeModal('stockKitchenModal')" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
+            <button type="button" onclick="closeKitchenModal('stockKitchenModal')" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Add</button>
           </div>
         </form>
@@ -1087,7 +1088,7 @@ function openKitchenStockModal(id) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount })
     });
-    closeModal("stockKitchenModal");
+    closeKitchenModal("stockKitchenModal");
     fetchAndRenderKitchen();
   };
 }
@@ -1099,7 +1100,7 @@ async function removeKitchenItem(id) {
   fetchAndRenderKitchen();
 }
 
-// Close modal helper
-function closeModal(id) {
+// Close modal helper 
+function closeKitchenModal(id) {
   document.getElementById(id)?.remove();
 }

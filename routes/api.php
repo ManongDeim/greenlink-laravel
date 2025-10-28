@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\FarmProductController;
 use App\Http\Controllers\Api\FoodProductController;
 use App\Http\Controllers\Api\EventSeederController;
 use App\Http\Controllers\Api\CustomerDashboardController;
-use App\Http\Controllers\KitchenInventoryController;
+use App\Http\Controllers\Api\KitchenInventoryController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 
