@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Api\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\KitchenInventory;
