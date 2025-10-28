@@ -18,6 +18,7 @@ class KitchenInventory extends Model
         'min_stock',
         'current_stock',
         'unit',
+        'unit_cost',
         'status',
         'last_updated',
         'weekly_demand',
@@ -42,10 +43,17 @@ class KitchenInventory extends Model
                 $item->status = 'Restock Needed';
             }
 
-            // --- Compute EOQ (only if all needed fields are filled) ---
+            // --- Preset carrying rate ---
+            $carryingRate = 0.3; // 30% annual
+
+            // --- Auto compute holding cost (weekly) ---
+            if ($item->unit_cost) {
+                $item->holding_cost = ($item->unit_cost * $carryingRate) / 52;
+            }
+
+            // --- Compute EOQ (weekly) ---
             if ($item->weekly_demand && $item->ordering_cost && $item->holding_cost) {
-                $annual_demand = $item->weekly_demand * 52;
-                $item->eoq = sqrt((2 * $annual_demand * $item->ordering_cost) / $item->holding_cost);
+                $item->eoq = sqrt((2 * $item->weekly_demand * $item->ordering_cost) / $item->holding_cost);
             }
 
             // --- Update timestamp ---
