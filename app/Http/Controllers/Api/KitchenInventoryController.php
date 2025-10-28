@@ -16,17 +16,24 @@ class KitchenInventoryController extends Controller
 
     // Add new ingredient
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'item_name' => 'required|string|max:255',
-            'min_stock' => 'required|integer|min:0',
-            'current_stock' => 'required|integer|min:0',
-        ]);
+{
+    $validated = $request->validate([
+        'item_name' => 'required|string|max:255',
+        'min_stock' => 'required|numeric|min:0',
+        'current_stock' => 'required|numeric|min:0',
+        'unit' => 'required|string|max:50',
+        'weekly_demand' => 'nullable|numeric|min:0',
+        'ordering_cost' => 'nullable|numeric|min:0',
+        'holding_cost' => 'nullable|numeric|min:0',
+    ]);
 
-        $ingredient = KitchenInventory::create($validated);
-        return response()->json(['message' => 'Ingredient added successfully', 'ingredient' => $ingredient]);
-    }
+    $ingredient = KitchenInventory::create($validated);
 
+    return response()->json([
+        'message' => 'Ingredient added successfully',
+        'ingredient' => $ingredient
+    ]);
+}
     // Add stock
     public function addStock(Request $request, $id)
     {

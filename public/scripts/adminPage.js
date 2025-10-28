@@ -644,6 +644,8 @@ async function fetchAndRenderKitchen() {
               <th class="px-4 py-2">Ingredient</th>
               <th class="px-4 py-2">Min Stock</th>
               <th class="px-4 py-2">Current Stock</th>
+              <th class="px-4 py-2">Unit</th>
+              <th class="px-4 py-2">EOQ</th>
               <th class="px-4 py-2">Status</th>
               <th class="px-4 py-2">Last Updated</th>
             </tr>
@@ -658,14 +660,16 @@ async function fetchAndRenderKitchen() {
                 <td class="px-4 py-2">${item.item_name}</td>
                 <td class="px-4 py-2">${item.min_stock}</td>
                 <td class="px-4 py-2">${item.current_stock}</td>
+                <td class="px-4 py-2">${item.unit ?? '—'}</td>
+                <td class="px-4 py-2">${item.eoq ? item.eoq.toFixed(2) : '—'}</td>
                 <td class="px-4 py-2 font-medium ${
                   item.status === 'Low Stock'
-                    ? 'text-red-500'
+                    ? 'text-yellow-600'
                     : item.status === 'Restock Needed'
-                    ? 'text-yellow-500'
+                    ? 'text-red-500'
                     : 'text-green-600'
                 }">${item.status}</td>
-                <td class="px-4 py-2">${item.last_updated}</td>
+                <td class="px-4 py-2">${item.last_updated ?? '—'}</td>
               </tr>
             `).join("")}
           </tbody>
@@ -1039,8 +1043,16 @@ function openAddKitchenModal() {
         <h2 class="text-xl font-bold mb-4 text-teal-700">Add Ingredient</h2>
         <form id="addKitchenForm" class="space-y-3">
           <input type="text" name="item_name" placeholder="Item Name" required class="w-full border rounded-lg p-2">
-          <input type="number" name="min_stock" placeholder="Minimum Stock" required class="w-full border rounded-lg p-2">
-          <input type="number" name="current_stock" placeholder="Current Stock" required class="w-full border rounded-lg p-2">
+          <input type="number" step="0.01" name="min_stock" placeholder="Minimum Stock" required class="w-full border rounded-lg p-2">
+          <input type="number" step="0.01" name="current_stock" placeholder="Current Stock" required class="w-full border rounded-lg p-2">
+          <input type="text" name="unit" placeholder="Unit (e.g., kg, pcs, L)" required class="w-full border rounded-lg p-2">
+          
+          <hr class="my-3">
+          <h3 class="text-md font-semibold text-gray-700">Optional EOQ Fields</h3>
+          <input type="number" step="0.01" name="weekly_demand" placeholder="Weekly Demand" class="w-full border rounded-lg p-2">
+          <input type="number" step="0.01" name="ordering_cost" placeholder="Ordering Cost" class="w-full border rounded-lg p-2">
+          <input type="number" step="0.01" name="holding_cost" placeholder="Holding Cost" class="w-full border rounded-lg p-2">
+
           <div class="flex justify-end gap-3 mt-4">
             <button type="button" onclick="closeKitchenModal('addKitchenModal')" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
             <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">Add</button>
@@ -1053,13 +1065,17 @@ function openAddKitchenModal() {
   document.getElementById("addKitchenForm").onsubmit = async (e) => {
     e.preventDefault();
     const formData = Object.fromEntries(new FormData(e.target));
-    await fetch("/api/inventory", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData)
-    });
-    closeKitchenModal("addKitchenModal");
-    fetchAndRenderKitchen();
+    try {
+      await fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      closeKitchenModal("addKitchenModal");
+      fetchAndRenderKitchen();
+    } catch (err) {
+      console.error("Failed to add ingredient:", err);
+    }
   };
 }
 

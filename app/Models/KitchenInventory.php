@@ -2,34 +2,41 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class KitchenInventory extends Model
 {
-    use HasFactory;
-
-    protected $table = 'kitchen_inventory';
-    protected $primaryKey = 'id';
-    public $timestamps = false; // ✅ only last_updated will be used
-
     protected $fillable = [
         'item_name',
         'min_stock',
         'current_stock',
+        'unit',
+        'weekly_demand',
+        'ordering_cost',
+        'holding_cost',
+        'eoq',
         'status',
-        'last_updated',
+        'last_updated'
     ];
+
+    public $timestamps = false;
 
     protected static function booted()
     {
         static::saving(function ($item) {
-            $threshold = $item->min_stock * 0.2;
+            // Compute EOQ if fields are available
+            if ($item->weekly_demand && $item->ordering_cost && $item->holding_cost) {
+                $annual_demand = $item->weekly_demand * 52;
+                $item->eoq = sqrt((2 * $annual_demand * $item->ordering_cost) / $item->holding_cost);
+            }
 
-            if ($item->current_stock <= $item->min_stock) {
-                $item->status = 'Low Stock';
-            } elseif ($item->current_stock <= ($item->min_stock + $threshold)) {
+            // Stock status logic (based on % of min_stock)
+            $ratio = ($item->current_stock / $item->min_stock) * 100;
+
+            if ($ratio <= 29) {
                 $item->status = 'Restock Needed';
+            } elseif ($ratio <= 39) {
+                $item->status = 'Low Stock';
             } else {
                 $item->status = 'Good';
             }
