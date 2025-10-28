@@ -198,7 +198,7 @@ const farmOrderCardTemplate = order => {
 };
 // Room Reservation template
 const roomReservationTemplate = reservation => `
-  <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
+  <div class="p-5 mb-4 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
        data-id="${reservation.room_reser_id}" data-payment-status="${reservation.payment_status ?? 'Pending'}">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-bold text-gray-800">Reservation #${reservation.room_reser_id}</h3>
