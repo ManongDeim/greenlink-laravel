@@ -43,17 +43,17 @@ class KitchenInventory extends Model
                 $item->status = 'Restock Needed';
             }
 
-            // --- Preset carrying rate ---
-            $carryingRate = 0.3; // 30% annual
+            // --- Preset carrying rate (30% annual) ---
+            $annualCarryingRate = 0.3;
 
             // --- Auto compute holding cost (weekly) ---
             if ($item->unit_cost) {
-                $item->holding_cost = ($item->unit_cost * $carryingRate) / 52;
+                $item->holding_cost = ($item->unit_cost * $annualCarryingRate) / 52;
             }
 
             // --- Compute EOQ (weekly) ---
-            if ($item->weekly_demand && $item->ordering_cost && $item->holding_cost) {
-                $item->eoq = sqrt((2 * $item->weekly_demand * $item->ordering_cost) / $item->holding_cost);
+            if ($item->weekly_demand && $item->ordering_cost && $item->holding_cost > 0) {
+                $item->eoq = round(sqrt((2 * $item->weekly_demand * $item->ordering_cost) / $item->holding_cost), 2);
             }
 
             // --- Update timestamp ---
