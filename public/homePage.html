@@ -55,67 +55,50 @@
   </section>
 
   <!--welcome-->
-<div class="absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full px-4 text-center">
+  <div class="absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full px-4 text-center">
+    <h1 class="mb-4 text-3xl font-bold text-white md:text-5xl drop-shadow-md">Welcome to Lola Sayong!</h1>
+    <p class="text-lg font-light text-white md:text-xl drop-shadow-md">A peaceful surf escape tucked along the shores of Gubat, Sorsogon</p>
+    <p class="text-lg font-light text-white md:text-xl drop-shadow-md">where every wave invites adventure, every stay supports the community,</p>
+    <p class="text-lg font-light text-white md:text-xl drop-shadow-md">and every moment brings you closer to nature, simplicity, and home.</p>
+ 
+      <!--Calendar with Date Range Picker-->
+      <div class="flex flex-wrap justify-center gap-4 p-6 mt-6 shadow-2xl backdrop-blur-md bg-transparent/40 rounded-xl">
+        <div class="flex flex-col">
+          <label class="mb-1 font-medium text-gray-800">Check-In</label>
+          <input id="checkIn" type="text" readonly placeholder="Select date" 
+                 class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+        </div>
 
-  <!-- Welcome text section -->
-  <div id="welcomeText">
-    <h1 class="mb-4 text-3xl font-bold text-white md:text-5xl drop-shadow-md">
-      Welcome to Lola Sayong!
-    </h1>
-    <p class="text-lg font-light text-white md:text-xl drop-shadow-md">
-      A peaceful surf escape tucked along the shores of Gubat, Sorsogon
-    </p>
-    <p class="text-lg font-light text-white md:text-xl drop-shadow-md">
-      where every wave invites adventure, every stay supports the community,
-    </p>
-    <p class="text-lg font-light text-white md:text-xl drop-shadow-md">
-      and every moment brings you closer to nature, simplicity, and home.
-    </p>
-  </div>
+        <div class="flex flex-col">
+          <label class="mb-1 font-medium text-gray-800">Check-Out</label>
+          <input id="checkOut" type="text" readonly placeholder="Select date" 
+                 class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+        </div>
 
-  <!-- Calendar with Date Range Picker -->
-  <div class="flex flex-wrap justify-center gap-4 p-6 mt-6 shadow-2xl backdrop-blur-md bg-transparent/40 rounded-xl">
-    <div class="flex flex-col">
-      <label class="mb-1 font-medium text-gray-800">Check-In</label>
-      <input id="checkIn" type="text" readonly placeholder="Select date"
-        class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-    </div>
-
-    <div class="flex flex-col">
-      <label class="mb-1 font-medium text-gray-800">Check-Out</label>
-      <input id="checkOut" type="text" readonly placeholder="Select date"
-        class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-    </div>
-
-    <div class="flex flex-col">
-      <label class="mb-1 font-medium text-gray-800">Reservation</label>
-      <select
-        class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-        <option>Room Reservation</option>
-        <option>Event Reservation</option>
-      </select>
-    </div>
-
-    <div class="flex items-center">
-      <button id="researchBtn"
-        class="px-6 py-2 mt-6 text-black transition duration-200 bg-white rounded-lg shadow-md hover:bg-teal-600 hover:text-white">
-        Search
-      </button>
-    </div>
-
-    <!-- Available Rooms with Image Cards (shows after Search) -->
-    <div id="availableRoomsContainer" class="relative w-full max-w-2xl mx-auto mt-3 hidden">
-      <label class="block mb-2 text-center font-semibold text-gray-800">
-        Available Rooms
-      </label>
-
-      <div id="availableRoomsList"
-        class="max-h-80 overflow-y-auto border border-gray-300 rounded-lg bg-white shadow-lg divide-y divide-gray-200 transition-all duration-300">
-        <!-- Room cards will be injected here -->
+        <div class="flex flex-col">
+          <label class="mb-1 font-medium text-gray-800">Reservation</label>
+          <select class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+            <option>Room Reservation</option>
+            <option>Event Reservation</option>
+          </select>
       </div>
-    </div>
+      <div class="flex items-center">
+        <button class="px-6 py-2 mt-6 text-black transition duration-200 bg-white rounded-lg shadow-md hover:bg-teal-600 hover:text-white"> Search</button>
+      </div>
+
+      <!-- Available Rooms with Image Cards (shows after Search) -->
+<div id="availableRoomsContainer" class="relative hidden w-full max-w-2xl mx-auto mt-6">
+  <label class="block mb-2 font-semibold text-center text-gray-800">
+    Available Rooms
+  </label>
+
+  <div id="availableRoomsList"
+       class="overflow-y-auto transition-all duration-300 bg-white border border-gray-300 divide-y divide-gray-200 rounded-lg shadow-lg max-h-80">
+    <!-- Room cards will be injected here -->
   </div>
 </div>
+    </div>
+  </div>
   
   
 
