@@ -575,13 +575,29 @@ function toggleDefaultEmail() {
   const icon = document.getElementById("defaultEmailIcon");
   const emailInput = document.getElementById("email");
 
-  // Toggle state visually and functionally
+  // Toggle visual and logical state
   const isUsingDefault = icon.classList.toggle("text-teal-600");
 
   if (isUsingDefault) {
-    emailInput.value = "default@mail.com"; // Example default
-    emailInput.disabled = true;
-    emailInput.classList.add("bg-gray-100", "cursor-not-allowed");
+    // Get the current logged-in user's email
+    let userEmail = null;
+
+    if (window.currentUser && window.currentUser.email) {
+      userEmail = window.currentUser.email;
+    } else {
+      // fallback to localStorage (in case the page reloaded)
+      userEmail = localStorage.getItem("userEmail");
+    }
+
+    if (userEmail) {
+      emailInput.value = userEmail;
+      emailInput.disabled = true;
+      emailInput.classList.add("bg-gray-100", "cursor-not-allowed");
+    } else {
+      // If user is not logged in, show modal or warning
+      alert("You must be logged in to use your default email.");
+      icon.classList.remove("text-teal-600"); // revert icon state
+    }
   } else {
     emailInput.disabled = false;
     emailInput.classList.remove("bg-gray-100", "cursor-not-allowed");
