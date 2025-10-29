@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body class="flex items-center justify-center min-h-screen p-6 bg-gradient-to-br from-teal-50 to-teal-100">
+    <div class="w-full max-w-md p-8 bg-white shadow-2xl rounded-2xl">
+      <!-- Header -->
+      <h1 class="mb-6 text-2xl font-bold text-center text-gray-800">Customer Profile</h1>
+
+      <!-- Avatar Section -->
+      <div class="relative w-32 h-32 mx-auto mb-6">
+        <img
+          id="avatarPreview"
+          src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
+          alt="Profile Picture"
+          class="object-cover w-32 h-32 border-4 border-teal-500 rounded-full shadow-md"
+        />
+        <label
+          for="avatarUpload"
+          class="absolute p-2 text-white bg-teal-600 rounded-full shadow-md cursor-pointer bottom-1 right-1 hover:bg-teal-700"
+          title="Change profile picture"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15.232 5.232l3.536 3.536M9 13l6-6 3 3-6 6H9v-3zM4 20h16" />
+          </svg>
+        </label>
+        <input type="file" id="avatarUpload" accept="image/*" class="hidden" />
+      </div>
+
+      <!-- Profile Form -->
+      <form id="profileForm" class="space-y-4">
+        <!-- Name -->
+        <div>
+          <label class="block mb-1 text-sm font-medium text-left text-gray-700">Full Name</label>
+          <input
+            type="text"
+            id="name"
+            value="John Doe"
+            disabled
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100"
+          />
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block mb-1 text-sm font-medium text-left text-gray-700">Email</label>
+          <input
+            type="email"
+            id="email"
+            value="johndoe@example.com"
+            disabled
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100"
+          />
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3">
+          <button
+            type="button"
+            id="editBtn"
+            class="px-4 py-2 font-medium text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50"
+          >
+            Edit
+          </button>
+          <button
+            type="submit"
+            id="saveBtn"
+            class="hidden px-4 py-2 font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700"
+          >
+            Save Changes
+          </button>
+        </div>
+      </form>
+
+      <hr class="my-6" />
+
+      <!-- Apply for PWD/Senior -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-semibold text-gray-800">PWD / Senior Citizen Application</h2>
+        <p class="text-sm text-gray-600">Upload a valid ID to apply for PWD or Senior Citizen status.</p>
+
+        <!-- File Upload -->
+        <input
+          type="file"
+          id="idUpload"
+          accept="image/*,application/pdf"
+          class="block w-full text-sm text-gray-600 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+        />
+
+        <!-- Status -->
+        <div
+          id="statusBox"
+          class="p-3 text-sm text-yellow-700 border border-yellow-300 rounded-lg bg-yellow-50"
+        >
+          Status: <span class="font-medium">Pending Validation</span>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          id="submitIDBtn"
+          class="w-full py-2 font-medium text-white transition bg-teal-600 rounded-lg hover:bg-teal-700"
+        >
+          Submit for Validation
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const editBtn = document.getElementById("editBtn");
+      const saveBtn = document.getElementById("saveBtn");
+      const nameInput = document.getElementById("name");
+      const emailInput = document.getElementById("email");
+      const avatarUpload = document.getElementById("avatarUpload");
+      const avatarPreview = document.getElementById("avatarPreview");
+
+      // Enable editing
+      editBtn.addEventListener("click", () => {
+        nameInput.disabled = false;
+        emailInput.disabled = false;
+        editBtn.classList.add("hidden");
+        saveBtn.classList.remove("hidden");
+      });
+
+      // Save changes
+      document.getElementById("profileForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        nameInput.disabled = true;
+        emailInput.disabled = true;
+        editBtn.classList.remove("hidden");
+        saveBtn.classList.add("hidden");
+        alert("Profile updated successfully!");
+      });
+
+      // Change profile picture preview
+      avatarUpload.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            avatarPreview.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Submit ID for validation
+      document.getElementById("submitIDBtn").addEventListener("click", () => {
+        const fileInput = document.getElementById("idUpload");
+        if (!fileInput.files.length) {
+          alert("Please upload a valid ID before submitting.");
+          return;
+        }
+        document.getElementById("statusBox").innerHTML =
+          'Status: <span class="font-medium text-yellow-600">Pending Admin Validation</span>';
+        alert("Your ID has been submitted for validation.");
+      });
+    </script>
+  </body>
+</html>
