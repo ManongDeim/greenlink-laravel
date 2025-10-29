@@ -140,7 +140,7 @@ class FoodOrderController extends Controller
     }
 
     // ✅ Mark payment as paid
-    $order->update(['payment_status' => 'Paid', 'order_status' => 'Preparing']);
+    $order->update(['payment_status' => 'Paid', 'order_status' => 'Pending']);
 
     // ✅ Deduct ingredients from kitchen inventory
     DB::transaction(function () use ($order) {
