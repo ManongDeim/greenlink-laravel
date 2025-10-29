@@ -204,19 +204,6 @@ const eventTypeError = document.getElementById('eventTypeError');
 const agreeCheckbox = document.getElementById("agreeCheckbox");
 const termsError = document.getElementById("termsError");
 
-  // ✅ Checkbox autofill logic
-  if (checkbox && emailInput) {
-    checkbox.addEventListener("change", function () {
-      if (this.checked) {
-        emailInput.value = "usingemail@gmail.com";
-        emailInput.setAttribute("readonly", true);
-      } else {
-        emailInput.value = "";
-        emailInput.removeAttribute("readonly");
-      }
-    });
-  }
-
 // ✅ Input restrictions
 fullnameInput.addEventListener("input", () => {
   fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, "");
@@ -298,7 +285,6 @@ if (eventTypeInput.value === '') {
     openConfirmationModal();
   }
 }
-
 
 function toggleDefaultEmail() {
   const icon = document.getElementById("defaultEmailIcon");
