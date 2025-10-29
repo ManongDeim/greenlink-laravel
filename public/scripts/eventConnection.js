@@ -304,19 +304,32 @@ function toggleDefaultEmail() {
   const icon = document.getElementById("defaultEmailIcon");
   const emailInput = document.getElementById("email");
 
-  // Toggle state visually and functionally
+  // Toggle highlight on the button icon
   const isUsingDefault = icon.classList.toggle("text-teal-600");
 
   if (isUsingDefault) {
-    emailInput.value = "default@mail.com"; // Example default
-    emailInput.disabled = true;
-    emailInput.classList.add("bg-gray-100", "cursor-not-allowed");
+    // Try to get logged-in user's email
+    const userEmail =
+      (window.currentUser && window.currentUser.email) ||
+      localStorage.getItem("userEmail");
+
+    if (userEmail) {
+      emailInput.value = userEmail;
+      emailInput.disabled = true;
+      emailInput.classList.add("bg-gray-100", "cursor-not-allowed");
+    } else {
+      // If not logged in — revert the icon and show alert
+      alert("⚠️ Please log in first to use your saved email.");
+      icon.classList.remove("text-teal-600");
+    }
   } else {
+    // Restore normal editable email input
     emailInput.disabled = false;
     emailInput.classList.remove("bg-gray-100", "cursor-not-allowed");
     emailInput.value = "";
   }
 }
+
 
 function openTermsModal() {
       document.getElementById('termsModal').classList.remove('hidden');
