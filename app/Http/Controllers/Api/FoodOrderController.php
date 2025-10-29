@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\KitchenInventory;
 use App\Models\FoodIngredient;
+use App\Models\FoodProduct;
 
 class FoodOrderController extends Controller
 {
@@ -118,66 +119,79 @@ class FoodOrderController extends Controller
         ]);
     }   
 
-     public function paymentSuccess(Request $request)
-    {
-        Log::info("✅ paymentSuccess route hit", [
-            'full_url' => $request->fullUrl(),
-            'ref' => $request->query('ref')
-        ]);
+    public function paymentSuccess(Request $request)
+{
+    Log::info("✅ paymentSuccess route hit", [
+        'full_url' => $request->fullUrl(),
+        'ref' => $request->query('ref')
+    ]);
 
-        $refNumber = $request->query('ref');
+    $refNumber = $request->query('ref');
 
-        if (!$refNumber) {
-            Log::warning("No ref number provided in paymentSuccess");
-            return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
-        }
+    if (!$refNumber) {
+        Log::warning("No ref number provided in paymentSuccess");
+        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
+    }
 
-        $order = FoodOrderModel::where('ref_number', $refNumber)->first();
+    $order = FoodOrderModel::where('ref_number', $refNumber)->first();
 
-        if (!$order) {
-            return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
-        }
+    if (!$order) {
+        Log::warning("Order not found for ref: {$refNumber}");
+        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
+    }
 
-        // ✅ Mark payment as paid
-        $order->update(['payment_status' => 'Paid', 'order_status' => 'Preparing']);
+    // ✅ Mark payment as paid
+    $order->update(['payment_status' => 'Paid', 'order_status' => 'Preparing']);
 
-        // ✅ Deduct ingredients from kitchen inventory
-        DB::transaction(function () use ($order) {
-            // Get all ordered food with quantities
-            $orderedItems = [
-                'Smoked Fish' => $order->smokedFish_order,
-                'Deviled Fish' => $order->deviledFish_order,
-                'Sea Sig' => $order->seaSig_order,
-                'Blue Craze' => $order->blueCraze_order,
-                'Chicken Sheet' => $order->chickenSheet_order,
-                'Black Meal' => $order->blackMeal_order,
-            ];
+    // ✅ Deduct ingredients from kitchen inventory
+    DB::transaction(function () use ($order) {
+        // All food and their ordered quantities
+        $orderedItems = [
+            'Smoked Fish' => $order->smokedFish_order,
+            'Deviled Fish' => $order->deviledFish_order,
+            'Sea Sig' => $order->seaSig_order,
+            'Blue Craze' => $order->blueCraze_order,
+            'Chicken Sheet' => $order->chickenSheet_order,
+            'Black Meal' => $order->blackMeal_order,
+        ];
 
-            foreach ($orderedItems as $foodName => $qtyOrdered) {
-                if ($qtyOrdered <= 0) continue;
+        foreach ($orderedItems as $foodName => $qtyOrdered) {
+            if ($qtyOrdered <= 0) continue;
 
-                // Find ingredients used for this food
-                $ingredients = FoodIngredient::where('productName', $foodName)->get();
+            // ✅ Find the food product by name
+            $foodProduct = FoodProduct::where('productName', $foodName)->first();
 
-                foreach ($ingredients as $ingredient) {
-                    $deductAmount = $ingredient->quantity_used * $qtyOrdered;
+            if (!$foodProduct) {
+                Log::warning("⚠️ Food product not found: {$foodName}");
+                continue;
+            }
 
-                    // Deduct from kitchen inventory
-                    $inventory = KitchenInventory::where('item_name', $ingredient->ingredient_name)->first();
+            // ✅ Get ingredients for that food product
+            $ingredients = FoodIngredient::where('food_product_id', $foodProduct->id)->get();
 
-                    if ($inventory) {
-                        $inventory->current_stock = max(0, $inventory->current_stock - $deductAmount);
-                        $inventory->save();
+            foreach ($ingredients as $ingredient) {
+                $deductAmount = $ingredient->quantity_used * $qtyOrdered;
 
-                        Log::info("🧾 Deducted {$deductAmount} {$inventory->unit} from {$inventory->item_name}");
-                    }
+                // ✅ Find ingredient in kitchen inventory
+                $inventory = KitchenInventory::where('item_name', $ingredient->ingredient_name)->first();
+
+                if ($inventory) {
+                    $inventory->current_stock = max(0, $inventory->current_stock - $deductAmount);
+                    $inventory->save();
+
+                    Log::info("🧾 Deducted {$deductAmount} {$inventory->unit} from {$inventory->item_name} (for {$foodName})");
+                } else {
+                    Log::warning("⚠️ Ingredient not found in inventory: {$ingredient->ingredient_name}");
                 }
             }
-        });
+        }
+    });
 
-        Log::info("Payment successful and inventory updated for {$refNumber}");
-        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
-    }
+    Log::info("✅ Payment successful and inventory updated for {$refNumber}");
+
+    return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
+}
+
 
     // Step 2b: If payment fails
     public function paymentFailed(Request $request)
