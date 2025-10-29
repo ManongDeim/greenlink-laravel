@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\FarmProductController;
 use App\Http\Controllers\Api\FoodProductController;
 use App\Http\Controllers\Api\EventSeederController;
 use App\Http\Controllers\Api\CustomerDashboardController;
+use App\Http\Controllers\Api\KitchenInventoryController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 
@@ -111,3 +112,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/room-reservations', [CustomerDashboardController::class, 'getRoomReservations']);
     Route::get('/customer/event-reservations', [CustomerDashboardController::class, 'getEventReservations']);
 });
+
+
+// Kitchen Inventory Routes
+
+
+Route::get('/inventory', [KitchenInventoryController::class, 'index']);
+Route::post('/inventory', [KitchenInventoryController::class, 'store']);
+Route::post('/inventory/add-stock/{id}', [KitchenInventoryController::class, 'addStock']);
+Route::delete('/inventory/{id}', [KitchenInventoryController::class, 'destroy']);

@@ -619,6 +619,69 @@ async function fetchAndRenderRoomReservations(status = null) {
 }
 
 
+// =================== Kitchen Inventory ===================
+async function fetchAndRenderKitchen() {
+  const content = document.getElementById("content");
+  content.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+
+  try {
+    const res = await fetch("/api/inventory");
+    const data = await res.json();
+
+    content.innerHTML = `
+      <div class="p-6 bg-white rounded-2xl shadow-md">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-teal-700">Kitchen Inventory</h2>
+          <button onclick="openAddKitchenModal()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+            + Add Item
+          </button>
+        </div>
+
+        <table class="min-w-full border border-gray-200 text-sm text-left">
+          <thead class="bg-gray-100 text-gray-700">
+            <tr>
+              <th class="px-4 py-2">Action</th>
+              <th class="px-4 py-2">Ingredient</th>
+              <th class="px-4 py-2">Min Stock</th>
+              <th class="px-4 py-2">Current Stock</th>
+              <th class="px-4 py-2">Unit</th>
+              <th class="px-4 py-2">EOQ</th>
+              <th class="px-4 py-2">Status</th>
+              <th class="px-4 py-2">Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map(item => `
+              <tr class="border-t hover:bg-gray-50">
+                <td class="px-4 py-2 flex gap-2">
+                  <button onclick="removeKitchenItem(${item.id})" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">Remove</button>
+                  <button onclick="openKitchenStockModal(${item.id})" class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">+ Stock</button>
+                </td>
+                <td class="px-4 py-2">${item.item_name}</td>
+                <td class="px-4 py-2">${item.min_stock}</td>
+                <td class="px-4 py-2">${item.current_stock}</td>
+                <td class="px-4 py-2">${item.unit ?? '—'}</td>
+                <td class="px-4 py-2">${item.eoq ? item.eoq.toFixed(2) : '—'}</td>
+                <td class="px-4 py-2 font-medium ${
+                  item.status === 'Low Stock'
+                    ? 'text-yellow-600'
+                    : item.status === 'Restock Needed'
+                    ? 'text-red-500'
+                    : 'text-green-600'
+                }">${item.status}</td>
+                <td class="px-4 py-2">${item.last_updated ?? '—'}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (err) {
+    console.error("Failed to load kitchen inventory:", err);
+    content.innerHTML = `<p class="text-red-500">Failed to load kitchen inventory</p>`;
+  }
+}
+
 
 
 
@@ -632,6 +695,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const sections = {
     food: { render: fetchAndRenderFood },
     farm: { render: fetchAndRenderFarm },
+    kitchen: { render: fetchAndRenderKitchen },
     foodOrders: { render: fetchAndRenderFoodOrders },
     farmOrders: { render: fetchAndRenderFarmOrders },
     room: { render: fetchAndRenderRoomReservations },
@@ -745,6 +809,16 @@ if (roomBtn && roomSubmenu) {
 
   
 // ================= Modals =================
+
+
+// 🔹 Input validation
+function validateFloatInput(input) {
+  input.value = input.value.replace(/[^0-9.]/g, '');
+  if ((input.value.match(/\./g) || []).length > 1) {
+    input.value = input.value.substring(0, input.value.length - 1);
+  }
+}
+
 
 // Food Order Details Modal
 
@@ -966,4 +1040,128 @@ function updateRoomStatus(reservationId, status) {
       }
     })
     .catch(err => console.error(err));
+}
+
+
+// Kitchen Inventory Modal
+
+// Add Item
+function openAddKitchenModal() {
+  const modal = `
+    <div id="addKitchenModal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+      <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-lg">
+        <h2 class="text-xl font-bold mb-4 text-teal-700">Add Ingredient</h2>
+        <form id="addKitchenForm" class="space-y-3">
+          <input type="text" name="item_name" placeholder="Item Name" required class="w-full border rounded-lg p-2">
+
+          <input type="text" name="min_stock" placeholder="Minimum Stock" required 
+            class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
+
+          <input type="text" name="current_stock" placeholder="Current Stock" required 
+            class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
+
+          <input type="text" name="unit" placeholder="Unit (e.g., kg, pcs, L)" required class="w-full border rounded-lg p-2">
+
+          <input type="text" name="unit_cost" placeholder="Unit Cost (₱ per unit, e.g., per kg or pcs)" 
+            class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
+
+          <hr class="my-3">
+          <h3 class="text-md font-semibold text-gray-700">Optional EOQ Fields</h3>
+
+          <input type="text" name="weekly_demand" placeholder="Weekly Demand" 
+            class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
+
+          <input type="text" name="ordering_cost" placeholder="Ordering Cost" 
+            class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
+
+          <p class="text-sm text-gray-500 italic">* Holding cost and EOQ will be calculated automatically.</p>
+
+          <div class="flex justify-end gap-3 mt-4">
+            <button type="button" onclick="closeKitchenModal('addKitchenModal')" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
+            <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>`;
+  
+  document.body.insertAdjacentHTML("beforeend", modal);
+
+  // 🔹 Handle Add Ingredient submission
+  document.getElementById("addKitchenForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = Object.fromEntries(new FormData(e.target));
+
+    const numericFields = ["min_stock", "current_stock", "unit_cost", "weekly_demand", "ordering_cost"];
+    for (const field of numericFields) {
+      if (formData[field] && isNaN(parseFloat(formData[field]))) {
+        alert(`${field.replace('_', ' ')} must be a valid number`);
+        return;
+      }
+    }
+
+    try {
+      await fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      closeKitchenModal("addKitchenModal");
+      fetchAndRenderKitchen();
+    } catch (err) {
+      console.error("Failed to add ingredient:", err);
+    }
+  };
+}
+
+
+// Add Stock
+function openKitchenStockModal(id) {
+  const modal = `
+    <div id="stockKitchenModal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+      <div class="bg-white p-6 rounded-2xl w-full max-w-sm shadow-lg">
+        <h2 class="text-xl font-bold mb-4 text-teal-700">Add Stock</h2>
+        <form id="stockKitchenForm" class="space-y-3">
+          <input type="text" name="amount" placeholder="Amount to Add" required 
+            class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
+          <div class="flex justify-end gap-3 mt-4">
+            <button type="button" onclick="closeKitchenModal('stockKitchenModal')" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>`;
+  
+  document.body.insertAdjacentHTML("beforeend", modal);
+
+  // 🔹 Handle Add Stock submission
+  document.getElementById("stockKitchenForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const { amount } = Object.fromEntries(new FormData(e.target));
+
+    // ✅ Check if amount is valid float
+    if (isNaN(parseFloat(amount))) {
+      alert("Amount must be a valid number");
+      return;
+    }
+
+    await fetch(`/api/inventory/add-stock/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount })
+    });
+    closeKitchenModal("stockKitchenModal");
+    fetchAndRenderKitchen();
+  };
+}
+
+// Remove Item
+async function removeKitchenItem(id) {
+  if (!confirm("Remove this ingredient?")) return;
+  await fetch(`/api/inventory/${id}`, { method: "DELETE" });
+  fetchAndRenderKitchen();
+}
+
+// Close modal helper 
+function closeKitchenModal(id) {
+  document.getElementById(id)?.remove();
 }
