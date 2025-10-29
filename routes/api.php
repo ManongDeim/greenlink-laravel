@@ -121,3 +121,4 @@ Route::get('/inventory', [KitchenInventoryController::class, 'index']);
 Route::post('/inventory', [KitchenInventoryController::class, 'store']);
 Route::post('/inventory/add-stock/{id}', [KitchenInventoryController::class, 'addStock']);
 Route::delete('/inventory/{id}', [KitchenInventoryController::class, 'destroy']);
+Route::post('/kitchenInventory/{id}/spoilage', [KitchenInventoryController::class, 'recordSpoilage']);

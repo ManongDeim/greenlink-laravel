@@ -653,9 +653,18 @@ async function fetchAndRenderKitchen() {
           <tbody>
             ${data.map(item => `
               <tr class="border-t hover:bg-gray-50">
-                <td class="px-4 py-2 flex gap-2">
-                  <button onclick="removeKitchenItem(${item.id})" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">Remove</button>
-                  <button onclick="openKitchenStockModal(${item.id})" class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">+ Stock</button>
+                <td class="px-4 py-2 relative">
+                  <!-- Action icon -->
+                  <button onclick="toggleActionMenu(${item.id})" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                    ⚙️
+                  </button>
+
+                  <!-- Hidden action menu -->
+                  <div id="actionMenu_${item.id}" class="hidden absolute top-full left-0 mt-1 bg-white border rounded shadow-lg flex flex-col">
+                    <button onclick="removeKitchenItem(${item.id})" class="px-4 py-2 text-left hover:bg-red-100">Remove</button>
+                    <button onclick="openKitchenStockModal(${item.id})" class="px-4 py-2 text-left hover:bg-blue-100">+ Stock</button>
+                    <button onclick="openSpoilageLossModal(${item.id})" class="px-4 py-2 text-left hover:bg-yellow-100">Spoilage/Loss</button>
+                  </div>
                 </td>
                 <td class="px-4 py-2">${item.item_name}</td>
                 <td class="px-4 py-2">${item.min_stock}</td>
@@ -682,8 +691,11 @@ async function fetchAndRenderKitchen() {
   }
 }
 
-
-
+// Toggle action menu
+function toggleActionMenu(id) {
+  const menu = document.getElementById(`actionMenu_${id}`);
+  menu.classList.toggle("hidden");
+}
 
 
 // Side Buttons Logic
@@ -1164,4 +1176,49 @@ async function removeKitchenItem(id) {
 // Close modal helper 
 function closeKitchenModal(id) {
   document.getElementById(id)?.remove();
+}
+
+// Spoilage/Loss Modal
+
+function openSpoilageLossModal(id) {
+  document.getElementById("spoilageItemId").value = id;
+  document.getElementById("spoilageQuantity").value = "";
+  document.getElementById("spoilageReason").value = "";
+  document.getElementById("spoilageLossModal").classList.remove("hidden");
+}
+
+function closeSpoilageLossModal() {
+  document.getElementById("spoilageLossModal").classList.add("hidden");
+}
+
+async function submitSpoilageLoss() {
+  const id = document.getElementById("spoilageItemId").value;
+  const quantity = parseFloat(document.getElementById("spoilageQuantity").value);
+  const reason = document.getElementById("spoilageReason").value.trim();
+
+  if (!quantity || quantity <= 0) {
+    alert("Please enter a valid quantity.");
+    return;
+  }
+
+  if (!reason) {
+    alert("Please provide a reason or note.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/kitchenInventory/${id}/spoilage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ quantity, reason }),
+    });
+    const data = await res.json();
+
+    alert(data.message || "Spoilage/Loss recorded successfully.");
+    closeSpoilageLossModal();
+    fetchAndRenderKitchen();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to record spoilage/loss.");
+  }
 }
