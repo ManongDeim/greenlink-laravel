@@ -140,38 +140,50 @@ function removeItem(index) {
 
 // Confirm order
 function confirmOrder() {
-   if (cart.length === 0) {
+  const orderType = document.querySelector('input[name="orderType"]:checked')?.value;
+  const date = document.getElementById('pickupDate').value;
+  const hour = document.getElementById('hourSelect').value;
+  const minute = document.getElementById('minuteSelect').value;
+  const time = `${hour}:${minute}`;
+
+  if (!orderType || !date || !hour || !minute) {
+    alert("Please select order type, date, and time before confirming.");
+    return;
+  }
+
+  // ✅ Proceed to payment summary modal
+  if (cart.length === 0) {
     showAlert("Your cart is empty!");
     return;
   }
 
   let summary = "";
   let total = 0;
-  
+
   cart.forEach(item => {
     let price = getPrice(item.name);
     let itemTotal = price * item.qty;
     total += itemTotal;
 
     summary += `<div class="flex justify-between">
-        <span>${item.name} x ${item.qty}</span>
-        <span>₱${itemTotal.toFixed(2)}</span>
-      </div>`;
+      <span>${item.name} x ${item.qty}</span>
+      <span>₱${itemTotal.toFixed(2)}</span>
+    </div>`;
   });
 
-   summary += `
+  summary += `
     <div class="mt-2 flex justify-between font-bold">
       <span>Total:</span>
       <span>₱${total.toFixed(2)}</span>
     </div>`;
 
-    document.getElementById("paymentSummary").innerHTML = summary;
+  document.getElementById("paymentSummary").innerHTML = summary;
 
-    closeModal();
-    document.getElementById("paymentModal").classList.remove("hidden");
-    document.body.classList.add("overflow-hidden"); // disable scroll
-    
+  closeModal();
+  document.getElementById("paymentModal").classList.remove("hidden");
+  document.body.classList.add("overflow-hidden");
 }
+
 
 // Send to Laravel + Log in guard
 
@@ -467,22 +479,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  function confirmOrder() {
-    const orderType = document.querySelector('input[name="orderType"]:checked')?.value;
-    const date = document.getElementById('pickupDate').value;
-    const hour = document.getElementById('hourSelect').value;
-    const minute = document.getElementById('minuteSelect').value;
-    const time = `${hour}:${minute}`;
-
-    if (!orderType || !date || !hour || !minute) {
-      alert("Please select order type, date, and time before confirming.");
-      return;
-    }
-
-    alert(`Order confirmed!\nType: ${orderType}\nDate: ${date}\nTime: ${time}`);
-    closeModal();
-  }
-
-  function closeModal() {
-    document.getElementById("checkoutModal").classList.add("hidden");
-  }
+  

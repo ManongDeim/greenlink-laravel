@@ -157,7 +157,7 @@ class FoodOrderController extends Controller
                 if ($qtyOrdered <= 0) continue;
 
                 // Find ingredients used for this food
-                $ingredients = FoodIngredient::where('food_name', $foodName)->get();
+                $ingredients = FoodIngredient::where('productName', $foodName)->get();
 
                 foreach ($ingredients as $ingredient) {
                     $deductAmount = $ingredient->quantity_used * $qtyOrdered;
