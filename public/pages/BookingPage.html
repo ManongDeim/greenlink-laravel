@@ -3,11 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="../src/Pictures/LogoLolasayong2.png" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+.flatpickr-calendar {
+  font-size: 14px;
+}
+
+.flatpickr-days, .dayContainer {
+  display: flex !important;
+  flex-wrap: wrap !important;
+}
+
+.flatpickr-day {
+  box-sizing: border-box !important;
+  display: inline-block !important;
+  text-align: center !important;
+  width: 14.28% !important; /* 100% / 7 days */
+}
+
+.flatpickr-weekdays, .flatpickr-days {
+  text-align: center !important;
+}
+</style>
   
   <title>Room Booking</title>
 </head>
