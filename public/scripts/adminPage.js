@@ -652,35 +652,35 @@ async function fetchAndRenderKitchen() {
           </thead>
           <tbody>
             ${data.map(item => `
-              <tr class="border-t hover:bg-gray-50">
-                <td class="px-4 py-2 relative">
-                  <!-- Action icon -->
-                  <button onclick="toggleActionMenu(${item.id})" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">
-                    ⚙️
-                  </button>
+<tr class="border-t hover:bg-gray-50 relative">
+  <td class="px-4 py-2 relative">
+    <!-- Toggle button -->
+    <button onclick="toggleActionMenu(event, ${item.id})" class="relative z-10 p-2 bg-gray-200 rounded hover:bg-gray-300">
+      ⚙️
+    </button>
 
-                  <!-- Hidden action menu -->
-                  <div id="actionMenu_${item.id}" class="hidden absolute top-full left-0 mt-1 bg-white border rounded shadow-lg flex flex-col">
-                    <button onclick="removeKitchenItem(${item.id})" class="px-4 py-2 text-left hover:bg-red-100">Remove</button>
-                    <button onclick="openKitchenStockModal(${item.id})" class="px-4 py-2 text-left hover:bg-blue-100">+ Stock</button>
-                    <button onclick="openSpoilageLossModal(${item.id})" class="px-4 py-2 text-left hover:bg-yellow-100">Spoilage/Loss</button>
-                  </div>
-                </td>
-                <td class="px-4 py-2">${item.item_name}</td>
-                <td class="px-4 py-2">${item.min_stock}</td>
-                <td class="px-4 py-2">${item.current_stock}</td>
-                <td class="px-4 py-2">${item.unit ?? '—'}</td>
-                <td class="px-4 py-2">${item.eoq ? item.eoq.toFixed(2) : '—'}</td>
-                <td class="px-4 py-2 font-medium ${
-                  item.status === 'Low Stock'
-                    ? 'text-yellow-600'
-                    : item.status === 'Restock Needed'
-                    ? 'text-red-500'
-                    : 'text-green-600'
-                }">${item.status}</td>
-                <td class="px-4 py-2">${item.last_updated ?? '—'}</td>
-              </tr>
-            `).join("")}
+    <!-- Dropdown menu (hidden by default) -->
+    <div id="actionMenu-${item.id}" class="absolute right-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
+      <button onclick="removeKitchenItem(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-red-100">Remove</button>
+      <button onclick="openKitchenStockModal(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-blue-100">+ Stock</button>
+      <button onclick="openSpoilageModal(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-yellow-100">Spoilage/Loss</button>
+    </div>
+  </td>
+  <td class="px-4 py-2">${item.item_name}</td>
+  <td class="px-4 py-2">${item.min_stock}</td>
+  <td class="px-4 py-2">${item.current_stock}</td>
+  <td class="px-4 py-2">${item.unit ?? '—'}</td>
+  <td class="px-4 py-2">${item.eoq ? item.eoq.toFixed(2) : '—'}</td>
+  <td class="px-4 py-2 font-medium ${
+    item.status === 'Low Stock'
+      ? 'text-yellow-600'
+      : item.status === 'Restock Needed'
+      ? 'text-red-500'
+      : 'text-green-600'
+  }">${item.status}</td>
+  <td class="px-4 py-2">${item.last_updated ?? '—'}</td>
+</tr>
+`).join('')}
           </tbody>
         </table>
       </div>
@@ -692,10 +692,36 @@ async function fetchAndRenderKitchen() {
 }
 
 // Toggle action menu
-function toggleActionMenu(id) {
-  const menu = document.getElementById(`actionMenu_${id}`);
-  menu.classList.toggle("hidden");
+let openActionMenuId = null;
+
+function toggleActionMenu(event, id) {
+  event.stopPropagation();
+
+  const menu = document.getElementById(`actionMenu-${id}`);
+  if (!menu) {
+    console.warn("⚠️ action menu not found for id:", id);
+    return; // exit if element doesn't exist
+  }
+
+  // Close previously open menu if different
+  if (openActionMenuId && openActionMenuId !== id) {
+    const prevMenu = document.getElementById(`actionMenu-${openActionMenuId}`);
+    if (prevMenu) prevMenu.classList.add('hidden');
+  }
+
+  // Toggle current menu
+  menu.classList.toggle('hidden');
+  openActionMenuId = menu.classList.contains('hidden') ? null : id;
 }
+
+// Close menu when clicking outside
+document.addEventListener('click', () => {
+  if (openActionMenuId) {
+    const menu = document.getElementById(`actionMenu-${openActionMenuId}`);
+    if (menu) menu.classList.add('hidden');
+    openActionMenuId = null;
+  }
+});
 
 
 // Side Buttons Logic
@@ -1180,45 +1206,60 @@ function closeKitchenModal(id) {
 
 // Spoilage/Loss Modal
 
-function openSpoilageLossModal(id) {
-  document.getElementById("spoilageItemId").value = id;
-  document.getElementById("spoilageQuantity").value = "";
-  document.getElementById("spoilageReason").value = "";
-  document.getElementById("spoilageLossModal").classList.remove("hidden");
+// Open Spoilage/Loss modal
+function openSpoilageModal(itemId) {
+    const modal = document.getElementById('spoilageModal');
+    const input = document.getElementById('spoilageItemId');
+
+    if (!modal || !input) {
+        console.error("Spoilage modal or input not found!");
+        return;
+    }
+
+    input.value = itemId; // Save the item ID for the action
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden'); // disable scroll
 }
 
-function closeSpoilageLossModal() {
-  document.getElementById("spoilageLossModal").classList.add("hidden");
+// Close Spoilage/Loss modal
+function closeSpoilageModal() {
+    const modal = document.getElementById('spoilageModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden'); // re-enable scroll
+    }
 }
 
-async function submitSpoilageLoss() {
-  const id = document.getElementById("spoilageItemId").value;
-  const quantity = parseFloat(document.getElementById("spoilageQuantity").value);
-  const reason = document.getElementById("spoilageReason").value.trim();
+// Handle spoilage/loss form submission
+async function submitSpoilage() {
+    const itemId = document.getElementById('spoilageItemId').value;
+    const qty = parseFloat(document.getElementById('spoilageQty').value);
+    const reason = document.getElementById('spoilageReason').value;
 
-  if (!quantity || quantity <= 0) {
-    alert("Please enter a valid quantity.");
-    return;
-  }
+    if (!itemId || !qty || !reason) {
+        alert("Please fill in all fields.");
+        return;
+    }
 
-  if (!reason) {
-    alert("Please provide a reason or note.");
-    return;
-  }
+    try {
+       const res = await fetch(`https://greenlinklolasayong.site/api/kitchenInventory/${itemId}/spoilage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quantity: qty, reason })
+});
 
-  try {
-    const res = await fetch(`/api/kitchenInventory/${id}/spoilage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quantity, reason }),
-    });
-    const data = await res.json();
+        const data = await res.json();
 
-    alert(data.message || "Spoilage/Loss recorded successfully.");
-    closeSpoilageLossModal();
-    fetchAndRenderKitchen();
-  } catch (err) {
-    console.error(err);
-    alert("Failed to record spoilage/loss.");
-  }
+        if (res.ok) {
+            alert("Spoilage/loss recorded!");
+            closeSpoilageModal();
+            fetchAndRenderKitchen(); // refresh the table
+        } else {
+            console.error("Error:", data);
+            alert("Failed to record spoilage/loss.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error submitting spoilage/loss.");
+    }
 }
