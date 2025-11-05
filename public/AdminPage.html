@@ -39,8 +39,12 @@
         <button  data-section="kitchen" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
         🍳 Kitchen Inventory
         </button>
-        <button data-section="farm" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
-          🌾 Farm Inventory
+        <button class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400"
+        data-section="farm">
+         🌾 Farm Inventory
+        </button>
+        <button data-section="farmProducts" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+          🌾 Farm Products
         </button>
         <!-- Food Orders -->
 <button data-section="foodOrders" id="foodOrdersBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
@@ -199,6 +203,63 @@
     </div>
   </div>
 </div>
+
+<!-- Add Farm Item Modal -->
+<div id="addFarmModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+    <h2 class="text-2xl font-bold mb-4 text-teal-700">Add Farm Item</h2>
+
+    <form id="addFarmForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700">Item Name</label>
+        <input type="text" name="item_name" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500" required>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700">Min Stock</label>
+          <input type="number" step="0.001" name="min_stock" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700">Current Stock</label>
+          <input type="number" step="0.001" name="current_stock" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700">Unit</label>
+          <input type="text" name="unit" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="e.g. kg, dozen" required>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700">Unit Cost (₱)</label>
+          <input type="number" step="0.01" name="unit_cost" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700">Weekly Demand</label>
+          <input type="number" step="0.001" name="weekly_demand" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700">Ordering Cost</label>
+          <input type="number" step="0.01" name="ordering_cost" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700">Holding Cost</label>
+          <input type="number" step="0.01" name="holding_cost" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" onclick="closeAddFarmModal()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">Add</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
 
 <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2"></div>

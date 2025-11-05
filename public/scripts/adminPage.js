@@ -496,7 +496,7 @@ function replaceFarmPhoto(id) {
   }
 }
 
-async function fetchAndRenderFarm() {
+async function fetchAndRenderFarmProducts() {
   const containerId = 'content'; // You can reuse the same container
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -723,6 +723,119 @@ document.addEventListener('click', () => {
   }
 });
 
+// =================== Farm Inventory ===================
+async function fetchAndRenderFarm() {
+  const content = document.getElementById("content");
+  content.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+
+  try {
+    const res = await fetch("/api/farmInventory");
+    const data = await res.json();
+
+    content.innerHTML = `
+      <div class="p-6 bg-white rounded-2xl shadow-md">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-teal-700">Farm Inventory</h2>
+          <button onclick="openAddFarmModal()" 
+                  class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+            + Add Item
+          </button>
+        </div>
+
+        <table class="min-w-full border border-gray-200 text-sm text-left">
+          <thead class="bg-gray-100 text-gray-700">
+            <tr>
+              <th class="px-4 py-2">Action</th>
+              <th class="px-4 py-2">Item</th>
+              <th class="px-4 py-2">Min Stock</th>
+              <th class="px-4 py-2">Current Stock</th>
+              <th class="px-4 py-2">Unit</th>
+              <th class="px-4 py-2">Unit Cost</th>
+              <th class="px-4 py-2">Weekly Demand</th>
+              <th class="px-4 py-2">Ordering Cost</th>
+              <th class="px-4 py-2">Holding Cost</th>
+              <th class="px-4 py-2">EOQ</th>
+              <th class="px-4 py-2">Status</th>
+              <th class="px-4 py-2">Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map(item => `
+              <tr class="border-t hover:bg-gray-50 relative">
+                <td class="px-4 py-2 relative">
+                  <button onclick="toggleActionMenu(event, ${item.id})" 
+                          class="relative z-10 p-2 bg-gray-200 rounded hover:bg-gray-300">
+                    ⚙️
+                  </button>
+
+                  <div id="actionMenu-${item.id}" 
+                       class="absolute right-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
+                    <button onclick="removeFarmItem(${item.id})" 
+                            class="block w-full text-left px-3 py-1 hover:bg-red-100">
+                      Remove
+                    </button>
+                    <button onclick="openFarmStockModal(${item.id})" 
+                            class="block w-full text-left px-3 py-1 hover:bg-blue-100">
+                      + Stock
+                    </button>
+                    <button onclick="openFarmSpoilageModal(${item.id})" 
+                            class="block w-full text-left px-3 py-1 hover:bg-yellow-100">
+                      Spoilage/Loss
+                    </button>
+                  </div>
+                </td>
+                <td class="px-4 py-2">${item.item_name}</td>
+                <td class="px-4 py-2">${item.min_stock ?? '—'}</td>
+                <td class="px-4 py-2">${item.current_stock ?? '—'}</td>
+                <td class="px-4 py-2">${item.unit ?? '—'}</td>
+                <td class="px-4 py-2">${item.unit_cost ? '₱' + item.unit_cost.toFixed(2) : '—'}</td>
+                <td class="px-4 py-2">${item.weekly_demand ?? '—'}</td>
+                <td class="px-4 py-2">${item.ordering_cost ?? '—'}</td>
+                <td class="px-4 py-2">${item.holding_cost ?? '—'}</td>
+                <td class="px-4 py-2">${item.eoq ? item.eoq.toFixed(2) : '—'}</td>
+                <td class="px-4 py-2 font-medium ${
+                  item.status === 'Low Stock'
+                    ? 'text-yellow-600'
+                    : item.status === 'Restock Needed'
+                    ? 'text-red-500'
+                    : 'text-green-600'
+                }">${item.status}</td>
+                <td class="px-4 py-2">${item.last_updated ?? '—'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (err) {
+    console.error("Failed to load farm inventory:", err);
+    content.innerHTML = `<p class="text-red-500">Failed to load farm inventory</p>`;
+  }
+}
+
+// Action Menu
+let OpenActionMenuId = null;
+function toggleActionMenu(event, id) {
+  event.stopPropagation();
+  const menu = document.getElementById(`actionMenu-${id}`);
+  if (!menu) return;
+
+  if (OpenActionMenuId && OpenActionMenuId !== id) {
+    const prev = document.getElementById(`actionMenu-${OpenActionMenuId}`);
+    if (prev) prev.classList.add('hidden');
+  }
+
+  menu.classList.toggle('hidden');
+  OpenActionMenuId = menu.classList.contains('hidden') ? null : id;
+}
+document.addEventListener('click', () => {
+  if (OpenActionMenuId) {
+    const menu = document.getElementById(`actionMenu-${OpenActionMenuId}`);
+    if (menu) menu.classList.add('hidden');
+    OpenActionMenuId = null;
+  }
+});
+
 
 // Side Buttons Logic
 document.addEventListener("DOMContentLoaded", () => {
@@ -732,8 +845,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // =================== Section Mapping ===================
   const sections = {
     food: { render: fetchAndRenderFood },
-    farm: { render: fetchAndRenderFarm },
+    farmProducts: { render: fetchAndRenderFarmProducts },
     kitchen: { render: fetchAndRenderKitchen },
+    farm: { render: fetchAndRenderFarm },
     foodOrders: { render: fetchAndRenderFoodOrders },
     farmOrders: { render: fetchAndRenderFarmOrders },
     room: { render: fetchAndRenderRoomReservations },
@@ -1262,4 +1376,32 @@ async function submitSpoilage() {
         console.error(err);
         alert("Error submitting spoilage/loss.");
     }
+}
+
+// Farm Inventory
+
+function openAddFarmModal() {
+  document.getElementById("addFarmModal").classList.remove("hidden");
+}
+function closeAddFarmModal() {
+  document.getElementById("addFarmModal").classList.add("hidden");
+}
+
+async function submitAddFarmItem() {
+  const form = document.getElementById("addFarmForm");
+  const formData = new FormData(form);
+
+  try {
+    const res = await fetch(`/api/farmInventoryStore`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Failed to add item");
+
+    closeAddFarmModal();
+    fetchAndRenderFarm();
+  } catch (err) {
+    alert("Error adding item: " + err.message);
+  }
 }

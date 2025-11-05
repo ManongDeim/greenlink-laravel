@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\FoodProductController;
 use App\Http\Controllers\Api\EventSeederController;
 use App\Http\Controllers\Api\CustomerDashboardController;
 use App\Http\Controllers\Api\KitchenInventoryController;
+use App\Http\Controllers\Api\FarmInventoryController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 
@@ -122,3 +123,11 @@ Route::post('/inventory', [KitchenInventoryController::class, 'store']);
 Route::post('/inventory/add-stock/{id}', [KitchenInventoryController::class, 'addStock']);
 Route::delete('/inventory/{id}', [KitchenInventoryController::class, 'destroy']);
 Route::post('/kitchenInventory/{id}/spoilage', [KitchenInventoryController::class, 'recordSpoilage']);
+
+// Farm Inventory Routes
+
+  Route::get('/farmInventory', [FarmInventoryController::class, 'index']);
+  Route::post('/farmInventoryStore', [FarmInventoryController::class, 'store']);
+  Route::post('/{id}/add-stock', [FarmInventoryController::class, 'addStock']);
+  Route::delete('/{id}/delete', [FarmInventoryController::class, 'destroy']);
+  Route::post('/{id}/spoilage', [FarmInventoryController::class, 'recordSpoilage']);
