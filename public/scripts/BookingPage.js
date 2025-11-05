@@ -456,9 +456,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             selectedDates[1] = nextDay;
           }
 
-          lastCheckIn = selectedDates[0];
-          checkInInput.value = selectedDates[0].toISOString().split("T")[0];
-          checkOutInput.value = selectedDates[1].toISOString().split("T")[0];
+const formatLocal = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+checkInInput.value = formatLocal(selectedDates[0]);
+checkOutInput.value = formatLocal(selectedDates[1]);
         }
       }
     });
@@ -476,7 +482,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   const emailInput = document.getElementById("email");
-  const checkbox = document.getElementById("useDefaultEmail");
   const fullnameInput = document.getElementById("fullname");
   const nameError = document.getElementById("nameError");
   const phoneInput = document.getElementById("phone");
@@ -487,19 +492,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const agreeCheckbox = document.getElementById("agreeCheckbox");
   const termsError = document.getElementById("termsError");
 
-
-  // ✅ Checkbox autofill logic
-  if (checkbox && emailInput) {
-    checkbox.addEventListener("change", function () {
-      if (this.checked) {
-        emailInput.value = "usingemail@gmail.com";
-        emailInput.setAttribute("readonly", true);
-      } else {
-        emailInput.value = "";
-        emailInput.removeAttribute("readonly");
-      }
-    });
-  }
 
   // ✅ Input restrictions
   fullnameInput.addEventListener("input", () => {
