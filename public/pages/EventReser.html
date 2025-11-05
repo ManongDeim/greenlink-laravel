@@ -5,9 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-  
-  <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+.flatpickr-calendar {
+  font-size: 14px;
+}
+
+.flatpickr-days, .dayContainer {
+  display: flex !important;
+  flex-wrap: wrap !important;
+}
+
+.flatpickr-day {
+  box-sizing: border-box !important;
+  display: inline-block !important;
+  text-align: center !important;
+  width: 14.28% !important; /* 100% / 7 days */
+}
+
+.flatpickr-weekdays, .flatpickr-days {
+  text-align: center !important;
+}
+</style>
   
   <!-- Tab Icon -->
   <link rel="icon" type="image/png" href="../src/Pictures/LogoLolasayong2.png">
