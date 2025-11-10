@@ -20,10 +20,10 @@ class FarmInventoryController extends Controller
     {
         $validated = $request->validate([
             'item_name' => 'required|string|max:255',
-            'min_stock' => 'required|numeric|min:0',
-            'current_stock' => 'required|numeric|min:0',
+            'min_stock' => 'required|float',
+            'current_stock' => 'required|float',
             'unit' => 'required|string|max:50',
-            'unit_cost' => 'nullable|numeric|min:0',
+            'unit_cost' => 'nullable|float',
         ]);
 
         $item = FarmInventory::create($validated);
