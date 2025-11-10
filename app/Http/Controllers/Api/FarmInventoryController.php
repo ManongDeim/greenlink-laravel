@@ -24,8 +24,6 @@ class FarmInventoryController extends Controller
             'current_stock' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
             'unit_cost' => 'nullable|numeric|min:0',
-            'weekly_demand' => 'nullable|numeric|min:0',
-            'ordering_cost' => 'nullable|numeric|min:0',
         ]);
 
         $item = FarmInventory::create($validated);

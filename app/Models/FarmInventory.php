@@ -21,43 +21,27 @@ class FarmInventory extends Model
         'unit_cost',
         'status',
         'last_updated',
-        'weekly_demand',
-        'ordering_cost',
-        'holding_cost',
-        'eoq',
     ];
 
-    protected static function booted()
-    {
-        static::saving(function ($item) {
-            // --- Compute Status ---
-            $percentage = ($item->min_stock > 0)
-                ? ($item->current_stock / $item->min_stock) * 100
-                : 0;
+   protected static function booted()
+{
+    static::saving(function ($item) {
 
-            if ($percentage >= 40) {
-                $item->status = 'Good';
-            } elseif ($percentage >= 30) {
-                $item->status = 'Low Stock';
-            } else {
-                $item->status = 'Restock Needed';
-            }
+        // --- Compute Status ---
+        $percentage = ($item->min_stock > 0)
+            ? ($item->current_stock / $item->min_stock) * 100
+            : 0;
 
-            // --- Preset carrying rate (30% annual) ---
-            $annualCarryingRate = 0.3;
+        if ($percentage >= 40) {
+            $item->status = 'Good';
+        } elseif ($percentage >= 30) {
+            $item->status = 'Low Stock';
+        } else {
+            $item->status = 'Restock Needed';
+        }
 
-            // --- Auto compute holding cost (weekly) ---
-            if ($item->unit_cost) {
-                $item->holding_cost = ($item->unit_cost * $annualCarryingRate) / 52;
-            }
+        $item->last_updated = now();
+    });
+}
 
-            // --- Compute EOQ (weekly) ---
-            if ($item->weekly_demand && $item->ordering_cost && $item->holding_cost > 0) {
-                $item->eoq = round(sqrt((2 * $item->weekly_demand * $item->ordering_cost) / $item->holding_cost), 2);
-            }
-
-            // --- Update timestamp ---
-            $item->last_updated = now();
-        });
-    }
 }

@@ -205,60 +205,35 @@
 </div>
 
 <!-- Add Farm Item Modal -->
-<div id="addFarmModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
-  <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
-    <h2 class="text-2xl font-bold mb-4 text-teal-700">Add Farm Item</h2>
+<!-- 🌾 Add Farm Item Modal -->
+<div id="addFarmModal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden">
+  <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-lg">
+    <h2 class="text-xl font-bold mb-4 text-teal-700">Add Farm Item</h2>
 
-    <form id="addFarmForm" class="space-y-4">
-      <div>
-        <label class="block text-sm font-semibold text-gray-700">Item Name</label>
-        <input type="text" name="item_name" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500" required>
-      </div>
+    <form id="addFarmForm" onsubmit="submitAddFarmItem(event)" class="space-y-3">
+      <input type="text" name="item_name" placeholder="Item Name" required class="w-full border rounded-lg p-2">
 
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700">Min Stock</label>
-          <input type="number" step="0.001" name="min_stock" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700">Current Stock</label>
-          <input type="number" step="0.001" name="current_stock" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
-        </div>
-      </div>
+      <input type="text" name="min_stock" placeholder="Minimum Stock" required
+        class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
 
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700">Unit</label>
-          <input type="text" name="unit" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="e.g. kg, dozen" required>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700">Unit Cost (₱)</label>
-          <input type="number" step="0.01" name="unit_cost" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
-        </div>
-      </div>
+      <input type="text" name="current_stock" placeholder="Current Stock" required
+        class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
 
-      <div class="grid grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700">Weekly Demand</label>
-          <input type="number" step="0.001" name="weekly_demand" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700">Ordering Cost</label>
-          <input type="number" step="0.01" name="ordering_cost" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700">Holding Cost</label>
-          <input type="number" step="0.01" name="holding_cost" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-        </div>
-      </div>
+      <input type="text" name="unit" placeholder="Unit (e.g., kg, pcs, bundle)" required
+        class="w-full border rounded-lg p-2">
 
-      <div class="flex justify-end space-x-3 pt-4">
-        <button type="button" onclick="closeAddFarmModal()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+      <input type="text" name="unit_cost" placeholder="Unit Cost (₱ per unit)" required
+        class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
+
+      <div class="flex justify-end gap-3 mt-4">
+        <button type="button" onclick="closeAddFarmModal()" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
         <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">Add</button>
       </div>
     </form>
   </div>
 </div>
+
+
 
 
 

@@ -751,10 +751,6 @@ async function fetchAndRenderFarm() {
               <th class="px-4 py-2">Current Stock</th>
               <th class="px-4 py-2">Unit</th>
               <th class="px-4 py-2">Unit Cost</th>
-              <th class="px-4 py-2">Weekly Demand</th>
-              <th class="px-4 py-2">Ordering Cost</th>
-              <th class="px-4 py-2">Holding Cost</th>
-              <th class="px-4 py-2">EOQ</th>
               <th class="px-4 py-2">Status</th>
               <th class="px-4 py-2">Last Updated</th>
             </tr>
@@ -789,10 +785,6 @@ async function fetchAndRenderFarm() {
                 <td class="px-4 py-2">${item.current_stock ?? '—'}</td>
                 <td class="px-4 py-2">${item.unit ?? '—'}</td>
                 <td class="px-4 py-2">${item.unit_cost ? '₱' + item.unit_cost.toFixed(2) : '—'}</td>
-                <td class="px-4 py-2">${item.weekly_demand ?? '—'}</td>
-                <td class="px-4 py-2">${item.ordering_cost ?? '—'}</td>
-                <td class="px-4 py-2">${item.holding_cost ?? '—'}</td>
-                <td class="px-4 py-2">${item.eoq ? item.eoq.toFixed(2) : '—'}</td>
                 <td class="px-4 py-2 font-medium ${
                   item.status === 'Low Stock'
                     ? 'text-yellow-600'
@@ -1383,25 +1375,34 @@ async function submitSpoilage() {
 function openAddFarmModal() {
   document.getElementById("addFarmModal").classList.remove("hidden");
 }
+
 function closeAddFarmModal() {
   document.getElementById("addFarmModal").classList.add("hidden");
+  document.getElementById("addFarmForm").reset(); // optional: clears inputs
 }
 
-async function submitAddFarmItem() {
+async function submitAddFarmItem(event) {
+  event.preventDefault(); // prevent form reload
   const form = document.getElementById("addFarmForm");
   const formData = new FormData(form);
 
   try {
-    const res = await fetch(`/api/farmInventoryStore`, {
+    const response = await fetch("/api/farmInventoryStore", {
       method: "POST",
       body: formData,
     });
 
-    if (!res.ok) throw new Error("Failed to add item");
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to add item");
+    }
 
+    // ✅ Success
     closeAddFarmModal();
-    fetchAndRenderFarm();
-  } catch (err) {
-    alert("Error adding item: " + err.message);
+    fetchAndRenderFarm(); // refresh table/list
+
+  } catch (error) {
+    console.error("Error adding item:", error);
+    alert("❌ Error adding item: " + error.message);
   }
 }
