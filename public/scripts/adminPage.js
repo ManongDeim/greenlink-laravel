@@ -784,7 +784,13 @@ async function fetchAndRenderFarm() {
                 <td class="px-4 py-2">${item.min_stock ?? '—'}</td>
                 <td class="px-4 py-2">${item.current_stock ?? '—'}</td>
                 <td class="px-4 py-2">${item.unit ?? '—'}</td>
-                <td class="px-4 py-2">${item.unit_cost ? '₱' + item.unit_cost.toFixed(2) : '—'}</td>
+                <td class="px-4 py-2">
+                ${
+                item.unit_cost !== null && item.unit_cost !== "" && !isNaN(item.unit_cost)
+                ? "₱" + Number(item.unit_cost).toFixed(2)
+                 : "—"
+                  }
+                </td>
                 <td class="px-4 py-2 font-medium ${
                   item.status === 'Low Stock'
                     ? 'text-yellow-600'
@@ -1405,4 +1411,82 @@ async function submitAddFarmItem(event) {
     console.error("Error adding item:", error);
     alert("❌ Error adding item: " + error.message);
   }
+}
+
+async function removeFarmItem(id) {
+  if (!confirm("Are you sure you want to remove this item?")) return;
+
+  try {
+    const res = await fetch(`/api/farmInventory/${id}`, { method: "DELETE" });
+    const data = await res.json();
+
+    showToast(data.message);
+    fetchAndRenderFarm();
+  } catch (err) {
+    showToast("Failed to remove item", "error");
+  }
+}
+
+function openFarmStockModal(id) {
+  document.getElementById("farmStockItemId").value = id;
+  document.getElementById("farmStockModal").classList.remove("hidden");
+}
+
+function closeFarmStockModal() {
+  document.getElementById("farmStockModal").classList.add("hidden");
+  document.getElementById("farmStockAmount").value = "";
+}
+
+async function submitFarmStock() {
+  const id = document.getElementById("farmStockItemId").value;
+  const amount = document.getElementById("farmStockAmount").value;
+
+  if (!amount || amount <= 0) {
+    showToast("Enter valid stock amount", "error");
+    return;
+  }
+
+  const res = await fetch(`/api/farmInventory/add-stock/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount }),
+  });
+
+  const data = await res.json();
+  showToast(data.message);
+  closeFarmStockModal();
+  fetchAndRenderFarm();
+}
+
+function openFarmSpoilageModal(id) {
+  document.getElementById("farmSpoilageItemId").value = id;
+  document.getElementById("farmSpoilageModal").classList.remove("hidden");
+}
+
+function closeFarmSpoilageModal() {
+  document.getElementById("farmSpoilageModal").classList.add("hidden");
+  document.getElementById("farmSpoilageQty").value = "";
+  document.getElementById("farmSpoilageReason").value = "";
+}
+
+async function submitFarmSpoilage() {
+  const id = document.getElementById("farmSpoilageItemId").value;
+  const quantity = document.getElementById("farmSpoilageQty").value;
+  const reason = document.getElementById("farmSpoilageReason").value;
+
+  if (!quantity || quantity <= 0) {
+    showToast("Enter valid quantity", "error");
+    return;
+  }
+
+  const res = await fetch(`/api/farmInventory/${id}/spoilage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ quantity, reason }),
+  });
+
+  const data = await res.json();
+  showToast(data.message);
+  closeFarmSpoilageModal();
+  fetchAndRenderFarm();
 }

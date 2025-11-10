@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FarmInventory extends Model
 {
     use HasFactory;
 
     protected $table = 'farm_inventory';
-    protected $primaryKey = 'id';
     public $timestamps = false;
 
     protected $fillable = [
@@ -23,25 +22,31 @@ class FarmInventory extends Model
         'last_updated',
     ];
 
-   protected static function booted()
-{
-    static::saving(function ($item) {
+    protected $casts = [
+        'min_stock'     => 'float',
+        'current_stock' => 'float',
+        'unit_cost'     => 'float',
+    ];
 
-        // --- Compute Status ---
-        $percentage = ($item->min_stock > 0)
-            ? ($item->current_stock / $item->min_stock) * 100
-            : 0;
+    protected static function booted()
+    {
+        static::saving(function ($item) {
 
-        if ($percentage >= 40) {
-            $item->status = 'Good';
-        } elseif ($percentage >= 30) {
-            $item->status = 'Low Stock';
-        } else {
-            $item->status = 'Restock Needed';
-        }
+            // ---- Auto Status Logic ----
+            $percentage = ($item->min_stock > 0)
+                ? ($item->current_stock / $item->min_stock) * 100
+                : 0;
 
-        $item->last_updated = now();
-    });
-}
+            if ($percentage >= 40) {
+                $item->status = 'Good';
+            } elseif ($percentage >= 30) {
+                $item->status = 'Low Stock';
+            } else {
+                $item->status = 'Restock Needed';
+            }
 
+            // ---- Update Timestamp ----
+            $item->last_updated = now();
+        });
+    }
 }

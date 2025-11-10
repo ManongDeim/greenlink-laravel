@@ -125,9 +125,9 @@ Route::delete('/inventory/{id}', [KitchenInventoryController::class, 'destroy'])
 Route::post('/kitchenInventory/{id}/spoilage', [KitchenInventoryController::class, 'recordSpoilage']);
 
 // Farm Inventory Routes
+Route::get('farmInventory', [FarmInventoryController::class, 'index']);
+Route::post('farmInventoryStore', [FarmInventoryController::class, 'store']);
+Route::delete('farmInventory/{id}', [FarmInventoryController::class, 'destroy']);
+Route::post('farmInventory/add-stock/{id}', [FarmInventoryController::class, 'addStock']);
+Route::post('farmInventory/{id}/spoilage', [FarmInventoryController::class, 'recordSpoilage']);
 
-  Route::get('/farmInventory', [FarmInventoryController::class, 'index']);
-  Route::post('/farmInventoryStore', [FarmInventoryController::class, 'store']);
-  Route::post('/{id}/add-stock', [FarmInventoryController::class, 'addStock']);
-  Route::delete('/{id}/delete', [FarmInventoryController::class, 'destroy']);
-  Route::post('/{id}/spoilage', [FarmInventoryController::class, 'recordSpoilage']);
