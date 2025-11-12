@@ -171,7 +171,7 @@ class FarmOrderController extends Controller
                     Log::info("🔍 {$productName} | Ordered: {$orderedQty} | Conversion: {$conversion} | Current: {$product->current_stock}");
 
 
-                    $newQty = max(0, $product->qty - $deductQty);
+                    $newQty = max(0, $product->current_stock - $deductQty);
                     $product->update(['current_stock' => $newQty]);
 
                     Log::info("✅ Deducted {$deductQty} ({$conversion} per order) from {$productName}, new stock: {$newQty}");

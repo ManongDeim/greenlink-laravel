@@ -1380,40 +1380,6 @@ async function submitSpoilage() {
 
 // Farm Inventory
 
-function openAddFarmModal() {
-  document.getElementById("addFarmModal").classList.remove("hidden");
-}
-
-function closeAddFarmModal() {
-  document.getElementById("addFarmModal").classList.add("hidden");
-  document.getElementById("addFarmForm").reset(); // optional: clears inputs
-}
-
-async function submitAddFarmItem(event) {
-  event.preventDefault(); // prevent form reload
-  const form = document.getElementById("addFarmForm");
-  const formData = new FormData(form);
-
-  try {
-    const response = await fetch("/api/farmInventoryStore", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to add item");
-    }
-
-    // ✅ Success
-    closeAddFarmModal();
-    fetchAndRenderFarm(); // refresh table/list
-
-  } catch (error) {
-    console.error("Error adding item:", error);
-    alert("❌ Error adding item: " + error.message);
-  }
-}
 
 async function removeFarmItem(id) {
   if (!confirm("Are you sure you want to remove this item?")) return;
@@ -1492,5 +1458,36 @@ async function submitFarmSpoilage() {
   const data = await res.json();
   showToast(data.message);
   closeFarmSpoilageModal();
+  fetchAndRenderFarm();
+}
+
+function openFarmStockModal(id) {
+  document.getElementById("farmStockItemId").value = id;
+  document.getElementById("farmStockModal").classList.remove("hidden");
+}
+
+function closeFarmStockModal() {
+  document.getElementById("farmStockModal").classList.add("hidden");
+  document.getElementById("farmStockAmount").value = "";
+}
+
+async function submitFarmStock() {
+  const id = document.getElementById("farmStockItemId").value;
+  const amount = document.getElementById("farmStockAmount").value;
+
+  if (!amount || amount <= 0) {
+    showToast("Enter valid stock amount", "error");
+    return;
+  }
+
+  const res = await fetch(`/api/farmInventory/add-stock/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount }),
+  });
+
+  const data = await res.json();
+  showToast(data.message);
+  closeFarmStockModal();
   fetchAndRenderFarm();
 }
