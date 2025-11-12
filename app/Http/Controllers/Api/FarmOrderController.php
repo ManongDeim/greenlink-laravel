@@ -162,7 +162,7 @@ class FarmOrderController extends Controller
         foreach ($productFields as $productName => $field) {
             $orderedQty = $order->$field ?? 0;
             if ($orderedQty > 0) {
-                $product = FarmInventory::where('productName', $productName)->first();
+                $product = FarmInventory::where('item_name', $productName)->first();
 
                 if ($product) {
                     $conversion = $product->unit_conversion ?? 1; // defaults to 1:1
