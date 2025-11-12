@@ -750,6 +750,7 @@ async function fetchAndRenderFarm() {
               <th class="px-4 py-2">Min Stock</th>
               <th class="px-4 py-2">Current Stock</th>
               <th class="px-4 py-2">Unit</th>
+              <th class="px-4 py-2">Unit Conversion</th>
               <th class="px-4 py-2">Unit Cost</th>
               <th class="px-4 py-2">Status</th>
               <th class="px-4 py-2">Last Updated</th>
@@ -784,6 +785,7 @@ async function fetchAndRenderFarm() {
                 <td class="px-4 py-2">${item.min_stock ?? '—'}</td>
                 <td class="px-4 py-2">${item.current_stock ?? '—'}</td>
                 <td class="px-4 py-2">${item.unit ?? '—'}</td>
+                <td class="px-4 py-2">${item.unit_conversion ?? '1'}</td>
                 <td class="px-4 py-2">
                 ${
                 item.unit_cost !== null && item.unit_cost !== "" && !isNaN(item.unit_cost)

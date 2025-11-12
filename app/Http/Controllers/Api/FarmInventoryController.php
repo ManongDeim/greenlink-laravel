@@ -27,6 +27,7 @@ class FarmInventoryController extends Controller
             'min_stock'     => 'required|numeric|min:0',
             'current_stock' => 'required|numeric|min:0',
             'unit'          => 'required|string|max:50',
+            'unit_conversion' => 'required|numeric|min:0.001',
             'unit_cost'     => 'required|numeric|min:0',
         ]);
 
