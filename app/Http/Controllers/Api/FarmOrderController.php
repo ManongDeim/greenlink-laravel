@@ -168,6 +168,9 @@ class FarmOrderController extends Controller
                     $conversion = $product->unit_conversion ?? 1; // defaults to 1:1
                     $deductQty = $orderedQty * $conversion;
 
+                    Log::info("🔍 {$productName} | Ordered: {$orderedQty} | Conversion: {$conversion} | Current: {$product->current_stock}");
+
+
                     $newQty = max(0, $product->qty - $deductQty);
                     $product->update(['current_stock' => $newQty]);
 
