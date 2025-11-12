@@ -144,7 +144,7 @@ class FarmOrderController extends Controller
     if ($order->payment_status !== 'Paid') {
         $order->update([
             'payment_status' => 'Paid',
-            'order_status' => 'Completed'
+            'order_status' => 'Pending'
         ]);
 
         Log::info("Payment marked successful for ref: {$refNumber}");
@@ -169,7 +169,7 @@ class FarmOrderController extends Controller
                     $deductQty = $orderedQty * $conversion;
 
                     $newQty = max(0, $product->qty - $deductQty);
-                    $product->update(['qty' => $newQty]);
+                    $product->update(['current_stock' => $newQty]);
 
                     Log::info("✅ Deducted {$deductQty} ({$conversion} per order) from {$productName}, new stock: {$newQty}");
                 } else {
