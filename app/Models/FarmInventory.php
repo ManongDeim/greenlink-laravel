@@ -17,6 +17,7 @@ class FarmInventory extends Model
         'min_stock',
         'current_stock',
         'unit',
+        'unit_conversion',
         'unit_cost',
         'status',
         'last_updated',

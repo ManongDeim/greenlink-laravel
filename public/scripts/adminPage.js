@@ -1429,36 +1429,38 @@ async function removeFarmItem(id) {
   }
 }
 
-function openFarmStockModal(id) {
-  document.getElementById("farmStockItemId").value = id;
-  document.getElementById("farmStockModal").classList.remove("hidden");
+// 🌾 --- Farm Inventory Modal Logic ---
+
+function openAddFarmModal() {
+  document.getElementById("addFarmModal").classList.remove("hidden");
 }
 
-function closeFarmStockModal() {
-  document.getElementById("farmStockModal").classList.add("hidden");
-  document.getElementById("farmStockAmount").value = "";
+function closeAddFarmModal() {
+  document.getElementById("addFarmModal").classList.add("hidden");
 }
 
-async function submitFarmStock() {
-  const id = document.getElementById("farmStockItemId").value;
-  const amount = document.getElementById("farmStockAmount").value;
+async function submitAddFarmItem(e) {
+  if (e) e.preventDefault();
 
-  if (!amount || amount <= 0) {
-    showToast("Enter valid stock amount", "error");
-    return;
+  const form = document.getElementById("addFarmForm");
+  const formData = new FormData(form);
+
+  try {
+    const res = await fetch(`/api/farmInventoryStore`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Failed to add item");
+
+    closeAddFarmModal();
+    form.reset();
+    await fetchAndRenderFarm();
+  } catch (err) {
+    alert("Error adding item: " + err.message);
   }
-
-  const res = await fetch(`/api/farmInventory/add-stock/${id}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount }),
-  });
-
-  const data = await res.json();
-  showToast(data.message);
-  closeFarmStockModal();
-  fetchAndRenderFarm();
 }
+
 
 function openFarmSpoilageModal(id) {
   document.getElementById("farmSpoilageItemId").value = id;

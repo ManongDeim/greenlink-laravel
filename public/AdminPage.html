@@ -204,79 +204,74 @@
   </div>
 </div>
 
-<!-- Add Farm Item Modal -->
 <!-- 🌾 Add Farm Item Modal -->
-<div id="addFarmModal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden">
-  <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-lg">
-    <h2 class="text-xl font-bold mb-4 text-teal-700">Add Farm Item</h2>
+<div id="addFarmModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50">
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+    <h2 class="text-xl font-bold mb-4">Add Farm Inventory Item</h2>
 
-    <form id="addFarmForm" onsubmit="submitAddFarmItem(event)" class="space-y-3">
-      <input type="text" name="item_name" placeholder="Item Name" required class="w-full border rounded-lg p-2">
+    <form id="addFarmForm" onsubmit="submitAddFarmItem(event)">
+      <div class="grid grid-cols-2 gap-4">
 
-      <input type="text" name="min_stock" placeholder="Minimum Stock" required
-        class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
+        <!-- Item Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Item Name</label>
+          <input type="text" name="item_name" required
+                 class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400">
+        </div>
 
-      <input type="text" name="current_stock" placeholder="Current Stock" required
-        class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
+        <!-- Unit -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Unit</label>
+          <input type="text" name="unit" placeholder="e.g. kg, dozen, piece"
+                 class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400">
+        </div>
 
-      <input type="text" name="unit" placeholder="Unit (e.g., kg, pcs, bundle)" required
-        class="w-full border rounded-lg p-2">
+        <!-- Minimum Stock -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Minimum Stock</label>
+          <input type="number" step="0.01" name="min_stock" required
+                 class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400">
+        </div>
 
-      <input type="text" name="unit_cost" placeholder="Unit Cost (₱ per unit)" required
-        class="w-full border rounded-lg p-2" oninput="validateFloatInput(this)">
+        <!-- Current Stock -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Current Stock</label>
+          <input type="number" step="0.01" name="current_stock" required
+                 class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400">
+        </div>
 
-      <div class="flex justify-end gap-3 mt-4">
-        <button type="button" onclick="closeAddFarmModal()" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
-        <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">Add</button>
+        <!-- Unit Cost -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Unit Cost (₱)</label>
+          <input type="number" step="0.01" name="unit_cost" required
+                 class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400">
+        </div>
+
+        <!-- Conversion Rate -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Conversion Rate</label>
+          <input type="number" step="0.01" name="unit_conversion" placeholder="1 if same (e.g. 0.5 for 500g)"
+                 class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400">
+          <p class="text-xs text-gray-500 mt-1">
+            Example: If item sold per 500g but stored in kg → enter 0.5
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end space-x-2">
+        <button type="button" onclick="closeAddFarmModal()"
+                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+          Add Item
+        </button>
       </div>
     </form>
   </div>
 </div>
 
-
-<!-- Add Farm Item Modal -->
-<div id="addFarmModal" class="fixed inset-0 hidden bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md">
-    <h2 class="text-xl font-bold text-teal-700 mb-4">Add Farm Item</h2>
-    <form id="addFarmForm" class="space-y-3">
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Item Name</label>
-        <input name="item_name" type="text" class="w-full border rounded-lg p-2" required>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Min Stock</label>
-        <input name="min_stock" type="number" step="0.001" class="w-full border rounded-lg p-2" required>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Current Stock</label>
-        <input name="current_stock" type="number" step="0.001" class="w-full border rounded-lg p-2" required>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Unit</label>
-        <input name="unit" type="text" placeholder="e.g., kg, pcs, dozen" class="w-full border rounded-lg p-2" required>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Unit Conversion</label>
-        <input name="unit_conversion" type="number" step="0.001" value="1" class="w-full border rounded-lg p-2" required>
-        <p class="text-xs text-gray-500">How much inventory is reduced per 1 order (e.g., 0.5 for half kg/dozen)</p>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Unit Cost</label>
-        <input name="unit_cost" type="number" step="0.01" class="w-full border rounded-lg p-2" required>
-      </div>
-
-      <div class="flex justify-end space-x-2 pt-3">
-        <button type="button" onclick="closeAddFarmModal()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancel</button>
-        <button type="button" onclick="submitAddFarmItem()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">Save</button>
-      </div>
-    </form>
-  </div>
-</div>
 
 
 <div id="farmSpoilageModal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden p-4">
