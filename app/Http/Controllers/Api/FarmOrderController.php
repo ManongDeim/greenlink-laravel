@@ -141,51 +141,51 @@ class FarmOrderController extends Controller
         return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
     }
 
-    // ✅ Only deduct stock once
     if ($order->payment_status !== 'Paid') {
-
         $order->update([
             'payment_status' => 'Paid',
             'order_status' => 'Completed'
         ]);
 
-        Log::info("Payment marked successful with reference number: {$refNumber}");
+        Log::info("Payment marked successful for ref: {$refNumber}");
 
-        // ------- ✅ LIST OF ORDERED ITEMS -------
-        $productsToUpdate = [
-            'Bangus' => $order->bangus_order,
-            'Egg' => $order->eggs_order,
-            'Mud Crab' => $order->mudCrab_order,
-            'Native Chicken' => $order->nativeChicken_order,
-            'Native Pork' => $order->nativePork_order,
-            'Squash' => $order->squash_order,
+        // ✅ Store product names & order fields dynamically
+        $productFields = [
+            'Bangus' => 'bangus_order',
+            'Egg' => 'eggs_order',
+            'Mud Crab' => 'mudCrab_order',
+            'Native Chicken' => 'nativeChicken_order',
+            'Native Pork' => 'nativePork_order',
+            'Squash' => 'squash_order',
         ];
 
-        // ✅ Deduct from farm_inventory table
-        foreach ($productsToUpdate as $name => $orderedQty) {
+        foreach ($productFields as $productName => $field) {
+            $orderedQty = $order->$field ?? 0;
             if ($orderedQty > 0) {
+                $product = \App\Models\FarmProduct::where('productName', $productName)->first();
 
-                $inventory = FarmInventory::where('item_name', $name)->first();
+                if ($product) {
+                    $conversion = $product->unit_conversion ?? 1; // defaults to 1:1
+                    $deductQty = $orderedQty * $conversion;
 
-                if ($inventory) {
-                    $newStock = max(0, $inventory->current_stock - $orderedQty);
+                    $newQty = max(0, $product->qty - $deductQty);
+                    $product->update(['qty' => $newQty]);
 
-                    $inventory->update([
-                        'current_stock' => $newStock
-                    ]);
-
-                    Log::info("✅ Deducted {$orderedQty} from Farm Inventory: {$name}, new stock: {$newStock}");
+                    Log::info("✅ Deducted {$deductQty} ({$conversion} per order) from {$productName}, new stock: {$newQty}");
                 } else {
-                    Log::warning("⚠️ No matching inventory item found for: {$name}");
+                    Log::warning("⚠️ Product not found in farm inventory: {$productName}");
                 }
             }
         }
 
-        Log::info("✅ Farm inventory deduction complete for ref: {$refNumber}");
+        Log::info("✅ All applicable stock deducted for ref: {$refNumber}");
+    } else {
+        Log::info("⚠️ Payment already marked as Paid for ref: {$refNumber}, skipping deduction.");
     }
 
     return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
 }
+
 
 
     // Step 2b: If payment fails
