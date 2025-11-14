@@ -782,8 +782,8 @@ async function fetchAndRenderFarm() {
                   </div>
                 </td>
                 <td class="px-4 py-2">${item.item_name}</td>
-                <td class="px-4 py-2">${item.min_stock ?? '—'}</td>
-                <td class="px-4 py-2">${item.current_stock ?? '—'}</td>
+                <td class="px-4 py-2">${item.min_stock !== null ? item.min_stock.toFixed(2) : '—'}</td>
+                <td class="px-4 py-2">${item.current_stock !== null ? item.current_stock.toFixed(2) : '—'}</td>
                 <td class="px-4 py-2">${item.unit ?? '—'}</td>
                 <td class="px-4 py-2">${item.unit_conversion ?? '1'}</td>
                 <td class="px-4 py-2">
@@ -881,6 +881,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // =================== Sidebar Button Logic ===================
   sidebarButtons.forEach(btn => {
     btn.addEventListener("click", () => {
+
+      if (btn.classList.contains("submenu-toggle")) return;
+
       // Reset all buttons
       sidebarButtons.forEach(b => {
         b.classList.remove("bg-teal-600", "text-white", "hover:bg-teal-700", "hover:border-teal-700");
@@ -955,6 +958,15 @@ if (roomBtn && roomSubmenu) {
     });
   });
 }
+
+// Page Management submenu
+
+const pageManagementBtn = document.getElementById('pageManagementBtn');
+const pageManagementSubmenu = document.getElementById('pageManagementSubmenu');
+
+pageManagementBtn.addEventListener('click', () => {
+  pageManagementSubmenu.classList.toggle('hidden');
+});
 
 });
 
