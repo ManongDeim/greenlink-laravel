@@ -21,12 +21,12 @@ function showToast(message, type = "success", duration = 3000) {
 
 const foodCardTemplate = item => `
   <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
-    <img src="${item.productPicture}" alt="${item.productName}" 
+    <img id="food-photo-${item.id}" src="${item.productPicture}"  alt="${item.productName} " 
       class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
 
-    <h3 class="text-lg font-semibold text-gray-800 mb-1">${item.productName}</h3>
+    <h3 id="food-name-${item.id}" class="text-lg font-semibold text-gray-800 mb-1">${item.productName}</h3>
     <p class="text-sm text-gray-600 mb-4">
-      Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
+      Price: <span id="food-price-${item.id}" class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
 
     <!-- Modern Button Group -->
@@ -611,8 +611,7 @@ async function saveFoodPrice(id) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      price: newPrice,
-      measurement: newMeasurement,
+      price: newPrice
     }),
   });
 

@@ -98,6 +98,6 @@ Route::prefix('api/farm')->group(function () {
 
 Route::prefix('api/food')->group(function () {
     Route::post('/edit-name/{id}', [FoodProductController::class, 'editName']);
-    Route::post('/edit-price/{id}', [FarmProductController::class, 'editPrice']);
-    Route::post('/replace-photo/{id}', [FarmProductController::class, 'replacePhoto']);
+    Route::post('/edit-price/{id}', [FoodProductController::class, 'editPrice']);
+    Route::post('/replace-photo/{id}', [FoodProductController::class, 'replacePhoto']);
 });
