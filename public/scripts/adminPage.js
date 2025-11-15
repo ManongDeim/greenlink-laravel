@@ -33,7 +33,7 @@ const foodCardTemplate = item => `
     <div class="flex flex-col gap-3">
       <!-- Edit Name -->
       <button
-        onclick="editName(${item.id})"
+        onclick="editFoodName(${item.id})"
         class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl shadow-sm hover:from-teal-600 hover:to-teal-700 hover:shadow-md transition-all duration-300 active:scale-[0.97]"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:-rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,7 +44,7 @@ const foodCardTemplate = item => `
 
       <!-- Edit Price -->
       <button
-        onclick="editPrice(${item.id})"
+        onclick="editFoodPrice(${item.id})"
         class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-cyan-50 to-teal-50 text-teal-700 border border-teal-100 rounded-xl hover:from-cyan-100 hover:to-teal-100 hover:border-teal-200 hover:shadow-sm transition-all duration-300 active:scale-[0.97]"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -56,7 +56,7 @@ const foodCardTemplate = item => `
 
       <!-- Replace Photo -->
       <button
-        onclick="replacePhoto(${item.id})"
+        onclick="replaceFoodPhoto(${item.id})"
         class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-white rounded-xl shadow-sm hover:from-amber-500 hover:to-yellow-600 hover:shadow-md transition-all duration-300 active:scale-[0.97]"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -219,6 +219,55 @@ const roomReservationTemplate = reservation => `
       <li>Check-out: ${reservation.check_out_date}</li>
     </ul>
     <p class="mt-2 text-sm text-gray-700 font-semibold">Status: ${reservation.status}</p>
+  </div>
+`;
+
+const roomCardTemplate = item => `
+  <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
+    <img src="${item.image}" alt="${item.room_name}" 
+      class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
+
+    <h3 class="text-lg font-semibold text-gray-800 mb-1">${item.room_name}</h3>
+    <p class="text-sm text-gray-600 mb-4">
+      Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
+    </p>
+
+    <!-- Modern Button Group -->
+    <div class="flex flex-col gap-3">
+      <!-- Edit Name -->
+      <button
+        onclick="editName(${item.id})"
+        class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl shadow-sm hover:from-teal-600 hover:to-teal-700 hover:shadow-md transition-all duration-300 active:scale-[0.97]"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:-rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2M12 5v14m7 0H5"/>
+        </svg>
+        <span>Edit Name</span>
+      </button>
+
+      <!-- Edit Price -->
+      <button
+        onclick="editPrice(${item.id})"
+        class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-cyan-50 to-teal-50 text-teal-700 border border-teal-100 rounded-xl hover:from-cyan-100 hover:to-teal-100 hover:border-teal-200 hover:shadow-sm transition-all duration-300 active:scale-[0.97]"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3v1h6v-1c0-1.657-1.343-3-3-3z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14v6H5z"/>
+        </svg>
+        <span>Edit Price</span>
+      </button>
+
+      <!-- Replace Photo -->
+      <button
+        onclick="replacePhoto(${item.id})"
+        class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-white rounded-xl shadow-sm hover:from-amber-500 hover:to-yellow-600 hover:shadow-md transition-all duration-300 active:scale-[0.97]"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v16h16V4H4zm8 12l-4-4m4 4l4-4m-4 4V8" />
+        </svg>
+        <span>Replace Photo</span>
+      </button>
+    </div>
   </div>
 `;
 
@@ -472,6 +521,143 @@ function replaceFarmPhoto(id) {
   fileInput.click();
 }
 
+// ----------- Food Product Editing -----------
+
+// ✅ Edit Product Name
+function editFoodName(id) {
+  closeAllInputBoxes();
+
+  const button = event.target.closest("button");
+  const parent = button.parentElement;
+
+  const container = document.createElement("div");
+  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+
+  container.innerHTML = `
+    <input type="text" id="editNameInput${id}" 
+           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-teal-500"
+           placeholder="Enter new name">
+    <button class="bg-teal-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-teal-700 transition"
+            onclick="saveFoodName(${id})">Save</button>
+    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+            onclick="closeAllInputBoxes()">Cancel</button>
+  `;
+
+  parent.insertAdjacentElement("afterend", container);
+}
+
+async function saveFoodName(id) {
+  const input = document.getElementById(`editNameInput${id}`);
+  const newName = input.value.trim();
+  if (!newName) return showToast("Please enter a name");
+
+  const response = await fetch(`/api/food/edit-name/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productName: newName }),
+  });
+
+  const result = await response.json();
+  showToast(result.message);
+
+  // ✅ Update UI instantly
+  const nameEl = document.getElementById(`food-name-${id}`);
+  if (nameEl) nameEl.textContent = newName;
+
+  closeAllInputBoxes();
+}
+
+// ✅ Edit Product Price
+function editFoodPrice(id) {
+  closeAllInputBoxes();
+
+  const button = event.target.closest("button");
+  const parent = button.parentElement;
+
+  // 🧾 Get current displayed price and measurement
+  const priceEl = document.getElementById(`food-price-${id}`);
+  const currentPrice = priceEl ? priceEl.textContent.replace("₱", "").trim() : "";
+
+  const container = document.createElement("div");
+  container.className = "inline-editor col-span-2 mt-2 flex flex-col gap-2";
+
+  container.innerHTML = `
+    <div class="flex items-center gap-2">
+      <input type="text" id="editPriceInput${id}"
+             value="${currentPrice}"
+             class="border border-gray-300 rounded-lg px-3 py-1 w-1/2 text-sm focus:ring-2 focus:ring-cyan-500"
+             placeholder="Enter new price">
+    </div>
+
+    <div class="flex gap-2">
+      <button class="bg-cyan-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-cyan-700 transition"
+              onclick="saveFoodPrice(${id})">Save</button>
+      <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+              onclick="closeAllInputBoxes()">Cancel</button>
+    </div>
+  `;
+
+  parent.insertAdjacentElement("afterend", container);
+}
+
+async function saveFoodPrice(id) {
+  const priceInput = document.getElementById(`editPriceInput${id}`);
+
+  const newPrice = priceInput.value.trim();
+
+  if (!newPrice || isNaN(newPrice)) return showToast("Please enter a valid price");
+
+  const response = await fetch(`/api/farm/edit-price/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      price: newPrice,
+      measurement: newMeasurement,
+    }),
+  });
+
+  const result = await response.json();
+  showToast(result.message);
+
+  // ✅ Update price and measurement text
+  const priceEl = document.getElementById(`food-price-${id}`);
+  if (priceEl) priceEl.textContent = `₱${newPrice}`;
+
+  closeAllInputBoxes();
+}
+
+// ✅ Replace Picture stays as file upload popup
+function replaceFoodPhoto(id) {
+  closeAllInputBoxes();
+
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = "image/*";
+
+  fileInput.onchange = async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("productPicture", file);
+
+    const response = await fetch(`/api/food/replace-photo/${id}`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+    showToast(result.message);
+
+    // ✅ Update image instantly
+    const imgEl = document.getElementById(`food-photo-${id}`);
+    if (imgEl && result.path) {
+      imgEl.src = result.path + `?t=${Date.now()}`; // cache-buster
+    }
+  };
+
+  fileInput.click();
+}
 
 // ================= Fetch & Render Functions =================
  async function fetchAndRenderFood() {
@@ -487,11 +673,33 @@ function replaceFarmPhoto(id) {
     const data = await res.json();
 
     // Ensure the API returns: [{ category: 'Granny\'s Grub Originals', items: [...] }, ...]
-    const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Food Inventory", items: data }];
+    const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Food Items", items: data }];
 
     renderItems(containerId, dataSections, foodCardTemplate);
   } catch (err) {
-    console.error('Failed to load food inventory:', err);
+    console.error('Failed to load food items:', err);
+    container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
+  }
+}
+
+async function fetchAndRenderRoom() {
+  const containerId = 'content';
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  // Show loading
+  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+
+  try {
+    const res = await fetch('/api/rooms'); // Must return array of categories
+    const data = await res.json();
+
+    // Ensure the API returns: [{ category: 'Granny\'s Grub Originals', items: [...] }, ...]
+    const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Room Management", items: data }];
+
+    renderItems(containerId, dataSections, roomCardTemplate);
+  } catch (err) {
+    console.error('Failed to load food items:', err);
     container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
   }
 }
@@ -507,11 +715,11 @@ async function fetchAndRenderFarmProducts() {
     const res = await fetch('/api/farmProducts'); // your API endpoint
     const data = await res.json();
 
-    const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Farm Inventory", items: data }];
+    const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Farm Products", items: data }];
 
     renderItems(containerId, dataSections, farmCardTemplate);
   } catch (err) {
-    console.error('Failed to load farm inventory:', err);
+    console.error('Failed to load farm products:', err);
     container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
   }
 }
@@ -851,6 +1059,7 @@ document.addEventListener("DOMContentLoaded", () => {
     foodOrders: { render: fetchAndRenderFoodOrders },
     farmOrders: { render: fetchAndRenderFarmOrders },
     room: { render: fetchAndRenderRoomReservations },
+    roomManagement: {render: fetchAndRenderRoom},
     event: {
       custom: `
         <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>

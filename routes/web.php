@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\FarmOrderController;
 use App\Http\Controllers\Api\FoodOrderController;
 use App\Http\Controllers\Api\FarmProductController;
 use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\Api\FoodProductController;
 use App\Models\FoodOrderModel;
 
 Route::get('/check-key', function () {
@@ -91,4 +92,12 @@ Route::prefix('api/farm')->group(function () {
     Route::post('/edit-price/{id}', [FarmProductController::class, 'editPrice']);
     Route::post('/replace-photo/{id}', [FarmProductController::class, 'replacePhoto']);
     Route::post('/add-stock/{id}', [FarmProductController::class, 'addStock']);
+});
+
+// Food Product routes
+
+Route::prefix('api/food')->group(function () {
+    Route::post('/edit-name/{id}', [FoodProductController::class, 'editName']);
+    Route::post('/edit-price/{id}', [FarmProductController::class, 'editPrice']);
+    Route::post('/replace-photo/{id}', [FarmProductController::class, 'replacePhoto']);
 });
