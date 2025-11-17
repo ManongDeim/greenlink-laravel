@@ -10,6 +10,7 @@ class RoomSeederModel extends Model
     use HasFactory;
 
     protected $table = 'rooms';
+     public $timestamps = false;
 
       protected $fillable = [
         'roomId',

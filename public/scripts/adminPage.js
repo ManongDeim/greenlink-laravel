@@ -214,12 +214,12 @@ const roomReservationTemplate = reservation => `
 
 const roomCardTemplate = item => `
   <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
-    <img id="room-photo-${id}" src="${item.image}" alt="${item.room_name}" 
+    <img id="room-photo-${item.id}" src="${item.image}" alt="${item.room_name}" 
       class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
 
-    <h3 id="room-name-${id}" class="text-lg font-semibold text-gray-800 mb-1">${item.room_name}</h3>
+    <h3 id="room-name-${item.id}" class="text-lg font-semibold text-gray-800 mb-1">${item.room_name}</h3>
     <p class="text-sm text-gray-600 mb-4">
-      Price: <span id="room-price-${id}" class="font-semibold text-teal-700">₱${item.price}</span>
+      Price: <span id="room-price-${item.id}" class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
 
     <!-- Modern Button Group -->
@@ -681,7 +681,7 @@ async function saveRoomName(id) {
   const response = await fetch(`/api/room/edit-name/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ productName: newName }),
+    body: JSON.stringify({ room_name: newName }),
   });
 
   const result = await response.json();
