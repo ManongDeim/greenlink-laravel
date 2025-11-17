@@ -85,7 +85,7 @@ const farmCardTemplate = item => `
     </p>
 
     <!-- Button Grid -->
-    <div class="grid grid-cols-2 gap-3 mt-5">
+    <div class="flex flex-col gap-3 mt-5">
       <!-- Edit Name -->
       <button
         onclick="editFarmName(${item.id})"
@@ -120,16 +120,6 @@ const farmCardTemplate = item => `
         <span>Replace Picture</span>
       </button>
 
-      <!-- Add Stock -->
-      <button
-        onclick="addFarmStock(${item.id})"
-        class="group flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl shadow-sm hover:from-emerald-600 hover:to-green-700 transition-all duration-300 active:scale-95"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:rotate-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        <span>Add Stock</span>
-      </button>
     </div>
   </div>
 `;
@@ -329,7 +319,7 @@ function editFarmName(id) {
   const parent = button.parentElement;
 
   const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+  container.className = "flex items-center col-span-2 gap-2 mt-2 inline-editor";
 
   container.innerHTML = `
     <input type="text" id="editNameInput${id}" 
@@ -381,7 +371,7 @@ function editFarmPrice(id) {
   const currentMeasurement = measurementEl ? measurementEl.textContent.trim() : "";
 
   const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex flex-col gap-2";
+  container.className = "flex flex-col col-span-2 gap-2 mt-2 inline-editor";
 
   container.innerHTML = `
     <div class="flex items-center gap-2">
@@ -447,7 +437,7 @@ function addFarmStock(id) {
   const parent = button.parentElement;
 
   const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+  container.className = "flex items-center col-span-2 gap-2 mt-2 inline-editor";
 
   container.innerHTML = `
     <input type="number" id="addStockInput${id}" 
@@ -531,7 +521,7 @@ function editFoodName(id) {
   const parent = button.parentElement;
 
   const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+  container.className = "flex items-center col-span-2 gap-2 mt-2 inline-editor";
 
   container.innerHTML = `
     <input type="text" id="editNameInput${id}" 
@@ -579,7 +569,7 @@ function editFoodPrice(id) {
   const currentPrice = priceEl ? priceEl.textContent.replace("₱", "").trim() : "";
 
   const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex flex-col gap-2";
+  container.className = "flex flex-col col-span-2 gap-2 mt-2 inline-editor";
 
   container.innerHTML = `
     <div class="flex items-center gap-2">
