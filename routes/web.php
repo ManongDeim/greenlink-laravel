@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\FoodOrderController;
 use App\Http\Controllers\Api\FarmProductController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\FoodProductController;
+use App\Http\Controllers\Api\RoomSeederController;
 use App\Models\FoodOrderModel;
 
 Route::get('/check-key', function () {
@@ -100,4 +101,12 @@ Route::prefix('api/food')->group(function () {
     Route::post('/edit-name/{id}', [FoodProductController::class, 'editName']);
     Route::post('/edit-price/{id}', [FoodProductController::class, 'editPrice']);
     Route::post('/replace-photo/{id}', [FoodProductController::class, 'replacePhoto']);
+});
+
+// Room Seeder routes
+
+Route::prefix('api/room')->group(function () {
+    Route::post('/edit-name/{id}', [RoomSeederController::class, 'editName']);
+    Route::post('/edit-price/{id}', [RoomSeederController::class, 'editPrice']);
+    Route::post('/replace-photo/{id}', [RoomSeederController::class, 'replacePhoto']);
 });

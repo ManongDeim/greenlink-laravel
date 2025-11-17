@@ -224,19 +224,19 @@ const roomReservationTemplate = reservation => `
 
 const roomCardTemplate = item => `
   <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
-    <img src="${item.image}" alt="${item.room_name}" 
+    <img id="room-photo-${id}" src="${item.image}" alt="${item.room_name}" 
       class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
 
-    <h3 class="text-lg font-semibold text-gray-800 mb-1">${item.room_name}</h3>
+    <h3 id="room-name-${id}" class="text-lg font-semibold text-gray-800 mb-1">${item.room_name}</h3>
     <p class="text-sm text-gray-600 mb-4">
-      Price: <span class="font-semibold text-teal-700">₱${item.price}</span>
+      Price: <span id="room-price-${id}" class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
 
     <!-- Modern Button Group -->
     <div class="flex flex-col gap-3">
       <!-- Edit Name -->
       <button
-        onclick="editName(${item.id})"
+        onclick="editRoomName(${item.id})"
         class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl shadow-sm hover:from-teal-600 hover:to-teal-700 hover:shadow-md transition-all duration-300 active:scale-[0.97]"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:-rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -247,7 +247,7 @@ const roomCardTemplate = item => `
 
       <!-- Edit Price -->
       <button
-        onclick="editPrice(${item.id})"
+        onclick="editRoomPrice(${item.id})"
         class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-cyan-50 to-teal-50 text-teal-700 border border-teal-100 rounded-xl hover:from-cyan-100 hover:to-teal-100 hover:border-teal-200 hover:shadow-sm transition-all duration-300 active:scale-[0.97]"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -259,7 +259,7 @@ const roomCardTemplate = item => `
 
       <!-- Replace Photo -->
       <button
-        onclick="replacePhoto(${item.id})"
+        onclick="replaceRoomPhoto(${item.id})"
         class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-white rounded-xl shadow-sm hover:from-amber-500 hover:to-yellow-600 hover:shadow-md transition-all duration-300 active:scale-[0.97]"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -607,7 +607,7 @@ async function saveFoodPrice(id) {
 
   if (!newPrice || isNaN(newPrice)) return showToast("Please enter a valid price");
 
-  const response = await fetch(`/api/farm/edit-price/${id}`, {
+  const response = await fetch(`/api/food/edit-price/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -650,6 +650,143 @@ function replaceFoodPhoto(id) {
 
     // ✅ Update image instantly
     const imgEl = document.getElementById(`food-photo-${id}`);
+    if (imgEl && result.path) {
+      imgEl.src = result.path + `?t=${Date.now()}`; // cache-buster
+    }
+  };
+
+  fileInput.click();
+}
+
+// ----------- Room Product Editing -----------
+
+// ✅ Edit Product Name
+function editRoomName(id) {
+  closeAllInputBoxes();
+
+  const button = event.target.closest("button");
+  const parent = button.parentElement;
+
+  const container = document.createElement("div");
+  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+
+  container.innerHTML = `
+    <input type="text" id="editNameInput${id}" 
+           class="border border-gray-300 rounded-lg px-3 py-1 w-full text-sm focus:ring-2 focus:ring-teal-500"
+           placeholder="Enter new name">
+    <button class="bg-teal-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-teal-700 transition"
+            onclick="saveRoomName(${id})">Save</button>
+    <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+            onclick="closeAllInputBoxes()">Cancel</button>
+  `;
+
+  parent.insertAdjacentElement("afterend", container);
+}
+
+async function saveRoomName(id) {
+  const input = document.getElementById(`editNameInput${id}`);
+  const newName = input.value.trim();
+  if (!newName) return showToast("Please enter a name");
+
+  const response = await fetch(`/api/room/edit-name/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productName: newName }),
+  });
+
+  const result = await response.json();
+  showToast(result.message);
+
+  // ✅ Update UI instantly
+  const nameEl = document.getElementById(`room-name-${id}`);
+  if (nameEl) nameEl.textContent = newName;
+
+  closeAllInputBoxes();
+}
+
+// ✅ Edit Product Price
+function editRoomPrice(id) {
+  closeAllInputBoxes();
+
+  const button = event.target.closest("button");
+  const parent = button.parentElement;
+
+  // 🧾 Get current displayed price and measurement
+  const priceEl = document.getElementById(`room-price-${id}`);
+  const currentPrice = priceEl ? priceEl.textContent.replace("₱", "").trim() : "";
+
+  const container = document.createElement("div");
+  container.className = "inline-editor col-span-2 mt-2 flex flex-col gap-2";
+
+  container.innerHTML = `
+    <div class="flex items-center gap-2">
+      <input type="text" id="editPriceInput${id}"
+             value="${currentPrice}"
+             class="border border-gray-300 rounded-lg px-3 py-1 w-1/2 text-sm focus:ring-2 focus:ring-cyan-500"
+             placeholder="Enter new price">
+    </div>
+
+    <div class="flex gap-2">
+      <button class="bg-cyan-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-cyan-700 transition"
+              onclick="saveRoomPrice(${id})">Save</button>
+      <button class="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 transition"
+              onclick="closeAllInputBoxes()">Cancel</button>
+    </div>
+  `;
+
+  parent.insertAdjacentElement("afterend", container);
+}
+
+async function saveRoomPrice(id) {
+  const priceInput = document.getElementById(`editPriceInput${id}`);
+
+  const newPrice = priceInput.value.trim();
+
+  if (!newPrice || isNaN(newPrice)) return showToast("Please enter a valid price");
+
+  const response = await fetch(`/api/room/edit-price/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      price: newPrice
+    }),
+  });
+
+  const result = await response.json();
+  showToast(result.message);
+
+  // ✅ Update price and measurement text
+  const priceEl = document.getElementById(`room-price-${id}`);
+  if (priceEl) priceEl.textContent = `₱${newPrice}`;
+
+  closeAllInputBoxes();
+}
+
+// ✅ Replace Picture stays as file upload popup
+function replaceRoomPhoto(id) {
+  closeAllInputBoxes();
+
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = "image/*";
+
+  fileInput.onchange = async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await fetch(`/api/room/replace-photo/${id}`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+    showToast(result.message);
+
+    // ✅ Update image instantly
+    const imgEl = document.getElementById(`room-photo-${id}`);
     if (imgEl && result.path) {
       imgEl.src = result.path + `?t=${Date.now()}`; // cache-buster
     }

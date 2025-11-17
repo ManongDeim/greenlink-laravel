@@ -73,15 +73,4 @@ public function replacePhoto(Request $request, $id)
 }
 
 
-
-    public function addStock(Request $request, $id)
-    {
-        $request->validate(['qty' => 'required|integer|min:1']);
-
-        $product = FarmProduct::findOrFail($id);
-        $product->qty += $request->qty;
-        $product->save();
-
-        return response()->json(['success' => true, 'message' => 'Stock added']);
-    }
 }
