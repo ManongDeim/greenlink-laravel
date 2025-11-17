@@ -70,7 +70,7 @@ public function replacePhoto(Request $request, $id)
     // ✅ Move file correctly
     $request->file('image')->move($destinationPath, $filename);
 
-    $product->productPicture = '/rooms/' . $filename;
+    $product->image = '/rooms/' . $filename;
     $product->save();
 
     Log::info('✅ File moved correctly to:', ['path' => $destinationPath . '/' . $filename]);
