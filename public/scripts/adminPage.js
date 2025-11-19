@@ -275,7 +275,7 @@ const eventReservationTemplate = reservation => `
       <li>Check-out: ${reservation.end_datetime}</li>
     </ul>
     <p class="mt-2 text-sm text-gray-700 font-semibold">Things to Bring: ${reservation.to_bring}</p>
-    <p class="mt-2 text-sm text-gray-700 font-semibold">Status: ${reservation.approval_status}</p>
+    <p id="event-status-${reservation.event_reservation_id}" class="mt-2 text-sm text-gray-700 font-semibold">Status: ${reservation.approval_status}</p>
   </div>
 `;
 
@@ -1340,6 +1340,7 @@ if (eventBtn && eventSubmenu) {
   });
 }
 
+
 // Page Management submenu
 
 const pageManagementBtn = document.getElementById('pageManagementBtn');
@@ -1648,6 +1649,14 @@ function openEventModal(reservation) {
       updateEventStatus(reservation.event_reservation_id, "Ended");
   }
 
+  else if (status === "Started") {
+    modalButtons.style.display = "flex";
+    document.getElementById("endEventBtn").style.display = "block";
+
+    document.getElementById("endEventBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Ended");
+  }
+
   document.getElementById("eventReservationModal").classList.remove("hidden");
 }
 
@@ -1666,8 +1675,23 @@ function updateEventStatus(event_reservation_id, status) {
     .then(data => {
       showToast(data.message);
       document.getElementById("eventReservationModal").classList.add("hidden");
+
+      const statusEl = document.getElementById(`event-status-${event_reservation_id}`);
+      if (statusEl) {
+        statusEl.textContent = `Status: ${status}`;
+      }
+
+      const container = document.getElementById("content");
+      if (container.dataset.eventReservations) {
+        let list = JSON.parse(container.dataset.eventReservations);
+        let record = list.find(r => r.event_reservation_id == event_reservation_id);
+        if (record) record.approval_status = status;
+        container.dataset.eventReservations = JSON.stringify(list);
+      }
     })
     .catch(err => console.error(err));
+
+    
 }
 
 
