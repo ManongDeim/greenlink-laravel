@@ -977,7 +977,7 @@ async function fetchAndRenderEventReservations(status = null) {
     const data = await res.json();
 
     // Filter by status
-    const filtered = status ? data.filter(r => r.status === status) : data;
+    const filtered = status ? data.filter(r => r.approval_status === status) : data;
 
     // Render each reservation card
     container.innerHTML = filtered.map(eventReservationTemplate).join("");
@@ -1322,6 +1322,7 @@ if (roomBtn && roomSubmenu) {
   });
 }
 
+
 // Event Reservations submenu
 const eventBtn = document.getElementById("eventReservationsBtn");
 const eventSubmenu = document.getElementById("eventReservationsSubmenu");
@@ -1618,7 +1619,7 @@ function openEventModal(reservation) {
   // 🔥 NOW SHOW BUTTONS BASED ON STATUS
   const status = reservation.approval_status;
 
-  if (["Checked-in", "Checked-out", "Cancelled", "Started", "Ended"].includes(status)) {
+  if (["Dissaproved", "Cancelled", "Ended"].includes(status)) {
     modalButtons.style.display = "none";   // nothing to show
   } 
   
