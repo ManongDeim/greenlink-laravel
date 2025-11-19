@@ -980,7 +980,7 @@ async function fetchAndRenderEventReservations(status = null) {
     const filtered = status ? data.filter(r => r.status === status) : data;
 
     // Render each reservation card
-    container.innerHTML = filtered.map(roomReservationTemplate).join("");
+    container.innerHTML = filtered.map(eventReservationTemplate).join("");
 
     // ✅ Store the fetched data on the container for later reference
     container.dataset.eventReservations = JSON.stringify(data);
@@ -991,7 +991,7 @@ async function fetchAndRenderEventReservations(status = null) {
         const id = card.dataset.id;
         const allReservations = JSON.parse(container.dataset.eventReservations);
         const reservation = allReservations.find(r => r.event_reservation_id == id);
-        if (reservation) openRoomModal(reservation);
+        if (reservation) openEventModal(reservation);
       });
     });
   } catch (err) {
@@ -1327,11 +1327,11 @@ const eventBtn = document.getElementById("eventReservationsBtn");
 const eventSubmenu = document.getElementById("eventReservationsSubmenu");
 
 if (eventBtn && eventSubmenu) {
-  roomBtn.addEventListener("click", () => {
-    roomSubmenu.classList.toggle("hidden");
+  eventBtn.addEventListener("click", () => {
+    eventSubmenu.classList.toggle("hidden");
   });
 
-  roomSubmenu.querySelectorAll("button[data-status]").forEach(btn => {
+  eventSubmenu.querySelectorAll("button[data-status]").forEach(btn => {
     btn.addEventListener("click", async () => {
       const status = btn.dataset.status;
       await fetchAndRenderEventReservations(status);
@@ -1587,33 +1587,73 @@ function updateRoomStatus(reservationId, status) {
 }
 
 
+
+
 function openEventModal(reservation) {
-  document.getElementById("roomModalTitle").textContent = `Reservation #${reservation.room_reser_id}`;
-  document.getElementById("roomModalRef").textContent = `Guest: ${reservation.full_name}`;
-  document.getElementById("roomModalItems").innerHTML = `
+  document.getElementById("eventModalTitle").textContent = `Reservation #${reservation.event_reservation_id}`;
+  document.getElementById("eventModalRef").textContent = `Guest: ${reservation.full_name}`;
+  document.getElementById("eventModalItems").innerHTML = `
     <li>Event: ${reservation.event_type}</li>
-    <li>Check-in: ${reservation.start_datetime}</li>
-    <li>Check-out: ${reservation.end_datetime}</li>
+    <li>Start: ${reservation.start_datetime}</li>
+    <li>End: ${reservation.end_datetime}</li>
     <li>Phone: ${reservation.phone_number}</li>
     <li>Things to Bring: ${reservation.to_bring}</li>
+    <li>Status: ${reservation.approval_status}</li>
   `;
 
-  const modalButtons = document.getElementById("roomModalButtons");
-  if (["Checked-in", "Checked-out", "Cancelled", "Started"].includes(reservation.status)) {
-    modalButtons.style.display = "none";
-  } else if(["Pending"].includes(reservation.status)) {
+  const modalButtons = document.getElementById("eventModalButtons");
+
+  // 🔥 FIRST HIDE ALL BUTTONS
+  const buttons = [
+    "approveBtn",
+    "disapproveBtn",
+    "cancelEventBtn",
+    "startEventBtn",
+    "endEventBtn"
+  ];
+  buttons.forEach(id => {
+    document.getElementById(id).style.display = "none";
+  });
+
+  // 🔥 NOW SHOW BUTTONS BASED ON STATUS
+  const status = reservation.approval_status;
+
+  if (["Checked-in", "Checked-out", "Cancelled", "Started", "Ended"].includes(status)) {
+    modalButtons.style.display = "none";   // nothing to show
+  } 
+  
+  else if (status === "Pending") {
     modalButtons.style.display = "flex";
-    document.getElementById("approveBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Approved");
-    document.getElementById("disapproveBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Disapproved");
-    document.getElementById("cancelEventBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Cancelled");
-  } else if (["Approved"].includes(reservation.status)) {
+    document.getElementById("approveBtn").style.display = "block";
+    document.getElementById("disapproveBtn").style.display = "block";
+    document.getElementById("cancelEventBtn").style.display = "block";
+
+    document.getElementById("approveBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Approved");
+    document.getElementById("disapproveBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Disapproved");
+    document.getElementById("cancelEventBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Cancelled");
+  }
+
+  else if (status === "Approved") {
     modalButtons.style.display = "flex";
-    document.getElementById("startEventBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Started");
-    document.getElementById("endEventBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Ended");
+    document.getElementById("startEventBtn").style.display = "block";
+    document.getElementById("endEventBtn").style.display = "block";
+
+    document.getElementById("startEventBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Started");
+    document.getElementById("endEventBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Ended");
   }
 
   document.getElementById("eventReservationModal").classList.remove("hidden");
 }
+
+
+document.getElementById("closeEventModal").addEventListener("click", () => {
+  document.getElementById("eventReservationModal").classList.add("hidden");
+});
 
 function updateEventStatus(event_reservation_id, status) {
   fetch(`/api/eventReservation/${event_reservation_id}/update-status`, {

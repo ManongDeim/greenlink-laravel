@@ -66,7 +66,7 @@ class EventController extends Controller
         return response()->json(['message' => 'Reservation not found'], 404);
     }
 
-    $reservation->status = $request->status;
+    $reservation->appoval_status = $request->status;
     $reservation->save();
 
     return response()->json(['message' => 'Status updated successfully']);
