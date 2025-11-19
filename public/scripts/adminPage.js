@@ -261,6 +261,24 @@ const roomCardTemplate = item => `
   </div>
 `;
 
+// Room Reservation template
+const eventReservationTemplate = reservation => `
+  <div class="p-5 mb-4 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
+       data-id="${reservation.event_reservation_id}">
+    <div class="flex items-center justify-between">
+      <h3 class="text-lg font-bold text-gray-800">Reservation #${reservation.event_reservation_id}</h3>
+    </div>
+    <ul class="mt-2 text-sm text-gray-700 list-disc list-inside">
+      <li>Event Type: ${reservation.event_type}</li>
+      <li>Guest: ${reservation.full_name}</li>
+      <li>Check-in: ${reservation.start_datetime}</li>
+      <li>Check-out: ${reservation.end_datetime}</li>
+    </ul>
+    <p class="mt-2 text-sm text-gray-700 font-semibold">Things to Bring: ${reservation.to_bring}</p>
+    <p class="mt-2 text-sm text-gray-700 font-semibold">Status: ${reservation.approval_status}</p>
+  </div>
+`;
+
 // ================= Reusable Render Functions =================
 
   /**
@@ -952,6 +970,36 @@ async function fetchAndRenderRoomReservations(status = null) {
   }
 }
 
+async function fetchAndRenderEventReservations(status = null) {
+  const container = document.getElementById("content");
+  try {
+    const res = await fetch("/api/event-reservations");
+    const data = await res.json();
+
+    // Filter by status
+    const filtered = status ? data.filter(r => r.status === status) : data;
+
+    // Render each reservation card
+    container.innerHTML = filtered.map(eventReservationTemplate).join("");
+
+    // ✅ Store the fetched data on the container for later reference
+    container.dataset.eventReservations = JSON.stringify(data);
+
+    // ✅ Add click handlers for each card
+    document.querySelectorAll(".order-item").forEach(card => {
+      card.addEventListener("click", () => {
+        const id = card.dataset.id;
+        const allReservations = JSON.parse(container.dataset.eventReservations);
+        const reservation = allReservations.find(r => r.event_reservation_id == id);
+        if (reservation) openEventModal(reservation);
+      });
+    });
+  } catch (err) {
+    console.error("Error fetching room reservations:", err);
+    container.innerHTML = `<p class="text-red-500">Failed to load room reservations</p>`;
+  }
+}
+
 
 // =================== Kitchen Inventory ===================
 async function fetchAndRenderKitchen() {
@@ -1186,27 +1234,7 @@ document.addEventListener("DOMContentLoaded", () => {
     farmOrders: { render: fetchAndRenderFarmOrders },
     room: { render: fetchAndRenderRoomReservations },
     roomManagement: {render: fetchAndRenderRoom},
-    event: {
-      custom: `
-        <h2 class="mb-4 text-xl font-bold text-teal-700">Event Reservation</h2>
-        <div class="space-y-3 text-gray-700">
-          <p><span class="font-semibold">Reservation ID:</span> <span id="reservationID"></span></p>
-          <p><span class="font-semibold">Event Start Date:</span> <span id="eventStart"></span></p>
-          <p><span class="font-semibold">Event End Date:</span> <span id="eventEnd"></span></p>
-          <p><span class="font-semibold">Full Name:</span> <span id="fullName"></span></p>
-          <p><span class="font-semibold">Event Type:</span> <span id="eventType"></span></p>
-          <p><span class="font-semibold">E-mail:</span> <span id="email"></span></p>
-          <p><span class="font-semibold">Phone Number:</span> <span id="phoneNumber"></span></p>
-          <p><span class="font-semibold">Number of Pax:</span> <span id="pax"></span></p>
-          <p><span class="font-semibold">Things to be brought:</span> <span id="toBring"></span></p>
-          <p><span class="font-semibold">Approval Status:</span> <span id="approvalStat"></span></p>
-        </div>
-        <div class="flex justify-end gap-4 mt-20">
-          <button class="px-5 py-2 text-gray-700 bg-gray-300 rounded-lg disapprove-btn hover:bg-gray-400">Disapprove</button>
-          <button class="px-5 py-2 text-white bg-teal-600 rounded-lg approve-btn hover:bg-teal-700">Approve</button>
-        </div>
-      `
-    },
+    event: { render: fetchAndRenderEventReservations},
     cancel: {
       title: "Cancellation",
       text: "This is the Cancellation section. Manage cancellations and refund requests here."
@@ -1290,6 +1318,23 @@ if (roomBtn && roomSubmenu) {
     btn.addEventListener("click", async () => {
       const status = btn.dataset.status;
       await fetchAndRenderRoomReservations(status);
+    });
+  });
+}
+
+// Event Reservations submenu
+const eventBtn = document.getElementById("eventReservationsBtn");
+const eventSubmenu = document.getElementById("eventReservationsSubmenu");
+
+if (eventBtn && eventSubmenu) {
+  eventBtn.addEventListener("click", () => {
+    eventSubmenu.classList.toggle("hidden");
+  });
+
+  eventSubmenu.querySelectorAll("button[data-status]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const status = btn.dataset.status;
+      await fetchAndRenderEventReservations(status);
     });
   });
 }
@@ -1537,6 +1582,89 @@ function updateRoomStatus(reservationId, status) {
         else if (status === "Cancelled") badge.className = "px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full";
         else badge.className = "px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full";
       }
+    })
+    .catch(err => console.error(err));
+}
+
+
+
+
+function openEventModal(reservation) {
+  document.getElementById("eventModalTitle").textContent = `Reservation #${reservation.event_reservation_id}`;
+  document.getElementById("eventModalRef").textContent = `Guest: ${reservation.full_name}`;
+  document.getElementById("eventModalItems").innerHTML = `
+    <li>Event: ${reservation.event_type}</li>
+    <li>Start: ${reservation.start_datetime}</li>
+    <li>End: ${reservation.end_datetime}</li>
+    <li>Phone: ${reservation.phone_number}</li>
+    <li>Things to Bring: ${reservation.to_bring}</li>
+    <li>Status: ${reservation.approval_status}</li>
+  `;
+
+  const modalButtons = document.getElementById("eventModalButtons");
+
+  // 🔥 FIRST HIDE ALL BUTTONS
+  const buttons = [
+    "approveBtn",
+    "disapproveBtn",
+    "cancelEventBtn",
+    "startEventBtn",
+    "endEventBtn"
+  ];
+  buttons.forEach(id => {
+    document.getElementById(id).style.display = "none";
+  });
+
+  // 🔥 NOW SHOW BUTTONS BASED ON STATUS
+  const status = reservation.approval_status;
+
+  if (["Checked-in", "Checked-out", "Cancelled", "Started", "Ended"].includes(status)) {
+    modalButtons.style.display = "none";   // nothing to show
+  } 
+  
+  else if (status === "Pending") {
+    modalButtons.style.display = "flex";
+    document.getElementById("approveBtn").style.display = "block";
+    document.getElementById("disapproveBtn").style.display = "block";
+    document.getElementById("cancelEventBtn").style.display = "block";
+
+    document.getElementById("approveBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Approved");
+    document.getElementById("disapproveBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Disapproved");
+    document.getElementById("cancelEventBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Cancelled");
+  }
+
+  else if (status === "Approved") {
+    modalButtons.style.display = "flex";
+    document.getElementById("startEventBtn").style.display = "block";
+    document.getElementById("endEventBtn").style.display = "block";
+
+    document.getElementById("startEventBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Started");
+    document.getElementById("endEventBtn").onclick = () =>
+      updateEventStatus(reservation.event_reservation_id, "Ended");
+  }
+
+  document.getElementById("eventReservationModal").classList.remove("hidden");
+}
+
+
+document.getElementById("closeEventModal").addEventListener("click", () => {
+  document.getElementById("eventReservationModal").classList.add("hidden");
+});
+
+function updateEventStatus(event_reservation_id, status) {
+  fetch(`/api/eventReservation/${event_reservation_id}/update-status`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status })
+  })
+    .then(res => res.json())
+    .then(data => {
+      showToast(data.message);
+      document.getElementById("eventReservationModal").classList.add("hidden");
     })
     .catch(err => console.error(err));
 }

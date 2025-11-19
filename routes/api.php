@@ -104,6 +104,8 @@ Route::get('events', [EventSeederController::class, 'index']);
 // Event Routes
 
 Route::middleware('auth:sanctum')->post('/event-reservations', [EventController::class, 'store']);
+Route::get('/event-reservations', [EventController::class, 'index']);
+Route::post('/eventReservation/{id}/update-status', [EventController::class, 'updateStatus']);
 
 // Customer Dashboard Routes
 
