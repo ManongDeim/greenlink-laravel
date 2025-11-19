@@ -52,4 +52,23 @@ class EventController extends Controller
             'reservation' => $reservation,
         ], 201);
     }
+
+    public function index()
+    {
+        return response()->json(EventModel::all());
+    }
+
+     public function updateStatus($id, Request $request)
+{
+    $reservation = EventModel::where('event_reservation_id', $id)->first();
+
+    if (!$reservation) {
+        return response()->json(['message' => 'Reservation not found'], 404);
+    }
+
+    $reservation->status = $request->status;
+    $reservation->save();
+
+    return response()->json(['message' => 'Status updated successfully']);
+}
 }

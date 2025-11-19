@@ -99,9 +99,31 @@
   </button>
 </div>
 
-        <button data-section="event" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+        <button data-section="event" id="eventReservationsBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           📅 Event Reservation
         </button>
+
+        <!-- Event Reservations Submenu -->
+<div id="eventReservationsSubmenu" class="hidden mt-2 ml-6 space-y-2">
+  <button data-status="Pending" class="block w-full px-4 py-2 text-left text-gray-600 rounded-lg room-status-btn hover:bg-teal-100">
+    Pending Reservations
+  </button>
+  <button data-status="Approved" class="block w-full px-4 py-2 text-left text-gray-600 rounded-lg room-status-btn hover:bg-green-100">
+    Approved Events
+  </button>
+  <button data-status="Disapproved" class="block w-full px-4 py-2 text-left text-gray-600 rounded-lg room-status-btn hover:bg-blue-100">
+    Disapproved Events
+  </button>
+  <button data-status="Started" class="block w-full px-4 py-2 text-left text-gray-600 rounded-lg room-status-btn hover:bg-red-100">
+    Started Events
+  </button>
+    <button data-status="Ended" class="block w-full px-4 py-2 text-left text-gray-600 rounded-lg room-status-btn hover:bg-red-100">
+    Ended Events
+  </button>
+    <button data-status="Cancelled" class="block w-full px-4 py-2 text-left text-gray-600 rounded-lg room-status-btn hover:bg-red-100">
+    Cancelled Events
+  </button>
+</div>
 
         <!-- Page Management  -->
         <button id="pageManagementBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg submenu-toggle sidebar-btn hover:bg-gray-200 hover:border-gray-400">
@@ -189,6 +211,25 @@
       <button id="checkInBtn" class="px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">Check-in</button>
       <button id="checkOutBtn" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Check-out</button>
       <button id="cancelRoomBtn" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Event Reservation Details Modal -->
+<div id="eventReservationModal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 bg-black/50">
+  <div class="relative w-full max-w-lg p-6 bg-white shadow-lg rounded-2xl">
+    <button id="closeRoomModal" class="absolute text-gray-500 top-2 right-2 hover:text-gray-700">✖</button>
+    <h2 id="roomModalTitle" class="mb-4 text-xl font-bold text-gray-800"></h2>
+    <ul id="roomModalItems" class="mb-4 text-gray-700 list-disc list-inside"></ul>
+    <p id="roomModalTotal" class="mb-2 font-semibold text-gray-800"></p>
+    <p id="roomModalRef" class="mb-4 text-gray-600"></p>
+
+    <div id="eventModalButtons" class="flex gap-4 mt-4">
+      <button id="approveBtn" class="px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">Approve</button>
+      <button id="disapproveBtn" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Disapprove</button>
+      <button id="cancelEventBtn" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancel</button>
+      <button id="startEventBtn" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Start</button>
+      <button id="endEventBtn" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">End</button>
     </div>
   </div>
 </div>
