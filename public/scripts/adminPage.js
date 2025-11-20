@@ -261,7 +261,7 @@ const roomCardTemplate = item => `
   </div>
 `;
 
-// Room Reservation template
+// Event Reservation template
 const eventReservationTemplate = reservation => `
   <div class="p-5 mb-4 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
        data-id="${reservation.event_reservation_id}">
@@ -278,6 +278,46 @@ const eventReservationTemplate = reservation => `
     <p id="event-status-${reservation.event_reservation_id}" class="mt-2 text-sm text-gray-700 font-semibold">Status: ${reservation.approval_status}</p>
   </div>
 `;
+
+const eventManagementTemplate = data => `
+<div class="p-6 bg-white rounded-2xl shadow-md">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold text-teal-700">Event Management</h2>
+    <button onclick="openAddKitchenModal()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+      + Add Event
+    </button>
+  </div>
+
+  <table class="min-w-full border border-gray-200 text-sm text-left">
+    <thead class="bg-gray-100 text-gray-700">
+      <tr>
+        <th class="px-4 py-2">Action</th>
+        <th class="px-4 py-2">Event Name</th>
+        <th class="px-4 py-2">Max Pax</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${data.map(item => `
+      <tr class="border-t hover:bg-gray-50 relative">
+        <td class="px-4 py-2 relative">
+          <button onclick="toggleActionMenu(event, ${item.id})"
+                  class="relative z-10 p-2 bg-gray-200 rounded hover:bg-gray-300">⚙️</button>
+
+          <div id="actionMenu-${item.id}" class="absolute left-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
+            <button onclick="submitEventName(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-green-100">Edit Name</button>
+            <button onclick="submitEventPax(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-blue-100">Edit Pax</button>
+            <button onclick="removeEvent(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-red-100">Remove</button>
+          </div>
+        </td>
+        <td class="px-4 py-2">${item.event_name}</td>
+        <td class="px-4 py-2">${item.max_pax}</td>
+      </tr>
+      `).join("")}
+    </tbody>
+  </table>
+</div>
+`;
+
 
 // ================= Reusable Render Functions =================
 
@@ -803,6 +843,8 @@ function replaceRoomPhoto(id) {
   fileInput.click();
 }
 
+
+
 // ================= Fetch & Render Functions =================
  async function fetchAndRenderFood() {
   const containerId = 'content';
@@ -1195,6 +1237,25 @@ async function fetchAndRenderFarm() {
   }
 }
 
+// Fetch and Render Event Management
+
+async function fetchAndRenderEventManagement() {
+  const container = document.getElementById("content");
+
+  try {
+    const res = await fetch("/api/events");
+    const data = await res.json();
+
+    container.innerHTML = eventManagementTemplate(data);
+
+    container.dataset.eventManagement = JSON.stringify(data);
+
+  } catch (err) {
+    console.error("Error fetching event management data:", err);
+    container.innerHTML = `<p class="text-red-500">Failed to load events</p>`;
+  }
+}
+
 // Action Menu
 let OpenActionMenuId = null;
 function toggleActionMenu(event, id) {
@@ -1219,6 +1280,7 @@ document.addEventListener('click', () => {
 });
 
 
+
 // Side Buttons Logic
 document.addEventListener("DOMContentLoaded", () => {
   const sidebarButtons = document.querySelectorAll(".sidebar-btn");
@@ -1235,6 +1297,7 @@ document.addEventListener("DOMContentLoaded", () => {
     room: { render: fetchAndRenderRoomReservations },
     roomManagement: {render: fetchAndRenderRoom},
     event: { render: fetchAndRenderEventReservations},
+    eventManagement: { render: fetchAndRenderEventManagement },
     cancel: {
       title: "Cancellation",
       text: "This is the Cancellation section. Manage cancellations and refund requests here."
@@ -1990,4 +2053,109 @@ async function submitFarmStock() {
   showToast(data.message);
   closeFarmStockModal();
   fetchAndRenderFarm();
+}
+
+// 🌾 --- Event Management Modal Logic ---
+
+function openAddEventModal() {
+  document.getElementById("addEventModal").classList.remove("hidden");
+}
+
+function closeAddEventModal() {
+  document.getElementById("addEventModal").classList.add("hidden");
+}
+
+async function submitAddEvent(e) {
+  if (e) e.preventDefault();
+
+  const form = document.getElementById("addFarmForm");
+  const formData = new FormData(form);
+
+  try {
+    const res = await fetch(`/api/farmInventoryStore`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Failed to add item");
+
+    closeAddFarmModal();
+    form.reset();
+    await fetchAndRenderFarm();
+  } catch (err) {
+    alert("Error adding event: " + err.message);
+  }
+}
+
+
+function openEditEventNameModal(id) {
+  document.getElementById("eventId").value = id;
+  document.getElementById("editEventNameModal").classList.remove("hidden");
+}
+
+function closeEdiEventNameModal() {
+  document.getElementById("editEventNameModal").classList.add("hidden");
+  document.getElementById("eventName").value = "";
+}
+
+async function submitEventName() {
+  const id = document.getElementById("eventId").value;
+  const name = document.getElementById("eventName").value;
+
+
+  const res = await fetch(`/api/event-management/edit-name/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({name}),
+  });
+
+  const data = await res.json();
+  showToast(data.message);
+  closeEditEventNameModal();
+  fetchAndRenderEventManagement();
+}
+
+function openEventPaxModal(id) {
+  document.getElementById("eventPaxId").value = id;
+  document.getElementById("editEventPaxModal").classList.remove("hidden");
+}
+
+function closeEventPaxModal() {
+  document.getElementById("editEventPaxModal").classList.add("hidden");
+  document.getElementById("eventMaxPax").value = "";
+}
+
+async function submitEventPax() {
+  const id = document.getElementById("eventPaxId").value;
+  const amount = document.getElementById("eventMaxPax").value;
+
+  if (!amount || amount <= 0) {
+    showToast("Enter valid pax amount", "error");
+    return;
+  }
+
+  const res = await fetch(`/api/event-management/edit-pax/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount }),
+  });
+
+  const data = await res.json();
+  showToast(data.message);
+  closeFarmStockModal();
+  fetchAndRenderFarm();
+}
+
+async function removeEvent(id) {
+  if (!confirm("Are you sure you want to remove this item?")) return;
+
+  try {
+    const res = await fetch(`/api/event-management/remove/${id}`);
+    const data = await res.json();
+
+    showToast(data.message);
+    fetchAndRenderEventManagement();
+  } catch (err) {
+    showToast("Failed to remove item", "error");
+  }
 }
