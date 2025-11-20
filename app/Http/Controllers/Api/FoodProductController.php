@@ -55,16 +55,15 @@ public function store(Request $request)
 
         // Save ingredients
         if ($request->has('ingredients')) {
-            foreach ($request->ingredients as $ingredientId) {
-                $quantity = $request->quantities[$ingredientId] ?? 0;
-                if ($quantity > 0) {
-                    $product->ingredients()->create([
-                        'ingredient_id' => $ingredientId,
-                        'quantity_used' => $quantity
-                    ]);
-                }
-            }
+    $syncData = [];
+    foreach ($request->ingredients as $ingredientId) {
+        $quantity = $request->quantities[$ingredientId] ?? 0;
+        if ($quantity > 0) {
+            $syncData[$ingredientId] = ['quantity_used' => $quantity];
         }
+    }
+    $product->ingredients()->sync($syncData); // sync handles inserting into pivot
+}
 
         return response()->json(['success' => true, 'message' => 'Food product created successfully']);
 

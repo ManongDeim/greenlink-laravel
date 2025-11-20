@@ -21,7 +21,9 @@ class FoodProduct extends Model
     ];
 
     public function ingredients()
-    {
-        return $this->hasMany(FoodIngredient::class);
-    }
+{
+    return $this->belongsToMany(KitchenInventory::class, 'food_ingredients', 'food_product_id', 'ingredient_id')
+                ->withPivot('quantity_used');
+}
+
 }

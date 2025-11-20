@@ -61,8 +61,10 @@ class KitchenInventory extends Model
         });
     }
 
-     public function foodIngredients()
-    {
-        return $this->hasMany(FoodIngredient::class, 'ingredient_id');
-    }
+    public function foods()
+{
+    return $this->belongsToMany(FoodProduct::class, 'food_ingredients', 'ingredient_id', 'food_product_id')
+                ->withPivot('quantity_used');
+}
+
 }
