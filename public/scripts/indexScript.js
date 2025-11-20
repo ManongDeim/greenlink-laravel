@@ -274,3 +274,14 @@ flatpickrScript.onload = () => {
     });
   }
 };
+  document.addEventListener("DOMContentLoaded", () => {
+    const searchBtn = document.getElementById("researchBtn");
+    const welcomeText = document.getElementById("welcomeText");
+
+    searchBtn.addEventListener("click", () => {
+      welcomeText.classList.add("opacity-0", "transition", "duration-700");
+      setTimeout(() => {
+        welcomeText.style.display = "none";
+      }, 700);
+    });
+  });

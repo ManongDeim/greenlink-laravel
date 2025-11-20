@@ -411,13 +411,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("pickupDate").setAttribute("min", today);
 
     // Populate hours (00–23)
-    const hourSelect = document.getElementById("hourSelect");
-    for (let h = 0; h < 24; h++) {
-      const option = document.createElement("option");
-      option.value = h.toString().padStart(2, "0");
-      option.textContent = h.toString().padStart(2, "0");
-      hourSelect.appendChild(option);
-    }
+     const hourSelect = document.getElementById("hourSelect");
+
+  for (let h = 10; h <= 20; h++) {
+    const option = document.createElement("option");
+    option.value = h.toString().padStart(2, "0");
+    option.textContent = h.toString().padStart(2, "0");
+    hourSelect.appendChild(option);
+  }
 
     // Populate minutes (00–59) in 5-minute steps
     const minuteSelect = document.getElementById("minuteSelect");

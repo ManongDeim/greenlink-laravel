@@ -462,12 +462,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Populate 24-hour format (00–23)
     const hourSelect = document.getElementById("hourSelect");
-    for (let h = 0; h < 24; h++) {
-      const option = document.createElement("option");
-      option.value = h.toString().padStart(2, "0");
-      option.textContent = h.toString().padStart(2, "0");
-      hourSelect.appendChild(option);
-    }
+
+  for (let h = 7; h <= 20; h++) {
+    const option = document.createElement("option");
+    option.value = h.toString().padStart(2, "0");
+    option.textContent = h.toString().padStart(2, "0");
+    hourSelect.appendChild(option);
+  }
 
     // Populate minutes (00–59)
     const minuteSelect = document.getElementById("minuteSelect");
