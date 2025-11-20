@@ -850,8 +850,6 @@ function replaceRoomPhoto(id) {
   const containerId = 'content';
   const container = document.getElementById(containerId);
   if (!container) return;
-
-  // Show loading
   container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
 
   try {
@@ -862,11 +860,41 @@ function replaceRoomPhoto(id) {
     const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Food Items", items: data }];
 
     renderItems(containerId, dataSections, foodCardTemplate);
+    insertAddFoodButton();
   } catch (err) {
     console.error('Failed to load food items:', err);
     container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
   }
 }
+
+function insertAddFoodButton() {
+  const container = document.getElementById("content");
+  if (!container) return;
+
+  const btn = document.createElement("button");
+  btn.innerHTML = `
+    <span class="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7H5"/>
+      </svg>
+      Add Food Item
+    </span>
+  `;
+
+  // Remove absolute positioning and use a wrapper div for spacing
+  const wrapper = document.createElement("div");
+  wrapper.className = "flex justify-end mb-4"; // button aligned to right inside content
+  wrapper.appendChild(btn);
+
+  btn.onclick = () => {
+    openAddFoodModal(); // your modal opening function
+  };
+
+  // Insert the button at the top of the main content
+  container.prepend(wrapper);
+}
+
+
 
 async function fetchAndRenderRoom() {
   const containerId = 'content';
@@ -884,11 +912,40 @@ async function fetchAndRenderRoom() {
     const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Room Management", items: data }];
 
     renderItems(containerId, dataSections, roomCardTemplate);
+    insertAddRoomButton();
   } catch (err) {
     console.error('Failed to load food items:', err);
     container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
   }
 }
+
+function insertAddRoomButton() {
+  const container = document.getElementById("content");
+  if (!container) return;
+
+  const btn = document.createElement("button");
+  btn.innerHTML = `
+    <span class="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7H5"/>
+      </svg>
+      Add Room
+    </span>
+  `;
+
+  // Remove absolute positioning and use a wrapper div for spacing
+  const wrapper = document.createElement("div");
+  wrapper.className = "flex justify-end mb-4"; // button aligned to right inside content
+  wrapper.appendChild(btn);
+
+  btn.onclick = () => {
+    openAddFoodModal(); // your modal opening function
+  };
+
+  // Insert the button at the top of the main content
+  container.prepend(wrapper);
+}
+
 
 async function fetchAndRenderFarmProducts() {
   const containerId = 'content'; // You can reuse the same container
