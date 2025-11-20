@@ -17,7 +17,7 @@ class EventSeederController extends Controller
     {
         $validated = $request->validate([
             'event_name'     => 'required|string|max:255',
-            'max_pax'     => 'required|number|min:1',
+            'max_pax'     => 'required|integer|min:1',
         ]);
 
         $item = Event::create($validated);
