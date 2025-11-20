@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\EventSeederModel as Event;
 
 class EventSeederController extends Controller
@@ -40,7 +41,12 @@ class EventSeederController extends Controller
     }
 
     public function editPax(Request $request, $id)
-{
+{   
+    Log::info("editPax REACHED", [
+        'id' => $id,
+        'max_pax' => $request->max_pax
+    ]);
+
     $request->validate([
         'max_pax' => 'required|integer|min:0',
     ]);

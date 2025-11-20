@@ -2237,6 +2237,8 @@ async function submitEventPax() {
   const id = document.getElementById("eventPaxId").value;
   const amount = document.getElementById("eventMaxPax").value;
 
+   console.log("Sending to server:", { id, amount });
+
   if (!amount || amount <= 0) {
     showToast("Enter valid pax amount", "error");
     return;
@@ -2248,9 +2250,14 @@ async function submitEventPax() {
     body: JSON.stringify({max_pax: amount }),
   });
 
-  const data = await res.json();
+   console.log("Raw response:", res);
+
+  const text = await res.text();  // read raw output
+  console.log("Response text:", text); // this will reveal HTML error page!
+
+  const data = JSON.parse(text); // convert safely
   showToast(data.message);
-  closeFarmStockModal();
+  closeEventPaxModal();
   fetchAndRenderEventManagement();
 }
 
