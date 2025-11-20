@@ -2068,20 +2068,20 @@ function closeAddEventModal() {
 async function submitAddEvent(e) {
   if (e) e.preventDefault();
 
-  const form = document.getElementById("addFarmForm");
+  const form = document.getElementById("addEventForm");
   const formData = new FormData(form);
 
   try {
-    const res = await fetch(`/api/farmInventoryStore`, {
+    const res = await fetch(`/api/event-management/add`, {
       method: "POST",
       body: formData,
     });
 
     if (!res.ok) throw new Error("Failed to add item");
 
-    closeAddFarmModal();
+    closeAddEventNameModal();
     form.reset();
-    await fetchAndRenderFarm();
+    await fetchAndRenderEventManagement();
   } catch (err) {
     alert("Error adding event: " + err.message);
   }
@@ -2103,7 +2103,7 @@ async function submitEventName() {
   const name = document.getElementById("eventName").value;
 
 
-  const res = await fetch(`/api/event-management/edit-name/${id}`, {
+  const res = await fetch(`/api/event-management/edit-event-name/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({name}),

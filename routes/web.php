@@ -116,7 +116,7 @@ Route::prefix('api/room')->group(function () {
 
 Route::prefix('api/event-management')->group(function () {
     Route::post('/add', [EventSeederController::class, 'store']);
-    Route::post('/edit-name/{id}', [EventSeederController::class, 'editName']);
+    Route::post('/edit-event-name/{id}', [EventSeederController::class, 'editName']);
     Route::post('/edit-pax/{id}', [EventSeederController::class, 'editPax']);
     Route::post('/remove/{id}', [EventSeederController::class, 'replacePhoto']);
 });
