@@ -106,7 +106,7 @@ Route::prefix('api/food')->group(function () {
     Route::post('/replace-photo/{id}', [FoodProductController::class, 'replacePhoto']);
 });
 Route::get('/api/kitchen-inventory-list', [FoodProductController::class, 'getIngredients']);
-Route::post('/api/food-products', [FoodProductController::class, 'store']);
+Route::post('/api/add-food-products', [FoodProductController::class, 'store']);
 
 // Room Seeder routes
 

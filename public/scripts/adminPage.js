@@ -2317,10 +2317,13 @@ document.getElementById("addFoodForm").addEventListener("submit", async function
   const formData = new FormData(form);
 
   try {
-    const res = await fetch('/api/food-products', {
+    const res = await fetch(`/api/add-food-products`, {
       method: 'POST',
       body: formData
     });
+
+    const text = await res.text();
+console.log('Raw response:', text);
 
     if (!res.ok) throw new Error("Failed to add food item");
 
