@@ -21,7 +21,7 @@ function showToast(message, type = "success", duration = 3000) {
 
 const foodCardTemplate = item => `
   <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
-    <img id="food-photo-${item.id}" src="${item.productPicture}"  alt="${item.productName} " 
+    <img id="food-photo-${item.id}" src="${item.productPicture}" alt="${item.productName}"
       class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
 
     <h3 id="food-name-${item.id}" class="text-lg font-semibold text-gray-800 mb-1">${item.productName}</h3>
@@ -29,14 +29,15 @@ const foodCardTemplate = item => `
       Price: <span id="food-price-${item.id}" class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
 
-    <!-- Modern Button Group -->
-    <div class="flex flex-col gap-3">
+    <!-- SMALLER BUTTON GROUP -->
+    <div class="flex flex-col gap-2">
+
       <!-- Edit Name -->
       <button
         onclick="editFoodName(${item.id})"
-        class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl shadow-sm hover:from-teal-600 hover:to-teal-700 hover:shadow-md transition-all duration-300 active:scale-[0.97]"
+        class="group flex items-center justify-center gap-1.5 px-3 py-2 bg-teal-600 text-white rounded-lg shadow-sm hover:bg-teal-700 transition text-sm active:scale-[0.98]"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:-rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2M12 5v14m7 0H5"/>
         </svg>
         <span>Edit Name</span>
@@ -45,9 +46,9 @@ const foodCardTemplate = item => `
       <!-- Edit Price -->
       <button
         onclick="editFoodPrice(${item.id})"
-        class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-cyan-50 to-teal-50 text-teal-700 border border-teal-100 rounded-xl hover:from-cyan-100 hover:to-teal-100 hover:border-teal-200 hover:shadow-sm transition-all duration-300 active:scale-[0.97]"
+        class="group flex items-center justify-center gap-1.5 px-3 py-2 bg-teal-50 text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-100 transition text-sm active:scale-[0.98]"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3v1h6v-1c0-1.657-1.343-3-3-3z"/>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14v6H5z"/>
         </svg>
@@ -57,13 +58,36 @@ const foodCardTemplate = item => `
       <!-- Replace Photo -->
       <button
         onclick="replaceFoodPhoto(${item.id})"
-        class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-white rounded-xl shadow-sm hover:from-amber-500 hover:to-yellow-600 hover:shadow-md transition-all duration-300 active:scale-[0.97]"
+        class="group flex items-center justify-center gap-1.5 px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition text-sm active:scale-[0.98]"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v16h16V4H4zm8 12l-4-4m4 4l4-4m-4 4V8" />
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v16h16V4H4zm8 12l-4-4m4 4l4-4m-4 4V8"/>
         </svg>
         <span>Replace Photo</span>
       </button>
+
+      <!-- Edit Ingredients -->
+      <button
+        onclick="editFoodIngredients(${item.id})"
+        class="group flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition text-sm active:scale-[0.98]"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20l9-16H3l9 16z"/>
+        </svg>
+        <span>Ingredients</span>
+      </button>
+
+      <!-- Remove Item -->
+      <button
+        onclick="removeFoodItem(${item.id})"
+        class="group flex items-center justify-center gap-1.5 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm active:scale-[0.98]"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        <span>Remove</span>
+      </button>
+
     </div>
   </div>
 `;
@@ -78,14 +102,15 @@ const farmCardTemplate = item => `
       Price: <span id="farm-price-${item.id}" class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
     <p class="text-sm text-gray-600 mb-1">
-  Measurement: <span id="farm-measurement-${item.id}" class="font-semibold text-teal-700">${item.measurement || ''}</span>
-</p>
+      Measurement: <span id="farm-measurement-${item.id}" class="font-semibold text-teal-700">${item.measurement || ''}</span>
+    </p>
     <p class="text-sm text-gray-600">
       Available Stock: <span id="farm-stock-${item.id}" class="font-semibold text-teal-700">${item.qty}</span>
     </p>
 
     <!-- Button Grid -->
     <div class="flex flex-col gap-3 mt-5">
+      
       <!-- Edit Name -->
       <button
         onclick="editFarmName(${item.id})"
@@ -120,9 +145,21 @@ const farmCardTemplate = item => `
         <span>Replace Picture</span>
       </button>
 
+      <!-- Remove Item -->
+      <button
+        onclick="removeFarmItem(${item.id})"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl shadow-sm hover:from-red-600 hover:to-red-700 transition-all duration-300 active:scale-95"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:-rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        <span>Remove Item</span>
+      </button>
+
     </div>
   </div>
 `;
+
 
 // Generate an order card for a single order
 const foodOrderTemplate = order => {
@@ -222,44 +259,58 @@ const roomCardTemplate = item => `
       Price: <span id="room-price-${item.id}" class="font-semibold text-teal-700">₱${item.price}</span>
     </p>
 
-    <!-- Modern Button Group -->
-    <div class="flex flex-col gap-3">
+    <!-- Compact Button Group -->
+    <div class="flex flex-col gap-2">
+
       <!-- Edit Name -->
       <button
         onclick="editRoomName(${item.id})"
-        class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl shadow-sm hover:from-teal-600 hover:to-teal-700 hover:shadow-md transition-all duration-300 active:scale-[0.97]"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg shadow-sm hover:bg-teal-700 transition"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:-rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2M12 5v14m7 0H5"/>
         </svg>
-        <span>Edit Name</span>
+        <span class="text-sm">Edit Name</span>
       </button>
 
       <!-- Edit Price -->
       <button
         onclick="editRoomPrice(${item.id})"
-        class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-cyan-50 to-teal-50 text-teal-700 border border-teal-100 rounded-xl hover:from-cyan-100 hover:to-teal-100 hover:border-teal-200 hover:shadow-sm transition-all duration-300 active:scale-[0.97]"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-100 transition"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3v1h6v-1c0-1.657-1.343-3-3-3z"/>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14v6H5z"/>
         </svg>
-        <span>Edit Price</span>
+        <span class="text-sm">Edit Price</span>
       </button>
 
       <!-- Replace Photo -->
       <button
         onclick="replaceRoomPhoto(${item.id})"
-        class="group flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-white rounded-xl shadow-sm hover:from-amber-500 hover:to-yellow-600 hover:shadow-md transition-all duration-300 active:scale-[0.97]"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-amber-400 text-white rounded-lg shadow-sm hover:bg-amber-500 transition"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v16h16V4H4zm8 12l-4-4m4 4l4-4m-4 4V8" />
         </svg>
-        <span>Replace Photo</span>
+        <span class="text-sm">Replace Photo</span>
       </button>
+
+      <!-- Remove Room -->
+      <button
+        onclick="removeRoom(${item.id})"
+        class="group flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg shadow-sm hover:bg-red-600 transition"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        <span class="text-sm">Remove</span>
+      </button>
+
     </div>
   </div>
 `;
+
 
 // Event Reservation template
 const eventReservationTemplate = reservation => `
@@ -850,8 +901,6 @@ function replaceRoomPhoto(id) {
   const containerId = 'content';
   const container = document.getElementById(containerId);
   if (!container) return;
-
-  // Show loading
   container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
 
   try {
@@ -862,11 +911,41 @@ function replaceRoomPhoto(id) {
     const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Food Items", items: data }];
 
     renderItems(containerId, dataSections, foodCardTemplate);
+    insertAddFoodButton();
   } catch (err) {
     console.error('Failed to load food items:', err);
     container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
   }
 }
+
+function insertAddFoodButton() {
+  const container = document.getElementById("content");
+  if (!container) return;
+
+  const btn = document.createElement("button");
+  btn.innerHTML = `
+    <span class="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7H5"/>
+      </svg>
+      Add Food Item
+    </span>
+  `;
+
+  // Remove absolute positioning and use a wrapper div for spacing
+  const wrapper = document.createElement("div");
+  wrapper.className = "flex justify-end mb-4"; // button aligned to right inside content
+  wrapper.appendChild(btn);
+
+  btn.onclick = () => {
+    openAddFoodModal(); // your modal opening function
+  };
+
+  // Insert the button at the top of the main content
+  container.prepend(wrapper);
+}
+
+
 
 async function fetchAndRenderRoom() {
   const containerId = 'content';
@@ -884,11 +963,40 @@ async function fetchAndRenderRoom() {
     const dataSections = Array.isArray(data[0]?.items) ? data : [{ category: "Room Management", items: data }];
 
     renderItems(containerId, dataSections, roomCardTemplate);
+    insertAddRoomButton();
   } catch (err) {
     console.error('Failed to load food items:', err);
     container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
   }
 }
+
+function insertAddRoomButton() {
+  const container = document.getElementById("content");
+  if (!container) return;
+
+  const btn = document.createElement("button");
+  btn.innerHTML = `
+    <span class="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7H5"/>
+      </svg>
+      Add Room
+    </span>
+  `;
+
+  // Remove absolute positioning and use a wrapper div for spacing
+  const wrapper = document.createElement("div");
+  wrapper.className = "flex justify-end mb-4"; // button aligned to right inside content
+  wrapper.appendChild(btn);
+
+  btn.onclick = () => {
+    openAddFoodModal(); // your modal opening function
+  };
+
+  // Insert the button at the top of the main content
+  container.prepend(wrapper);
+}
+
 
 async function fetchAndRenderFarmProducts() {
   const containerId = 'content'; // You can reuse the same container
