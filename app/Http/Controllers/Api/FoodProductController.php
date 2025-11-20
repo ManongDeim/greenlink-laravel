@@ -21,55 +21,66 @@ class FoodProductController extends Controller
     return response()->json($ingredients);
 }
 
-    public function store(Request $request)
+public function store(Request $request)
 {
-    dd('Reached store method', $request->all());
-
-    $validated = $request->validate([
-        'productName' => 'required|string|max:255',
-        'price' => 'required|numeric|min:0',
-        'productPicture' => 'nullable|image|max:2048',
-        'ingredients' => 'required|array',
-        'ingredients.*' => 'integer|exists:kitchen_inventory,id',
-        'quantities' => 'required|array',
-        'quantities.*' => 'numeric|min:0',
-
-    ]);
-
-    // Save FoodProduct
-    $product = FoodProduct::create([
-        'productName' => $validated['productName'],
-        'price' => $validated['price'],
-    ]);
-
-    // Handle image
-    if ($request->hasFile('productPicture')) {
-        $destinationPath = realpath(base_path('../')) . '/food_products';
-        if (!file_exists($destinationPath)) mkdir($destinationPath, 0775, true);
-
-        $filename = uniqid() . '.' . $request->file('productPicture')->getClientOriginalExtension();
-        $request->file('productPicture')->move($destinationPath, $filename);
-
-        $product->productPicture = '/food_products/' . $filename;
-        $product->save();
-    }
-
-    // Save ingredients
-    $ingredients = $request->input('ingredients', []);
-$quantities = $request->input('quantities', []);
-
-foreach ($ingredients as $index => $ingredientId) {
-    $quantity = $quantities[$index] ?? 0; // match by index, not key
-    if ($quantity > 0) {
-        $product->ingredients()->create([
-            'ingredient_id' => $ingredientId,
-            'quantity_used' => $quantity
+    try {
+        // Validate input
+        $validated = $request->validate([
+            'productName' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'productPicture' => 'nullable|image|max:2048',
+            'ingredients' => 'required|array',
+            'ingredients.*' => 'integer|exists:kitchen_inventory,id',
+            'quantities' => 'required|array',
+            'quantities.*' => 'numeric|min:0',
         ]);
+
+        // Create product
+        $product = FoodProduct::create([
+            'productName' => $validated['productName'],
+            'price' => $validated['price'],
+        ]);
+
+        // Handle image upload
+        if ($request->hasFile('productPicture')) {
+            $destinationPath = realpath(base_path('../')) . '/food_products';
+            if (!file_exists($destinationPath)) mkdir($destinationPath, 0775, true);
+
+            $filename = uniqid() . '.' . $request->file('productPicture')->getClientOriginalExtension();
+            $request->file('productPicture')->move($destinationPath, $filename);
+
+            $product->productPicture = '/food_products/' . $filename;
+            $product->save();
+        }
+
+        // Save ingredients
+        if ($request->has('ingredients')) {
+            foreach ($request->ingredients as $ingredientId) {
+                $quantity = $request->quantities[$ingredientId] ?? 0;
+                if ($quantity > 0) {
+                    $product->ingredients()->create([
+                        'ingredient_id' => $ingredientId,
+                        'quantity_used' => $quantity
+                    ]);
+                }
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Food product created successfully']);
+
+    } catch (\Exception $e) {
+        // Log the full exception
+        Log::error('Error creating food product', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'request' => $request->all()
+        ]);
+
+        // Return JSON error to frontend
+        return response()->json(['success' => false, 'message' => 'Failed to create food product'], 500);
     }
 }
 
-    return response()->json(['success' => true, 'message' => 'Food product created successfully']);
-}
 
 
     public function editName(Request $request, $id)
