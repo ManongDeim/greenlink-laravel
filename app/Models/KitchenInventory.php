@@ -27,12 +27,6 @@ class KitchenInventory extends Model
         'eoq',
     ];
 
-    public function getIngredients()
-{
-    $ingredients = KitchenInventory::all();
-    return response()->json($ingredients);
-}
-
     protected static function booted()
     {
         static::saving(function ($item) {

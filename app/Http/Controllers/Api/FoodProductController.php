@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\FoodProduct;
+use App\Models\KitchenInventory;
 
 class FoodProductController extends Controller
 {
@@ -13,6 +14,12 @@ class FoodProductController extends Controller
     {
         return response()->json(FoodProduct::all());
     }
+
+        public function getIngredients()
+{
+    $ingredients = KitchenInventory::all();
+    return response()->json($ingredients);
+}
 
     public function store(Request $request)
 {
@@ -32,13 +39,13 @@ class FoodProductController extends Controller
 
     // Handle image
     if ($request->hasFile('productPicture')) {
-        $destinationPath = realpath(base_path('../')) . '/food';
+        $destinationPath = realpath(base_path('../')) . '/food_products';
         if (!file_exists($destinationPath)) mkdir($destinationPath, 0775, true);
 
         $filename = uniqid() . '.' . $request->file('productPicture')->getClientOriginalExtension();
         $request->file('productPicture')->move($destinationPath, $filename);
 
-        $product->productPicture = '/food/' . $filename;
+        $product->productPicture = '/food_products/' . $filename;
         $product->save();
     }
 
