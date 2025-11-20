@@ -40,6 +40,8 @@ Route::middleware(['auth:sanctum'])->get('/user-info', function (Request $reques
 Route::post('cottageReservation', [RoomController::class, 'store']);
 Route::post('foodOrder', [FoodOrderController::class, 'store']);
 
+Route::post('/add-food-products', [FoodProductController::class, 'store']);
+
 
 // Admin Routes
 
