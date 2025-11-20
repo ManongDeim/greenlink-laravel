@@ -14,7 +14,6 @@ class FoodProduct extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'foodProduct_id',
         'productName',
         'productPicture',
         'qty',
