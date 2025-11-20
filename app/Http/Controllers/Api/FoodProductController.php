@@ -55,17 +55,18 @@ class FoodProductController extends Controller
     }
 
     // Save ingredients
-    if ($request->has('ingredients')) {
-        foreach ($request->ingredients as $ingredientId) {
-            $quantity = $request->quantities[$ingredientId] ?? 0;
-            if ($quantity > 0) {
-                $product->ingredients()->create([
-                    'ingredient_id' => $ingredientId,
-                    'quantity_used' => $quantity
-                ]);
-            }
-        }
+    $ingredients = $request->input('ingredients', []);
+$quantities = $request->input('quantities', []);
+
+foreach ($ingredients as $index => $ingredientId) {
+    $quantity = $quantities[$index] ?? 0; // match by index, not key
+    if ($quantity > 0) {
+        $product->ingredients()->create([
+            'ingredient_id' => $ingredientId,
+            'quantity_used' => $quantity
+        ]);
     }
+}
 
     return response()->json(['success' => true, 'message' => 'Food product created successfully']);
 }

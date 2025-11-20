@@ -2319,15 +2319,31 @@ document.getElementById("addFoodForm").addEventListener("submit", async function
   try {
     const res = await fetch(`/api/add-food-products`, {
       method: 'POST',
-      body: formData
+      body: formData,
     });
 
-    const text = await res.text();
-console.log('Raw response:', text);
+    const text = await res.text(); // read raw response first
+    let data;
+    try {
+      data = JSON.parse(text); // try parsing JSON
+    } catch {
+      console.error("Non-JSON response:", text);
+      throw new Error("Server returned an unexpected response. Check console.");
+    }
 
-    if (!res.ok) throw new Error("Failed to add food item");
+    if (!res.ok) {
+      // Validation or other errors
+      if (data.errors) {
+        // Show each validation error in toast
+        for (const field in data.errors) {
+          data.errors[field].forEach(msg => showToast(msg, "error"));
+        }
+      } else {
+        showToast(data.message || "Failed to add food item", "error");
+      }
+      return;
+    }
 
-    const data = JSON.parse(text); // parse text as JSON
     showToast(data.message || "Food added successfully", "success");
     closeAddFoodModal();
     await fetchAndRenderFood(); // refresh the food list
