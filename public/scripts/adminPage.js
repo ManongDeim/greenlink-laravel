@@ -2327,7 +2327,7 @@ console.log('Raw response:', text);
 
     if (!res.ok) throw new Error("Failed to add food item");
 
-    const data = await res.json();
+    const data = JSON.parse(text); // parse text as JSON
     showToast(data.message || "Food added successfully", "success");
     closeAddFoodModal();
     await fetchAndRenderFood(); // refresh the food list

@@ -23,6 +23,8 @@ class FoodProductController extends Controller
 
     public function store(Request $request)
 {
+    dd('Reached store method', $request->all());
+
     $validated = $request->validate([
         'productName' => 'required|string|max:255',
         'price' => 'required|numeric|min:0',
