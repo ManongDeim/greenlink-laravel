@@ -14,6 +14,51 @@ class FoodProductController extends Controller
         return response()->json(FoodProduct::all());
     }
 
+    public function store(Request $request)
+{
+    $validated = $request->validate([
+        'productName' => 'required|string|max:255',
+        'price' => 'required|numeric|min:0',
+        'productPicture' => 'nullable|image|max:2048',
+        'ingredients' => 'nullable|array',
+        'quantities' => 'nullable|array',
+    ]);
+
+    // Save FoodProduct
+    $product = FoodProduct::create([
+        'productName' => $validated['productName'],
+        'price' => $validated['price'],
+    ]);
+
+    // Handle image
+    if ($request->hasFile('productPicture')) {
+        $destinationPath = realpath(base_path('../')) . '/food';
+        if (!file_exists($destinationPath)) mkdir($destinationPath, 0775, true);
+
+        $filename = uniqid() . '.' . $request->file('productPicture')->getClientOriginalExtension();
+        $request->file('productPicture')->move($destinationPath, $filename);
+
+        $product->productPicture = '/food/' . $filename;
+        $product->save();
+    }
+
+    // Save ingredients
+    if ($request->has('ingredients')) {
+        foreach ($request->ingredients as $ingredientId) {
+            $quantity = $request->quantities[$ingredientId] ?? 0;
+            if ($quantity > 0) {
+                $product->ingredients()->create([
+                    'ingredient_id' => $ingredientId,
+                    'quantity_used' => $quantity
+                ]);
+            }
+        }
+    }
+
+    return response()->json(['success' => true, 'message' => 'Food product created successfully']);
+}
+
+
     public function editName(Request $request, $id)
     {
         $request->validate(['productName' => 'required|string|max:255']);

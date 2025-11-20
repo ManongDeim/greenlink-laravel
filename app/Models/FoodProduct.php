@@ -20,4 +20,9 @@ class FoodProduct extends Model
         'qty',
         'price',
     ];
+
+    public function ingredients()
+    {
+        return $this->hasMany(FoodIngredient::class);
+    }
 }

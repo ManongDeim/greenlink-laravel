@@ -2252,10 +2252,10 @@ async function submitEventPax() {
 
    console.log("Raw response:", res);
 
-  const text = await res.text();  // read raw output
-  console.log("Response text:", text); // this will reveal HTML error page!
+  const text = await res.text();  
+  console.log("Response text:", text); 
 
-  const data = JSON.parse(text); // convert safely
+  const data = JSON.parse(text); 
   showToast(data.message);
   closeEventPaxModal();
   fetchAndRenderEventManagement();
@@ -2265,7 +2265,9 @@ async function removeEvent(id) {
   if (!confirm("Are you sure you want to remove this item?")) return;
 
   try {
-    const res = await fetch(`/api/event-management/remove/${id}`);
+    const res = await fetch(`/api/event-management/remove/${id}`, {
+      method: "POST"
+    });
     const data = await res.json();
 
     showToast(data.message);
@@ -2274,3 +2276,59 @@ async function removeEvent(id) {
     showToast("Failed to remove item", "error");
   }
 }
+
+// Add Food Items
+
+// Open modal and load kitchen inventory
+async function openAddFoodModal() {
+  const modal = document.getElementById("addFoodModal");
+  modal.classList.remove("hidden");
+
+  // Fetch kitchen inventory
+  const res = await fetch('/api/kitchen-inventory-list');
+  const ingredients = await res.json();
+
+  const container = document.getElementById("ingredient-list");
+  container.innerHTML = '';
+
+  ingredients.forEach(item => {
+    container.innerHTML += `
+      <div class="flex items-center gap-2">
+        <input type="checkbox" name="ingredients[]" value="${item.id}" id="ingredient-${item.id}" />
+        <label for="ingredient-${item.id}" class="flex-1">${item.item_name} (${item.current_stock} ${item.unit})</label>
+        <input type="number" name="quantities[${item.id}]" min="0" placeholder="Qty" class="w-20 px-2 border rounded"/>
+      </div>
+    `;
+  });
+}
+
+// Close modal
+function closeAddFoodModal() {
+  const modal = document.getElementById("addFoodModal");
+  modal.classList.add("hidden");
+  document.getElementById("addFoodForm").reset();
+}
+
+// Submit new food item
+document.getElementById("addFoodForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  try {
+    const res = await fetch('/api/food-products', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) throw new Error("Failed to add food item");
+
+    const data = await res.json();
+    showToast(data.message || "Food added successfully", "success");
+    closeAddFoodModal();
+    await fetchAndRenderFood(); // refresh the food list
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+});

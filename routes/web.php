@@ -11,7 +11,9 @@ use App\Http\Controllers\Api\FarmProductController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\FoodProductController;
 use App\Http\Controllers\Api\RoomSeederController;
+use App\Http\Controllers\Api\KitchenInventoryController;
 use App\Models\FoodOrderModel;
+use App\Models\KitchenInventory;
 
 Route::get('/check-key', function () {
     return env('APP_KEY');
@@ -103,6 +105,8 @@ Route::prefix('api/food')->group(function () {
     Route::post('/edit-price/{id}', [FoodProductController::class, 'editPrice']);
     Route::post('/replace-photo/{id}', [FoodProductController::class, 'replacePhoto']);
 });
+Route::get('/api/kitchen-inventory-list', [KitchenInventoryController::class, 'getIngredients']);
+Route::get('/api/food-products', [FoodProductController::class, 'store']);
 
 // Room Seeder routes
 

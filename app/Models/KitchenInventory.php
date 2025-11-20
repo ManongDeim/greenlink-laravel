@@ -27,6 +27,12 @@ class KitchenInventory extends Model
         'eoq',
     ];
 
+    public function getIngredients()
+{
+    $ingredients = KitchenInventory::all();
+    return response()->json($ingredients);
+}
+
     protected static function booted()
     {
         static::saving(function ($item) {
@@ -59,5 +65,10 @@ class KitchenInventory extends Model
             // --- Update timestamp ---
             $item->last_updated = now();
         });
+    }
+
+     public function foodIngredients()
+    {
+        return $this->hasMany(FoodIngredient::class, 'ingredient_id');
     }
 }

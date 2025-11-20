@@ -18,6 +18,11 @@ class FoodIngredient extends Model
         'quantity_used',
     ];
 
+     public function foodProduct()
+    {
+        return $this->belongsTo(FoodProduct::class);
+    }
+
     public function ingredient()
     {
         return $this->belongsTo(KitchenInventory::class, 'ingredient_id');
