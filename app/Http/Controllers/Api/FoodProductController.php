@@ -32,7 +32,7 @@ public function store(Request $request)
             'ingredients' => 'required|array',
             'ingredients.*' => 'integer|exists:kitchen_inventory,id',
             'quantities' => 'required|array',
-            'quantities.*' => 'numeric|min:0',
+            'quantities.*' => 'nullable|numeric|min:0',
         ]);
 
         // Create product
