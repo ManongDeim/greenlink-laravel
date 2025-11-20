@@ -27,8 +27,8 @@ class FoodProductController extends Controller
         'productName' => 'required|string|max:255',
         'price' => 'required|numeric|min:0',
         'productPicture' => 'nullable|image|max:2048',
-        'ingredients' => 'nullable|array',
-        'quantities' => 'nullable|array',
+        'ingredients' => 'required|integer|exists:kitchen_inventory,id',
+        'quantities' => 'required|numeric|min:0',
     ]);
 
     // Save FoodProduct

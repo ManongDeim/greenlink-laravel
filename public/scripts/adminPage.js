@@ -2296,7 +2296,7 @@ async function openAddFoodModal() {
       <div class="flex items-center gap-2">
         <input type="checkbox" name="ingredients[]" value="${item.id}" id="ingredient-${item.id}" />
         <label for="ingredient-${item.id}" class="flex-1">${item.item_name} (${item.current_stock} ${item.unit})</label>
-        <input type="number" name="quantities[${item.id}]" min="0" placeholder="Qty" class="w-20 px-2 border rounded"/>
+        <input type="number" name="quantities[${item.id}]" step="0.001" min="0" placeholder="Qty" class="w-20 px-2 border rounded"/>
       </div>
     `;
   });
