@@ -366,7 +366,7 @@
 </div>
 
 <!-- Add Event Modal -->
-<div id="addFarmModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50">
+<div id="addEventModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50">
   <div class="relative w-full max-w-lg p-6 bg-white shadow-lg rounded-xl">
     <h2 class="mb-4 text-xl font-bold">Add Event</h2>
 
@@ -400,6 +400,7 @@
     </form>
   </div>
 </div>
+</div>
 
 <!-- Edit Event Name Modal -->
 
@@ -409,12 +410,9 @@
 
     <input type="hidden" id="eventId">
 
-    <label class="block font-semibold">Quantity Lost</label>
+    <label class="block font-semibold">New Event Name</label>
     <input type="text" id="eventName"
            class="w-full px-3 py-2 mb-3 border rounded-lg">
-
-    <label class="block font-semibold">Reason</label>
-    <textarea id="farmSpoilageReason" class="w-full px-3 py-2 mb-4 border rounded-lg"></textarea>
 
     <div class="flex justify-end gap-3">
       <button onclick="closeEditEventNameModal()" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>

@@ -283,7 +283,7 @@ const eventManagementTemplate = data => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
   <div class="flex justify-between items-center mb-4">
     <h2 class="text-2xl font-bold text-teal-700">Event Management</h2>
-    <button onclick="openAddKitchenModal()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+    <button onclick="openAddEventModal()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
       + Add Event
     </button>
   </div>
@@ -304,8 +304,8 @@ const eventManagementTemplate = data => `
                   class="relative z-10 p-2 bg-gray-200 rounded hover:bg-gray-300">⚙️</button>
 
           <div id="actionMenu-${item.id}" class="absolute left-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
-            <button onclick="submitEventName(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-green-100">Edit Name</button>
-            <button onclick="submitEventPax(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-blue-100">Edit Pax</button>
+            <button onclick="openEditEventNameModal(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-green-100">Edit Name</button>
+            <button onclick="openEventPaxModal(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-blue-100">Edit Pax</button>
             <button onclick="removeEvent(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-red-100">Remove</button>
           </div>
         </td>
@@ -2079,7 +2079,7 @@ async function submitAddEvent(e) {
 
     if (!res.ok) throw new Error("Failed to add item");
 
-    closeAddEventNameModal();
+    closeAddEventModal();
     form.reset();
     await fetchAndRenderEventManagement();
   } catch (err) {
@@ -2093,7 +2093,7 @@ function openEditEventNameModal(id) {
   document.getElementById("editEventNameModal").classList.remove("hidden");
 }
 
-function closeEdiEventNameModal() {
+function closeEditEventNameModal() {
   document.getElementById("editEventNameModal").classList.add("hidden");
   document.getElementById("eventName").value = "";
 }
@@ -2106,7 +2106,7 @@ async function submitEventName() {
   const res = await fetch(`/api/event-management/edit-event-name/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({name}),
+    body: JSON.stringify({event_name: name }),
   });
 
   const data = await res.json();
@@ -2137,13 +2137,13 @@ async function submitEventPax() {
   const res = await fetch(`/api/event-management/edit-pax/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount }),
+    body: JSON.stringify({max_pax: amount }),
   });
 
   const data = await res.json();
   showToast(data.message);
   closeFarmStockModal();
-  fetchAndRenderFarm();
+  fetchAndRenderEventManagement();
 }
 
 async function removeEvent(id) {
