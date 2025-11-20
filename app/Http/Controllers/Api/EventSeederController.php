@@ -42,8 +42,7 @@ class EventSeederController extends Controller
     public function editPax(Request $request, $id)
 {
     $request->validate([
-        'price' => 'required|numeric|min:0',
-        'measurement' => 'nullable|string|max:255',
+        'max_pax' => 'required|integer|min:0',
     ]);
 
     $product = Event::findOrFail($id);
