@@ -56,6 +56,16 @@ async function loadUserProfile() {
          </svg>
          Dashboard
       </a>
+      <button onclick="openProfile()"
+        class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+    <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 14c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z" />
+    </svg>
+    Profile
+</button>
       <button onclick="logout()" 
               class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100">
           <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
