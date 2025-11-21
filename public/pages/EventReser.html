@@ -380,6 +380,27 @@
       </button>
     </div>
   </div>
+  
+  <!-- Success Popup -->
+<div id="successPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] hidden">
+  <div class="max-w-sm p-6 text-center bg-white shadow-xl rounded-xl animate-fadeIn">
+    <h2 class="mb-2 text-xl font-semibold text-teal-700">Success!</h2>
+    <p class="mb-4 text-gray-700">Reservation submitted successfully!</p>
+    <button onclick="closeSuccessPopup()" 
+      class="px-4 py-2 mt-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">
+      OK
+    </button>
+  </div>
+</div>
+
+<!-- Animation -->
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-fadeIn { animation: fadeIn 0.15s ease-out; }
+</style>
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="../global_scripts/loginScript.js" defer></script>

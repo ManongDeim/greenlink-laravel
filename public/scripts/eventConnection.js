@@ -414,6 +414,14 @@ document.getElementById("confirmBtn").addEventListener("click", async function (
     pax: form.querySelector("input[name='pax']").value,
     to_bring: form.querySelector("textarea[name='to_bring']").value,
   };
+  
+  function openSuccessPopup() {
+  document.getElementById("successPopup").classList.remove("hidden");
+}
+
+function closeSuccessPopup() {
+  document.getElementById("successPopup").classList.add("hidden");
+}
 
   try {
     const response = await fetch("https://greenlinklolasayong.site/api/event-reservations", {
@@ -429,7 +437,7 @@ document.getElementById("confirmBtn").addEventListener("click", async function (
     const data = await response.json();
 
     if (response.ok) {
-      alert("✅ Reservation submitted successfully!");
+      openSuccessPopup();
       closeConfirmationModal();
       form.reset();
     } else {
