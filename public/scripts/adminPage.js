@@ -2452,26 +2452,26 @@ document.getElementById("editIngredientsForm").addEventListener("submit", async 
 
 //Delete Food Item
 async function removeFoodItem(id) {
-    if (!confirm("Are you sure you want to delete this food item?")) {
-        return;
+  if (!confirm("Are you sure you want to delete this food item?")) return;
+
+  try {
+    const res = await fetch(`/api/delete-food/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Server error:", errorText);
+      throw new Error("Failed to delete food item.");
     }
 
-    try {
-        const res = await fetch(`/api/food-products/${id}`, {
-            method: "DELETE"
-        });
+    const data = await res.json(); // ONLY read once
 
-        const text = await res.text();
-        console.log("Delete response:", text);
-
-        if (!res.ok) throw new Error("Failed to delete food item");
-
-        const data = await res.json();
-        showToast(data.message, "success");
-
-        await fetchAndRenderFood(); // refresh list
-    } catch (err) {
-        console.error(err);
-        showToast(err.message, "error");
-    }
+    showToast(data.message || "Food item removed", "success");
+    await fetchAndRenderFood();
+  } catch (err) {
+    console.error(err);
+    showToast(err.message, "error");
+  }
 }
+

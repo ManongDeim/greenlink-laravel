@@ -139,4 +139,5 @@ Route::post('farmInventory/{id}/spoilage', [FarmInventoryController::class, 'rec
 
 Route::get('/food-products/{id}/ingredients', [FoodProductController::class, 'getExistingIngredients']);
 Route::post('/food-products/{id}/ingredients/update', [FoodProductController::class, 'updateIngredients']);
-Route::delete('/food-products/{id}', [FoodProductController::class, 'destroy']);
+Route::delete('/delete-food/{id}', [FoodProductController::class, 'destroy']);
+
