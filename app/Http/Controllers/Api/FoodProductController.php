@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\FoodProduct;
+use App\Models\FoodIngredient;
 use App\Models\KitchenInventory;
 
 class FoodProductController extends Controller
@@ -52,6 +53,7 @@ public function store(Request $request)
             $product->productPicture = '/food_products/' . $filename;
             $product->save();
         }
+
 
         // Save ingredients
         if ($request->has('ingredients')) {
@@ -134,4 +136,50 @@ public function store(Request $request)
 
     return response()->json(['success' => true, 'message' => 'Product photo replaced successfully']);
 }
+
+public function getExistingIngredients($id)
+{
+    $product = FoodProduct::with('ingredientsDetails')->findOrFail($id);
+
+    // Return:
+    // product ingredients AND kitchen inventory list
+    return response()->json([
+        'product' => $product,
+        'kitchen' => KitchenInventory::all()
+    ]);
 }
+
+public function updateIngredients(Request $request, $id)
+{
+    $request->validate([
+        'ingredients' => 'array',
+        'ingredients.*' => 'integer|exists:kitchen_inventory,id',
+        'quantities' => 'array',
+        'quantities.*' => 'numeric|min:0'
+    ]);
+
+    $product = FoodProduct::findOrFail($id);
+
+    // Delete old ingredients
+    FoodIngredient::where('food_product_id', $id)->delete();
+
+    // Insert updated
+    foreach ($request->ingredients as $ingredientId) {
+        $qty = $request->quantities[$ingredientId] ?? 0;
+
+        if ($qty > 0) {
+            FoodIngredient::create([
+                'food_product_id' => $id,
+                'ingredient_id' => $ingredientId,
+                'quantity_used' => $qty
+            ]);
+        }
+    }
+
+    return response()->json(['success' => true]);
+}
+
+
+}
+
+

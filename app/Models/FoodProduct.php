@@ -26,4 +26,9 @@ class FoodProduct extends Model
                 ->withPivot('quantity_used');
 }
 
+public function ingredientsDetails()
+{
+    return $this->hasMany(FoodIngredient::class, 'food_product_id');
+}
+
 }

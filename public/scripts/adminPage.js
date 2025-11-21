@@ -2351,3 +2351,105 @@ document.getElementById("addFoodForm").addEventListener("submit", async function
     showToast(err.message, "error");
   }
 });
+
+
+// Edit Food Ingredients
+
+async function editFoodIngredients(foodId) {
+  document.getElementById("editFoodId").value = foodId;
+
+  const modal = document.getElementById("editIngredientsModal");
+  modal.classList.remove("hidden");
+
+  // Fetch product + kitchen list
+  const res = await fetch(`/api/food-products/${foodId}/ingredients`);
+  const data = await res.json();
+
+  const productIngredients = data.product.ingredients_details;
+  const kitchenList = data.kitchen;
+
+  const container = document.getElementById("editIngredientList");
+  container.innerHTML = "";
+
+  kitchenList.forEach(item => {
+    // find existing ingredient
+    const existing = productIngredients.find(i => i.ingredient_id === item.id);
+    const qty = existing ? existing.quantity_used : "";
+
+    container.innerHTML += `
+      <div class="flex items-center gap-2">
+        <input type="checkbox" 
+               class="ingredient-check"
+               data-id="${item.id}"
+               ${existing ? "checked" : ""}>
+
+        <label class="flex-1">${item.item_name} (${item.current_stock} ${item.unit})</label>
+
+        <input type="number"
+               step="0.001"
+               min="0"
+               class="qty-input border rounded px-2 w-20"
+               data-id="${item.id}"
+               value="${qty}"
+               ${existing ? "" : "disabled"}>
+      </div>
+    `;
+  });
+
+  // Enable/disable quantity on check
+  document.querySelectorAll(".ingredient-check").forEach(chk => {
+    chk.addEventListener("change", () => {
+      const id = chk.getAttribute("data-id");
+      const qtyInput = document.querySelector(`.qty-input[data-id="${id}"]`);
+
+      qtyInput.disabled = !chk.checked;
+      if (!chk.checked) qtyInput.value = "";
+    });
+  });
+}
+
+function closeEditIngredients() {
+  document.getElementById("editIngredientsModal").classList.add("hidden");
+}
+
+document.getElementById("editIngredientsForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const foodId = document.getElementById("editFoodId").value;
+
+  const selectedIngredients = [];
+  const quantities = {};
+
+  document.querySelectorAll(".ingredient-check").forEach(chk => {
+    const id = chk.getAttribute("data-id");
+    const qty = document.querySelector(`.qty-input[data-id="${id}"]`).value;
+
+    if (chk.checked && qty > 0) {
+      selectedIngredients.push(id);
+      quantities[id] = qty;
+    }
+  });
+
+  const res = await fetch(`/api/food-products/${foodId}/ingredients/update`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ingredients: selectedIngredients,
+      quantities: quantities
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    showToast("Ingredients updated!", "success");
+    closeEditIngredients();
+    fetchAndRenderFood(); // refresh list
+  } else {
+    showToast("Error saving ingredients", "error");
+  }
+});
+
+
+
+

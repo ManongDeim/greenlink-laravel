@@ -480,6 +480,29 @@
 </div>
 
 
+<!-- Edit Ingredients Modal -->
+<div id="editIngredientsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 p-4 items-center justify-center">
+  <div class="bg-white w-full max-w-2xl rounded-2xl p-6">
+    <h2 class="text-xl font-bold mb-4">Edit Ingredients</h2>
+
+    <form id="editIngredientsForm" class="space-y-4">
+      <input type="hidden" id="editFoodId">
+
+      <div>
+        <label class="font-medium">Ingredients</label>
+        <div id="editIngredientList" class="border rounded p-3 max-h-60 overflow-y-auto space-y-2"></div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-4">
+        <button type="button" onclick="closeEditIngredients()" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
 <div id="toast-container" class="fixed z-50 space-y-2 top-5 right-5"></div>
 
 <script src="./scripts/adminPage.js"></script>
