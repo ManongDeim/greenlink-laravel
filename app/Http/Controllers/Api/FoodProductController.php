@@ -179,6 +179,31 @@ public function updateIngredients(Request $request, $id)
     return response()->json(['success' => true]);
 }
 
+public function destroy($id)
+{
+    try {
+        $product = FoodProduct::find($id);
+
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Food item not found'], 404);
+        }
+
+        // Delete image file if exists
+        if ($product->productPicture && file_exists(public_path($product->productPicture))) {
+            unlink(public_path($product->productPicture));
+        }
+
+        // Delete food product (ingredients deleted via cascade)
+        $product->delete();
+
+        return response()->json(['success' => true, 'message' => 'Food item removed successfully']);
+        
+    } catch (\Exception $e) {
+        Log::error("Error deleting food product: " . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'Server error'], 500);
+    }
+}
+
 
 }
 

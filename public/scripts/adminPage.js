@@ -2450,6 +2450,28 @@ document.getElementById("editIngredientsForm").addEventListener("submit", async 
   }
 });
 
+//Delete Food Item
+async function removeFoodItem(id) {
+    if (!confirm("Are you sure you want to delete this food item?")) {
+        return;
+    }
 
+    try {
+        const res = await fetch(`/api/food-products/${id}`, {
+            method: "DELETE"
+        });
 
+        const text = await res.text();
+        console.log("Delete response:", text);
 
+        if (!res.ok) throw new Error("Failed to delete food item");
+
+        const data = await res.json();
+        showToast(data.message, "success");
+
+        await fetchAndRenderFood(); // refresh list
+    } catch (err) {
+        console.error(err);
+        showToast(err.message, "error");
+    }
+}
