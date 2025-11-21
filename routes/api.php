@@ -137,5 +137,5 @@ Route::post('farmInventory/{id}/spoilage', [FarmInventoryController::class, 'rec
 
 // Food Item Routes
 
-Route::get('/food-products/{id}/ingredients', [FoodProductController::class, 'getIngredients']);
+Route::get('/food-products/{id}/ingredients', [FoodProductController::class, 'getExistingIngredients']);
 Route::post('/food-products/{id}/ingredients/update', [FoodProductController::class, 'updateIngredients']);
