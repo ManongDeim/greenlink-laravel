@@ -2512,7 +2512,7 @@ async function removeRoom(id) {
   if (!confirm("Are you sure you want to delete this room?")) return;
 
   try {
-    const res = await fetch(`/rooms/delete-room/${id}`, {
+    const res = await fetch(`api/rooms/delete-room/${id}`, {
       method: 'DELETE'
     });
 
