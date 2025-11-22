@@ -122,7 +122,9 @@ class ProfileController extends Controller
 
         $google->id_photo = "ids/{$filename}";
         $google->id_status = "Pending Validation";
+         Log::info("updateProfile: GoogleUser avatar updated", ['avatar_url' => $google->avatar]);
         $google->save();
+         Log::info("updateProfile: GoogleUser saved successfully", ['google_user' => $google->toArray()]);
         Log::info("submitID: GoogleUser ID updated", ['google_user' => $google->toArray()]);
 
         return response()->json(['success' => true, 'user' => $google]);
