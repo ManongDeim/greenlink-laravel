@@ -120,7 +120,7 @@ class ProfileController extends Controller
             }
         }
 
-        $google->id_photo = "ids/{$filename}";
+        $google->id_photo = asset("ids/{$filename}");
         $google->id_status = "Pending Validation";
          Log::info("updateProfile: GoogleUser avatar updated", ['avatar_url' => $google->avatar]);
         $google->save();
