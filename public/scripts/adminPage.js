@@ -2501,7 +2501,7 @@ document.getElementById("addRoomForm").addEventListener("submit", async function
 
     showToast(data.message, "success");
     closeAddRoomModal();
-    fetchAndRenderRooms();
+    fetchAndRenderRoom();
   } catch (err) {
     showToast("Failed to add room: " + err.message, "error");
   }
