@@ -130,6 +130,7 @@ document.addEventListener("click", (e) => {
     }
 }
 
+
 async function logout() {
     try {
     const response = await fetch("/logout", {

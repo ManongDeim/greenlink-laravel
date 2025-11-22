@@ -41,12 +41,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
     const data = await res.json();
     if (data.success) {
-      nameInput.disabled = true;
-      editBtn.classList.remove("hidden");
-      saveBtn.classList.add("hidden");
-      avatarPreview.src = data.user.avatar;
-      alert("Profile updated successfully!");
-    }
+    nameInput.disabled = true;
+    editBtn.classList.remove("hidden");
+    saveBtn.classList.add("hidden");
+    avatarPreview.src = data.user.avatar;
+
+    // Update the dropdown
+    updateDropdownName(data.user.name, data.user.avatar);
+
+    alert("Profile updated successfully!");
+}
+
   });
 
   avatarUpload.addEventListener("change", (e) => {
@@ -76,4 +81,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       alert("Your ID has been submitted.");
     }
   });
+
+  function updateDropdownName(newName, newAvatar) {
+    const authSection = document.getElementById("auth-section");
+    if (!authSection) return;
+
+    const nameSpan = authSection.querySelector("span.text-sm.font-medium");
+    if (nameSpan) nameSpan.textContent = newName;
+
+    const avatarImg = authSection.querySelector("img.rounded-full");
+    if (avatarImg && newAvatar) avatarImg.src = newAvatar;
+}
+
 });

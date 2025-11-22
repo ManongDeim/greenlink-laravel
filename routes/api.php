@@ -18,18 +18,28 @@ use App\Http\Controllers\Api\KitchenInventoryController;
 use App\Http\Controllers\Api\FarmInventoryController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
+use App\Models\GoogleUser;
 
 Route::middleware(['auth:sanctum'])->get('/user-info', function (Request $request) {
-     $user = $request->user()->load('googleAccount');
+    $email = $request->user()->email;
+
+    $googleUser = GoogleUser::where('email', $email)->first();
+
+    if (!$googleUser) {
+        return response()->json([
+            'is_logged_in' => false,
+            'message' => 'Google user not found'
+        ], 404);
+    }
 
     return response()->json([
         'is_logged_in' => true,
         'user' => [
-            'id'     => $user->id,
-            'name'   => $user->name,
-            'email'  => $user->email,
-            'avatar' => $user->googleAccount?->avatar,
-            'role'   => $user->googleAccount?->role ?? 'customer',
+            'id'     => $googleUser->user_id,
+            'name'   => $googleUser->full_name,
+            'email'  => $googleUser->email,
+            'avatar' => $googleUser->avatar,
+            'role'   => $googleUser->role ?? 'customer',
         ],
         'session_data' => session()->all()
     ]);
