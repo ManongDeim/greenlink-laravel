@@ -26,33 +26,28 @@ avatarPreview.src = user.avatar || "https://cdn-icons-png.flaticon.com/512/847/8
 updateDropdownName(user.name, user.avatar);
 
 // Initialize ID section
-if (!user.id_status || user.id_status === "No Submission") {
-  idUpload.classList.remove("hidden");
-  submitIDBtn.classList.remove("hidden");
-  statusBox.classList.add("hidden");
-} else if (user.id_status === "Pending Validation") {
-  idUpload.classList.add("hidden");
-  submitIDBtn.classList.add("hidden");
-  statusBox.classList.remove("hidden");
-  statusBox.innerHTML = `Status: <span class="font-medium">Pending Validation</span>`;
-} else if (user.id_status === "Submission Rejected") {
-  idUpload.classList.add("hidden");
-  submitIDBtn.classList.add("hidden");
-  statusBox.classList.remove("hidden");
-  statusBox.innerHTML = `Status: <span class="font-medium">Submission Rejected</span>`;
-} else if (user.id_status === "Validated") {
-  idUpload.classList.add("hidden");
-  submitIDBtn.classList.add("hidden");
-  statusBox.classList.remove("hidden");
-  statusBox.innerHTML = `Status: <span class="font-medium">Submission Validated</span>`;
-  if (user.id_photo) {
-    const img = document.createElement("img");
-    img.src = user.id_photo;
-    img.className = "w-40 h-40 object-cover mt-2 rounded-lg border";
-    img.alt = "Validated ID";
-    statusBox.appendChild(img);
-  }
-}
+if (user.id_status === "Validated" || user.id_status === "Submission Validated") {
+        // Show image only
+        idUpload.classList.add("hidden");
+        statusBox.classList.add("hidden");
+
+        const idPhotoContainer = document.getElementById("idPhotoContainer");
+        const idPhotoPreview = document.getElementById("idPhotoPreview");
+
+        idPhotoPreview.src = user.id_photo;
+        idPhotoContainer.classList.remove("hidden");
+    } else if (user.id_status === "Rejected" || user.id_status === "Submission Rejected") {
+        // Show status only
+        statusBox.innerHTML = `Status: <span class="font-medium">Submission Rejected</span>`;
+        statusBox.classList.remove("hidden");
+        idUpload.classList.remove("hidden");
+        document.getElementById("idPhotoContainer").classList.add("hidden");
+    } else {
+        // Pending validation — show input
+        idUpload.classList.remove("hidden");
+        statusBox.classList.add("hidden");
+        document.getElementById("idPhotoContainer").classList.add("hidden");
+    }
 }
 
 await loadProfile();

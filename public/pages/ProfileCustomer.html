@@ -110,19 +110,22 @@
       <h2 class="text-lg font-semibold text-gray-800">PWD / Senior Citizen Application</h2>
       <p class="text-sm text-gray-600">Upload a valid ID to apply.</p>
 
-      <input type="file" id="idUpload"
-        class="block w-full text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50">
+      <div id="idPhotoContainer" class="hidden flex justify-center items-center p-4 border border-gray-300 rounded-lg bg-gray-50">
+  <img id="idPhotoPreview" src="" alt="ID Photo" class="max-w-full max-h-80 object-contain" />
+</div>
 
-      <div id="statusBox"
-        class="p-3 text-sm text-yellow-700 border border-yellow-300 rounded-lg bg-yellow-50">
-        Status: <span class="font-medium">Pending Validation</span>
-      </div>
+<!-- Upload input -->
+<input type="file" id="idUpload" class="block w-full text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50">
 
-      <button id="submitIDBtn"
-        class="w-full py-2 font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700">
-        Submit for Validation
-      </button>
-    </div>
+<!-- Status box -->
+<div id="statusBox" class="hidden p-3 text-sm text-yellow-700 border border-yellow-300 rounded-lg bg-yellow-50">
+  Status: <span class="font-medium">Pending Validation</span>
+</div>
+
+<button id="submitIDBtn" class="w-full py-2 font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700">
+  Submit for Validation
+</button>
+
 
   </div>
 
