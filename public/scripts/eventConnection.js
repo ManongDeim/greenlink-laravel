@@ -215,6 +215,21 @@ phoneInput.addEventListener("input", () => {
 
 function validateForm() {
   let isValid = true;
+    
+    // Validate time sequence
+const start = combineDateTime(
+  document.querySelector("input[name='start_date']").value,
+  document.querySelector("input[name='start_time']").value
+);
+const end = combineDateTime(
+  document.querySelector("input[name='end_date']").value,
+  document.querySelector("input[name='end_time']").value
+);
+
+if (new Date(end) <= new Date(start)) {
+  showAlert("End time must be later than start time.");
+  return;
+}
 
    // ✅ Terms and Conditions validation
   if (!agreeCheckbox.checked) {
