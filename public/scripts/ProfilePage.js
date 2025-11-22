@@ -166,7 +166,7 @@ try {
     if (user.id_status === "Validated" && user.id_photo) {
       const img = document.createElement("img");
       img.src = user.id_photo;
-      img.className = "w-40 h-40 object-cover mt-2 rounded-lg border";
+      img.className = "object-cover w-40 h-40 mt-2 border rounded-lg";
       img.alt = "Validated ID";
       statusBox.appendChild(img);
     }
@@ -195,4 +195,110 @@ if (avatarImg && newAvatar) avatarImg.src = newAvatar;
 
 }
 
+});
+
+
+function openReserModal() {
+      document.getElementById('reservationModal').classList.remove('hidden');
+      document.body.classList.add("overflow-hidden"); // disable scroll
+    }
+    function closeReserModal() {
+      document.getElementById('reservationModal').classList.add('hidden');
+      document.body.classList.remove("overflow-hidden"); // re-enable scroll
+    }
+
+    function openOrderModal() {
+      document.getElementById('orderModal').classList.remove('hidden');
+      document.body.classList.add("overflow-hidden"); // disable scroll
+    }
+    function closeOrderModal() {
+      document.getElementById('orderModal').classList.add('hidden');
+      document.body.classList.remove("overflow-hidden"); // re-enable scroll
+      
+    }
+    
+    //Pages  
+
+  //Room Reservation Page
+  document.addEventListener("DOMContentLoaded", () => {
+  
+  const btn = document.getElementById("roomReser");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "./RoomReser.html"; // go to another page
+  });
+});
+
+  //Cottage Reservation Page
+  document.addEventListener("DOMContentLoaded", () => {
+  
+  const btn = document.getElementById("cottageReser");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "#"; // go to another page
+  });
+});
+
+//Event Reservation Page
+
+  document.addEventListener("DOMContentLoaded", () => {
+  
+  const btn = document.getElementById("eventReser");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "./EventReser.html"; // go to another page
+  });
+});
+
+
+//Food Order Page
+
+  document.addEventListener("DOMContentLoaded", () => {
+  
+  const btn = document.getElementById("foodOrder");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "./FoodOrders.html"; // go to another page
+  });
+});
+
+//Farm Order Page
+
+  document.addEventListener("DOMContentLoaded", () => {
+  
+  const btn = document.getElementById("farmOrder");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "./FarmOrders.html"; // go to another page
+  });
+});
+
+// --- Close Modal When Clicking Outside ---
+document.addEventListener("click", function (event) {
+  const reservationModal = document.getElementById("reservationModal");
+  const orderModal = document.getElementById("orderModal");
+
+  // If Reservation Modal is open and user clicks outside the content box
+  if (!reservationModal.classList.contains("hidden") &&
+      event.target === reservationModal) {
+    closeReserModal();
+  }
+
+  // If Order Modal is open and user clicks outside the content box
+  if (!orderModal.classList.contains("hidden") &&
+      event.target === orderModal) {
+    closeOrderModal();
+  }
+  // --- Close Modal When Pressing ESC ---
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Escape") {
+    closeReserModal();
+    closeOrderModal();
+  }
+});
 });

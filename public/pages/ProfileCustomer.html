@@ -25,11 +25,11 @@
         class="object-contain w-auto h-20 transition-transform duration-300 cursor-pointer hover:scale-105 hover:drop-shadow-lg">
     </a>
 
-    <nav class="flex gap-6 text-lg font-medium">
-        <a href="../homePage.html" class="text-white transition hover:text-gray-200">Home</a>
-        <a onclick="openReserModal()" class="text-white transition hover:text-gray-200">Booking</a>
-        <a onclick="openOrderModal()" class="text-white transition hover:text-gray-200">Order</a>
-      </nav>
+   <nav class="flex gap-6 text-lg font-medium">
+      <a href="../homePage.html" class="text-white transition hover:text-gray-200">Home</a>
+      <button onclick="openReserModal()" class="text-white transition hover:text-gray-200">Booking</a>
+      <button onclick="openOrderModal()" class="text-white transition hover:text-gray-200">Order</a>
+    </nav>
   </div>
 
   <!-- Right: Auth Section -->
@@ -110,8 +110,8 @@
       <h2 class="text-lg font-semibold text-gray-800">PWD / Senior Citizen Application</h2>
       <p class="text-sm text-gray-600">Upload a valid ID to apply.</p>
 
-      <div id="idPhotoContainer" class="hidden flex justify-center items-center p-4 border border-gray-300 rounded-lg bg-gray-50">
-  <img id="idPhotoPreview" src="" alt="ID Photo" class="max-w-full max-h-80 object-contain" />
+      <div id="idPhotoContainer" class="flex items-center justify-center hidden p-4 border border-gray-300 rounded-lg bg-gray-50">
+  <img id="idPhotoPreview" src="" alt="ID Photo" class="object-contain max-w-full max-h-80" />
 </div>
 
 <!-- Upload input -->
@@ -130,6 +130,52 @@
   </div>
 
 </section>
+
+    <!-- Modals -->
+    
+<!-- Reservation Pop-Up -->
+  <div id="reservationModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-white/30 backdrop-blur-md">
+    <!-- Pop-Up Content -->
+    <div class="p-6 bg-white shadow-2xl rounded-2xl w-96 animate-fade-in">
+      <h2 class="mb-6 text-xl font-semibold text-center text-gray-800">Choose Reservation Type</h2>
+
+      <div class="grid gap-4">
+        <button id="roomReser" class="px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 rounded-xl">
+          Room Reservation
+        </button>
+        <button id="eventReser" class="px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 rounded-xl">
+          Event Reservation
+        </button>
+      </div>
+
+      <!-- Close Button -->
+      <div class="mt-6 text-center">
+        <button onclick="closeReserModal()" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Pop-Up -->
+  <div id="orderModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-white/30 backdrop-blur-md">
+    <!-- Pop-Up Content -->
+    <div class="p-6 bg-white shadow-2xl rounded-2xl w-96 animate-fade-in">
+      <h2 class="mb-6 text-xl font-semibold text-center text-gray-800">Choose Order Type</h2>
+
+      <div class="grid grid-cols-2 gap-6">
+        <button id="foodOrder" class="px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 rounded-xl">
+          Food Order
+        </button>
+        <button id="farmOrder" class="px-4 py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md hover:bg-teal-800 rounded-xl">
+          Farm Order
+        </button>
+      </div>
+
+      <!-- Close Button -->
+      <div class="mt-6 text-center">
+        <button onclick="closeOrderModal()" class="font-medium text-gray-500 hover:text-gray-700">Close</button>
+      </div>
+    </div>
+  </div>
 
 
 <!-- SCRIPTS -->
