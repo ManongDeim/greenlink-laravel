@@ -21,29 +21,26 @@ use App\Models\RoomSeederModel;
 use App\Models\GoogleUser;
 
 Route::middleware(['auth:sanctum'])->get('/user-info', function (Request $request) {
-    $email = $request->user()->email;
+    $user = $request->user()->load('googleAccount');
 
-    $googleUser = GoogleUser::where('email', $email)->first();
-
-    if (!$googleUser) {
-        return response()->json([
-            'is_logged_in' => false,
-            'message' => 'Google user not found'
-        ], 404);
-    }
+    // If user customized avatar, use it.
+    $finalAvatar = $user->googleAccount?->avatar 
+        ? url($user->googleAccount->avatar)
+        : ($user->avatar ?? null);
 
     return response()->json([
         'is_logged_in' => true,
         'user' => [
-            'id'     => $googleUser->user_id,
-            'name'   => $googleUser->name,
-            'email'  => $googleUser->email,
-            'avatar' => $googleUser->avatar,
-            'role'   => $googleUser->role ?? 'customer',
+            'id'     => $user->id,
+            'name'   => $user->googleAccount?->name ?? $user->name,
+            'email'  => $user->email,
+            'avatar' => $finalAvatar,
+            'role'   => $user->googleAccount?->role ?? 'customer',
         ],
         'session_data' => session()->all()
     ]);
 });
+
 
 
 
