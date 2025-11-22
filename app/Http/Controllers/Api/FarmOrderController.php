@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+use App\Helpers\GlobalMailHelper;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -186,6 +187,16 @@ class FarmOrderController extends Controller
         Log::info("⚠️ Payment already marked as Paid for ref: {$refNumber}, skipping deduction.");
     }
 
+    GlobalMailHelper::notifyUser(
+        $order->user->email,
+        'Farm Order Payment Successful',
+        "Your payment for Farm Order {$order->farmOrder_id} has been received successfully. Thank you for your purchase!"
+    );
+
+    GlobalMailHelper::notifyAdmins(
+        'New Farm Order Paid',
+        "A new farm order (Ref: {$order->ref_number}) has been paid by user ID: {$order->user_id}."
+    );
     return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
 }
 

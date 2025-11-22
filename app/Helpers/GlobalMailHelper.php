@@ -15,7 +15,7 @@ class GlobalMailHelper
      * @param string $message
      * @return void
      */
-    function notifyAdmins($subject, $message)
+   public static function notifyAdmins($subject, $message)
     {
         // Get admins from google_users
         $admins = GoogleUser::where('role', 'admin')->pluck('email');
