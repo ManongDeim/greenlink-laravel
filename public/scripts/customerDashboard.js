@@ -264,4 +264,53 @@ document.addEventListener('DOMContentLoaded', () => {
       e.target.innerText = "Submitted ✅";
     }
   });
+
+  // Submit feedback to backend
+document.addEventListener('click', async function(e) {
+  if (e.target.classList.contains('submit-feedback')) {
+    const feedbackSection = e.target.closest('.feedback-section');
+    const rating = feedbackSection.dataset.rating;
+    const comment = feedbackSection.querySelector('textarea').value;
+
+    const starsContainer = e.target.closest('.stars');
+    const id = starsContainer.dataset.id;
+    const typeMap = {
+      "🍴 Food Orders": "food",
+      "🌾 Farm Orders": "farm",
+      "🏡 Room Reservations": "room",
+      "📅 Event Reservations": "event"
+    };
+    const type = starsContainer.dataset.type;
+    const typeKey = typeMap[type];
+
+    try {
+      const res = await fetch('/api/submit-review', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          type: typeKey,
+          id: id,
+          stars: rating,
+          comment: comment
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        e.target.disabled = true;
+        feedbackSection.querySelector('textarea').disabled = true;
+        e.target.innerText = "Submitted ✅";
+        console.log("Review saved:", data.review);
+      } else {
+        alert("Failed to submit review.");
+      }
+    } catch(err) {
+      console.error("Error submitting review:", err);
+    }
+  }
+});
+
 });
