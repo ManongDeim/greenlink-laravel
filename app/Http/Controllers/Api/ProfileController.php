@@ -63,7 +63,7 @@ class ProfileController extends Controller
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
             $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            $path = public_path('avatars');
+            $path = public_path('../../avatars');
             if (!file_exists($path)) mkdir($path, 0775, true);
             $file->move($path, $filename);
             Log::info("updateProfile: Avatar file moved", ['filename' => $filename, 'path' => $path]);
@@ -106,7 +106,7 @@ class ProfileController extends Controller
 
         $file = $request->file('id_photo');
         $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-        $path = public_path('ids');
+        $path = public_path('../../ids');
         if (!file_exists($path)) mkdir($path, 0775, true);
         $file->move($path, $filename);
         Log::info("submitID: ID file moved", ['filename' => $filename, 'path' => $path]);
@@ -120,7 +120,7 @@ class ProfileController extends Controller
             }
         }
 
-        $google->id_photo = asset("ids/{$filename}");
+        $google->id_photo = "ids/{$filename}";
         $google->id_status = "Pending Validation";
         $google->save();
         Log::info("submitID: GoogleUser ID updated", ['google_user' => $google->toArray()]);
