@@ -29,39 +29,73 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   document.getElementById("profileForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    console.log("🔹 Submit clicked");
+
     const formData = new FormData();
-formData.append("name", nameInput.value);
-if (avatarUpload.files.length) {
-  formData.append("avatar", avatarUpload.files[0]);
+    formData.append("name", nameInput.value);
+    console.log("📝 Name to update:", nameInput.value);
+
+    if (avatarUpload.files.length) {
+        formData.append("avatar", avatarUpload.files[0]);
+        console.log("📁 Avatar file to upload:", avatarUpload.files[0]);
+    } else {
+        console.log("📁 No avatar file selected, skipping upload");
     }
 
-    const res = await fetch("/profile-update", {
-      method: "POST",
-      body: formData
-    });
-    const data = await res.json();
-    if (data.success) {
-    nameInput.disabled = true;
-    editBtn.classList.remove("hidden");
-    saveBtn.classList.add("hidden");
-    avatarPreview.src = data.user.avatar;
+    try {
+        const res = await fetch("/profile-update", {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+        });
 
-    // Update the dropdown
-    updateDropdownName(data.user.name, data.user.avatar);
+        console.log("⏳ Response received:", res);
 
-    alert("Profile updated successfully!");
-}
+        if (!res.ok) {
+            console.error("❌ Server returned an error:", res.status, res.statusText);
+            const text = await res.text();
+            console.log("📝 Response text:", text);
+            return;
+        }
 
-  });
+        const data = await res.json();
+        console.log("✅ JSON response:", data);
 
-  avatarUpload.addEventListener("change", (e) => {
+        if (data.success) {
+            nameInput.disabled = true;
+            editBtn.classList.remove("hidden");
+            saveBtn.classList.add("hidden");
+            avatarPreview.src = data.user.avatar;
+            console.log("👤 Updated avatar in preview:", data.user.avatar);
+
+            // Update the dropdown (auth section)
+            updateDropdownName(data.user.name, data.user.avatar);
+            console.log("👤 Updated dropdown with new name and avatar");
+
+            alert("Profile updated successfully!");
+        } else {
+            console.warn("⚠️ Update failed:", data.message);
+        }
+    } catch (err) {
+        console.error("💥 Error during profile update:", err);
+    }
+});
+
+avatarUpload.addEventListener("change", (e) => {
     const file = e.target.files[0];
+    console.log("📂 Avatar file selected:", file);
+
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => avatarPreview.src = reader.result;
-      reader.readAsDataURL(file);
+        const reader = new FileReader();
+        reader.onload = () => {
+            avatarPreview.src = reader.result;
+            console.log("🖼️ Preview updated with selected file");
+        };
+        reader.readAsDataURL(file);
     }
-  });
+});
+
 
   document.getElementById("submitIDBtn").addEventListener("click", async () => {
     if (!idUpload.files.length) {
@@ -73,7 +107,8 @@ formData.append("id_photo", idUpload.files[0]);
 
     const res = await fetch("/submit-id", {
       method: "POST",
-      body: formData
+      body: formData,
+      credentials: "same-origin"
     });
     const data = await res.json();
     if (data.success) {

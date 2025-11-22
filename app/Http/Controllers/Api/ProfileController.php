@@ -22,7 +22,7 @@ class ProfileController extends Controller
     public function updateProfile(Request $request)
     {
         $request->validate([
-            'full_name' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'avatar' => 'nullable|image|max:2048',
         ]);
 
@@ -31,7 +31,7 @@ class ProfileController extends Controller
         // Update User (main) so header shows the edited name
         $mainUser = User::where('email', $userEmail)->first();
         if ($mainUser) {
-            $mainUser->name = $request->input('full_name');
+            $mainUser->name = $request->input('name');
             $mainUser->save();
         }
 
@@ -39,7 +39,7 @@ class ProfileController extends Controller
         $google = GoogleUser::where('email', $userEmail)->first();
         if (!$google) return response()->json(['success' => false, 'message' => 'User not found']);
 
-        $google->name = $request->input('full_name');
+        $google->name = $request->input('ame');
 
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
