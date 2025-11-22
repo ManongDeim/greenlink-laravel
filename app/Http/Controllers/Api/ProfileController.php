@@ -77,7 +77,7 @@ class ProfileController extends Controller
                 }
             }
 
-            $google->avatar = asset("avatars/{$filename}");
+            $google->avatar = "/avatars/{$filename}";
             Log::info("updateProfile: GoogleUser avatar updated", ['avatar_url' => $google->avatar]);
         }
 
