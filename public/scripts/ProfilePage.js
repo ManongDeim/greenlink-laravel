@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const editBtn = document.getElementById("editBtn");
   const saveBtn = document.getElementById("saveBtn");
   const nameInput = document.getElementById("name");
+  const emailInput = document.getElementById("email");
   const avatarUpload = document.getElementById("avatarUpload");
   const avatarPreview = document.getElementById("avatarPreview");
   const idUpload = document.getElementById("idUpload");
@@ -13,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (profileData.success) {
     const user = profileData.user;
     nameInput.value = user.name || "";
+    emailInput.value = user.email || "";
     avatarPreview.src = user.avatar || "https://cdn-icons-png.flaticon.com/512/847/847969.png";
     if (user.id_status) {
       statusBox.innerHTML = `Status: <span class="font-medium">${user.id_status}</span>`;
