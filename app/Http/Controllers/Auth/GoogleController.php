@@ -34,7 +34,7 @@ class GoogleController extends Controller
     );
 
     // Create or update GoogleUser
-    $googleUser = GoogleUser::updateOrCreate(
+    $googleUser = GoogleUser::firstOrCreate(
         ['user_id' => $user->id],
         [
             'email'  => $googleUserData->getEmail(),
@@ -43,6 +43,8 @@ class GoogleController extends Controller
             'role'   => 'customer' // default role
         ]
     );
+
+    
 
     // ✅ Log in the main User model
     Auth::login($user);
