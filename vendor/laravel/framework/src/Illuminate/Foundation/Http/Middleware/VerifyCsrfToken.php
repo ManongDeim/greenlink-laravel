@@ -43,6 +43,8 @@ class VerifyCsrfToken
         'api/*',
         '/logout',
         'api/farm/*',
+        '/profile-update',
+        '/submit-id',
     ];
 
     /**
