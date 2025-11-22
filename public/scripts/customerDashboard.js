@@ -1,181 +1,126 @@
-//Modals
-  
-  function openReserModal() {
-  document.getElementById('reservationModal').classList.remove('hidden');
-  document.body.classList.add("overflow-hidden"); // disable scroll
-}
-
-function closeReserModal() {
-  document.getElementById('reservationModal').classList.add('hidden');
-  document.body.classList.remove("overflow-hidden"); // re-enable scroll
-}
-
-function openOrderModal() {
-  document.getElementById('orderModal').classList.remove('hidden');
-  document.body.classList.add("overflow-hidden"); // disable scroll
-}
-
-function closeOrderModal() {
-  document.getElementById('orderModal').classList.add('hidden');
-  document.body.classList.remove("overflow-hidden"); // re-enable scroll
-}
-//Pages  
-
-  //Room Reservation Page
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("roomReser");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "../pages/RoomReser.html"; // go to another page
-  });
-});
-
-//Event Reservation Page
-
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("eventReser");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "../pages/EventReser.html"; // go to another page
-  });
-});
-
-
-//Food Order Page
-
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("foodOrder");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "../pages/FoodOrders.html"; // go to another page
-  });
-});
-
-//Farm Order Page
-
-  document.addEventListener("DOMContentLoaded", () => {
-  
-  const btn = document.getElementById("farmOrder");
-
-
-  btn.addEventListener("click", () => {
-    window.location.href = "../pages/FarmOrders.html"; // go to another page
-  });
-});
-
-// Fetch Data for Customer Dashboard
-
-// scripts/customerDashboard.js
 document.addEventListener('DOMContentLoaded', () => {
-  const sidebarButtons = document.querySelectorAll('.sidebar-btn');
 
+  // --- Modals ---
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+  }
+
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+  }
+
+  // --- Page navigation ---
+  const pageButtons = [
+    { id: 'roomReser', url: '../pages/RoomReser.html' },
+    { id: 'eventReser', url: '../pages/EventReser.html' },
+    { id: 'foodOrder', url: '../pages/FoodOrders.html' },
+    { id: 'farmOrder', url: '../pages/FarmOrders.html' },
+  ];
+
+  pageButtons.forEach(btn => {
+    const el = document.getElementById(btn.id);
+    if (el) el.addEventListener('click', () => window.location.href = btn.url);
+  });
+
+  // --- Dashboard: Load sections dynamically ---
+  const sidebarButtons = document.querySelectorAll('.sidebar-btn');
   sidebarButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const section = btn.dataset.section;
-      openSection(section); // ✅ now loads dynamically
+      openSection(section);
     });
   });
-});
 
-// ✅ Dynamically render content instead of reloading
-async function openSection(section) {
-  const content = document.getElementById('content');
+  async function openSection(section) {
+    const content = document.getElementById('content');
+    let endpoint, title;
 
-  switch (section) {
-    case "foodOrders":
-      fetchAndRender("/api/customer/food-orders", "🍴 Food Orders");
-      break;
-    case "farmOrders":
-      fetchAndRender("/api/customer/farm-orders", "🌾 Farm Orders");
-      break;
-    case "room":
-      fetchAndRender("/api/customer/room-reservations", "🏡 Room Reservations");
-      break;
-    case "event":
-      fetchAndRender("/api/customer/event-reservations", "📅 Event Reservations");
-      break;
-    default:
-      content.innerHTML = "<p>Invalid section selected.</p>";
-  }
-}
-
-async function fetchAndRender(endpoint, title) {
-  const content = document.getElementById("content");
-  content.innerHTML = `<h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2><p>Loading...</p>`;
-
-  try {
-    const token = localStorage.getItem("authToken"); // or however you store Sanctum token
-    const res = await fetch(endpoint, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Accept": "application/json"
-      }
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-
-    if (!data.length) {
-      content.innerHTML = `<h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2>
-        <p class="text-gray-500">No records found.</p>`;
-      return;
+    switch(section) {
+      case "foodOrders":
+        endpoint = "/api/customer/food-orders";
+        title = "🍴 Food Orders";
+        break;
+      case "farmOrders":
+        endpoint = "/api/customer/farm-orders";
+        title = "🌾 Farm Orders";
+        break;
+      case "room":
+        endpoint = "/api/customer/room-reservations";
+        title = "🏡 Room Reservations";
+        break;
+      case "event":
+        endpoint = "/api/customer/event-reservations";
+        title = "📅 Event Reservations";
+        break;
+      default:
+        content.innerHTML = "<p>Invalid section selected.</p>";
+        return;
     }
 
-    const cards = data.map(item => createCard(item, title)).join("");
-    content.innerHTML = `
-      <h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2>
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">${cards}</div>
-    `;
-  } catch (err) {
-    console.error(err);
-    content.innerHTML = `<p class="text-red-500">Failed to load data. ${err.message}</p>`;
+    content.innerHTML = `<h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2><p>Loading...</p>`;
+
+    try {
+      const res = await fetch(endpoint, { headers: { "Accept": "application/json" } });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      if (!data.length) {
+        content.innerHTML = `<h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2>
+          <p class="text-gray-500">No records found.</p>`;
+        return;
+      }
+
+      const cards = data.map(item => createCard(item, title)).join('');
+      content.innerHTML = `<h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2>
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">${cards}</div>`;
+    } catch(err) {
+      console.error(err);
+      content.innerHTML = `<p class="text-red-500">Failed to load data. ${err.message}</p>`;
+    }
   }
-}
 
-function createCard(item, type) {
-  const ratingSection = (id) => `
-    <div class="mt-3">
-      <p class="text-gray-700 font-medium">Rate your experience:</p>
-      <div class="flex space-x-1 mt-1 stars" data-id="${id}" data-type="${type}">
-        ${[1,2,3,4,5].map(n => `<span class="cursor-pointer text-gray-300 hover:text-yellow-400 text-xl">&#9733;</span>`).join('')}
+  // --- Create Card with rating section ---
+  function createCard(item, type) {
+    const ratingSection = (id) => `
+      <div class="mt-3">
+        <p class="text-gray-700 font-medium">Rate your experience:</p>
+        <div class="flex space-x-1 mt-1 stars" data-id="${id}" data-type="${type}">
+          ${[1,2,3,4,5].map(n => `<span class="cursor-pointer text-gray-300 hover:text-yellow-400 text-xl">&#9733;</span>`).join('')}
+        </div>
+        <div class="mt-2 hidden feedback-section">
+          <textarea class="w-full border rounded p-2 mt-1 text-gray-700" placeholder="Write a comment (optional)"></textarea>
+          <button class="mt-2 px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 submit-feedback">Submit</button>
+        </div>
       </div>
-      <div class="mt-2 hidden feedback-section">
-        <textarea class="w-full border rounded p-2 mt-1 text-gray-700" placeholder="Write a comment (optional)"></textarea>
-        <button class="mt-2 px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 submit-feedback">Submit</button>
-      </div>
-    </div>
-  `;
+    `;
 
-  switch (type) {
-    case "🍴 Food Orders":
-      return `
-        <div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
+    switch(type) {
+      case "🍴 Food Orders":
+        return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
           <h3 class="text-lg font-semibold text-teal-700">Order #${item.foodOrder_id}</h3>
           <p class="text-gray-600 mt-2">Total: ₱${item.total_bill}</p>
           <p class="text-gray-600">Payment: ${item.payment_method} (${item.payment_status})</p>
           <p class="text-gray-600">Status: ${item.order_status ?? 'N/A'}</p>
           ${ratingSection(item.foodOrder_id)}
         </div>`;
-
-    case "🌾 Farm Orders":
-      return `
-        <div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
+      case "🌾 Farm Orders":
+        return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
           <h3 class="text-lg font-semibold text-teal-700">Farm Order #${item.farmOrder_id}</h3>
           <p class="text-gray-600 mt-2">Total: ₱${item.total_bill}</p>
           <p class="text-gray-600">Payment: ${item.payment_method} (${item.payment_status})</p>
           <p class="text-gray-600">Status: ${item.order_status ?? 'N/A'}</p>
           ${ratingSection(item.farmOrder_id)}
         </div>`;
-
-    case "🏡 Room Reservations":
-      return `
-        <div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
+      case "🏡 Room Reservations":
+        return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
           <h3 class="text-lg font-semibold text-teal-700">${item.room}</h3>
           <p class="text-gray-600">Reservation ID: <span class="font-medium">${item.room_reser_id}</span></p>
           <p class="text-gray-600 mt-2">Check-in: ${item.check_in_date}</p>
@@ -184,10 +129,8 @@ function createCard(item, type) {
           <p class="text-gray-600">Payment: ${item.payment_method ?? 'N/A'} (${item.payment_status ?? 'N/A'})</p>
           ${ratingSection(item.room_reser_id)}
         </div>`;
-
-    case "📅 Event Reservations":
-      return `
-        <div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
+      case "📅 Event Reservations":
+        return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
           <h3 class="text-lg font-semibold text-teal-700">${item.event_type}</h3>
           <p class="text-gray-600">Reservation ID: <span class="font-medium">${item.event_reservation_id}</span></p>
           <p class="text-gray-600 mt-2">From: ${item.start_datetime}</p>
@@ -196,83 +139,77 @@ function createCard(item, type) {
           <p class="text-gray-600">Status: ${item.approval_status ?? 'Pending'}</p>
           ${ratingSection(item.event_reservation_id)}
         </div>`;
+    }
   }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Hover effect for stars
-  document.addEventListener('mouseover', function(e) {
-    if (e.target.closest('.stars span')) {
-      const star = e.target;
-      const stars = star.parentElement.querySelectorAll('span');
-      const index = Array.from(stars).indexOf(star);
-
-      stars.forEach((s, i) => {
-        s.classList.toggle('text-yellow-400', i <= index);
-        s.classList.toggle('text-gray-300', i > index);
-      });
-    }
+  // --- Stars hover and reset ---
+  document.addEventListener('mouseover', (e) => {
+    const star = e.target.closest('.stars span');
+    if (!star) return;
+    const stars = star.parentElement.querySelectorAll('span');
+    const index = Array.from(stars).indexOf(star);
+    stars.forEach((s,i) => {
+      s.classList.toggle('text-yellow-400', i <= index);
+      s.classList.toggle('text-gray-300', i > index);
+    });
   });
 
-  // Reset stars on mouseout if not clicked
-  document.addEventListener('mouseout', function(e) {
-    if (e.target.closest('.stars span')) {
-      const starsContainer = e.target.parentElement;
-      const stars = starsContainer.querySelectorAll('span');
-      const feedbackSection = starsContainer.nextElementSibling;
-      const rating = feedbackSection.dataset.rating || 0;
-
-      stars.forEach((s, i) => {
-        s.classList.toggle('text-yellow-400', i < rating);
-        s.classList.toggle('text-gray-300', i >= rating);
-      });
-    }
+  document.addEventListener('mouseout', (e) => {
+    const star = e.target.closest('.stars span');
+    if (!star) return;
+    const starsContainer = star.parentElement;
+    const stars = starsContainer.querySelectorAll('span');
+    const feedbackSection = starsContainer.nextElementSibling;
+    const rating = feedbackSection.dataset.rating || 0;
+    stars.forEach((s,i) => {
+      s.classList.toggle('text-yellow-400', i < rating);
+      s.classList.toggle('text-gray-300', i >= rating);
+    });
   });
 
-  // Click to select rating
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.stars span')) {
-      const star = e.target;
-      const starsContainer = star.parentElement;
-      const stars = starsContainer.querySelectorAll('span');
-      const index = Array.from(stars).indexOf(star) + 1;
+  // --- Click stars & submit feedback ---
+  document.addEventListener('click', async (e) => {
+  console.log("🔹 Click event:", e.target);
 
-      stars.forEach((s, i) => {
-        s.classList.toggle('text-yellow-400', i < index);
-        s.classList.toggle('text-gray-300', i >= index);
-      });
+  const star = e.target.closest('.stars span');
+  if (star) {
+    console.log("⭐ Star clicked:", star);
+    const starsContainer = star.parentElement;
+    console.log("📦 starsContainer:", starsContainer);
+    const stars = starsContainer.querySelectorAll('span');
+    const index = Array.from(stars).indexOf(star) + 1;
+    stars.forEach((s,i) => {
+      s.classList.toggle('text-yellow-400', i < index);
+      s.classList.toggle('text-gray-300', i >= index);
+    });
+    const feedbackSection = starsContainer.nextElementSibling;
+    console.log("📝 feedbackSection:", feedbackSection);
+    feedbackSection.classList.remove('hidden');
+    feedbackSection.dataset.rating = index;
+  }
 
-      // Show feedback section
-      const feedbackSection = starsContainer.nextElementSibling;
-      feedbackSection.classList.remove('hidden');
-      feedbackSection.dataset.rating = index;
-    }
-
-    // Submit feedback
-    if (e.target.classList.contains('submit-feedback')) {
-      const feedbackSection = e.target.closest('.feedback-section');
-      const rating = feedbackSection.dataset.rating;
-      const comment = feedbackSection.querySelector('textarea').value;
-
-      const id = e.target.closest('.stars').dataset.id;
-      const type = e.target.closest('.stars').dataset.type;
-
-      console.log(`Feedback for ${type} ID ${id}: Rating=${rating}, Comment="${comment}"`);
-
-      e.target.disabled = true;
-      feedbackSection.querySelector('textarea').disabled = true;
-      e.target.innerText = "Submitted ✅";
-    }
-  });
-
-  // Submit feedback to backend
-document.addEventListener('click', async function(e) {
   if (e.target.classList.contains('submit-feedback')) {
+    console.log("✅ Submit feedback clicked:", e.target);
     const feedbackSection = e.target.closest('.feedback-section');
+    console.log("📝 feedbackSection for submit:", feedbackSection);
+
+    if (!feedbackSection) {
+      console.error("❌ feedbackSection is null!");
+      return;
+    }
+
     const rating = feedbackSection.dataset.rating;
     const comment = feedbackSection.querySelector('textarea').value;
 
-    const starsContainer = e.target.closest('.stars');
+    // Fix: find the stars container as the previous sibling
+    const starsContainer = feedbackSection.previousElementSibling;
+    console.log("📦 starsContainer for submit (fixed):", starsContainer);
+
+    if (!starsContainer || !starsContainer.classList.contains('stars')) {
+      console.error("❌ starsContainer is missing or not a stars container!");
+      return;
+    }
+
     const id = starsContainer.dataset.id;
     const typeMap = {
       "🍴 Food Orders": "food",
@@ -280,30 +217,27 @@ document.addEventListener('click', async function(e) {
       "🏡 Room Reservations": "room",
       "📅 Event Reservations": "event"
     };
-    const type = starsContainer.dataset.type;
-    const typeKey = typeMap[type];
+    const typeKey = typeMap[starsContainer.dataset.type];
+
+    console.log("🔹 Submitting review:", { typeKey, id, rating, comment });
+
+    // ...send fetch request as before
 
     try {
       const res = await fetch('/api/submit-review', {
         method: 'POST',
         headers: {
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          type: typeKey,
-          id: id,
-          stars: rating,
-          comment: comment
-        })
+        body: JSON.stringify({ type: typeKey, id, stars: rating, comment })
       });
-
       const data = await res.json();
-
+      console.log("🔹 Response from submit-review:", data);
       if (data.success) {
         e.target.disabled = true;
         feedbackSection.querySelector('textarea').disabled = true;
         e.target.innerText = "Submitted ✅";
-        console.log("Review saved:", data.review);
       } else {
         alert("Failed to submit review.");
       }
@@ -312,5 +246,6 @@ document.addEventListener('click', async function(e) {
     }
   }
 });
+
 
 });

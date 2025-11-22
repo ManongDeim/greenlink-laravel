@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\EventSeederController;
 use App\Http\Controllers\Api\CustomerDashboardController;
 use App\Http\Controllers\Api\KitchenInventoryController;
 use App\Http\Controllers\Api\FarmInventoryController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 use App\Models\GoogleUser;
@@ -153,4 +154,9 @@ Route::delete('/delete-food/{id}', [FoodProductController::class, 'destroy']);
 
 Route::post('/rooms/add', [RoomSeederController::class, 'store']);
 Route::delete('/rooms/delete-room/{id}', [RoomSeederController::class, 'destroy']);
+
+//Review Routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/submit-review', [ReviewController::class, 'submit']);
+});
 
