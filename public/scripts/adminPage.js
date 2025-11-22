@@ -2507,4 +2507,28 @@ document.getElementById("addRoomForm").addEventListener("submit", async function
   }
 });
 
+//Delete Room
+async function removeFoodItem(id) {
+  if (!confirm("Are you sure you want to delete this room?")) return;
+
+  try {
+    const res = await fetch(`/api/delete-room/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Server error:", errorText);
+      throw new Error("Failed to delete food item.");
+    }
+
+    const data = await res.json(); // ONLY read once
+
+    showToast(data.message || "Food item removed", "success");
+    await fetchAndRenderFood();
+  } catch (err) {
+    console.error(err);
+    showToast(err.message, "error");
+  }
+}
 

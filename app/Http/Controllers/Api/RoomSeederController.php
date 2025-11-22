@@ -143,5 +143,43 @@ public function store(Request $request)
     ]);
 }
 
+public function destroy($id)
+{
+    try {
+        $room = Room::find($id);
+
+        if (!$room) {
+            return response()->json(['success' => false, 'message' => 'Room not found'], 404);
+        }
+
+        // Delete main image
+        if ($room->image && file_exists(public_path($room->image))) {
+            unlink(public_path($room->image));
+        }
+
+        // Delete carousel images
+        if (!empty($room->carousel_images)) {
+            $carouselImages = json_decode($room->carousel_images, true);
+
+            if (is_array($carouselImages)) {
+                foreach ($carouselImages as $imgPath) {
+                    if ($imgPath && file_exists(public_path($imgPath))) {
+                        unlink(public_path($imgPath));
+                    }
+                }
+            }
+        }
+
+        // Delete room
+        $room->delete();
+
+        return response()->json(['success' => true, 'message' => 'Room removed successfully']);
+
+    } catch (\Exception $e) {
+        Log::error("Error deleting room: " . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'Server error'], 500);
+    }
+}
+
 }
 
