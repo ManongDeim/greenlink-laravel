@@ -19,6 +19,7 @@ class GoogleUser extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
+        'id',
         'user_id',
         'name',
         'email',
