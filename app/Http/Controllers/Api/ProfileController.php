@@ -30,7 +30,7 @@ class ProfileController extends Controller
         $user = GoogleUser::where('email', $request->user()->email)->first();
         if (!$user) return response()->json(['success' => false, 'message' => 'User not found']);
 
-        $user->full_name = $request->full_name;
+        $user->name = $request->name;
 
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
@@ -63,9 +63,9 @@ class ProfileController extends Controller
         if (!file_exists($path)) mkdir($path, 0775, true);
         $file->move($path, $filename);
 
-        if ($user->id_file && file_exists(public_path($user->id_file))) unlink(public_path($user->id_file));
+        if ($user->id_photo && file_exists(public_path($user->id_photo))) unlink(public_path($user->id_photo));
 
-        $user->id_file = "/ids/$filename";
+        $user->id_photo = "/ids/$filename";
         $user->id_status = "Pending Validation";
         $user->save();
 
