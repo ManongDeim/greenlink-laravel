@@ -56,7 +56,7 @@ async function loadUserProfile() {
          </svg>
          Dashboard
       </a>
-      <button href="/pages/ProfileCustomer.html"
+      <button onclick="openProfile()"
         class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
     <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round"
@@ -148,4 +148,8 @@ async function logout() {
   } catch (err) {
     console.error("❌ Logout error:", err);
   }
+}
+
+function openProfile() {
+    window.location.href = "/pages/ProfileCustomer.html";
 }

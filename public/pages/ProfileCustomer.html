@@ -32,14 +32,14 @@
       </nav>
   </div>
 
-  <!-- Right Auth -->
-  <div id="auth-section" class="flex items-center">
-    <a id="loginBtn"
-      class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm hover:bg-gray-100">
-      <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5">
-      <span class="text-sm font-medium">Log-in</span>
-    </a>
-  </div>
+  <!-- Right: Auth Section -->
+<div id="auth-section" class="flex items-center">
+  <a id="loginBtn"
+     class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm hover:bg-gray-100">
+    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
+    <span class="text-sm font-medium">Log-in</span>
+  </a>
+</div>
 
 </header>
 
@@ -130,50 +130,10 @@
 
 
 <!-- SCRIPTS -->
-<script>
-  const editBtn = document.getElementById("editBtn");
-  const saveBtn = document.getElementById("saveBtn");
-  const nameInput = document.getElementById("name");
-  const emailInput = document.getElementById("email");
-  const avatarUpload = document.getElementById("avatarUpload");
-  const avatarPreview = document.getElementById("avatarPreview");
-
-  editBtn.addEventListener("click", () => {
-    nameInput.disabled = false;
-    emailInput.disabled = false;
-    editBtn.classList.add("hidden");
-    saveBtn.classList.remove("hidden");
-  });
-
-  document.getElementById("profileForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    nameInput.disabled = true;
-    emailInput.disabled = true;
-    editBtn.classList.remove("hidden");
-    saveBtn.classList.add("hidden");
-    alert("Profile updated successfully!");
-  });
-
-  avatarUpload.addEventListener("change", (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => avatarPreview.src = reader.result;
-      reader.readAsDataURL(file);
-    }
-  });
-
-  document.getElementById("submitIDBtn").addEventListener("click", () => {
-    const fileInput = document.getElementById("idUpload");
-    if (!fileInput.files.length) {
-      alert("Please upload a valid ID before submitting.");
-      return;
-    }
-    document.getElementById("statusBox").innerHTML =
-      'Status: <span class="font-medium text-yellow-600">Pending Admin Validation</span>';
-    alert("Your ID has been submitted.");
-  });
+<script src="../scripts/ProfilePage.js"></script>
 </script>
+<script src="../global_scripts/loginScript.js" defer></script>
+<script src="../global_scripts/authLogin.js"></script>
 
 </body>
 </html>
