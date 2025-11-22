@@ -104,9 +104,6 @@ const farmCardTemplate = item => `
     <p class="text-sm text-gray-600 mb-1">
       Measurement: <span id="farm-measurement-${item.id}" class="font-semibold text-teal-700">${item.measurement || ''}</span>
     </p>
-    <p class="text-sm text-gray-600">
-      Available Stock: <span id="farm-stock-${item.id}" class="font-semibold text-teal-700">${item.qty}</span>
-    </p>
 
     <!-- Button Grid -->
     <div class="flex flex-col gap-3 mt-5">
@@ -767,7 +764,7 @@ function editRoomName(id) {
   const parent = button.parentElement;
 
   const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex items-center gap-2";
+  container.className = "flex items-center col-span-2 gap-2 mt-2 inline-editor";
 
   container.innerHTML = `
     <input type="text" id="editNameInput${id}" 
@@ -815,7 +812,7 @@ function editRoomPrice(id) {
   const currentPrice = priceEl ? priceEl.textContent.replace("₱", "").trim() : "";
 
   const container = document.createElement("div");
-  container.className = "inline-editor col-span-2 mt-2 flex flex-col gap-2";
+  container.className = "flex flex-col col-span-2 gap-2 mt-2 inline-editor";
 
   container.innerHTML = `
     <div class="flex items-center gap-2">
@@ -1997,11 +1994,53 @@ function openKitchenStockModal(id) {
 }
 
 // Remove Item
+function customConfirm(message) {
+  return new Promise((resolve) => {
+    // Create popup container
+    const popup = document.createElement("div");
+    popup.className =
+      "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50";
+
+    popup.innerHTML = `
+      <div class="bg-white rounded-xl p-6 w-80 shadow-lg text-center">
+        <p class="text-gray-800 text-lg font-medium mb-6">${message}</p>
+        <div class="flex justify-center gap-4">
+          <button id="confirmYes" 
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+            Yes
+          </button>
+          <button id="confirmNo" 
+            class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition">
+            No
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(popup);
+
+    // Handle Yes
+    popup.querySelector("#confirmYes").onclick = () => {
+      popup.remove();
+      resolve(true);
+    };
+
+    // Handle No
+    popup.querySelector("#confirmNo").onclick = () => {
+      popup.remove();
+      resolve(false);
+    };
+  });
+}
+
 async function removeKitchenItem(id) {
-  if (!confirm("Remove this ingredient?")) return;
+  const confirmed = await customConfirm("Remove this ingredient?");
+  if (!confirmed) return;
+
   await fetch(`/api/inventory/${id}`, { method: "DELETE" });
   fetchAndRenderKitchen();
 }
+
 
 // Close modal helper 
 function closeKitchenModal(id) {
@@ -2053,19 +2092,60 @@ async function submitSpoilage() {
 });
 
         const data = await res.json();
+        
+        function showPopup(message, type = "success") {
+    // Colors based on success or error
+    const bg = type === "success" ? "bg-green-600" : "bg-red-600";
+
+    // Create popup
+    const popup = document.createElement("div");
+    popup.className = `
+        fixed top-5 right-5 z-[9999]
+        text-white px-4 py-3 rounded-lg shadow-lg
+        ${bg} animate-fade-in
+    `;
+    popup.textContent = message;
+
+    // Add fade-out animation
+    popup.style.transition = "opacity 0.5s ease";
+
+    // Add to page
+    document.body.appendChild(popup);
+
+    // Auto-remove after 2.5 sec
+    setTimeout(() => {
+        popup.style.opacity = "0";
+        setTimeout(() => popup.remove(), 500);
+    }, 2500);
+}
+
+// Add animation if not existing
+if (!document.getElementById("popup-animation-style")) {
+    const style = document.createElement("style");
+    style.id = "popup-animation-style";
+    style.textContent = `
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.25s ease-out; }
+    `;
+    document.head.appendChild(style);
+}
+
 
         if (res.ok) {
-            alert("Spoilage/loss recorded!");
-            closeSpoilageModal();
-            fetchAndRenderKitchen(); // refresh the table
-        } else {
-            console.error("Error:", data);
-            alert("Failed to record spoilage/loss.");
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Error submitting spoilage/loss.");
-    }
+    showPopup("Spoilage/loss recorded!", "success");
+    closeSpoilageModal();
+    fetchAndRenderKitchen();
+} else {
+    console.error("Error:", data);
+    showPopup("Failed to record spoilage/loss.", "error");
+}
+} catch (err) {
+    console.error(err);
+    showPopup("Error submitting spoilage/loss.", "error");
+}
 }
 
 // Farm Inventory

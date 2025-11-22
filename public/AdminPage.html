@@ -207,7 +207,7 @@
     <div id="roomModalButtons" class="flex gap-4 mt-4">
       <button id="checkInBtn" class="px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">Check-in</button>
       <button id="checkOutBtn" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Check-out</button>
-      <button id="cancelRoomBtn" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancel</button>
+      <button id="cancelRoomBtn" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancel Reservation</button>
     </div>
   </div>
 </div>
@@ -224,7 +224,7 @@
     <div id="eventModalButtons" class="flex gap-4 mt-4">
       <button id="approveBtn" class="px-4 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700">Approve</button>
       <button id="disapproveBtn" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Disapprove</button>
-      <button id="cancelEventBtn" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancel</button>
+      <button id="cancelEventBtn" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Cancel Reservation</button>
       <button id="startEventBtn" class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">Start</button>
       <button id="endEventBtn" class="px-4 py-2 text-white rounded-lg bg-sky-600 hover:bg-sky-700">End</button>
     </div>
@@ -437,7 +437,7 @@
 
 
 <!-- Add Food Modal -->
-<div id="addFoodModal" class="fixed flex inset-0 z-50 flex items-center justify-center hidden p-4 bg-black bg-opacity-50">
+<div id="addFoodModal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 bg-black bg-opacity-50">
   <div class="relative w-full max-w-2xl p-6 bg-white rounded-2xl">
     <h2 class="mb-4 text-xl font-bold">Add Food Item</h2>
     <form id="addFoodForm" class="space-y-4">
@@ -481,60 +481,60 @@
 
 
 <!-- Edit Ingredients Modal -->
-<div id="editIngredientsModal" class="fixed flex inset-0 bg-black bg-opacity-50 hidden z-50 p-4 items-center justify-center">
-  <div class="bg-white w-full max-w-2xl rounded-2xl p-6">
-    <h2 class="text-xl font-bold mb-4">Edit Ingredients</h2>
+<div id="editIngredientsModal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 bg-black bg-opacity-50">
+  <div class="w-full max-w-2xl p-6 bg-white rounded-2xl">
+    <h2 class="mb-4 text-xl font-bold">Edit Ingredients</h2>
 
     <form id="editIngredientsForm" class="space-y-4">
       <input type="hidden" id="editFoodId">
 
       <div>
         <label class="font-medium">Ingredients</label>
-        <div id="editIngredientList" class="border rounded p-3 max-h-60 overflow-y-auto space-y-2"></div>
+        <div id="editIngredientList" class="p-3 space-y-2 overflow-y-auto border rounded max-h-60"></div>
       </div>
 
       <div class="flex justify-end gap-2 pt-4">
         <button type="button" onclick="closeEditIngredients()" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Save</button>
+        <button type="submit" class="px-4 py-2 text-white bg-blue-600 rounded-lg">Save</button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Add Room Modal -->
-<div id="addRoomModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+<div id="addRoomModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50">
   <div class="bg-white p-6 rounded-lg shadow w-[450px]">
-    <h2 class="text-xl font-bold mb-4">Add New Room</h2>
+    <h2 class="mb-4 text-xl font-bold">Add New Room</h2>
 
     <form id="addRoomForm">
 
       <label>Room Name</label>
-      <input type="text" name="room_name" class="w-full p-2 border rounded mb-3" required>
+      <input type="text" name="room_name" class="w-full p-2 mb-3 border rounded" required>
 
       <label>Description</label>
-      <textarea name="description" class="w-full p-2 border rounded mb-3" required></textarea>
+      <textarea name="description" class="w-full p-2 mb-3 border rounded" required></textarea>
 
       <label>Min Capacity</label>
-      <input type="number" name="min_capacity" class="w-full p-2 border rounded mb-3" required>
+      <input type="number" name="min_capacity" class="w-full p-2 mb-3 border rounded" required>
 
       <label>Max Capacity</label>
-      <input type="number" name="max_capacity" class="w-full p-2 border rounded mb-3" required>
+      <input type="number" name="max_capacity" class="w-full p-2 mb-3 border rounded" required>
 
       <label>Price</label>
-      <input type="number" name="price" class="w-full p-2 border rounded mb-3" required>
+      <input type="number" name="price" class="w-full p-2 mb-3 border rounded" required>
 
       <label>Room Image</label>
-      <input type="file" name="image" accept="image/*" class="w-full p-2 border rounded mb-3">
+      <input type="file" name="image" accept="image/*" class="w-full p-2 mb-3 border rounded">
 
       <label>Carousel Images (Multiple)</label>
-      <input type="file" name="carousel_images[]" multiple accept="image/*" class="w-full p-2 border rounded mb-3">
+      <input type="file" name="carousel_images[]" multiple accept="image/*" class="w-full p-2 mb-3 border rounded">
 
       <label>Amenities (Comma-separated)</label>
-      <input type="text" name="amenities" class="w-full p-2 border rounded mb-4" placeholder="WiFi, Aircon, TV">
+      <input type="text" name="amenities" class="w-full p-2 mb-4 border rounded" placeholder="WiFi, Aircon, TV">
 
       <div class="flex justify-end gap-3">
         <button type="button" onclick="closeAddRoomModal()" class="px-3 py-2 bg-gray-300 rounded">Cancel</button>
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+        <button type="submit" class="px-4 py-2 text-white bg-blue-600 rounded">Save</button>
       </div>
 
     </form>
