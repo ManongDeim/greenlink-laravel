@@ -161,6 +161,18 @@ function confirmOrder() {
 
     document.getElementById("paymentSummary").innerHTML = summary;
 
+    const date = document.getElementById("pickupDate").value;
+    const hour = document.getElementById("hourSelect").value;
+    const minute = document.getElementById("minuteSelect").value;
+    const time = `${hour}:${minute}`;
+
+    if (!date || !hour || !minute) {
+      alert("Please select both date and time before confirming.");
+      return;
+    }
+
+    alert(`Order confirmed!\nDate: ${date}\nTime: ${time}`);
+
     closeModal();
     document.getElementById("paymentModal").classList.remove("hidden");
     
@@ -430,21 +442,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  function confirmOrder() {
-    const date = document.getElementById("pickupDate").value;
-    const hour = document.getElementById("hourSelect").value;
-    const minute = document.getElementById("minuteSelect").value;
-    const time = `${hour}:${minute}`;
 
-    if (!date || !hour || !minute) {
-      alert("Please select both date and time before confirming.");
-      return;
-    }
-
-    alert(`Order confirmed!\nDate: ${date}\nTime: ${time}`);
-    closeModal();
-  }
-
-  function closeModal() {
-    document.getElementById("checkoutModal").classList.add("hidden");
-  }

@@ -115,8 +115,11 @@ public function createPaymentLink(Request $request)
         return redirect('/pages/paymentFailed.html');
     }
 
+     // Determine proper payment_status
+    $status = $reservation->payment_method === 'Down Payment' ? 'Down Paid' : 'Paid';
+
     // Update payment_status to Paid
-    $reservation->update(['payment_status' => 'Paid']);
+    $reservation->update(['payment_status' => $status]);
     Log::info("Reservation updated to Paid for ref: {$ref}");
 
     // Redirect to success page
