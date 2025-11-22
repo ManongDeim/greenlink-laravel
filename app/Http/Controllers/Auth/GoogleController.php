@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\GoogleUser;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\GoogleProvider;
 
@@ -25,6 +26,12 @@ class GoogleController extends Controller
         $googleName = $googleUserData->getName();
         $googleAvatar = $googleUserData->getAvatar();
 
+        Log::info('Google callback called', [
+            'email' => $email,
+            'googleName' => $googleName,
+            'googleAvatar' => $googleAvatar,
+        ]);
+
         // 1) Create main User only if not exists. Do NOT overwrite existing name.
         $user = User::firstOrCreate(
             ['email' => $email],
@@ -34,11 +41,13 @@ class GoogleController extends Controller
             ]
         );
 
-        // 2) Create or update GoogleUser record.
+        Log::info('Main user found or created', ['user' => $user]);
+
+        // 2) Create or update GoogleUser record
         $googleUser = GoogleUser::where('user_id', $user->id)->first();
 
         if (!$googleUser) {
-            // Create with values from Google
+            // First time login, create record
             $googleUser = GoogleUser::create([
                 'user_id' => $user->id,
                 'email'   => $email,
@@ -46,21 +55,30 @@ class GoogleController extends Controller
                 'avatar'  => $googleAvatar,
                 'role'    => 'customer'
             ]);
+            Log::info('GoogleUser created', ['googleUser' => $googleUser]);
         } else {
-            // Update name/email — but only update avatar if the existing avatar is NOT a custom upload
-            // We treat custom avatars as local paths beginning with '/avatars' (you store custom avatars there)
-            $googleUser->name = $googleName;
-            $googleUser->email = $email;
-
+            // Only update Google avatar if the user hasn't uploaded a custom one
             $existingAvatar = $googleUser->avatar ?? null;
-            $isCustom = $existingAvatar && str_starts_with($existingAvatar, '/avatars');
+            $isCustomAvatar = $existingAvatar && str_starts_with($existingAvatar, '/avatars');
 
-            if (!$isCustom) {
-                // safe to overwrite avatar with Google avatar
+            if (!$isCustomAvatar) {
                 $googleUser->avatar = $googleAvatar;
+                Log::info('Google avatar updated', ['avatar' => $googleAvatar]);
+            } else {
+                Log::info('Custom avatar preserved', ['avatar' => $existingAvatar]);
             }
 
+            // Only set name if empty (first login)
+            if (!$googleUser->name || $googleUser->name === $googleName) {
+                $googleUser->name = $googleName;
+                Log::info('GoogleUser name set', ['name' => $googleName]);
+            } else {
+                Log::info('Custom name preserved', ['name' => $googleUser->name]);
+            }
+
+            $googleUser->email = $email; // keep email in sync
             $googleUser->save();
+            Log::info('GoogleUser saved', ['googleUser' => $googleUser]);
         }
 
         // Login main user
