@@ -1,28 +1,54 @@
-const editBtn = document.getElementById("editBtn");
+document.addEventListener("DOMContentLoaded", async function () {
+  const editBtn = document.getElementById("editBtn");
   const saveBtn = document.getElementById("saveBtn");
   const nameInput = document.getElementById("name");
-  const emailInput = document.getElementById("email");
   const avatarUpload = document.getElementById("avatarUpload");
   const avatarPreview = document.getElementById("avatarPreview");
+  const idUpload = document.getElementById("idUpload");
+  const statusBox = document.getElementById("statusBox");
+
+  // Fetch user data
+  const profileRes = await fetch("/profile-data");
+  const profileData = await profileRes.json();
+  if (profileData.success) {
+    const user = profileData.user;
+    nameInput.value = user.name || "";
+    avatarPreview.src = user.avatar || "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+    if (user.id_status) {
+      statusBox.innerHTML = `Status: <span class="font-medium">${user.id_status}</span>`;
+    }
+  }
 
   editBtn.addEventListener("click", () => {
     nameInput.disabled = false;
-    emailInput.disabled = false;
     editBtn.classList.add("hidden");
     saveBtn.classList.remove("hidden");
   });
 
-  document.getElementById("profileForm").addEventListener("submit", (e) => {
+  document.getElementById("profileForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    nameInput.disabled = true;
-    emailInput.disabled = true;
-    editBtn.classList.remove("hidden");
-    saveBtn.classList.add("hidden");
-    alert("Profile updated successfully!");
+    const formData = new FormData();
+    formData.append("full_name", nameInput.value);
+    if (avatarUpload.files.length) {
+      formData.append("avatar", avatarUpload.files[0]);
+    }
+
+    const res = await fetch("/profile-update", {
+      method: "POST",
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      nameInput.disabled = true;
+      editBtn.classList.remove("hidden");
+      saveBtn.classList.add("hidden");
+      avatarPreview.src = data.user.avatar;
+      alert("Profile updated successfully!");
+    }
   });
 
-  avatarUpload.addEventListener("change", (event) => {
-    const file = event.target.files[0];
+  avatarUpload.addEventListener("change", (e) => {
+    const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => avatarPreview.src = reader.result;
@@ -30,13 +56,22 @@ const editBtn = document.getElementById("editBtn");
     }
   });
 
-  document.getElementById("submitIDBtn").addEventListener("click", () => {
-    const fileInput = document.getElementById("idUpload");
-    if (!fileInput.files.length) {
+  document.getElementById("submitIDBtn").addEventListener("click", async () => {
+    if (!idUpload.files.length) {
       alert("Please upload a valid ID before submitting.");
       return;
     }
-    document.getElementById("statusBox").innerHTML =
-      'Status: <span class="font-medium text-yellow-600">Pending Admin Validation</span>';
-    alert("Your ID has been submitted.");
+    const formData = new FormData();
+    formData.append("id_file", idUpload.files[0]);
+
+    const res = await fetch("/submit-id", {
+      method: "POST",
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      statusBox.innerHTML = `Status: <span class="font-medium">${data.user.id_status}</span>`;
+      alert("Your ID has been submitted.");
+    }
   });
+});

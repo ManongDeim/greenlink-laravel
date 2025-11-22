@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 use App\Models\User; 
 
 
 class GoogleUser extends Model
 {
     use HasFactory;
+    use Notifiable;
 
     protected $table = 'google_users';
     protected $primaryKey = 'user_id'; 
@@ -18,8 +20,11 @@ class GoogleUser extends Model
 
     protected $fillable = [
         'user_id',
+        'name',
         'email',
         'avatar',
+        'id_photo',
+        'id_status'
     ];
 
     public function user()

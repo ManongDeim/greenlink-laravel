@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\FoodProductController;
 use App\Http\Controllers\Api\RoomSeederController;
 use App\Http\Controllers\Api\KitchenInventoryController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Models\FoodOrderModel;
 use App\Models\KitchenInventory;
 
@@ -123,4 +124,12 @@ Route::prefix('api/event-management')->group(function () {
     Route::post('/edit-event-name/{id}', [EventSeederController::class, 'editName']);
     Route::post('/edit-pax/{id}', [EventSeederController::class, 'editPax']);
     Route::post('/remove/{id}', [EventSeederController::class, 'destroy']);
+});
+
+// Profile Page Routes
+
+Route::middleware('auth')->group(function () {
+   Route::get('/profile-data', [ProfileController::class, 'getProfile']);
+   Route::post('/profile-update', [ProfileController::class, 'updateProfile']);
+   Route::post('/submit-id', [ProfileController::class, 'submitID']);
 });
