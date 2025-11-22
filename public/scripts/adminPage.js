@@ -2519,12 +2519,12 @@ async function removeRoom(id) {
     if (!res.ok) {
       const errorText = await res.text();
       console.error("Server error:", errorText);
-      throw new Error("Failed to delete food item.");
+      throw new Error("Failed to delete room.");
     }
 
     const data = await res.json(); // ONLY read once
 
-    showToast(data.message || "Food item removed", "success");
+    showToast(data.message || "Room removed", "success");
     await fetchAndRenderFood();
   } catch (err) {
     console.error(err);
