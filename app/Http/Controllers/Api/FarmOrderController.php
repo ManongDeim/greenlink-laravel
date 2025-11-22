@@ -187,7 +187,7 @@ class FarmOrderController extends Controller
         Log::info("⚠️ Payment already marked as Paid for ref: {$refNumber}, skipping deduction.");
     }
 
-    GlobalMailHelper::notifyUser(
+    GlobalMailHelper::notifyCustomers(
         $order->user->email,
         'Farm Order Payment Successful',
         "Your payment for Farm Order {$order->farmOrder_id} has been received successfully. Thank you for your purchase!"
