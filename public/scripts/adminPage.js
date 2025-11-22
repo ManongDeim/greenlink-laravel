@@ -2508,7 +2508,7 @@ document.getElementById("addRoomForm").addEventListener("submit", async function
 });
 
 //Delete Room
-async function removeFoodItem(id) {
+async function removeRoom(id) {
   if (!confirm("Are you sure you want to delete this room?")) return;
 
   try {
