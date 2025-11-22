@@ -1409,33 +1409,56 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // =================== Sidebar Button Logic ===================
-  sidebarButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
+try {
+    console.log("🔍 Initializing sidebar buttons...");
 
-      if (btn.classList.contains("submenu-toggle")) return;
+    sidebarButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            console.log("▶ Sidebar clicked:", btn.dataset.section);
 
-      // Reset all buttons
-      sidebarButtons.forEach(b => {
-        b.classList.remove("bg-teal-600", "text-white", "hover:bg-teal-700", "hover:border-teal-700");
-        if (!b.classList.contains("text-red-700")) {
-          b.classList.add("bg-gray-100", "text-gray-700", "hover:bg-gray-200", "hover:border-gray-400");
-        }
-      });
+            if (btn.classList.contains("submenu-toggle")) {
+                console.log("⏩ Submenu toggle button, skipping highlight logic");
+                return;
+            }
 
-      // Highlight active
-      btn.classList.remove("bg-gray-100", "text-gray-700", "hover:bg-gray-200", "hover:border-gray-400");
-      btn.classList.add("bg-teal-600", "text-white", "hover:bg-teal-700", "hover:border-teal-700");
+            // Reset all buttons
+            sidebarButtons.forEach(b => {
+                b.classList.remove("bg-teal-600", "text-white", "hover:bg-teal-700", "hover:border-teal-700");
+                if (!b.classList.contains("text-red-700")) {
+                    b.classList.add("bg-gray-100", "text-gray-700", "hover:bg-gray-200", "hover:border-gray-400");
+                }
+            });
 
-      const section = sections[btn.dataset.section];
-      if (section.render) section.render();
-      else if (section.custom) content.innerHTML = section.custom;
-      else
-        content.innerHTML = `
-          <h2 class="mb-4 text-xl font-bold text-teal-700">${section.title}</h2>
-          <p class="text-gray-700">${section.text}</p>
-        `;
+            // Highlight active
+            btn.classList.remove("bg-gray-100", "text-gray-700", "hover:bg-gray-200", "hover:border-gray-400");
+            btn.classList.add("bg-teal-600", "text-white", "hover:bg-teal-700", "hover:border-teal-700");
+
+            console.log("📌 Loading section:", btn.dataset.section);
+
+            const section = sections[btn.dataset.section];
+            if (!section) {
+                console.error("❌ No section found for:", btn.dataset.section);
+                return;
+            }
+
+            if (section.render) {
+                console.log("🎨 Rendering custom section");
+                section.render();
+            } else if (section.custom) {
+                console.log("📄 Loading custom HTML section");
+                content.innerHTML = section.custom;
+            } else {
+                console.log("📝 Loading default title/text section");
+                content.innerHTML = `
+                  <h2 class="mb-4 text-xl font-bold text-teal-700">${section.title}</h2>
+                  <p class="text-gray-700">${section.text}</p>
+                `;
+            }
+        });
     });
-  });
+} catch (err) {
+    console.error("❌ ERROR in Sidebar Button Logic:", err);
+}
 
   // =================== Submenu Logic ===================
   // Food Orders submenu

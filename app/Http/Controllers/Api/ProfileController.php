@@ -1,30 +1,31 @@
 <?php
 
-// app/Http/Controllers/ProfileController.php
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\GoogleUser;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
     public function getProfile(Request $request)
     {
-        $userEmail = $request->user()->email;
-        $user = GoogleUser::where('email', $userEmail)->first();
+        $user = GoogleUser::where('email', $request->user()->email)->first();
 
         if (!$user) return response()->json(['success' => false, 'message' => 'User not found']);
 
-        return response()->json(['success' => true, 'user' => $user]);
+        return response()->json([
+            'success' => true,
+            'user' => $user
+        ]);
     }
 
     public function updateProfile(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'avatar' => 'nullable|image|max:2048',
+            'avatar' => 'nullable|image|max:2048'
         ]);
 
         $user = GoogleUser::where('email', $request->user()->email)->first();
@@ -32,19 +33,23 @@ class ProfileController extends Controller
 
         $user->name = $request->name;
 
+        // --------- AVATAR UPLOAD (food product method) ----------
         if ($request->hasFile('avatar')) {
-            $file = $request->file('avatar');
-            $filename = uniqid().'.'.$file->getClientOriginalExtension();
-            $path = public_path('avatars');
-            if (!file_exists($path)) mkdir($path, 0775, true);
-            $file->move($path, $filename);
 
-            if ($user->avatar && file_exists(public_path($user->avatar))) unlink(public_path($user->avatar));
+            // Delete old file
+            if ($user->avatar && Storage::disk('public')->exists(str_replace("/storage/", "", $user->avatar))) {
+                Storage::disk('public')->delete(str_replace("/storage/", "", $user->avatar));
+            }
 
-            $user->avatar = "/avatars/$filename";
+            // Save new image
+            $path = $request->file('avatar')->store('avatars', 'public');
+
+            // Store database path
+            $user->avatar = "/storage/" . $path;
         }
 
         $user->save();
+
         return response()->json(['success' => true, 'user' => $user]);
     }
 
@@ -57,15 +62,14 @@ class ProfileController extends Controller
         $user = GoogleUser::where('email', $request->user()->email)->first();
         if (!$user) return response()->json(['success' => false, 'message' => 'User not found']);
 
-        $file = $request->file('id_photo');
-        $filename = uniqid().'.'.$file->getClientOriginalExtension();
-        $path = public_path('ids');
-        if (!file_exists($path)) mkdir($path, 0775, true);
-        $file->move($path, $filename);
+        // --------- ID UPLOAD (food product method) ----------
+        if ($user->id_photo && Storage::disk('public')->exists(str_replace("/storage/", "", $user->id_photo))) {
+            Storage::disk('public')->delete(str_replace("/storage/", "", $user->id_photo));
+        }
 
-        if ($user->id_photo && file_exists(public_path($user->id_photo))) unlink(public_path($user->id_photo));
+        $path = $request->file('id_photo')->store('ids', 'public');
 
-        $user->id_photo = "/ids/$filename";
+        $user->id_photo = "/storage/" . $path;
         $user->id_status = "Pending Validation";
         $user->save();
 
