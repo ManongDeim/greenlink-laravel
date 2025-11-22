@@ -39,26 +39,20 @@ class ProfileController extends Controller
         $google = GoogleUser::where('email', $userEmail)->first();
         if (!$google) return response()->json(['success' => false, 'message' => 'User not found']);
 
-        $google->name = $request->input('ame');
-
         if ($request->hasFile('avatar')) {
-            $file = $request->file('avatar');
+    $file = $request->file('avatar');
+    $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+    $path = public_path('avatars');
+    if (!file_exists($path)) mkdir($path, 0775, true);
+    $file->move($path, $filename);
 
-            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            $path = public_path('avatars');
-            if (!file_exists($path)) mkdir($path, 0775, true);
+    if ($google->avatar && file_exists(public_path(str_replace(url('/'), '', $google->avatar)))) {
+        try { unlink(public_path(str_replace(url('/'), '', $google->avatar))); } catch (\Throwable $e) { Log::warning("Could not unlink old avatar: ".$e->getMessage()); }
+    }
 
-            // Move file into public/avatars
-            $file->move($path, $filename);
+    $google->avatar = asset("avatars/{$filename}");
+}
 
-            // Remove old local avatar if it exists
-            if ($google->avatar && file_exists(public_path($google->avatar))) {
-                try { unlink(public_path($google->avatar)); } catch (\Throwable $e) { Log::warning("Could not unlink old avatar: ".$e->getMessage()); }
-            }
-
-            // Save relative path
-            $google->avatar = "/avatars/{$filename}";
-        }
 
         $google->save();
 
