@@ -38,6 +38,7 @@ class GoogleController extends Controller
         ['user_id' => $user->id],
         [
             'email'  => $googleUserData->getEmail(),
+            'name'=> $googleUserData->getName(),
             'avatar' => $googleUserData->getAvatar(),
             'role'   => 'customer' // default role
         ]
