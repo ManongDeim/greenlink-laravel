@@ -144,5 +144,5 @@ Route::delete('/delete-food/{id}', [FoodProductController::class, 'destroy']);
 
 //Room Routes
 
-Route::post('/rooms/add', [RoomController::class, 'store']);
+Route::post('/rooms/add', [RoomSeederController::class, 'store']);
 
