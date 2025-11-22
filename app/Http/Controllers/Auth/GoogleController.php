@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -7,7 +6,6 @@ use App\Models\User;
 use App\Models\GoogleUser;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Contracts\Provider as Provider;
 use Laravel\Socialite\Two\GoogleProvider;
 
 class GoogleController extends Controller
@@ -17,39 +15,57 @@ class GoogleController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-   public function callback()
-{
-    /** @var GoogleProvider $driver */
-    $driver = Socialite::driver('google');
+    public function callback()
+    {
+        /** @var GoogleProvider $driver */
+        $driver = Socialite::driver('google');
+        $googleUserData = $driver->user();
 
-    $googleUserData = $driver->user();
+        $email = $googleUserData->getEmail();
+        $googleName = $googleUserData->getName();
+        $googleAvatar = $googleUserData->getAvatar();
 
-    // Create or update main User
-    $user = User::updateOrCreate(
-        ['email' => $googleUserData->getEmail()],
-        [
-            'name'     => $googleUserData->getName(),
-            'password' => bcrypt(str()->random(16)),
-        ]
-    );
+        // 1) Create main User only if not exists. Do NOT overwrite existing name.
+        $user = User::firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => $googleName,
+                'password' => bcrypt(str()->random(16)),
+            ]
+        );
 
-    // Create or update GoogleUser
-    $googleUser = GoogleUser::firstOrCreate(
-        ['user_id' => $user->id],
-        [
-            'email'  => $googleUserData->getEmail(),
-            'name'=> $googleUserData->getName(),
-            'avatar' => $googleUserData->getAvatar(),
-            'role'   => 'customer' // default role
-        ]
-    );
+        // 2) Create or update GoogleUser record.
+        $googleUser = GoogleUser::where('user_id', $user->id)->first();
 
-    
+        if (!$googleUser) {
+            // Create with values from Google
+            $googleUser = GoogleUser::create([
+                'user_id' => $user->id,
+                'email'   => $email,
+                'name'    => $googleName,
+                'avatar'  => $googleAvatar,
+                'role'    => 'customer'
+            ]);
+        } else {
+            // Update name/email — but only update avatar if the existing avatar is NOT a custom upload
+            // We treat custom avatars as local paths beginning with '/avatars' (you store custom avatars there)
+            $googleUser->name = $googleName;
+            $googleUser->email = $email;
 
-    // ✅ Log in the main User model
-    Auth::login($user);
+            $existingAvatar = $googleUser->avatar ?? null;
+            $isCustom = $existingAvatar && str_starts_with($existingAvatar, '/avatars');
 
-    return redirect('/');
-}
+            if (!$isCustom) {
+                // safe to overwrite avatar with Google avatar
+                $googleUser->avatar = $googleAvatar;
+            }
 
+            $googleUser->save();
+        }
+
+        // Login main user
+        Auth::login($user);
+
+        return redirect('/');
+    }
 }

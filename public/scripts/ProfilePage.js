@@ -30,9 +30,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("profileForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("name", nameInput.value);
-    if (avatarUpload.files.length) {
-      formData.append("avatar", avatarUpload.files[0]);
+formData.append("name", nameInput.value);
+if (avatarUpload.files.length) {
+  formData.append("avatar", avatarUpload.files[0]);
     }
 
     const res = await fetch("/profile-update", {
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
     const formData = new FormData();
-    formData.append("id_photo", idUpload.files[0]);
+formData.append("id_photo", idUpload.files[0]);
 
     const res = await fetch("/submit-id", {
       method: "POST",
