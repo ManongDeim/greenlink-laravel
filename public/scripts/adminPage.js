@@ -1,20 +1,50 @@
-// ================= Toast Function =================
-function showToast(message, type = "success", duration = 3000) {
-  const container = document.getElementById("toast-container");
-  if (!container) return;
+// 🔔 Global Toast Function
+function showToast(message, type = "success") {
+  // Remove old toast if it exists
+  const old = document.getElementById("globalToast");
+  if (old) old.remove();
+
+  const bg =
+    type === "error"
+      ? "bg-red-600"
+      : type === "warning"
+      ? "bg-yellow-500"
+      : "bg-green-600";
 
   const toast = document.createElement("div");
-  toast.className = `toast ${type}`;
+  toast.id = "globalToast";
+  toast.className = `
+    fixed top-5 right-5 z-[9999]
+    text-white px-4 py-3 rounded-lg shadow-lg
+    ${bg} animate-slide-in
+  `;
   toast.textContent = message;
 
-  container.appendChild(toast);
+  toast.style.transition = "opacity 0.5s ease";
 
-  setTimeout(() => toast.classList.add("show"), 100);
+  document.body.appendChild(toast);
 
+  // Auto-remove after 2.5 sec
   setTimeout(() => {
-    toast.classList.remove("show");
-    setTimeout(() => toast.remove(), 300);
-  }, duration);
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 500);
+  }, 2500);
+}
+
+// Animation style (added once)
+if (!document.getElementById("toast-animation-style")) {
+  const style = document.createElement("style");
+  style.id = "toast-animation-style";
+  style.textContent = `
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slide-in {
+      animation: slide-in 0.25s ease-out;
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 // ================= Templates =================
@@ -2149,20 +2179,92 @@ if (!document.getElementById("popup-animation-style")) {
 }
 
 // Farm Inventory
+function showPopup(message, type = "info") {
+  // Remove old popup if it exists
+  const existing = document.getElementById("dynamicPopup");
+  if (existing) existing.remove();
 
+  // Overlay
+  const overlay = document.createElement("div");
+  overlay.id = "dynamicPopup";
+  overlay.className =
+    "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50";
+
+  // Box
+  const box = document.createElement("div");
+  box.className =
+    "w-full max-w-sm p-6 text-center bg-white rounded-lg shadow-lg";
+
+  // Message
+  const msg = document.createElement("p");
+  msg.className = "mb-4 text-gray-800";
+  msg.textContent = message;
+
+  // Button
+  const btn = document.createElement("button");
+  btn.className =
+    "px-4 py-2 text-white bg-teal-600 rounded hover:bg-teal-700";
+  btn.textContent = "OK";
+  btn.addEventListener("click", () => overlay.remove());
+
+  box.appendChild(msg);
+  box.appendChild(btn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+ function showConfirmPopup(message, onConfirm) {
+  const overlay = document.createElement("div");
+  overlay.className =
+    "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50";
+
+  const box = document.createElement("div");
+  box.className =
+    "w-full max-w-sm p-6 text-center bg-white rounded-lg shadow-lg";
+
+  const msg = document.createElement("p");
+  msg.className = "mb-5 text-gray-800";
+  msg.textContent = message;
+
+  const btnWrap = document.createElement("div");
+  btnWrap.className = "flex justify-center gap-4";
+
+  const yesBtn = document.createElement("button");
+  yesBtn.className =
+    "px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700";
+  yesBtn.textContent = "Yes";
+  yesBtn.onclick = () => {
+    overlay.remove();
+    onConfirm();
+  };
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className =
+    "px-4 py-2 text-gray-800 bg-gray-300 rounded hover:bg-gray-400";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.onclick = () => overlay.remove();
+
+  btnWrap.appendChild(yesBtn);
+  btnWrap.appendChild(cancelBtn);
+
+  box.appendChild(msg);
+  box.appendChild(btnWrap);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
 
 async function removeFarmItem(id) {
-  if (!confirm("Are you sure you want to remove this item?")) return;
+  showConfirmPopup("Are you sure you want to remove this item?", async () => {
+    try {
+      const res = await fetch(`/api/farmInventory/${id}`, { method: "DELETE" });
+      const data = await res.json();
 
-  try {
-    const res = await fetch(`/api/farmInventory/${id}`, { method: "DELETE" });
-    const data = await res.json();
-
-    showToast(data.message);
-    fetchAndRenderFarm();
-  } catch (err) {
-    showToast("Failed to remove item", "error");
-  }
+      showPopup(data.message, "success");
+      fetchAndRenderFarm();
+    } catch (err) {
+      showPopup("Failed to remove item", "error");
+    }
+  });
 }
 
 // 🌾 --- Farm Inventory Modal Logic ---
