@@ -36,7 +36,7 @@ Route::middleware(['auth:sanctum'])->get('/user-info', function (Request $reques
         'is_logged_in' => true,
         'user' => [
             'id'     => $googleUser->user_id,
-            'name'   => $googleUser->full_name,
+            'name'   => $googleUser->name,
             'email'  => $googleUser->email,
             'avatar' => $googleUser->avatar,
             'role'   => $googleUser->role ?? 'customer',
