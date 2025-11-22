@@ -78,4 +78,70 @@ public function replacePhoto(Request $request, $id)
     return response()->json(['success' => true, 'message' => 'Product photo replaced successfully']);
 }
 
+
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'room_name' => 'required|string|max:255',
+        'description' => 'required|string',
+        'min_capacity' => 'required|integer|min:1',
+        'max_capacity' => 'required|integer|min:1',
+        'price' => 'required|numeric|min:0',
+        'image' => 'nullable|image|max:2048',
+        'carousel_images.*' => 'nullable|image|max:2048',
+        'amenities' => 'nullable|string',
+    ]);
+
+    // Create room
+    $room = Room::create([
+        'room_name' => $validated['room_name'],
+        'description' => $validated['description'],
+        'min_capacity' => $validated['min_capacity'],
+        'max_capacity' => $validated['max_capacity'],
+        'price' => $validated['price'],
+        'image' => '',
+        'carousel_images' => json_encode([]),
+        'amenities' => json_encode([]),
+    ]);
+
+    // Handle main image
+    if ($request->hasFile('image')) {
+        $filename = uniqid().".".$request->image->getClientOriginalExtension();
+        $path = realpath(base_path('../'))."/rooms";
+        
+        if (!file_exists($path)) mkdir($path, 0775, true);
+
+        $request->image->move($path, $filename);
+        $room->image = "/rooms/".$filename;
+    }
+
+    // Handle carousel images
+    $carousel = [];
+    if ($request->hasFile('carousel_images')) {
+        $path = realpath(base_path('../'))."/rooms_carousel";
+        if (!file_exists($path)) mkdir($path, 0775, true);
+
+        foreach ($request->file('carousel_images') as $file) {
+            $filename = uniqid().".".$file->getClientOriginalExtension();
+            $file->move($path, $filename);
+            $carousel[] = "/rooms_carousel/".$filename;
+        }
+    }
+
+    $room->carousel_images = json_encode($carousel);
+
+    // Amenities
+    if (!empty($validated['amenities'])) {
+        $room->amenities = json_encode(array_map('trim', explode(",", $validated['amenities'])));
+    }
+
+    $room->save();
+
+    return response()->json([
+        "success" => true,
+        "message" => "Room added successfully"
+    ]);
 }
+
+}
+

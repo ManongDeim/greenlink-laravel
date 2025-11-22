@@ -141,3 +141,8 @@ Route::get('/food-products/{id}/ingredients', [FoodProductController::class, 'ge
 Route::post('/food-products/{id}/ingredients/update', [FoodProductController::class, 'updateIngredients']);
 Route::delete('/delete-food/{id}', [FoodProductController::class, 'destroy']);
 
+
+//Room Routes
+
+Route::post('/rooms/add', [RoomController::class, 'store']);
+

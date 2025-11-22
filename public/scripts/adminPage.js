@@ -976,7 +976,7 @@ function insertAddRoomButton() {
 
   const btn = document.createElement("button");
   btn.innerHTML = `
-    <span class="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700 transition">
+    <span onclick="openAddRoomModal()" class="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700 transition">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7H5"/>
       </svg>
@@ -988,10 +988,6 @@ function insertAddRoomButton() {
   const wrapper = document.createElement("div");
   wrapper.className = "flex justify-end mb-4"; // button aligned to right inside content
   wrapper.appendChild(btn);
-
-  btn.onclick = () => {
-    openAddFoodModal(); // your modal opening function
-  };
 
   // Insert the button at the top of the main content
   container.prepend(wrapper);
@@ -2474,4 +2470,41 @@ async function removeFoodItem(id) {
     showToast(err.message, "error");
   }
 }
+
+// Add Room 
+
+function openAddRoomModal() {
+  document.getElementById("addRoomModal").classList.remove("hidden");
+}
+
+function closeAddRoomModal() {
+  document.getElementById("addRoomModal").classList.add("hidden");
+  document.getElementById("addRoomForm").reset();
+}
+
+
+document.getElementById("addRoomForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+
+  try {
+    const res = await fetch(`/api/rooms/add`, {
+      method: "POST",
+      body: formData
+    });
+
+    const text = await res.text();
+    console.log("Raw response:", text);
+
+    const data = JSON.parse(text);
+
+    showToast(data.message, "success");
+    closeAddRoomModal();
+    fetchAndRenderRooms();
+  } catch (err) {
+    showToast("Failed to add room: " + err.message, "error");
+  }
+});
+
 

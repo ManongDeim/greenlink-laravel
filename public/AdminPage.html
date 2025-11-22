@@ -501,6 +501,45 @@
   </div>
 </div>
 
+<!-- Add Room Modal -->
+<div id="addRoomModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-lg shadow w-[450px]">
+    <h2 class="text-xl font-bold mb-4">Add New Room</h2>
+
+    <form id="addRoomForm">
+
+      <label>Room Name</label>
+      <input type="text" name="room_name" class="w-full p-2 border rounded mb-3" required>
+
+      <label>Description</label>
+      <textarea name="description" class="w-full p-2 border rounded mb-3" required></textarea>
+
+      <label>Min Capacity</label>
+      <input type="number" name="min_capacity" class="w-full p-2 border rounded mb-3" required>
+
+      <label>Max Capacity</label>
+      <input type="number" name="max_capacity" class="w-full p-2 border rounded mb-3" required>
+
+      <label>Price</label>
+      <input type="number" name="price" class="w-full p-2 border rounded mb-3" required>
+
+      <label>Room Image</label>
+      <input type="file" name="image" accept="image/*" class="w-full p-2 border rounded mb-3">
+
+      <label>Carousel Images (Multiple)</label>
+      <input type="file" name="carousel_images[]" multiple accept="image/*" class="w-full p-2 border rounded mb-3">
+
+      <label>Amenities (Comma-separated)</label>
+      <input type="text" name="amenities" class="w-full p-2 border rounded mb-4" placeholder="WiFi, Aircon, TV">
+
+      <div class="flex justify-end gap-3">
+        <button type="button" onclick="closeAddRoomModal()" class="px-3 py-2 bg-gray-300 rounded">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+      </div>
+
+    </form>
+  </div>
+</div>
 
 
 <div id="toast-container" class="fixed z-50 space-y-2 top-5 right-5"></div>
