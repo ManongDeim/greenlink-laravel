@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\CustomerDashboardController;
 use App\Http\Controllers\Api\KitchenInventoryController;
 use App\Http\Controllers\Api\FarmInventoryController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\ApprovalController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 use App\Models\GoogleUser;
@@ -159,4 +160,9 @@ Route::delete('/rooms/delete-room/{id}', [RoomSeederController::class, 'destroy'
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/submit-review', [ReviewController::class, 'submit']);
 });
+
+// Approval Routes
+Route::get('/google-users', [ApprovalController::class, 'getGoogleUsers']);
+Route::post('/google-users/{id}/update-id-status', [ApprovalController::class, 'updateIdStatus']);
+
 

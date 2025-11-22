@@ -187,6 +187,28 @@ const farmCardTemplate = item => `
   </div>
 `;
 
+const googleUserCardTemplate = user => `
+  <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
+    <img src="${user.id_picture}" alt="ID of ${user.name}" class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
+    
+    <h3 class="text-lg font-semibold text-gray-800 mb-1">${user.name}</h3>
+    <p class="text-sm text-gray-600 mb-4">Email: ${user.email}</p>
+
+    <div class="flex flex-col gap-2">
+      <button
+        onclick="updateIdStatus(${user.id}, 'Validated')"
+        class="px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition text-sm"
+      >Validated</button>
+
+      <button
+        onclick="updateIdStatus(${user.id}, 'Rejected')"
+        class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
+      >Rejected</button>
+    </div>
+  </div>
+`;
+
+
 
 // Generate an order card for a single order
 const foodOrderTemplate = order => {
@@ -1410,6 +1432,29 @@ document.addEventListener('click', () => {
   }
 });
 
+async function fetchAndRenderGoogleUsers() {
+  const container = document.getElementById('content');
+  if (!container) return;
+
+  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+
+  try {
+    const res = await fetch('/api/google-users'); // Your API to get users with id_picture & name
+    const users = await res.json();
+
+    if (!Array.isArray(users) || users.length === 0) {
+      container.innerHTML = `<p class="text-gray-500">No pending ID approvals.</p>`;
+      return;
+    }
+
+    container.innerHTML = users.map(user => googleUserCardTemplate(user)).join('');
+  } catch (err) {
+    console.error('Failed to load google users:', err);
+    container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
+  }
+}
+
+
 
 
 // Side Buttons Logic
@@ -1429,10 +1474,7 @@ document.addEventListener("DOMContentLoaded", () => {
     roomManagement: {render: fetchAndRenderRoom},
     event: { render: fetchAndRenderEventReservations},
     eventManagement: { render: fetchAndRenderEventManagement },
-    cancel: {
-      title: "Cancellation",
-      text: "This is the Cancellation section. Manage cancellations and refund requests here."
-    }
+    idApproval:{ render: fetchAndRenderGoogleUsers },
   };
 
   // =================== Sidebar Button Logic ===================
@@ -2737,3 +2779,26 @@ async function removeRoom(id) {
   }
 }
 
+// Update Status ID Approval
+
+async function updateIdStatus(userId, status) {
+  try {
+    const res = await fetch(`/api/google-users/${userId}/update-id-status`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({ id_status: status })
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || 'Failed to update status');
+
+    alert(`ID status updated to ${status}`);
+    fetchAndRenderGoogleUsers(); // Refresh cards
+  } catch (err) {
+    console.error(err);
+    alert('Failed to update ID status. Try again.');
+  }
+}
