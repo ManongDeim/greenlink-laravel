@@ -457,49 +457,140 @@ document.addEventListener("keydown", function (event) {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const today = new Date().toISOString().split("T")[0];
-  document.getElementById("pickupDate").setAttribute("min", today);
-
+  const pickupDate = document.getElementById("pickupDate");
   const hourSelect = document.getElementById("hourSelect");
   const minuteSelect = document.getElementById("minuteSelect");
   const ampmRadios = document.querySelectorAll('input[name="ampm"]');
 
-  // Function to populate hours based on AM/PM
-  function populateHours(ampm) {
-    hourSelect.innerHTML = ""; // clear existing options
+  // Allowed time window
+  const OPEN_HOUR = 7;   // 7 AM
+  const CLOSE_HOUR = 20; // 8 PM (20:00 in 24h)
 
-    let hours = [];
-    if (ampm === "AM") {
-      hours = [7, 8, 9, 10, 11]; // 7 AM → 11 PM
-    } else {
-      hours = [12, 1, 2, 3, 4, 5, 6, 7, 8]; // 12 PM → 8 PM
-    }
+  // Set today's date as minimum
+  const todayStr = new Date().toISOString().split("T")[0];
+  pickupDate.min = todayStr;
 
-    hours.forEach(hour => {
+  // Populate minutes
+  function populateMinutes() {
+    minuteSelect.innerHTML = "";
+    for (let m = 0; m < 60; m += 5) {
       const option = document.createElement("option");
-      option.value = hour;
-      option.textContent = hour;
-      hourSelect.appendChild(option);
+      option.value = m.toString().padStart(2, "0");
+      option.textContent = m.toString().padStart(2, "0");
+      minuteSelect.appendChild(option);
+    }
+  }
+  populateMinutes();
+
+  // Populate hours based on AM/PM
+  function populateHours(ampm) {
+    hourSelect.innerHTML = "";
+
+    let hours = ampm === "AM"
+      ? [7, 8, 9, 10, 11]        // 7 AM–11 AM
+      : [12, 1, 2, 3, 4, 5, 6, 7, 8]; // 12 PM–8 PM
+
+    hours.forEach(h => {
+      const opt = document.createElement("option");
+      opt.value = h;
+      opt.textContent = h;
+      hourSelect.appendChild(opt);
     });
+
+    disablePastHours();
   }
 
-  // Populate minutes (00–59 in 5-min increments)
-  minuteSelect.innerHTML = "";
-  for (let m = 0; m < 60; m += 5) {
-    const option = document.createElement("option");
-    option.value = m.toString().padStart(2, "0");
-    option.textContent = m.toString().padStart(2, "0");
-    minuteSelect.appendChild(option);
+  // Convert 12h time to 24h
+  function convertTo24(hour, ampm) {
+    hour = parseInt(hour);
+    if (ampm === "PM" && hour !== 12) return hour + 12;
+    if (ampm === "AM" && hour === 12) return 0;
+    return hour;
   }
 
-  // Initial population based on default radio (AM)
+  // Disable past hours (Rule B)
+  function disablePastHours() {
+    if (!pickupDate.value) return;
+
+    const selectedDate = new Date(pickupDate.value);
+    const now = new Date();
+    const isToday = selectedDate.toDateString() === now.toDateString();
+
+    const selectedAMPM = document.querySelector('input[name="ampm"]:checked').value;
+
+    Array.from(hourSelect.options).forEach(opt => {
+      const hour24 = convertTo24(opt.value, selectedAMPM);
+
+      // Disable hours outside allowed window
+      if (hour24 < OPEN_HOUR || hour24 > CLOSE_HOUR) {
+        opt.disabled = true;
+        return;
+      }
+
+      // If today → disable past hours
+      if (isToday && hour24 <= now.getHours()) {
+        opt.disabled = true;
+        opt.classList.add("opacity-40");
+      }
+    });
+
+    // After disabling, check if NO valid hours left
+    const available = Array.from(hourSelect.options).some(opt => !opt.disabled);
+
+    if (!available && isToday) {
+      // Move to tomorrow (Rule B)
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      pickupDate.value = tomorrow.toISOString().split("T")[0];
+
+      populateHours(selectedAMPM); // re-populate for tomorrow
+    }
+  }
+
+  // Disable minutes that are in the past
+  function disablePastMinutes() {
+    populateMinutes(); // Reset minutes first
+
+    if (!pickupDate.value) return;
+
+    const now = new Date();
+    const selectedDate = new Date(pickupDate.value);
+    const isToday = selectedDate.toDateString() === now.toDateString();
+
+    const selectedAMPM = document.querySelector('input[name="ampm"]:checked').value;
+    const selectedHour = hourSelect.value;
+    const selectedHour24 = convertTo24(selectedHour, selectedAMPM);
+
+    if (!selectedHour) return;
+
+    // If today and same hour → restrict minutes
+    if (isToday && selectedHour24 === now.getHours()) {
+      Array.from(minuteSelect.options).forEach(opt => {
+        if (parseInt(opt.value) < now.getMinutes()) {
+          opt.disabled = true;
+          opt.classList.add("opacity-40");
+        }
+      });
+    }
+  }
+
+  // Initial load
   const defaultAMPM = document.querySelector('input[name="ampm"]:checked').value;
   populateHours(defaultAMPM);
 
-  // Update hours when AM/PM radio changes
+  // Events
+  pickupDate.addEventListener("change", () => {
+    const ampm = document.querySelector('input[name="ampm"]:checked').value;
+    populateHours(ampm);
+    disablePastMinutes();
+  });
+
   ampmRadios.forEach(radio => {
     radio.addEventListener("change", () => {
       populateHours(radio.value);
+      disablePastMinutes();
     });
   });
+
+  hourSelect.addEventListener("change", disablePastMinutes);
 });
