@@ -40,52 +40,160 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function openSection(section) {
-    const content = document.getElementById('content');
-    let endpoint, title;
+  const content = document.getElementById('content');
+  let endpoint, title;
 
-    switch(section) {
-      case "foodOrders":
-        endpoint = "/api/customer/food-orders";
-        title = "🍴 Food Orders";
-        break;
-      case "farmOrders":
-        endpoint = "/api/customer/farm-orders";
-        title = "🌾 Farm Orders";
-        break;
-      case "room":
-        endpoint = "/api/customer/room-reservations";
-        title = "🏡 Room Reservations";
-        break;
-      case "event":
-        endpoint = "/api/customer/event-reservations";
-        title = "📅 Event Reservations";
-        break;
-      default:
-        content.innerHTML = "<p>Invalid section selected.</p>";
-        return;
-    }
-
-    content.innerHTML = `<h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2><p>Loading...</p>`;
-
-    try {
-      const res = await fetch(endpoint, { headers: { "Accept": "application/json" } });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      if (!data.length) {
-        content.innerHTML = `<h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2>
-          <p class="text-gray-500">No records found.</p>`;
-        return;
-      }
-
-      const cards = data.map(item => createCard(item, title)).join('');
-      content.innerHTML = `<h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2>
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">${cards}</div>`;
-    } catch(err) {
-      console.error(err);
-      content.innerHTML = `<p class="text-red-500">Failed to load data. ${err.message}</p>`;
-    }
+  switch(section) {
+    case "foodOrders":
+      endpoint = "/api/customer/food-orders";
+      title = "🍴 Food Orders";
+      break;
+    case "farmOrders":
+      endpoint = "/api/customer/farm-orders";
+      title = "🌾 Farm Orders";
+      break;
+    case "room":
+      endpoint = "/api/customer/room-reservations";
+      title = "🏡 Room Reservations";
+      break;
+    case "event":
+      endpoint = "/api/customer/event-reservations";
+      title = "📅 Event Reservations";
+      break;
+    default:
+      content.innerHTML = "<p>Invalid section selected.</p>";
+      return;
   }
+
+  // Initial loading UI
+  content.innerHTML = `
+    <h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2>
+    <p>Loading...</p>
+  `;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "GET",
+      credentials: "include",
+    });
+    
+    const data = await response.json();
+
+    // Save globally for filtering
+    window.currentSectionData = data;
+
+    // Render section with filters
+    renderSection(title, data);
+
+  } catch (error) {
+    console.error(error);
+    content.innerHTML = "<p class='text-red-600'>Failed to load data.</p>";
+  }
+}
+
+function renderSection(title, data) {
+  const content = document.getElementById("content");
+
+  let filters = "";
+
+  // ---- SECTION-SPECIFIC FILTER UI ----
+  if (title === "🍴 Food Orders") {
+    filters = `
+      <div class="flex gap-3 mb-5">
+        <select id="filterStatus" class="px-3 py-2 border rounded">
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+
+        <select id="filterPayment" class="px-3 py-2 border rounded">
+          <option value="">All Payment Status</option>
+          <option value="Paid">Paid</option>
+          <option value="Unpaid">Unpaid</option>
+        </select>
+      </div>
+    `;
+  }
+
+  if (title === "🌾 Farm Orders") {
+    filters = `
+      <div class="flex gap-3 mb-5">
+        <select id="filterStatus" class="px-3 py-2 border rounded">
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+
+        <select id="filterPayment" class="px-3 py-2 border rounded">
+          <option value="">All Payment Status</option>
+          <option value="Paid">Paid</option>
+          <option value="Unpaid">Unpaid</option>
+        </select>
+      </div>
+    `;
+  }
+
+  if (title === "🏡 Room Reservations") {
+    filters = `
+      <div class="flex gap-3 mb-5">
+        <select id="filterStatus" class="px-3 py-2 border rounded">
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Checked-in">Checked-in</option>
+          <option value="Checked-out">Checked-out</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+
+        <select id="filterPayment" class="px-3 py-2 border rounded">
+          <option value="">All Payment Status</option>
+          <option value="Paid">Paid</option>
+          <option value="Unpaid">Unpaid</option>
+        </select>
+      </div>
+    `;
+  }
+
+  if (title === "📅 Event Reservations") {
+    filters = `
+      <div class="flex gap-3 mb-5">
+        <select id="filterStatus" class="px-3 py-2 border rounded">
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Started</option>
+          <option value="Approved">Ended</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+
+        <select id="filterPayment" class="px-3 py-2 border rounded">
+          <option value="">All Payment Status</option>
+          <option value="Paid">Paid</option>
+          <option value="Unpaid">Unpaid</option>
+        </select>
+      </div>
+    `;
+  }
+
+  // ---- Build HTML ----
+  content.innerHTML = `
+    <h2 class="mb-6 text-2xl font-bold text-gray-800">${title}</h2>
+    ${filters}
+    <div id="sectionCards" class="grid gap-4"></div>
+  `;
+
+  renderFilteredCards(title, data);
+
+  // ---- Bind filters ----
+  const statusEl = document.getElementById("filterStatus");
+  const paymentEl = document.getElementById("filterPayment");
+
+  if (statusEl) statusEl.addEventListener("change", () => renderFilteredCards(title));
+  if (paymentEl) paymentEl.addEventListener("change", () => renderFilteredCards(title));
+}
+
 
   // --- Create Card with rating section ---
   function createCard(item, type) {
@@ -137,10 +245,51 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="text-gray-600">To: ${item.end_datetime}</p>
           <p class="text-gray-600">Guests: ${item.pax}</p>
           <p class="text-gray-600">Status: ${item.approval_status ?? 'Pending'}</p>
+          <p class="text-gray-600">Payment Status: ${item.payment_status ?? 'Pending'}</p>
           ${ratingSection(item.event_reservation_id)}
         </div>`;
     }
   }
+  function renderFilteredCards(title) {
+  const container = document.getElementById("sectionCards");
+  let items = window.currentSectionData;
+
+  // Read dropdown values (if they exist)
+  const statusF = document.getElementById("filterStatus")?.value || "";
+  const paymentF = document.getElementById("filterPayment")?.value || "";
+
+  // ---- Filter logic for Food Orders ----
+  if (
+  title === "🍴 Food Orders" ||
+  title === "🌾 Farm Orders" ||
+  title === "🏡 Room Reservations" ||
+  title === "📅 Event Reservations"
+) {
+  items = items.filter(item => {
+    // Determine the correct field to filter by
+    let statusValue = "";
+    if (title === "🏡 Room Reservations") statusValue = item.status;
+    else if (title === "📅 Event Reservations") statusValue = item.approval_status;
+    else statusValue = item.order_status;
+
+    const matchStatus = statusF
+      ? statusValue?.toLowerCase().trim() === statusF.toLowerCase().trim()
+      : true;
+
+    const matchPayment = paymentF
+      ? item.payment_status?.toLowerCase().trim() === paymentF.toLowerCase().trim()
+      : true;
+
+    return matchStatus && matchPayment;
+  });
+}
+
+
+  container.innerHTML = items.length
+    ? items.map(item => createCard(item, title)).join("")
+    : `<p class="text-gray-500">No matching results.</p>`;
+}
+
 
   // --- Stars hover and reset ---
   document.addEventListener('mouseover', (e) => {
