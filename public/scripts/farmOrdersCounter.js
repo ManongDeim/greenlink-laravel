@@ -422,15 +422,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const today = new Date().toISOString().split("T")[0];
     document.getElementById("pickupDate").setAttribute("min", today);
 
-    // Populate hours (00–23)
-     const hourSelect = document.getElementById("hourSelect");
+   const hourSelect = document.getElementById("hourSelect");
+    hourSelect.innerHTML = ""; // Clear existing options
 
-  for (let h = 10; h <= 20; h++) {
-    const option = document.createElement("option");
-    option.value = h.toString().padStart(2, "0");
-    option.textContent = h.toString().padStart(2, "0");
-    hourSelect.appendChild(option);
-  }
+let startHour = 10; // 10 AM
+let totalHours = 12; // Show 12 hours
+
+for (let i = 0; i < totalHours; i++) {
+  let hour = (startHour + i) % 12;
+  hour = hour === 0 ? 12 : hour; // convert 0 → 12
+  const option = document.createElement("option");
+  option.value = hour; // you can use 24-hour value if needed
+  option.textContent = hour;
+  hourSelect.appendChild(option);
+}
+
 
     // Populate minutes (00–59) in 5-minute steps
     const minuteSelect = document.getElementById("minuteSelect");
