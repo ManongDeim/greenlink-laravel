@@ -206,8 +206,9 @@ const termsError = document.getElementById("termsError");
 
 // ✅ Input restrictions
 fullnameInput.addEventListener("input", () => {
-  fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, "");
+  fullnameInput.value = fullnameInput.value.replace(/[^\p{L}\s]/gu, "");
 });
+
 phoneInput.addEventListener("input", () => {
   phoneInput.value = phoneInput.value.replace(/[^0-9]/g, "");
   if (phoneInput.value.length > 11) phoneInput.value = phoneInput.value.slice(0, 11);
@@ -241,20 +242,23 @@ if (new Date(end) <= new Date(start)) {
 
 
   // Full Name
-  if (fullnameInput.value.trim() === "") {
-    nameError.textContent = "Full name is required.";
-    nameError.classList.remove("hidden");
-    fullnameInput.classList.add("border-red-500");
-    isValid = false;
-  } else if (!/^[A-Za-z\s]+$/.test(fullnameInput.value.trim())) {
-    nameError.textContent = "Names can only include letters. Please try again.";
-    nameError.classList.remove("hidden");
-    fullnameInput.classList.add("border-red-500");
-    isValid = false;
-  } else {
-    nameError.classList.add("hidden");
-    fullnameInput.classList.remove("border-red-500");
-  }
+if (fullnameInput.value.trim() === "") {
+  nameError.textContent = "Full name is required.";
+  nameError.classList.remove("hidden");
+  fullnameInput.classList.add("border-red-500");
+  isValid = false;
+
+} else if (!/^[\p{L}\s]+$/u.test(fullnameInput.value.trim())) {
+  nameError.textContent = "Names can only include letters. Please try again.";
+  nameError.classList.remove("hidden");
+  fullnameInput.classList.add("border-red-500");
+  isValid = false;
+
+} else {
+  nameError.classList.add("hidden");
+  fullnameInput.classList.remove("border-red-500");
+}
+
 
 
   // Phone

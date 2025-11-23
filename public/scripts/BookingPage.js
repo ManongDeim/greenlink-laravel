@@ -495,8 +495,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ Input restrictions
   fullnameInput.addEventListener("input", () => {
-    fullnameInput.value = fullnameInput.value.replace(/[^A-Za-z\s]/g, "");
-  });
+  fullnameInput.value = fullnameInput.value.replace(/[^\p{L}\s]/gu, "");
+});
+
 
   phoneInput.addEventListener("input", () => {
     phoneInput.value = phoneInput.value.replace(/[^0-9]/g, "");
@@ -515,15 +516,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  if (fullnameInput.value.trim() === "") {
-    nameError.textContent = "Full name is required.";
-    nameError.classList.remove("hidden");
-    fullnameInput.classList.add("border-red-500");
-    isValid = false;
-  } else {
-    nameError.classList.add("hidden");
-    fullnameInput.classList.remove("border-red-500");
-  }
+  // Full Name
+if (fullnameInput.value.trim() === "") {
+  nameError.textContent = "Full name is required.";
+  nameError.classList.remove("hidden");
+  fullnameInput.classList.add("border-red-500");
+  isValid = false;
+
+} else if (!/^[\p{L}\s]+$/u.test(fullnameInput.value.trim())) {
+  nameError.textContent = "Names can only include letters. Please try again.";
+  nameError.classList.remove("hidden");
+  fullnameInput.classList.add("border-red-500");
+  isValid = false;
+
+} else {
+  nameError.classList.add("hidden");
+  fullnameInput.classList.remove("border-red-500");
+}
 
   if (!/^\d{11}$/.test(phoneInput.value.trim())) {
     phoneError.classList.remove("hidden");
