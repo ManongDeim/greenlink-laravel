@@ -119,7 +119,7 @@ class FoodOrderController extends Controller
         ]);
     }   
 
-    public function paymentSuccess(Request $request)
+   public function paymentSuccess(Request $request)
 {
     Log::info("✅ paymentSuccess route hit", [
         'full_url' => $request->fullUrl(),
@@ -136,58 +136,96 @@ class FoodOrderController extends Controller
     $order = FoodOrderModel::where('ref_number', $refNumber)->first();
 
     if (!$order) {
+        Log::warning("Order not found for ref: {$refNumber}");
         return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
     }
 
-    // ✅ Mark payment as paid
+    // Mark payment as paid
     $order->update(['payment_status' => 'Paid', 'order_status' => 'Pending']);
 
-    // ✅ Deduct ingredients from kitchen inventory
-    DB::transaction(function () use ($order) {
+    // Map: food display name => property on order
+    $orderedItems = [
+        'Smoked Fish'   => $order->smokedFish_order,
+        'Deviled Fish'  => $order->deviledFish_order,
+        'Sea Sig'       => $order->seaSig_order,
+        'Blue Craze'    => $order->blueCraze_order,
+        'Chicken Sheet' => $order->chickenSheet_order,
+        'Black Meal'    => $order->blackMeal_order,
+    ];
 
-        $orderedItems = [
-            'Smoked Fish'   => $order->smokedFish_order,
-            'Deviled Fish'  => $order->deviledFish_order,
-            'Sea Sig'       => $order->seaSig_order,
-            'Blue Craze'    => $order->blueCraze_order,
-            'Chicken Sheet' => $order->chickenSheet_order,
-            'Black Meal'    => $order->blackMeal_order,
-        ];
+    DB::transaction(function () use ($orderedItems, $refNumber) {
 
         foreach ($orderedItems as $foodName => $qtyOrdered) {
+            // ensure numeric qty
+            $qtyOrdered = is_numeric($qtyOrdered) ? (float) $qtyOrdered : 0;
             if ($qtyOrdered <= 0) continue;
 
-            // 🔹 Get the food product record
-            $foodProduct = FoodProduct::where('productName', $foodName)->first();
+            $normalized = trim(mb_strtolower($foodName));
+
+            // robust product lookup: try exact then fallback to case-insensitive/trimmed
+            $foodProduct = FoodProduct::whereRaw('LOWER(TRIM(productName)) = ?', [$normalized])->first();
+
             if (!$foodProduct) {
-                Log::warning("⚠️ Food product not found: {$foodName}");
+                // Last-ditch: try a LIKE match in case of extra words/punctuation
+                $foodProduct = FoodProduct::where('productName', 'like', '%' . $foodName . '%')->first();
+            }
+
+            if (!$foodProduct) {
+                Log::warning("⚠️ Food product not found for ordered item '{$foodName}' (normalized '{$normalized}') — ref {$refNumber}");
                 continue;
             }
 
-            // 🔹 Get all ingredients used for this food
-            $ingredients = FoodIngredient::where('food_product_id', $foodProduct->id)->get();
+            Log::info("Found product '{$foodProduct->productName}' (id={$foodProduct->id}) for ordered item '{$foodName}', qtyOrdered={$qtyOrdered}");
 
-            foreach ($ingredients as $ingredient) {
-                $deductAmount = $ingredient->quantity_used * $qtyOrdered;
+            // Use relation or explicit model to get ingredient rows
+            $ingredients = $foodProduct->ingredientsDetails()->get();
 
-                // 🔹 Find the corresponding ingredient in kitchen inventory
-                $inventory = KitchenInventory::find($ingredient->ingredient_id);
+            if ($ingredients->isEmpty()) {
+                Log::warning("⚠️ No ingredients defined for food_product_id={$foodProduct->id} ({$foodProduct->productName})");
+                continue;
+            }
+
+            foreach ($ingredients as $ingredientRow) {
+                // ensure numeric quantity_used
+                $quantityUsed = is_numeric($ingredientRow->quantity_used) ? (float) $ingredientRow->quantity_used : 0;
+                if ($quantityUsed <= 0) {
+                    Log::warning("⚠️ Non-positive quantity_used for food_ingredient id={$ingredientRow->id}, food_product_id={$foodProduct->id}");
+                    continue;
+                }
+
+                $deductAmount = $quantityUsed * $qtyOrdered;
+
+                // Prefer relationship to load the KitchenInventory model if set up
+                $inventory = null;
+                if (method_exists($ingredientRow, 'ingredient')) {
+                    $inventory = $ingredientRow->ingredient()->lockForUpdate()->first();
+                }
+
+                // fallback to direct find (locks as well)
+                if (!$inventory) {
+                    $inventory = KitchenInventory::where('id', $ingredientRow->ingredient_id)->lockForUpdate()->first();
+                }
 
                 if ($inventory) {
-                    $inventory->current_stock = max(0, $inventory->current_stock - $deductAmount);
+                    // ensure numeric current_stock
+                    $current = is_numeric($inventory->current_stock) ? (float) $inventory->current_stock : 0;
+                    $newStock = max(0, $current - $deductAmount);
+
+                    $inventory->current_stock = $newStock;
                     $inventory->save();
 
-                    Log::info("🧾 Deducted {$deductAmount} {$inventory->unit} from {$inventory->item_name}");
+                    Log::info("🧾 Deducted {$deductAmount} {$inventory->unit} from {$inventory->item_name} (id={$inventory->id}). Previous: {$current}, New: {$newStock}");
                 } else {
-                    Log::warning("⚠️ Ingredient ID {$ingredient->ingredient_id} not found in kitchen_inventory");
+                    Log::warning("⚠️ Ingredient ID {$ingredientRow->ingredient_id} for food_product_id={$foodProduct->id} not found in kitchen_inventory (ref {$refNumber})");
                 }
             }
         }
     });
 
-    Log::info("✅ Payment successful and inventory updated for {$refNumber}");
+    Log::info("✅ Payment successful and (attempted) inventory updates for {$refNumber}");
     return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
 }
+
 
 
 
