@@ -457,34 +457,49 @@ document.addEventListener("keydown", function (event) {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    const today = new Date().toISOString().split("T")[0];
-    document.getElementById("pickupDate").setAttribute("min", today);
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("pickupDate").setAttribute("min", today);
 
-    // Populate 24-hour format (00–23)
-    const hourSelect = document.getElementById("hourSelect");
-hourSelect.innerHTML = ""; // clear existing options
+  const hourSelect = document.getElementById("hourSelect");
+  const minuteSelect = document.getElementById("minuteSelect");
+  const ampmRadios = document.querySelectorAll('input[name="ampm"]');
 
-// Starting hour (7) and ending hour (20 in 24-hour format)
-let startHour = 7;
-let endHour = 20;
+  // Function to populate hours based on AM/PM
+  function populateHours(ampm) {
+    hourSelect.innerHTML = ""; // clear existing options
 
-// Fill hours in 12-hour format
-for (let h = startHour; h <= endHour; h++) {
-  let hour12 = h % 12 === 0 ? 12 : h % 12; // Convert to 12-hour format
-  const option = document.createElement("option");
-  option.value = hour12; // optionally: h for 24-hour value
-  option.textContent = hour12;
-  hourSelect.appendChild(option);
-}
-
-    // Populate minutes (00–59)
-    const minuteSelect = document.getElementById("minuteSelect");
-    for (let m = 0; m < 60; m += 5) {
-      const option = document.createElement("option");
-      option.value = m.toString().padStart(2, "0");
-      option.textContent = m.toString().padStart(2, "0");
-      minuteSelect.appendChild(option);
+    let hours = [];
+    if (ampm === "AM") {
+      hours = [7, 8, 9, 10, 11]; // 7 AM → 11 PM
+    } else {
+      hours = [12, 1, 2, 3, 4, 5, 6, 7, 8]; // 12 PM → 8 PM
     }
-  });
 
-  
+    hours.forEach(hour => {
+      const option = document.createElement("option");
+      option.value = hour;
+      option.textContent = hour;
+      hourSelect.appendChild(option);
+    });
+  }
+
+  // Populate minutes (00–59 in 5-min increments)
+  minuteSelect.innerHTML = "";
+  for (let m = 0; m < 60; m += 5) {
+    const option = document.createElement("option");
+    option.value = m.toString().padStart(2, "0");
+    option.textContent = m.toString().padStart(2, "0");
+    minuteSelect.appendChild(option);
+  }
+
+  // Initial population based on default radio (AM)
+  const defaultAMPM = document.querySelector('input[name="ampm"]:checked').value;
+  populateHours(defaultAMPM);
+
+  // Update hours when AM/PM radio changes
+  ampmRadios.forEach(radio => {
+    radio.addEventListener("change", () => {
+      populateHours(radio.value);
+    });
+  });
+});
