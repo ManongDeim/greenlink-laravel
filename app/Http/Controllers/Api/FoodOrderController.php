@@ -160,6 +160,8 @@ class FoodOrderController extends Controller
             $qtyOrdered = is_numeric($qtyOrdered) ? (float) $qtyOrdered : 0;
             if ($qtyOrdered <= 0) continue;
 
+            Log::info("ORDERED ITEMS DUMP", $orderedItems);
+
             $normalized = trim(mb_strtolower($foodName));
 
             // robust product lookup: try exact then fallback to case-insensitive/trimmed
