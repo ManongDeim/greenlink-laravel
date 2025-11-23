@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="../output.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 
   <!-- Tab Icon -->
   <link rel="icon" type="image/png" href="../src/Pictures/LogoLolasayong2.png">
@@ -26,8 +25,8 @@
     <!-- Navigation -->
     <nav class="flex gap-6 text-lg font-medium">
       <a href="../homePage.html" class="text-white transition hover:text-gray-200">Home</a>
-      <button onclick="openReserModal()" class="text-white transition hover:text-gray-200">Booking</a>
-      <button onclick="openOrderModal()" class="text-white transition hover:text-gray-200">Order</a>
+      <button onclick="openReserModal()" class="text-white transition hover:text-gray-200">Booking</button>
+      <button onclick="openOrderModal()" class="text-white transition hover:text-gray-200">Order</button>
     </nav>
   </div>
 
@@ -58,7 +57,6 @@
       class="flex items-center gap-2 bg-white text-gray-700 rounded-full px-3 py-1.5 text-sm hover:bg-gray-100 transition-shadow shadow-sm">
       <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google">
       <span>Log-in</span>
-    </button>
   </a>
 </div>
 
@@ -117,14 +115,14 @@
       </div>
 
       <div>
-  <div class="flex gap-2 items-center">
+  <div class="flex items-center gap-2">
     <!-- Hour + Minute -->
     <select id="hourSelect" class="w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"></select>
     <select id="minuteSelect" class="w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"></select>
 
     <!-- AM/PM  -->
       <label class="flex items-center gap-1">
-        <input type="radio" name="ampm" value="AM" class="text-teal-600 focus:ring-teal-500">
+        <input type="radio" name="ampm" value="AM" class="text-teal-600 focus:ring-teal-500" checked>
         <span>AM</span>
       </label>
 
@@ -200,7 +198,6 @@
 
      </div>
     <div class="grid gap-4">
-        </button>
         <button  id="paymongoBtn"  type="button" class="py-3 font-medium text-white transition duration-300 bg-teal-700 shadow-md requires-login hover:bg-teal-800 rounded-xl">
           Proceed to payment
         </button>
