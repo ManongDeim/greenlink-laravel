@@ -12,6 +12,8 @@ class ApprovalController extends Controller
     // Fetch all users with pending ID approval
     $users = GoogleUser::select('user_id', 'name', 'email', 'id_photo', 'id_status')
                         ->where('id_status', 'Pending Validation')
+                        ->whereNotNull('id_photo')
+                        ->where('id_photo', '!=', '')
                         ->get();
     return response()->json($users);
 }
