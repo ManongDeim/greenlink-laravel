@@ -153,6 +153,8 @@ class FoodOrderController extends Controller
         'Black Meal'    => $order->blackMeal_order,
     ];
 
+    Log::info("ORDERED ITEMS DUMP", $orderedItems);
+
     DB::transaction(function () use ($orderedItems, $refNumber) {
 
         foreach ($orderedItems as $foodName => $qtyOrdered) {
