@@ -189,19 +189,19 @@ const farmCardTemplate = item => `
 
 const googleUserCardTemplate = user => `
   <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
-    <img src="${user.id_picture}" alt="ID of ${user.name}" class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
+    <img src="${user.id_photo}" alt="ID of ${user.name}" class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
     
     <h3 class="text-lg font-semibold text-gray-800 mb-1">${user.name}</h3>
     <p class="text-sm text-gray-600 mb-4">Email: ${user.email}</p>
 
     <div class="flex flex-col gap-2">
       <button
-        onclick="updateIdStatus(${user.id}, 'Validated')"
+        onclick="updateIdStatus(${user.user_id}, 'Validated')"
         class="px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition text-sm"
       >Validated</button>
 
       <button
-        onclick="updateIdStatus(${user.id}, 'Rejected')"
+        onclick="updateIdStatus(${user.user_id}, 'Rejected')"
         class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
       >Rejected</button>
     </div>
