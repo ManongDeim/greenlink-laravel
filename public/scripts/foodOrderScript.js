@@ -420,42 +420,7 @@ document.addEventListener("keydown", function (event) {
     window.history.back();
  }
 
- document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const response = await fetch('https://greenlinklolasayong.site/api/foodProducts'); 
-    const products = await response.json();
-    const grid = document.getElementById('productGrid');
-
-    
-    products.forEach((product, index) => {
-      productData[product.productName] = parseFloat(product.price); 
-      const counterId = `counter_${product.id}`;
-      window.counters[counterId] = 0;
-
-      const card = document.createElement('div');
-      card.className = "overflow-hidden transition bg-white shadow-md rounded-xl w-80 hover:shadow-xl";
-      card.innerHTML = `
-        <img src="${product.productPicture}" alt="${product.productName}" class="object-cover w-full h-48">
-        <div class="p-4">
-          <h3 class="text-lg font-semibold">${product.productName}</h3>
-          <p class="text-gray-500">₱${product.price}</p>
-          <div class="flex items-center mt-4 space-x-4">
-            <div class="flex items-center space-x-4">
-              <button type="button" class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full hover:bg-teal-600 hover:text-white" onclick="decrementCounter('${counterId}')">−</button>
-              <span id="${counterId}" class="w-10 py-1 text-lg font-semibold text-center bg-gray-100 rounded-lg">0</span>
-              <button type="button" class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full hover:bg-teal-600 hover:text-white" onclick="incrementCounter('${counterId}')">+</button>
-            </div>
-            <button type="button" class="px-4 py-2 text-white bg-teal-600 rounded-lg shadow hover:bg-teal-700" onclick="addItem('${product.productName}', '${counterId}', ${product.price})">Add Item</button>
-          </div>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-  } catch (error) {
-    console.error('Failed to load products:', error);
-  }
-});
-document.addEventListener("DOMContentLoaded", () => {
+ document.addEventListener("DOMContentLoaded", () => {
   const pickupDate = document.getElementById("pickupDate");
   const hourSelect = document.getElementById("hourSelect");
   const minuteSelect = document.getElementById("minuteSelect");
@@ -493,7 +458,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const ampm = periodSelect.value;
     const hours = ampm === "AM" ? [7,8,9,10,11] : [12,1,2,3,4,5,6,7,8];
-
     hours.forEach(h => {
       const opt = document.createElement("option");
       opt.value = h;
@@ -518,7 +482,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectedDate = new Date(pickupDate.value);
     const now = new Date();
     const isToday = selectedDate.toDateString() === now.toDateString();
-    const ampm = periodSelect.value;
+    let ampm = periodSelect.value;
 
     Array.from(hourSelect.options).forEach(opt => {
       const hour24 = convertTo24(opt.value, ampm);
@@ -546,6 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
       populateHours();
 
       const altHasAvailable = Array.from(hourSelect.options).some(o => !o.disabled);
+
       if (altHasAvailable) {
         showToast(`⛔ Selected period has no available times. Switched to ${alternatePeriod} on the same day.`);
       } else {
@@ -558,51 +523,9 @@ document.addEventListener("DOMContentLoaded", () => {
         showToast("⛔ All times today are booked. Date moved to tomorrow.");
       }
     }
-
-    disablePastMinutes();
   }
 
-  // Disable past minutes for current hour
-  function disablePastMinutes() {
-    populateMinutes();
-    if (!pickupDate.value || !hourSelect.value) return;
-
-    const selectedDate = new Date(pickupDate.value);
-    const now = new Date();
-    const isToday = selectedDate.toDateString() === now.toDateString();
-    const ampm = periodSelect.value;
-    const selectedHour24 = convertTo24(hourSelect.value, ampm);
-
-    Array.from(minuteSelect.options).forEach(opt => {
-      if (isToday && selectedHour24 === now.getHours() && parseInt(opt.value) < now.getMinutes()) {
-        opt.disabled = true;
-        opt.classList.add("opacity-40");
-      } else {
-        opt.disabled = false;
-        opt.classList.remove("opacity-40");
-      }
-    });
-  }
-
-  // Notify user if selecting strictly past time
-  function notifyIfPastTime() {
-    if (!pickupDate.value || !hourSelect.value || !periodSelect.value) return;
-
-    const selectedDate = new Date(pickupDate.value);
-    const now = new Date();
-    const isToday = selectedDate.toDateString() === now.toDateString();
-    if (!isToday) return;
-
-    const hour24 = convertTo24(hourSelect.value, periodSelect.value);
-    const minute = parseInt(minuteSelect.value);
-
-    if (hour24 < now.getHours() || (hour24 === now.getHours() && minute < now.getMinutes())) {
-      showToast("⛔ This time has already passed today. Please choose a later time or select tomorrow.");
-      minuteSelect.value = "00";
-    }
-  }
-
-  // Toast function
+  // Simple toast function
   function showToast(message) {
     const toast = document.getElementById("toast");
     const toastMessage = document.getElementById("toastMessage");
@@ -616,14 +539,79 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       toast.classList.remove("opacity-100");
       toast.classList.add("opacity-0");
-      setTimeout(() => { toast.style.display = "none"; }, 500);
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 500);
     }, 3500);
+  }
+
+  // Disable past minutes and auto-skip if current hour is almost over
+  function disablePastMinutes() {
+    populateMinutes();
+    if (!pickupDate.value || !hourSelect.value) return;
+
+    const selectedDate = new Date(pickupDate.value);
+    const now = new Date();
+    const isToday = selectedDate.toDateString() === now.toDateString();
+    const ampm = periodSelect.value;
+    const selectedHour24 = convertTo24(hourSelect.value, ampm);
+
+    Array.from(minuteSelect.options).forEach(opt => {
+      const minuteVal = parseInt(opt.value);
+      if (isToday && selectedHour24 === now.getHours() && minuteVal < now.getMinutes()) {
+        opt.disabled = true;
+        opt.classList.add("opacity-40");
+      } else {
+        opt.disabled = false;
+        opt.classList.remove("opacity-40");
+      }
+    });
+
+    // Auto-skip to next hour if current hour has no available minutes
+    if (isToday && selectedHour24 === now.getHours() && now.getMinutes() >= 55) {
+      let nextHour = now.getHours() + 1;
+      if (nextHour > CLOSE_HOUR) {
+        // Move to next day if beyond closing
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        pickupDate.value = tomorrow.toISOString().split("T")[0];
+        periodSelect.value = "AM";
+        populateHours();
+      } else {
+        // Set hourSelect to next available hour
+        let nextPeriod = nextHour >= 12 ? "PM" : "AM";
+        periodSelect.value = nextPeriod;
+        populateHours();
+        hourSelect.value = nextHour > 12 ? nextHour - 12 : nextHour;
+        disablePastMinutes();
+      }
+      showToast("⛔ Current hour is almost over. Switched to next available hour.");
+    }
+  }
+
+  // Notify user if selecting past time
+  function notifyIfPastTime() {
+    if (!pickupDate.value || !hourSelect.value || !periodSelect.value) return;
+    const selectedDate = new Date(pickupDate.value);
+    const now = new Date();
+    const isToday = selectedDate.toDateString() === now.toDateString();
+    if (!isToday) return;
+
+    const hour24 = convertTo24(hourSelect.value, periodSelect.value);
+    const minute = parseInt(minuteSelect.value);
+
+    if (hour24 < now.getHours() || (hour24 === now.getHours() && minute < now.getMinutes())) {
+      showToast("⛔ This time has already passed today. Please choose a later time or select tomorrow.");
+      hourSelect.value = "";
+      minuteSelect.value = "00";
+    }
   }
 
   // INITIAL LOAD
   populateMinutes();
   populateHours();
   disablePastMinutes();
+  notifyIfPastTime();
 
   // EVENTS
   pickupDate.addEventListener("change", () => {
@@ -634,10 +622,12 @@ document.addEventListener("DOMContentLoaded", () => {
   periodSelect.addEventListener("change", () => {
     populateHours();
     disablePastMinutes();
+    notifyIfPastTime();
   });
 
   hourSelect.addEventListener("change", () => {
     disablePastMinutes();
+    notifyIfPastTime();
   });
 
   minuteSelect.addEventListener("change", notifyIfPastTime);

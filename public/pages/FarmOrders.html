@@ -116,20 +116,30 @@
 
       <div>
   <div class="flex items-center gap-2">
-    <!-- Hour + Minute -->
-    <select id="hourSelect" class="w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"></select>
-    <select id="minuteSelect" class="w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"></select>
+        <!-- Time Selection -->
+<div class="flex flex-col">
+  <label class="mb-2 font-medium text-gray-700">Select Time</label>
 
-    <!-- AM/PM  -->
-      <label class="flex items-center gap-1">
-        <input type="radio" name="ampm" value="AM" class="text-teal-600 focus:ring-teal-500" checked>
-        <span>AM</span>
-      </label>
+  <div class="flex gap-2">
+    <!-- Hour -->
+    <select id="hourSelect"
+      class="w-20 px-3 py-3 text-center bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+    </select>
 
-      <label class="flex items-center gap-1">
-        <input type="radio" name="ampm" value="PM" class="text-teal-600 focus:ring-teal-500">
-        <span>PM</span>
-      </label>
+    <!-- Minute -->
+    <select id="minuteSelect"
+      class="w-20 px-3 py-3 text-center bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+    </select>
+
+    <!-- AM/PM -->
+    <select id="periodSelect"
+      class="w-20 px-3 py-3 text-center bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+      <option>AM</option>
+      <option>PM</option>
+    </select>
+  </div>
+</div>
+
     </div>
   </div>
 </div>
