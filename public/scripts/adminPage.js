@@ -579,29 +579,107 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
 `;
 
 // Room Reservation template
-const roomReservationTemplate = reservation => `
-  <div class="p-5 mb-4 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
-       data-id="${reservation.room_reser_id}" data-payment-status="${reservation.payment_status ?? 'Pending'}">
-    <div class="flex items-center justify-between">
-      <h3 class="text-lg font-bold text-gray-800">Reservation #${reservation.room_reser_id}</h3>
-      <span class="px-2 py-1 text-xs font-semibold ${
-        reservation.payment_status === 'Paid'
-          ? 'text-green-700 bg-green-100'
-          : reservation.payment_status === 'Refunded'
-          ? 'text-blue-700 bg-blue-100'
-          : reservation.payment_status === 'Failed'
-          ? 'text-red-700 bg-red-100'
-          : 'text-teal-700 bg-teal-100'
-      } rounded-full">${reservation.payment_status ?? 'Pending'}</span>
-    </div>
-    <ul class="mt-2 text-sm text-gray-700 list-disc list-inside">
-      <li>Room: ${reservation.room}</li>
-      <li>Guest: ${reservation.full_name}</li>
-      <li>Check-in: ${reservation.check_in_date}</li>
-      <li>Check-out: ${reservation.check_out_date}</li>
-    </ul>
-    <p class="mt-2 text-sm text-gray-700 font-semibold">Status: ${reservation.status}</p>
+const roomReservationTableTemplate = (data, selectedStatus = '', selectedPayment = '') => `
+<div class="p-6 bg-white rounded-2xl shadow-md">
+  <h2 class="text-2xl font-bold text-teal-700 mb-4">Room Reservations</h2>
+
+  <!-- FILTERS -->
+  <div class="flex gap-4 mb-4">
+    <select id="filterRoomStatus" onchange="applyRoomReservationFilter()" class="px-3 py-2 border rounded-lg">
+      <option value="" ${selectedStatus === '' ? 'selected' : ''}>All Reservation Status</option>
+      <option value="Pending" ${selectedStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+      <option value="Checked-in" ${selectedStatus === 'Checked-in' ? 'selected' : ''}>Checked-in</option>
+      <option value="Checked-out" ${selectedStatus === 'Checked-out' ? 'selected' : ''}>Checked-out</option>
+      <option value="Cancelled" ${selectedStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+    </select>
+
+    <select id="filterRoomPayment" onchange="applyRoomReservationFilter()" class="px-3 py-2 border rounded-lg">
+      <option value="" ${selectedPayment === '' ? 'selected' : ''}>All Payment Status</option>
+      <option value="Paid" ${selectedPayment === 'Paid' ? 'selected' : ''}>Paid</option>
+      <option value="Unpaid" ${selectedPayment === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
+      <option value="Failed" ${selectedPayment === 'Failed' ? 'selected' : ''}>Failed</option>
+      <option value="Refunded" ${selectedPayment === 'Refunded' ? 'selected' : ''}>Refunded</option>
+    </select>
   </div>
+
+  <table class="min-w-full border border-gray-200 text-sm text-left">
+    <thead class="bg-gray-100 text-gray-700">
+      <tr>
+        <th class="px-4 py-2">Action</th>
+        <th class="px-4 py-2">Reservation ID</th>
+        <th class="px-4 py-2">Guest</th>
+        <th class="px-4 py-2">Room</th>
+        <th class="px-4 py-2">Payment</th>
+        <th class="px-4 py-2">Status</th>
+        <th class="px-4 py-2">Check-in</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      ${data.map(res => `
+        <tr class="border-t hover:bg-gray-50 cursor-pointer"
+            onclick="openRoomModal('${res.room_reser_id}')">
+
+          <!-- ACTION MENU -->
+          <td class="px-4 py-2 relative" onclick="event.stopPropagation()">
+            <button onclick="toggleRoomReservationActionMenu(event, '${res.room_reser_id}')"
+                    class="p-2 bg-gray-200 rounded hover:bg-gray-300">⚙️</button>
+
+            <div id="roomReservationActionMenu-${res.room_reser_id}"
+                 class="absolute left-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
+
+              ${
+                res.status === "Pending"
+                  ? `
+                    <button onclick="updateRoomStatus('${res.room_reser_id}','Checked-in')"
+                            class="block w-full text-left px-3 py-1 hover:bg-green-100">Check-in</button>
+                    <button onclick="updateRoomStatus('${res.room_reser_id}','Cancelled')"
+                            class="block w-full text-left px-3 py-1 hover:bg-red-100">Cancel</button>
+                  `
+                  : res.status === "Checked-in"
+                  ? `
+                    <button onclick="updateRoomStatus('${res.room_reser_id}','Checked-out')"
+                            class="block w-full text-left px-3 py-1 hover:bg-blue-100">Check-out</button>
+                  `
+                  : ``
+              }
+            </div>
+          </td>
+
+          <td class="px-4 py-2">#${res.room_reser_id}</td>
+          <td class="px-4 py-2">${res.full_name}</td>
+          <td class="px-4 py-2">${res.room}</td>
+
+          <td class="px-4 py-2">
+            <span class="px-2 py-1 text-xs font-semibold rounded-full
+              ${res.payment_status === 'Paid' ? 'text-green-700 bg-green-100' :
+                res.payment_status === 'Refunded' ? 'text-blue-700 bg-blue-100' :
+                res.payment_status === 'Failed' ? 'text-red-700 bg-red-100' :
+                'text-teal-700 bg-teal-100'}">
+              ${res.payment_status}
+            </span>
+          </td>
+
+          <td class="px-4 py-2">${res.status}</td>
+          <td class="px-4 py-2">${res.check_in_date}</td>
+        </tr>
+      `).join("")}
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL -->
+<div id="roomReservationModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
+    <h3 id="roomModalTitle" class="text-xl font-bold text-teal-700 mb-3"></h3>
+    <p id="roomModalRef"></p>
+    <ul id="roomModalItems" class="mt-3 text-sm text-gray-700 list-disc list-inside"></ul>
+
+    <div class="mt-4 text-right">
+      <button onclick="closeRoomModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+    </div>
+  </div>
+</div>
 `;
 
 const roomCardTemplate = item => `
@@ -1446,59 +1524,83 @@ async function fetchAndRenderFarmOrders() {
 }
 
 
-let FarmOpenOrderActionMenuId = null;
-function toggleOrderActionMenu(event, id) {
+// Track the currently open farm action menu
+let openFarmOrderActionMenuId = null;
+
+function toggleFarmOrderActionMenu(event, id) {
   event.stopPropagation();
-  const menu = document.getElementById(`orderActionMenu-${id}`);
+  const menu = document.getElementById(`farmOrderActionMenu-${id}`);
   if (!menu) return;
 
-  if (openOrderActionMenuId && openOrderActionMenuId !== id) {
-    const prev = document.getElementById(`orderActionMenu-${openOrderActionMenuId}`);
+  // Close previously open menu
+  if (openFarmOrderActionMenuId && openFarmOrderActionMenuId !== id) {
+    const prev = document.getElementById(`farmOrderActionMenu-${openFarmOrderActionMenuId}`);
     if (prev) prev.classList.add('hidden');
   }
 
   menu.classList.toggle('hidden');
-  openOrderActionMenuId = menu.classList.contains('hidden') ? null : id;
+  openFarmOrderActionMenuId = menu.classList.contains('hidden') ? null : id;
 }
 
 document.addEventListener('click', () => {
-  if (openOrderActionMenuId) {
-    const menu = document.getElementById(`orderActionMenu-${openOrderActionMenuId}`);
+  if (openFarmOrderActionMenuId) {
+    const menu = document.getElementById(`farmOrderActionMenu-${openFarmOrderActionMenuId}`);
     if (menu) menu.classList.add('hidden');
-    openOrderActionMenuId = null;
+    openFarmOrderActionMenuId = null;
   }
 });
 
 
-async function fetchAndRenderRoomReservations(status = null) {
+
+
+async function fetchAndRenderRoomReservations(status = null, payment = null) {
   const container = document.getElementById("content");
   try {
     const res = await fetch("/api/roomReser");
     const data = await res.json();
 
-    // Filter by status
-    const filtered = status ? data.filter(r => r.status === status) : data;
+    // Sort by earliest check-in date ascending
+    data.sort((a, b) => new Date(a.check_in_date) - new Date(b.check_in_date));
 
-    // Render each reservation card
-    container.innerHTML = filtered.map(roomReservationTemplate).join("");
+    // Store globally for modal lookup
+    window.roomReservationsData = data;
 
-    // ✅ Store the fetched data on the container for later reference
-    container.dataset.roomReservations = JSON.stringify(data);
+    // Filter
+    let filtered = data;
+    if (status) filtered = filtered.filter(r => r.status === status);
+    if (payment) filtered = filtered.filter(r => r.payment_status === payment);
 
-    // ✅ Add click handlers for each card
-    document.querySelectorAll(".order-item").forEach(card => {
-      card.addEventListener("click", () => {
-        const id = card.dataset.id;
-        const allReservations = JSON.parse(container.dataset.roomReservations);
-        const reservation = allReservations.find(r => r.room_reser_id == id);
-        if (reservation) openRoomModal(reservation);
-      });
-    });
+    // Render table
+    container.innerHTML = roomReservationTableTemplate(filtered, status || '', payment || '');
   } catch (err) {
-    console.error("Error fetching room reservations:", err);
+    console.error("Failed to fetch room reservations:", err);
     container.innerHTML = `<p class="text-red-500">Failed to load room reservations</p>`;
   }
 }
+
+let openRoomReservationActionMenuId = null;
+function toggleRoomReservationActionMenu(event, id) {
+  event.stopPropagation();
+  const menu = document.getElementById(`roomReservationActionMenu-${id}`);
+  if (!menu) return;
+
+  if (openRoomReservationActionMenuId && openRoomReservationActionMenuId !== id) {
+    const prev = document.getElementById(`roomReservationActionMenu-${openRoomReservationActionMenuId}`);
+    if (prev) prev.classList.add("hidden");
+  }
+
+  menu.classList.toggle("hidden");
+  openRoomReservationActionMenuId = menu.classList.contains("hidden") ? null : id;
+}
+
+// Close menu when clicking outside
+document.addEventListener("click", () => {
+  if (openRoomReservationActionMenuId) {
+    const menu = document.getElementById(`roomReservationActionMenu-${openRoomReservationActionMenuId}`);
+    if (menu) menu.classList.add("hidden");
+    openRoomReservationActionMenuId = null;
+  }
+});
 
 async function fetchAndRenderEventReservations(status = null) {
   const container = document.getElementById("content");
@@ -1861,40 +1963,7 @@ try {
 }
 
   // =================== Submenu Logic ===================
-  // Food Orders submenu
-  const foodOrdersBtn = document.getElementById("foodOrdersBtn");
-  const foodOrdersSubmenu = document.getElementById("foodOrdersSubmenu");
-  if (foodOrdersBtn && foodOrdersSubmenu) {
-    foodOrdersBtn.addEventListener("click", () => {
-      foodOrdersSubmenu.classList.toggle("hidden");
-    });
-
-    foodOrdersSubmenu.querySelectorAll("button[data-status]").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const status = btn.dataset.status;
-        await fetchAndRenderFoodOrders(status);
-      });
-    });
-  }
-
-  // Farm Orders submenu
-  const farmOrdersBtn = document.getElementById("farmOrdersBtn");
-  const farmOrdersSubmenu = document.getElementById("farmOrdersSubmenu");
-  if (farmOrdersBtn && farmOrdersSubmenu) {
-    farmOrdersBtn.addEventListener("click", () => {
-      farmOrdersSubmenu.classList.toggle("hidden");
-    });
-
-    farmOrdersSubmenu.querySelectorAll("button[data-status]").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        farmOrdersSubmenu.querySelectorAll("button").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        const status = btn.dataset.status;
-        await fetchAndRenderFarmOrders(status);
-      });
-    });
-  }
-
+  
   // Room Reservations submenu
 const roomBtn = document.getElementById("roomReservationsBtn");
 const roomSubmenu = document.getElementById("roomReservationsSubmenu");
@@ -2104,7 +2173,7 @@ function openFarmOrderModal(orderId) {
 }
 
 
-function closeFoodOrderModal() {
+function closeFarmOrderModal() {
   document.getElementById('farmOrderModal').classList.add('hidden');
 }
 
@@ -2172,60 +2241,52 @@ function applyFarmOrderFilter() {
 }
 
 // Room Reservation Modals and Functions
+function openRoomModal(reservationId) {
+  const allReservations = window.roomReservationsData || [];
+  const res = allReservations.find(r => r.room_reser_id === reservationId);
+  if (!res) return;
 
-function openRoomModal(reservation) {
-  document.getElementById("roomModalTitle").textContent = `Reservation #${reservation.room_reser_id}`;
-  document.getElementById("roomModalRef").textContent = `Guest: ${reservation.full_name}`;
+  document.getElementById("roomModalTitle").textContent = `Reservation #${res.room_reser_id}`;
+  document.getElementById("roomModalRef").textContent = `Guest: ${res.full_name}`;
   document.getElementById("roomModalItems").innerHTML = `
-    <li>Room: ${reservation.room}</li>
-    <li>Check-in: ${reservation.check_in_date}</li>
-    <li>Check-out: ${reservation.check_out_date}</li>
-    <li>Phone: ${reservation.phone_number}</li>
-    <li>Payment Status: ${reservation.payment_status}</li>
+    <li>Room: ${res.room}</li>
+    <li>Check-in: ${res.check_in_date}</li>
+    <li>Check-out: ${res.check_out_date}</li>
+    <li>Contact: ${res.phone_number}</li>
+    <li>Payment Status: ${res.payment_status}</li>
+    <li>Status: ${res.status}</li>
   `;
-
-  const modalButtons = document.getElementById("roomModalButtons");
-  if (["Checked-in", "Checked-out", "Cancelled"].includes(reservation.status)) {
-    modalButtons.style.display = "none";
-  } else {
-    modalButtons.style.display = "flex";
-    document.getElementById("checkInBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Checked-in");
-    document.getElementById("checkOutBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Checked-out");
-    document.getElementById("cancelRoomBtn").onclick = () => updateRoomStatus(reservation.room_reser_id, "Cancelled");
-  }
 
   document.getElementById("roomReservationModal").classList.remove("hidden");
 }
 
-// Close modal
-document.getElementById("closeRoomModal").addEventListener("click", () => {
+
+
+function closeRoomModal() {
   document.getElementById("roomReservationModal").classList.add("hidden");
-});
+}
+
 
 // --- Update reservation status ---
-function updateRoomStatus(reservationId, status) {
-  fetch(`/api/roomReservation/${reservationId}/update-status`, {
+function updateRoomStatus(id, status) {
+  fetch(`/api/roomReservation/${id}/update-status`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status })
   })
-    .then(res => res.json())
-    .then(data => {
-      showToast(data.message);
-      document.getElementById("roomReservationModal").classList.add("hidden");
+  .then(res => res.json())
+  .then(data => {
+    showToast(data.message);
+    applyRoomReservationFilter(); // re-render table
+  })
+  .catch(err => console.error(err));
+}
 
-      // Update UI instantly
-      const card = document.querySelector(`.order-item[data-id="${reservationId}"]`);
-      if (card) {
-        const badge = card.querySelector("span");
-        badge.textContent = status;
-        if (status === "Checked-in") badge.className = "px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full";
-        else if (status === "Checked-out") badge.className = "px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full";
-        else if (status === "Cancelled") badge.className = "px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full";
-        else badge.className = "px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full";
-      }
-    })
-    .catch(err => console.error(err));
+function applyRoomReservationFilter() {
+  const status = document.getElementById('filterRoomStatus').value;
+  const payment = document.getElementById('filterRoomPayment').value;
+
+  fetchAndRenderRoomReservations(status, payment);
 }
 
 
