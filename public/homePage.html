@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="./output.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-  <!-- Flatpickr CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 
   <!-- Tab Icon -->
   <link rel="icon" type="image/png" href="./src/Pictures/LogoLolasayong2.png">
@@ -14,150 +14,152 @@
   <title>Lola Sayong: GreenLink</title>
 </head>
 <body class="bg-white">
+
 <!-- Header -->
 <header class="relative z-50 flex items-center justify-between px-8 py-3 bg-white shadow-md">
 
-  <!-- Left: Logo + Navigation -->
   <div class="flex items-center gap-10">
+    <a href="./homePage.html">
+      <img src="./src/Pictures/LogoLolasayong2.png" class="object-contain w-auto h-20">
+    </a>
 
-    <!-- Logo -->
-     <a href="./homePage.html">
-    <img src="./src/Pictures/LogoLolasayong2.png" alt="Logo" class="object-contain w-auto h-20 transition-transform duration-300 cursor-pointer hover:scale-105 hover:drop-shadow-lg">
-      </a>
-
-    <!-- Navigation -->
     <nav class="flex gap-6 text-lg font-medium">
-      <a href="./homePage.html" class="text-gray-700 transition hover:text-teal-600">Home</a>
-      <button id="bookingBtn" class="text-gray-700 transition bg-auto hover:text-teal-600">
-        Booking
-      </button>
-      <button id="orderBtn" class="text-gray-700 transition hover:text-teal-600">
-        Order
-      </button> 
+      <a href="./homePage.html" class="text-gray-700 hover:text-teal-600">Home</a>
+      <button id="bookingBtn" class="text-gray-700 hover:text-teal-600">Booking</button>
+      <button id="orderBtn" class="text-gray-700 hover:text-teal-600">Order</button>
     </nav>
-  </div> 
+  </div>
 
-
-  <!-- Right: Auth Section -->
-<div id="auth-section" class="flex items-center">
-  <a id="loginBtn"
-     class="flex items-center gap-2 px-4 py-2 transition border border-gray-300 rounded-full shadow-sm hover:bg-gray-100">
-    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
-    <span class="text-sm font-medium">Log-in</span>
-  </a>
-</div>
+  <div id="auth-section" class="flex items-center">
+    <a id="loginBtn" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full shadow-sm hover:bg-gray-100">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" />
+      <span class="text-sm font-medium">Log-in</span>
+    </a>
+  </div>
 
 </header>
 
-   <!--Front Background-->
-  <section class="relative w-full">
-      <img class="w-full h-auto" src="./src/Pictures/BackgroundFrontPage.png" alt="BackgroundFrontPage"/>
-  </section>
 
-  <!--welcome-->
-<div class="absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full px-4 text-center">
+<!-- Featured Carousel -->
+<section class="w-full">
+  <div class="swiper mySwiper h-[400px] md:h-[600px]">
 
-  <!-- Welcome text section -->
-  <div id="welcomeText">
-    <h1 class="mb-4 text-3xl font-bold text-white md:text-5xl drop-shadow-md">
-      Welcome to Lola Sayong!
-    </h1>
-    <p class="text-lg font-light text-white md:text-xl drop-shadow-md">
-      A peaceful surf escape tucked along the shores of Gubat, Sorsogon
-    </p>
-    <p class="text-lg font-light text-white md:text-xl drop-shadow-md">
-      where every wave invites adventure, every stay supports the community,
-    </p>
-    <p class="text-lg font-light text-white md:text-xl drop-shadow-md">
-      and every moment brings you closer to nature, simplicity, and home.
-    </p>
+    <div class="swiper-wrapper">
+
+      <!-- Slide 1 -->
+      <div class="relative swiper-slide">
+        <img src="./src/Pictures/BackgroundFrontPage.png" class="object-cover w-full h-full">
+        <div class="absolute inset-0 flex items-center bg-gradient-to-r from-black/70 via-black/30 to-black/70">
+          <div class="px-6 text-center text-white md:px-20 md:text-left animate-fade-in">
+            <h2 class="mb-3 text-3xl font-bold leading-snug md:text-5xl drop-shadow-lg">Welcome to Lola Sayong</h2>
+            <p class="mb-5 text-lg md:text-2xl drop-shadow-md">Experience surfing, eco stays, and farm life.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="relative swiper-slide">
+        <img src="./src/Pictures/BackgroundRoom.png" class="object-cover w-full h-full">
+        <div class="absolute inset-0 flex items-center bg-gradient-to-r from-black/70 via-black/30 to-black/70">
+          <div class="px-6 text-center text-white md:px-20 md:text-left animate-fade-in">
+            <h2 class="mb-3 text-3xl font-bold leading-snug md:text-5xl drop-shadow-lg">Easy Room Booking</h2>
+            <p class="mb-5 text-lg md:text-2xl drop-shadow-md">Reserve your stay online with just a few clicks.</p>
+            <button href="#booking" class="inline-flex items-center justify-center px-8 py-3 font-semibold text-white transition bg-teal-600 border-2 border-teal-400 rounded-lg hover:bg-teal-700 hover:border-teal-200">
+              Reserve Now <span class="ml-2">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="relative swiper-slide">
+        <img src="./src/Pictures/BackgroundFood.png" class="object-cover w-full h-full">
+        <div class="absolute inset-0 flex items-center bg-gradient-to-r from-black/70 via-black/30 to-black/70">
+          <div class="px-6 text-center text-gray-400 md:px-20 md:text-left animate-fade-in">
+            <h2 class="mb-3 text-3xl font-bold leading-snug md:text-5xl drop-shadow-lg">Farm-to-Table Orders</h2>
+            <p class="mb-5 text-lg md:text-2xl drop-shadow-md">Fresh local food serve straight to you.</p>
+            <button href="#food" class="inline-flex items-center justify-center px-8 py-3 font-semibold text-white transition bg-teal-600 border-2 border-teal-400 rounded-lg hover:bg-teal-700 hover:border-teal-200">
+              Order Now <span class="ml-2">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Swiper Controls -->
+    <div class="swiper-pagination"></div>
+    <div class="text-teal-500 swiper-button-next"></div>
+    <div class="text-teal-500 swiper-button-prev"></div>
+
   </div>
+</section>
 
-  <!-- Calendar with Date Range Picker -->
-  <div class="flex flex-wrap justify-center gap-4 p-6 mt-6 shadow-2xl backdrop-blur-md bg-transparent/40 rounded-xl">
-    <div class="flex flex-col">
-      <label class="mb-1 font-medium text-gray-800">Check-In</label>
-      <input id="checkIn" type="text" readonly placeholder="Select date"
-        class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-    </div>
+<!-- Events Section -->
+<section class="px-6 py-16 text-gray-800 bg-white">
+  <div class="mx-auto max-w-7xl">
 
-    <div class="flex flex-col">
-      <label class="mb-1 font-medium text-gray-800">Check-Out</label>
-      <input id="checkOut" type="text" readonly placeholder="Select date"
-        class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-    </div>
+    <!-- Section Title -->
+    <h2 class="mb-12 text-3xl font-bold text-center text-teal-700 md:text-4xl">Events</h2>
 
-    <div class="flex flex-col">
-      <label class="mb-1 font-medium text-gray-800">Reservation</label>
-      <select
-        class="px-4 py-2 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-        <option>Room Reservation</option>
-        <option>Event Reservation</option>
-      </select>
-    </div>
+    <!-- Event Content: Sky Lantern -->
+    <div class="flex flex-col gap-10 lg:flex-row lg:items-start">
 
-    <div class="flex items-center">
-      <button id="researchBtn"
-        class="px-6 py-2 mt-6 text-black transition duration-200 bg-white rounded-lg shadow-md hover:bg-teal-600 hover:text-white">
-        Search
-      </button>
-    </div>
+      <!-- Event Image (Left) -->
+      <div class="w-full lg:w-1/3">
+        <img class="w-full transition-transform duration-300 rounded-lg shadow-lg hover:scale-105" 
+             src="./src/Pictures/Sky+lantern.png" alt="Sky Lantern Event">
+      </div>
 
-    <!-- Available Rooms with Image Cards (shows after Search) -->
-    <div id="availableRoomsContainer" class="relative w-full max-w-2xl mx-auto mt-6 hidden">
-      <label class="block mb-2 text-center font-semibold text-gray-800">
-        Available Rooms
-      </label>
-
-      <div id="availableRoomsList"
-        class="max-h-80 overflow-y-auto border border-gray-300 rounded-lg bg-white shadow-lg divide-y divide-gray-200 transition-all duration-300">
-        <!-- Room cards will be injected here -->
+      <!-- Event Description (Right) -->
+      <div class="w-full space-y-4 text-base font-light leading-relaxed text-justify lg:w-2/3 md:text-lg">
+        <p>
+          Imagine a serene evening where the sky transforms into a canvas of glowing dreams. 
+          The Sky Lantern Parade is a magical event where participants gather to release lanterns, each carrying hopes, dreams, and wishes.
+        </p>
+        <p>
+          Participants light their lanterns, and with a gentle release, the night sky comes alive with floating lights, creating a scene straight out of a fairytale. 
+          The lanterns, made from eco-friendly materials, drift upwards, illuminating the darkness with their warm glow. 
+          This enchanting spectacle symbolizes personal aspirations and fosters a sense of community.
+        </p>
+        <p>
+          The parade is accompanied by live music, captivating performances, and delicious local food, making it a perfect blend of cultural celebration and personal reflection. 
+          Whether you’re seeking a romantic evening, a family adventure, or a moment of peace, the Sky Lantern Parade offers an unforgettable experience.
+        </p>
       </div>
     </div>
+
+    <!-- Event Highlights: Surf Tour -->
+    <div class="flex flex-col gap-10 mt-16 lg:flex-row lg:items-start">
+
+      <!-- Surf Tour Image (Left) -->
+      <div class="w-full lg:w-1/3">
+        <img class="w-full transition-transform duration-300 rounded-lg shadow-lg hover:scale-105" 
+             src="./src/Pictures/surftour.png" alt="Surf Tour">
+      </div>
+
+      <!-- Surf Tour Description (Right) -->
+      <div class="w-full space-y-6 text-base font-light leading-relaxed text-justify lg:w-2/3 md:text-lg">
+        <p>
+          Join us for an exhilarating surf tour that takes you off the beaten path to some of the most stunning and lesser-known surf spots in our region.
+        </p>
+
+        <h3 class="text-2xl font-semibold text-teal-700 md:text-3xl">Event Highlights</h3>
+
+        <ul class="pl-5 space-y-2 list-disc">
+          <li><strong>Explore Hidden Gems:</strong> Discover pristine beaches and secret surf spots with breathtaking natural scenery.</li>
+          <li><strong>Expert Guidance:</strong> Experienced instructors provide coaching and ensure your safety in the water.</li>
+          <li><strong>Eco-Friendly Adventure:</strong> Learn about the marine ecosystem and promote sustainable tourism.</li>
+          <li><strong>Community Connection:</strong> Engage with local culture, enjoy local cuisine, and support small businesses.</li>
+        </ul>
+      </div>
+
+    </div>
+
   </div>
-</div>
+</section>
 
-  
 
-  <!--Events-->
-  <section class="px-6 py-16 text-gray-800 bg-white">
-    <h2 class="mb-12 text-3xl font-bold text-center md:text-4xl">Events</h2>
-    <!--Event Content-->
-    <div class="flex flex-col items-start gap-10 lg:flex-row">
-      <div class="w-full pl-20 lg:w-1/3">
-        <img class="w-full rounded-lg shadow-md" src="./src/Pictures/Sky+lantern.png" alt="SkyEvent">
-      </div>
-      <!--1st image Description-->
-      <div class="w-full pr-20 space-y-4 text-base font-light leading-relaxed text-justify lg:w-2/3 md:text-lg">
-        <p>
-          Imagine a serene evening where the sky transforms into a canvas of glowing dreams. The Sky Lantern Parade is a magical event where participants gather to release lanterns, each carrying hopes, dreams, and wishes.
-        </p>
-        <p>
-          Participants light their lanterns, and with a gentle release, the night sky comes alive with floating lights, creating a scene straight out of a fairytale. The lanterns, made from eco-friendly materials, drift upwards, illuminating the darkness with their warm glow. This enchanting spectacle not only symbolizes the release of personal aspirations but also fosters a sense of community and shared experience.
-        </p>
-        <p>
-          The parade is often accompanied by live music, captivating performances, and delicious local food, making it a perfect blend of cultural celebration and personal reflection. Whether you’re seeking a romantic evening, a family adventure, or a moment of peace, the Sky Lantern Parade offers an unforgettable experience that lights up both the sky and the heart.
-        </p>
-      </div>
-    </div>
-
-    <!--Event Highlights-->
-    <div class="grid grid-cols-1 gap-12 pl-20 mt-16 lg:grid-cols-2">
-      <div>
-        <p class="text-base font-light leading-relaxed text-justify md:text-lg">Join us for an exhilarating surf tour that takes you off the beaten path to some of the most stunning and lesser-known surf spots in our region.</p>
-        <h2 class="pt-4 mb-4 text-2xl font-semibold md:text-3xl">Event Highlights</h2>
-          <ul class="pl-5 space-y-2 text-base leading-relaxed list-disc md:text-lg">
-            <li>Explore Hidden Gems: Discover pristine beaches and secret surf spots that only the locals know about. Experience the thrill of surfing in uncrowded waters with breathtaking natural scenery.</li>
-            <li>Expert Guidance: Our experienced surf instructors will be with you every step of the way, providing personalized coaching and ensuring your safety in the water.</li>
-            <li>Eco-Friendly Adventure: Embrace sustainable tourism as we promote eco-friendly practices throughout the tour. Learn about the local marine ecosystem and how we can protect it.</li>
-            <li>Community Connection: Engage with the local community and immerse yourself in the rich culture and traditions of our coastal towns. Enjoy local cuisine and support small businesses.</li>
-          </ul>
-      </div>
-      <div class="flex justify-center">
-          <img class="rounded-md" src="./src/Pictures/surftour.png" alt="surftour"/>
-      </div>
-    </div>
-  </section>
 
   <!-- Footer -->
 <footer class="mt-12 text-gray-300 bg-gray-900">
@@ -234,38 +236,33 @@
     </div>
   </div>
 
-  
-  <script src="./scripts/indexScript.js"></script>
-  <script src="./global_scripts/loginScript.js" defer></script>
+<script src="./scripts/indexScript.js"></script>
+<script src="./global_scripts/loginScript.js" defer></script>
 
-  <style>
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .animate-fade-in {
-      animation: fadeIn 0.3s ease-out;
-    }
-  </style>
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-  <style>
-  /* Make Flatpickr calendar wide and centered */
-  .flatpickr-calendar.inline {
-    width: 100% !important;
-    max-width: 800px !important;
-    margin: 0 auto;
-    border-radius: 1rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+<!-- Tailwind + Custom Animation -->
+<style>
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-
-  .flatpickr-innerContainer {
-    justify-content: center;
-  }
-
-  .flatpickr-days {
-    width: 100%;
+  .animate-fade-in {
+    animation: fade-in 0.8s ease forwards;
   }
 </style>
+
+<!-- Swiper JS -->
+<script>
+  const swiper = new Swiper(".mySwiper", {
+    effect: "fade",
+    loop: true,
+    autoplay: { delay: 5000, disableOnInteraction: false },
+    pagination: { el: ".swiper-pagination", clickable: true },
+    navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+  });
+</script>
 
 </body>
 </html>
