@@ -455,40 +455,44 @@ document.addEventListener("keydown", function (event) {
     console.error('Failed to load products:', error);
   }
 });
-
 document.addEventListener("DOMContentLoaded", () => {
   const pickupDate = document.getElementById("pickupDate");
   const hourSelect = document.getElementById("hourSelect");
   const minuteSelect = document.getElementById("minuteSelect");
-  const ampmRadios = document.querySelectorAll('input[name="ampm"]');
+  const periodSelect = document.getElementById("periodSelect"); // AM/PM
 
-  // Allowed time window
   const OPEN_HOUR = 7;   // 7 AM
-  const CLOSE_HOUR = 20; // 8 PM (20:00 in 24h)
+  const CLOSE_HOUR = 20; // 8 PM (20:00)
 
   // Set today's date as minimum
   const todayStr = new Date().toISOString().split("T")[0];
   pickupDate.min = todayStr;
 
-  // Populate minutes
+  // Populate minutes 0–55 by 5
   function populateMinutes() {
     minuteSelect.innerHTML = "";
     for (let m = 0; m < 60; m += 5) {
-      const option = document.createElement("option");
-      option.value = m.toString().padStart(2, "0");
-      option.textContent = m.toString().padStart(2, "0");
-      minuteSelect.appendChild(option);
+      const opt = document.createElement("option");
+      opt.value = m.toString().padStart(2, "0");
+      opt.textContent = m.toString().padStart(2, "0");
+      minuteSelect.appendChild(opt);
     }
   }
-  populateMinutes();
 
-  // Populate hours based on AM/PM
-  function populateHours(ampm) {
+  // Build hours based on AM/PM
+  function populateHours() {
     hourSelect.innerHTML = "";
 
-    let hours = ampm === "AM"
-      ? [7, 8, 9, 10, 11]        // 7 AM–11 AM
-      : [12, 1, 2, 3, 4, 5, 6, 7, 8]; // 12 PM–8 PM
+    // Placeholder
+    const placeholder = document.createElement("option");
+    placeholder.textContent = "HH";
+    placeholder.value = "";
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    hourSelect.appendChild(placeholder);
+
+    const ampm = periodSelect.value;
+    const hours = ampm === "AM" ? [7,8,9,10,11] : [12,1,2,3,4,5,6,7,8];
 
     hours.forEach(h => {
       const opt = document.createElement("option");
@@ -500,7 +504,7 @@ document.addEventListener("DOMContentLoaded", () => {
     disablePastHours();
   }
 
-  // Convert 12h time to 24h
+  // Convert 12h → 24h
   function convertTo24(hour, ampm) {
     hour = parseInt(hour);
     if (ampm === "PM" && hour !== 12) return hour + 12;
@@ -508,89 +512,133 @@ document.addEventListener("DOMContentLoaded", () => {
     return hour;
   }
 
-  // Disable past hours (Rule B)
   function disablePastHours() {
     if (!pickupDate.value) return;
 
     const selectedDate = new Date(pickupDate.value);
     const now = new Date();
     const isToday = selectedDate.toDateString() === now.toDateString();
-
-    const selectedAMPM = document.querySelector('input[name="ampm"]:checked').value;
+    const ampm = periodSelect.value;
 
     Array.from(hourSelect.options).forEach(opt => {
-      const hour24 = convertTo24(opt.value, selectedAMPM);
+      const hour24 = convertTo24(opt.value, ampm);
 
-      // Disable hours outside allowed window
+      // Disable hours outside window
       if (hour24 < OPEN_HOUR || hour24 > CLOSE_HOUR) {
         opt.disabled = true;
+        opt.classList.add("opacity-40");
         return;
       }
 
-      // If today → disable past hours
-      if (isToday && hour24 <= now.getHours()) {
+      // Disable past hours today
+      if (isToday && hour24 < now.getHours()) {
         opt.disabled = true;
         opt.classList.add("opacity-40");
       }
     });
 
-    // After disabling, check if NO valid hours left
-    const available = Array.from(hourSelect.options).some(opt => !opt.disabled);
+    const hasAvailable = Array.from(hourSelect.options).some(o => !o.disabled);
 
-    if (!available && isToday) {
-      // Move to tomorrow (Rule B)
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      pickupDate.value = tomorrow.toISOString().split("T")[0];
+    if (!hasAvailable && isToday) {
+      // Try switching period first (AM <-> PM)
+      const alternatePeriod = ampm === "AM" ? "PM" : "AM";
+      periodSelect.value = alternatePeriod;
+      populateHours();
 
-      populateHours(selectedAMPM); // re-populate for tomorrow
+      const altHasAvailable = Array.from(hourSelect.options).some(o => !o.disabled);
+      if (altHasAvailable) {
+        showToast(`⛔ Selected period has no available times. Switched to ${alternatePeriod} on the same day.`);
+      } else {
+        // Both AM & PM full → move to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        pickupDate.value = tomorrow.toISOString().split("T")[0];
+        periodSelect.value = "AM";
+        populateHours();
+        showToast("⛔ All times today are booked. Date moved to tomorrow.");
+      }
     }
+
+    disablePastMinutes();
   }
 
-  // Disable minutes that are in the past
+  // Disable past minutes for current hour
   function disablePastMinutes() {
-    populateMinutes(); // Reset minutes first
+    populateMinutes();
+    if (!pickupDate.value || !hourSelect.value) return;
 
-    if (!pickupDate.value) return;
-
-    const now = new Date();
     const selectedDate = new Date(pickupDate.value);
+    const now = new Date();
     const isToday = selectedDate.toDateString() === now.toDateString();
+    const ampm = periodSelect.value;
+    const selectedHour24 = convertTo24(hourSelect.value, ampm);
 
-    const selectedAMPM = document.querySelector('input[name="ampm"]:checked').value;
-    const selectedHour = hourSelect.value;
-    const selectedHour24 = convertTo24(selectedHour, selectedAMPM);
+    Array.from(minuteSelect.options).forEach(opt => {
+      if (isToday && selectedHour24 === now.getHours() && parseInt(opt.value) < now.getMinutes()) {
+        opt.disabled = true;
+        opt.classList.add("opacity-40");
+      } else {
+        opt.disabled = false;
+        opt.classList.remove("opacity-40");
+      }
+    });
+  }
 
-    if (!selectedHour) return;
+  // Notify user if selecting strictly past time
+  function notifyIfPastTime() {
+    if (!pickupDate.value || !hourSelect.value || !periodSelect.value) return;
 
-    // If today and same hour → restrict minutes
-    if (isToday && selectedHour24 === now.getHours()) {
-      Array.from(minuteSelect.options).forEach(opt => {
-        if (parseInt(opt.value) < now.getMinutes()) {
-          opt.disabled = true;
-          opt.classList.add("opacity-40");
-        }
-      });
+    const selectedDate = new Date(pickupDate.value);
+    const now = new Date();
+    const isToday = selectedDate.toDateString() === now.toDateString();
+    if (!isToday) return;
+
+    const hour24 = convertTo24(hourSelect.value, periodSelect.value);
+    const minute = parseInt(minuteSelect.value);
+
+    if (hour24 < now.getHours() || (hour24 === now.getHours() && minute < now.getMinutes())) {
+      showToast("⛔ This time has already passed today. Please choose a later time or select tomorrow.");
+      minuteSelect.value = "00";
     }
   }
 
-  // Initial load
-  const defaultAMPM = document.querySelector('input[name="ampm"]:checked').value;
-  populateHours(defaultAMPM);
+  // Toast function
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    const toastMessage = document.getElementById("toastMessage");
 
-  // Events
+    toastMessage.textContent = message;
+    toast.style.display = "flex";
+    toast.style.zIndex = 99999;
+    toast.classList.remove("opacity-0");
+    toast.classList.add("opacity-100");
+
+    setTimeout(() => {
+      toast.classList.remove("opacity-100");
+      toast.classList.add("opacity-0");
+      setTimeout(() => { toast.style.display = "none"; }, 500);
+    }, 3500);
+  }
+
+  // INITIAL LOAD
+  populateMinutes();
+  populateHours();
+  disablePastMinutes();
+
+  // EVENTS
   pickupDate.addEventListener("change", () => {
-    const ampm = document.querySelector('input[name="ampm"]:checked').value;
-    populateHours(ampm);
+    populateHours();
     disablePastMinutes();
   });
 
-  ampmRadios.forEach(radio => {
-    radio.addEventListener("change", () => {
-      populateHours(radio.value);
-      disablePastMinutes();
-    });
+  periodSelect.addEventListener("change", () => {
+    populateHours();
+    disablePastMinutes();
   });
 
-  hourSelect.addEventListener("change", disablePastMinutes);
+  hourSelect.addEventListener("change", () => {
+    disablePastMinutes();
+  });
+
+  minuteSelect.addEventListener("change", notifyIfPastTime);
 });
