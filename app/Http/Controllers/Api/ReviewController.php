@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Review;
+use Illuminate\Support\Facades\DB;
 
 class ReviewController extends Controller
 {
@@ -43,7 +44,39 @@ class ReviewController extends Controller
 
         return response()->json([
             'success' => true,
-            'review' => $review
+            'review' => $review->load('user')
         ]);
     }
+
+    public function adminList()
+{
+    $reviews = DB::table('reviews')
+        ->join('users', 'users.id', '=', 'reviews.user_id')
+        ->select(
+            'reviews.*',
+            'users.name as user_name',
+            DB::raw('COALESCE(food_order_id, farm_order_id, room_reservation_id, event_reservation_id) AS order_id')
+        )
+        ->where('review_status', 'Not Reviewed')
+        ->orderBy('reviews.created_at', 'DESC')
+        ->get();
+
+    return response()->json($reviews);
+}
+
+public function markReviewed($id)
+{
+    $review = DB::table('reviews')->where('id', $id)->first();
+
+    if (!$review) {
+        return response()->json(['error' => 'Review not found'], 404);
+    }
+
+    DB::table('reviews')->where('id', $id)->update([
+        'review_status' => 'Reviewed'
+    ]);
+
+    return response()->json(['success' => true]);
+}
+
 }

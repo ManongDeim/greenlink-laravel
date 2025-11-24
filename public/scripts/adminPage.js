@@ -208,6 +208,67 @@ const googleUserCardTemplate = user => `
   </div>
 `;
 
+const reviewManagementTemplate = data => `
+<div class="p-6 bg-white rounded-2xl shadow-md">
+  <h2 class="text-2xl font-bold text-teal-700 mb-4">User Reviews</h2>
+
+  <table class="min-w-full border border-gray-200 text-sm text-left">
+    <thead class="bg-gray-100 text-gray-700">
+      <tr>
+        <th class="px-4 py-2">Action</th>
+        <th class="px-4 py-2">User</th>
+        <th class="px-4 py-2">Order/Reservation ID</th>
+        <th class="px-4 py-2">Current Stars</th>
+        <th class="px-4 py-2">Comment</th>
+        <th class="px-4 py-2">Review Date</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      ${data.map(item => `
+      <tr class="border-t hover:bg-gray-50 cursor-pointer"
+          onclick="openReviewModal(${item.id})">
+
+        <!-- ACTION BUTTON -->
+        <td class="px-4 py-2" onclick="event.stopPropagation()">
+          <button onclick="markReviewReviewed(${item.id})"
+                  class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+            Reviewed
+          </button>
+        </td>
+
+        <td class="px-4 py-2">${item.user_name}</td>
+        <td class="px-4 py-2">${item.order_id}</td>
+        <td class="px-4 py-2">${item.stars} ★</td>
+        <td class="px-4 py-2">${item.comment ?? ""}</td>
+        <td class="px-4 py-2">${new Date(item.created_at).toLocaleString()}</td>
+      </tr>
+      `).join("")}
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL -->
+<div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
+    <h3 class="text-xl font-bold text-teal-700 mb-3">Full Review</h3>
+
+    <p><strong>User:</strong> <span id="modalUser"></span></p>
+    <p><strong>Order ID:</strong> <span id="modalOrderId"></span></p>
+    <p><strong>Stars:</strong> <span id="modalStars"></span></p>
+    <p class="mt-2"><strong>Comment:</strong></p>
+    <p id="modalComment" class="bg-gray-100 p-2 rounded mt-1"></p>
+
+    <div class="mt-4 text-right">
+      <button onclick="closeReviewModal()" 
+              class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+    </div>
+  </div>
+</div>
+`;
+
+
+
 
 
 // Generate an order card for a single order
@@ -946,6 +1007,25 @@ function replaceRoomPhoto(id) {
 
 
 // ================= Fetch & Render Functions =================
+async function fetchAndRenderReviews() {
+  const container = document.getElementById("content");
+
+  try {
+    const res = await fetch("/api/reviews");
+    const data = await res.json();
+
+    container.innerHTML = reviewManagementTemplate(data);
+
+    // store for modal lookup
+    window.reviewData = data;
+
+  } catch (err) {
+    console.error("Error loading reviews:", err);
+    container.innerHTML = `<p class="text-red-500">Failed to load reviews</p>`;
+  }
+}
+
+
  async function fetchAndRenderFood() {
   const containerId = 'content';
   const container = document.getElementById(containerId);
@@ -2801,4 +2881,45 @@ async function updateIdStatus(userId, status) {
     console.error(err);
     alert('Failed to update ID status. Try again.');
   }
+}
+
+// Reviews Functions
+
+async function markReviewReviewed(id) {
+  if (!confirm("Mark this review as reviewed?")) return;
+
+  try {
+    const res = await fetch(`/api/reviews/${id}/mark-reviewed`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert("Review marked as reviewed!");
+      fetchAndRenderReviews();
+    }
+  } catch (err) {
+    console.error("Error updating review:", err);
+  }
+}
+
+
+function openReviewModal(id) {
+  const item = window.reviewData.find(r => r.id === id);
+  if (!item) return;
+
+  document.getElementById("modalUser").innerText = item.user_name;
+  document.getElementById("modalOrderId").innerText = item.order_id;
+  document.getElementById("modalStars").innerText = item.stars + " ★";
+  document.getElementById("modalComment").innerText = item.comment ?? "";
+
+  document.getElementById("reviewModal").classList.remove("hidden");
+  document.getElementById("reviewModal").classList.add("flex");
+}
+
+function closeReviewModal() {
+  const modal = document.getElementById("reviewModal");
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
 }

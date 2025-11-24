@@ -160,9 +160,10 @@ Route::delete('/rooms/delete-room/{id}', [RoomSeederController::class, 'destroy'
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/submit-review', [ReviewController::class, 'submit']);
 });
+Route::get('/reviews', [ReviewController::class, 'adminList']);
+Route::post('/reviews/{id}/mark-reviewed', [ReviewController::class, 'markReviewed']);
 
 // Approval Routes
 Route::get('/google-users', [ApprovalController::class, 'getGoogleUsers']);
 Route::post('/google-users/{id}/update-id-status', [ApprovalController::class, 'updateIdStatus']);
-
 
