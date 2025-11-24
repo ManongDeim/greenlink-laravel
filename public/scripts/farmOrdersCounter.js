@@ -418,6 +418,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Failed to load products:', error);
   }
 });
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const pickupDate = document.getElementById("pickupDate");
   const hourSelect = document.getElementById("hourSelect");
@@ -427,11 +430,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const OPEN_HOUR = 7;   // 7 AM
   const CLOSE_HOUR = 20; // 8 PM (20:00)
 
-  // Set today's date as minimum
   const todayStr = new Date().toISOString().split("T")[0];
   pickupDate.min = todayStr;
 
-  // Populate minutes 0–55 by 5
   function populateMinutes() {
     minuteSelect.innerHTML = "";
     for (let m = 0; m < 60; m += 5) {
@@ -442,11 +443,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Build hours based on AM/PM
+  function convertTo24(hour, ampm) {
+    hour = parseInt(hour);
+    if (ampm === "PM" && hour !== 12) return hour + 12;
+    if (ampm === "AM" && hour === 12) return 0;
+    return hour;
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    const toastMessage = document.getElementById("toastMessage");
+    toastMessage.textContent = message;
+    toast.style.display = "flex";
+    toast.style.zIndex = 99999;
+    toast.classList.remove("opacity-0");
+    toast.classList.add("opacity-100");
+    setTimeout(() => {
+      toast.classList.remove("opacity-100");
+      toast.classList.add("opacity-0");
+      setTimeout(() => { toast.style.display = "none"; }, 500);
+    }, 3500);
+  }
+
   function populateHours() {
     hourSelect.innerHTML = "";
 
-    // Placeholder
     const placeholder = document.createElement("option");
     placeholder.textContent = "HH";
     placeholder.value = "";
@@ -464,55 +485,37 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     disablePastHours();
-  }
-
-  // Convert 12h → 24h
-  function convertTo24(hour, ampm) {
-    hour = parseInt(hour);
-    if (ampm === "PM" && hour !== 12) return hour + 12;
-    if (ampm === "AM" && hour === 12) return 0;
-    return hour;
+    disablePastMinutes();
   }
 
   function disablePastHours() {
     if (!pickupDate.value) return;
-
-    const selectedDate = new Date(pickupDate.value);
     const now = new Date();
+    const selectedDate = new Date(pickupDate.value);
     const isToday = selectedDate.toDateString() === now.toDateString();
-    let ampm = periodSelect.value;
+    const ampm = periodSelect.value;
 
     Array.from(hourSelect.options).forEach(opt => {
       const hour24 = convertTo24(opt.value, ampm);
-
-      // Disable hours outside window
-      if (hour24 < OPEN_HOUR || hour24 > CLOSE_HOUR) {
+      if (hour24 < OPEN_HOUR || hour24 > CLOSE_HOUR || (isToday && hour24 < now.getHours())) {
         opt.disabled = true;
         opt.classList.add("opacity-40");
-        return;
-      }
-
-      // Disable past hours today
-      if (isToday && hour24 < now.getHours()) {
-        opt.disabled = true;
-        opt.classList.add("opacity-40");
+      } else {
+        opt.disabled = false;
+        opt.classList.remove("opacity-40");
       }
     });
 
-    const hasAvailable = Array.from(hourSelect.options).some(o => !o.disabled);
-
+    // Check if period has any available hours today
+    const hasAvailable = Array.from(hourSelect.options).some(o => !o.disabled && o.value !== "");
     if (!hasAvailable && isToday) {
-      // Try switching period first (AM <-> PM)
-      const alternatePeriod = ampm === "AM" ? "PM" : "AM";
-      periodSelect.value = alternatePeriod;
+      const altPeriod = ampm === "AM" ? "PM" : "AM";
+      periodSelect.value = altPeriod;
       populateHours();
-
-      const altHasAvailable = Array.from(hourSelect.options).some(o => !o.disabled);
-
+      const altHasAvailable = Array.from(hourSelect.options).some(o => !o.disabled && o.value !== "");
       if (altHasAvailable) {
-        showToast(`⛔ Selected period has no available times. Switched to ${alternatePeriod} on the same day.`);
+        showToast(`⛔ Selected period has no available times. Switched to ${altPeriod} on the same day.`);
       } else {
-        // Both AM & PM full → move to tomorrow
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         pickupDate.value = tomorrow.toISOString().split("T")[0];
@@ -523,27 +526,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Simple toast function
-  function showToast(message) {
-    const toast = document.getElementById("toast");
-    const toastMessage = document.getElementById("toastMessage");
-
-    toastMessage.textContent = message;
-    toast.style.display = "flex";
-    toast.style.zIndex = 99999;
-    toast.classList.remove("opacity-0");
-    toast.classList.add("opacity-100");
-
-    setTimeout(() => {
-      toast.classList.remove("opacity-100");
-      toast.classList.add("opacity-0");
-      setTimeout(() => {
-        toast.style.display = "none";
-      }, 500);
-    }, 3500);
-  }
-
-  // Disable past minutes and auto-skip if current hour is almost over
   function disablePastMinutes() {
     populateMinutes();
     if (!pickupDate.value || !hourSelect.value) return;
@@ -551,8 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectedDate = new Date(pickupDate.value);
     const now = new Date();
     const isToday = selectedDate.toDateString() === now.toDateString();
-    const ampm = periodSelect.value;
-    const selectedHour24 = convertTo24(hourSelect.value, ampm);
+    const selectedHour24 = convertTo24(hourSelect.value, periodSelect.value);
 
     Array.from(minuteSelect.options).forEach(opt => {
       const minuteVal = parseInt(opt.value);
@@ -565,68 +546,33 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Auto-skip to next hour if current hour has no available minutes
-    if (isToday && selectedHour24 === now.getHours() && now.getMinutes() >= 55) {
+    // Auto-skip to next hour if current hour is over 55 minutes
+    const availableMinutes = Array.from(minuteSelect.options).some(o => !o.disabled);
+    if (isToday && !availableMinutes) {
       let nextHour = now.getHours() + 1;
       if (nextHour > CLOSE_HOUR) {
-        // Move to next day if beyond closing
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         pickupDate.value = tomorrow.toISOString().split("T")[0];
         periodSelect.value = "AM";
-        populateHours();
       } else {
-        // Set hourSelect to next available hour
-        let nextPeriod = nextHour >= 12 ? "PM" : "AM";
+        const nextPeriod = nextHour >= 12 ? "PM" : "AM";
         periodSelect.value = nextPeriod;
         populateHours();
         hourSelect.value = nextHour > 12 ? nextHour - 12 : nextHour;
-        disablePastMinutes();
       }
+      disablePastMinutes();
       showToast("⛔ Current hour is almost over. Switched to next available hour.");
-    }
-  }
-
-  // Notify user if selecting past time
-  function notifyIfPastTime() {
-    if (!pickupDate.value || !hourSelect.value || !periodSelect.value) return;
-    const selectedDate = new Date(pickupDate.value);
-    const now = new Date();
-    const isToday = selectedDate.toDateString() === now.toDateString();
-    if (!isToday) return;
-
-    const hour24 = convertTo24(hourSelect.value, periodSelect.value);
-    const minute = parseInt(minuteSelect.value);
-
-    if (hour24 < now.getHours() || (hour24 === now.getHours() && minute < now.getMinutes())) {
-      showToast("⛔ This time has already passed today. Please choose a later time or select tomorrow.");
-      hourSelect.value = "";
-      minuteSelect.value = "00";
     }
   }
 
   // INITIAL LOAD
   populateMinutes();
   populateHours();
-  disablePastMinutes();
-  notifyIfPastTime();
 
   // EVENTS
-  pickupDate.addEventListener("change", () => {
-    populateHours();
-    disablePastMinutes();
-  });
-
-  periodSelect.addEventListener("change", () => {
-    populateHours();
-    disablePastMinutes();
-    notifyIfPastTime();
-  });
-
-  hourSelect.addEventListener("change", () => {
-    disablePastMinutes();
-    notifyIfPastTime();
-  });
-
-  minuteSelect.addEventListener("change", notifyIfPastTime);
+  pickupDate.addEventListener("change", () => { populateHours(); });
+  periodSelect.addEventListener("change", () => { populateHours(); });
+  hourSelect.addEventListener("change", () => { disablePastMinutes(); });
+  minuteSelect.addEventListener("change", () => {});
 });
