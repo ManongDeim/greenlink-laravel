@@ -264,4 +264,16 @@ class FoodOrderController extends Controller
        
     return response()->json(FoodOrderModel::orderBy('created_at', 'desc')->get());
     }
+
+    public function delete($foodOrderId)
+{
+    $order = FoodOrderModel::where('foodOrder_id', $foodOrderId)->first();
+    if (!$order) {
+        return response()->json(['success' => false, 'message' => 'Order not found'], 404);
+    }
+
+    $order->delete();
+    return response()->json(['success' => true, 'message' => 'Order deleted successfully']);
+}
+
 }

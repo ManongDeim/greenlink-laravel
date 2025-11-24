@@ -86,6 +86,8 @@ Route::get('/paymentSuccessFood', [FoodOrderController::class, 'paymentSuccess']
 Route::get('/paymentFailedFood', [FoodOrderController::class, 'paymentFailed']);
 Route::get('foodProducts', [FoodProductController::class, 'index']);
 Route::get('foodOrder', [FoodOrderController::class, 'index']);
+Route::delete('/foodOrder/{foodOrder}/delete', [FoodOrderController::class, 'delete']);
+
 
 
 // Room Routes
