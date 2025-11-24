@@ -212,6 +212,26 @@ const reviewManagementTemplate = data => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
   <h2 class="text-2xl font-bold text-teal-700 mb-4">User Reviews</h2>
 
+  
+  <!-- FILTERS -->
+  <div class="flex gap-4 mb-4">
+    <select id="filterType" onchange="applyReviewFilters()"
+      class="px-3 py-2 border rounded-lg">
+      <option value="">All Types</option>
+      <option value="food">Food</option>
+      <option value="farm">Farm</option>
+      <option value="room">Room</option>
+      <option value="event">Event</option>
+    </select>
+
+    <select id="filterStatus" onchange="applyReviewFilters()"
+      class="px-3 py-2 border rounded-lg">
+      <option value="">All Status</option>
+      <option value="Not Reviewed">Not Reviewed</option>
+      <option value="Reviewed">Reviewed</option>
+    </select>
+  </div>
+
   <table class="min-w-full border border-gray-200 text-sm text-left">
     <thead class="bg-gray-100 text-gray-700">
       <tr>
@@ -1015,15 +1035,13 @@ async function fetchAndRenderReviews() {
     const data = await res.json();
 
     container.innerHTML = reviewManagementTemplate(data);
-
-    // store for modal lookup
     window.reviewData = data;
 
   } catch (err) {
     console.error("Error loading reviews:", err);
-    container.innerHTML = `<p class="text-red-500">Failed to load reviews</p>`;
   }
 }
+
 
 
  async function fetchAndRenderFood() {
@@ -1555,6 +1573,7 @@ document.addEventListener("DOMContentLoaded", () => {
     event: { render: fetchAndRenderEventReservations},
     eventManagement: { render: fetchAndRenderEventManagement },
     idApproval:{ render: fetchAndRenderGoogleUsers },
+    reviews: { render: fetchAndRenderReviews },
   };
 
   // =================== Sidebar Button Logic ===================
@@ -2922,4 +2941,31 @@ function closeReviewModal() {
   const modal = document.getElementById("reviewModal");
   modal.classList.add("hidden");
   modal.classList.remove("flex");
+}
+
+
+async function applyReviewFilters() {
+  const type = document.getElementById("filterType").value;
+  const status = document.getElementById("filterStatus").value;
+
+  const params = new URLSearchParams();
+  if (type) params.append("type", type);
+  if (status) params.append("status", status);
+
+  const container = document.getElementById("content");
+
+  try {
+    const res = await fetch(`/api/reviews?${params.toString()}`);
+    const data = await res.json();
+
+    container.innerHTML = reviewManagementTemplate(data);
+    window.reviewData = data;
+
+    // Restore selected filters after rerender
+    document.getElementById("filterType").value = type;
+    document.getElementById("filterStatus").value = status;
+
+  } catch (err) {
+    console.error("Error applying filters:", err);
+  }
 }

@@ -48,21 +48,46 @@ class ReviewController extends Controller
         ]);
     }
 
-    public function adminList()
+    public function adminList(Request $request)
 {
-    $reviews = DB::table('reviews')
+    $type = $request->query('type');      // food, farm, room, event, null
+    $status = $request->query('status');  // Reviewed, Not Reviewed, null
+
+    $query = DB::table('reviews')
         ->join('users', 'users.id', '=', 'reviews.user_id')
         ->select(
             'reviews.*',
             'users.name as user_name',
             DB::raw('COALESCE(food_order_id, farm_order_id, room_reservation_id, event_reservation_id) AS order_id')
-        )
-        ->where('review_status', 'Not Reviewed')
-        ->orderBy('reviews.created_at', 'DESC')
-        ->get();
+        );
 
-    return response()->json($reviews);
+    // ⭐ Filter by type
+    if ($type === 'food') {
+        $query->whereNotNull('food_order_id');
+    }
+    if ($type === 'farm') {
+        $query->whereNotNull('farm_order_id');
+    }
+    if ($type === 'room') {
+        $query->whereNotNull('room_reservation_id');
+    }
+    if ($type === 'event') {
+        $query->whereNotNull('event_reservation_id');
+    }
+
+    // ⭐ Filter by status
+    if ($status === 'Reviewed') {
+        $query->where('review_status', 'Reviewed');
+    } 
+    else if ($status === 'Not Reviewed') {
+        $query->where('review_status', 'Not Reviewed');
+    }
+
+    $query->orderBy('reviews.created_at', 'DESC');
+
+    return response()->json($query->get());
 }
+
 
 public function markReviewed($id)
 {
