@@ -356,25 +356,25 @@ const reviewManagementTemplate = data => `
 
 
 
-const foodOrdersTableTemplate = data => `
+const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPaymentStatus = '') => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
   <h2 class="text-2xl font-bold text-teal-700 mb-4">Food Orders</h2>
 
-  <!-- FILTERS -->
+ <!-- FILTERS -->
   <div class="flex gap-4 mb-4">
     <select id="filterOrderStatus" onchange="applyFoodOrderFilter()"
       class="px-3 py-2 border rounded-lg">
-      <option value="">All Order Status</option>
-      <option value="Pending">Pending</option>
-      <option value="Completed">Completed</option>
-      <option value="Cancelled">Cancelled</option>
+      <option value="" ${selectedOrderStatus === '' ? 'selected' : ''}>All Order Status</option>
+      <option value="Pending" ${selectedOrderStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+      <option value="Completed" ${selectedOrderStatus === 'Completed' ? 'selected' : ''}>Completed</option>
+      <option value="Cancelled" ${selectedOrderStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
     </select>
 
     <select id="filterPaymentStatus" onchange="applyFoodOrderFilter()"
       class="px-3 py-2 border rounded-lg">
-      <option value="">All Payment Status</option>
-      <option value="Paid">Paid</option>
-      <option value="Unpaid">Unpaid</option>
+      <option value="" ${selectedPaymentStatus === '' ? 'selected' : ''}>All Payment Status</option>
+      <option value="Paid" ${selectedPaymentStatus === 'Paid' ? 'selected' : ''}>Paid</option>
+      <option value="Unpaid" ${selectedPaymentStatus === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
     </select>
   </div>
 
@@ -404,25 +404,30 @@ const foodOrdersTableTemplate = data => `
         .map(i => `${order[i.key]}x ${i.name}`)
         .join(', ');
 
-        // Conditional Action Buttons
-        let actionButtons = '';
-        if (order.order_status === 'Pending') {
-          actionButtons = `
-            <button onclick="updateOrderStatus('${order.foodOrder_id}','Completed')" 
-              class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 mr-2">Complete</button>
-            <button onclick="updateOrderStatus('${order.foodOrder_id}','Cancelled')" 
-              class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Cancel</button>
-          `;
-        } else {
-          actionButtons = `
-            <button onclick="deleteFoodOrder('${order.foodOrder_id}')" 
-              class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700">Remove</button>
-          `;
-        }
-
         return `
-        <tr class="border-t hover:bg-gray-50 cursor-pointer" onclick="openFoodOrderModal('${order.foodOrder_id}')">
-          <td class="px-4 py-2" onclick="event.stopPropagation()">${actionButtons}</td>
+        <tr class="border-t hover:bg-gray-50 relative cursor-pointer" onclick="openFoodOrderModal('${order.foodOrder_id}')">
+          <td class="px-4 py-2 relative" onclick="event.stopPropagation()">
+            <button onclick="toggleOrderActionMenu(event, '${order.foodOrder_id}')"
+                    class="relative z-10 p-2 bg-gray-200 rounded hover:bg-gray-300">⚙️</button>
+
+            <div id="orderActionMenu-${order.foodOrder_id}" 
+                 class="absolute left-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
+              ${
+                order.order_status === 'Pending' 
+                ? `
+                  <button onclick="updateOrderStatus('${order.foodOrder_id}','Completed')" 
+                    class="block w-full text-left px-3 py-1 hover:bg-green-100">Complete</button>
+                  <button onclick="updateOrderStatus('${order.foodOrder_id}','Cancelled')" 
+                    class="block w-full text-left px-3 py-1 hover:bg-red-100">Cancel</button>
+                  `
+                : `
+                  <button onclick="deleteFoodOrder('${order.foodOrder_id}')" 
+                    class="block w-full text-left px-3 py-1 hover:bg-gray-100">Remove</button>
+                  `
+              }
+            </div>
+          </td>
+
           <td class="px-4 py-2">${order.foodOrder_id}</td>
           <td class="px-4 py-2">${items || '-'}</td>
           <td class="px-4 py-2">₱${parseFloat(order.total_bill).toLocaleString()}</td>
@@ -458,34 +463,121 @@ const foodOrdersTableTemplate = data => `
 `;
 
 
-// Farm order card template
-const farmOrderCardTemplate = order => {
-  const items = [];
-  if (order.bangus_order > 0) items.push(`${order.bangus_order}x Bangus`);
-  if (order.eggs_order > 0) items.push(`${order.eggs_order}x Eggs`);
-  if (order.mudCrab_order > 0) items.push(`${order.mudCrab_order}x Mud Crab`);
-  if (order.nativeChicken_order > 0) items.push(`${order.nativeChicken_order}x Native Chicken`);
-  if (order.nativePork_order > 0) items.push(`${order.nativePork_order}x Native Pork`);
-  if (order.squash_order > 0) items.push(`${order.squash_order}x Squash`);
+// Farm order table template
+const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentStatus = '') => `
+<div class="p-6 bg-white rounded-2xl shadow-md">
+  <h2 class="text-2xl font-bold text-teal-700 mb-4">Farm Orders</h2>
 
-  return `
-    <div class="p-5 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
-         data-id="${order.farmOrder_id}" data-order-status="${order.order_status ?? ''}">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold text-gray-800">Order #${order.farmOrder_id}</h3>
-        <div class="flex items-center gap-2">
-          <span class="px-2 py-1 text-xs font-semibold ${order.payment_status === 'Paid' ? 'text-green-700 bg-green-100' : 'text-teal-700 bg-teal-100'} rounded-full">${order.payment_status}</span>
-        </div>
-      </div>
-      <ul class="mt-2 text-sm text-gray-700 list-disc list-inside">
-        ${items.map(i => `<li>${i}</li>`).join('')}
-      </ul>
-      <p class="mt-2 text-sm text-gray-700 font-semibold">Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}</p>
-      <p class="text-sm text-gray-700 font-semibold">Payment Method: ${order.payment_method}</p>
-      <p class="mt-2 text-sm font-semibold text-gray-800">Order Status: ${order.order_status}</p>
+  <!-- FILTERS -->
+  <div class="flex gap-4 mb-4">
+    <select id="filterFarmOrderStatus" onchange="applyFarmOrderFilter()" class="px-3 py-2 border rounded-lg">
+      <option value="" ${selectedOrderStatus === '' ? 'selected' : ''}>All Order Status</option>
+      <option value="Pending" ${selectedOrderStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+      <option value="Completed" ${selectedOrderStatus === 'Completed' ? 'selected' : ''}>Completed</option>
+      <option value="Cancelled" ${selectedOrderStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+    </select>
+
+    <select id="filterFarmPaymentStatus" onchange="applyFarmOrderFilter()" class="px-3 py-2 border rounded-lg">
+      <option value="" ${selectedPaymentStatus === '' ? 'selected' : ''}>All Payment Status</option>
+      <option value="Paid" ${selectedPaymentStatus === 'Paid' ? 'selected' : ''}>Paid</option>
+      <option value="Unpaid" ${selectedPaymentStatus === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
+    </select>
+  </div>
+
+  <table class="min-w-full border border-gray-200 text-sm text-left">
+    <thead class="bg-gray-100 text-gray-700">
+      <tr>
+        <th class="px-4 py-2">Action</th>
+        <th class="px-4 py-2">Order ID</th>
+        <th class="px-4 py-2">Items</th>
+        <th class="px-4 py-2">Total Bill</th>
+        <th class="px-4 py-2">Payment Status</th>
+        <th class="px-4 py-2">Order Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      ${data
+        .map((order) => {
+          const items = [
+            { key: "bangus_order", name: "Bangus" },
+            { key: "eggs_order", name: "Eggs" },
+            { key: "mudCrab_order", name: "Mud Crab" },
+            { key: "nativeChicken_order", name: "Native Chicken" },
+            { key: "nativePork_order", name: "Native Pork" },
+            { key: "squash_order", name: "Squash" },
+          ]
+            .filter((i) => order[i.key] && order[i.key] > 0)
+            .map((i) => `${order[i.key]}x ${i.name}`)
+            .join(", ");
+
+          return `
+        <tr class="border-t hover:bg-gray-50 relative cursor-pointer"
+            onclick="openFarmOrderModal('${order.farmOrder_id}')">
+
+          <td class="px-4 py-2 relative" onclick="event.stopPropagation()">
+            <button onclick="toggleFarmOrderActionMenu(event, '${order.farmOrder_id}')"
+                    class="relative z-10 p-2 bg-gray-200 rounded hover:bg-gray-300">⚙️</button>
+
+            <div id="farmOrderActionMenu-${order.farmOrder_id}"
+                 class="absolute left-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
+
+              ${
+                order.order_status === "Pending"
+                  ? `
+                <button onclick="updateFarmOrderStatus('${order.farmOrder_id}','Completed')"
+                        class="block w-full text-left px-3 py-1 hover:bg-green-100">Complete</button>
+
+                <button onclick="updateFarmOrderStatus('${order.farmOrder_id}','Cancelled')"
+                        class="block w-full text-left px-3 py-1 hover:bg-red-100">Cancel</button>
+                `
+                  : `
+                <button onclick="deleteFarmOrder('${order.farmOrder_id}')"
+                        class="block w-full text-left px-3 py-1 hover:bg-gray-100">Remove</button>
+                `
+              }
+            </div>
+          </td>
+
+          <td class="px-4 py-2">${order.farmOrder_id}</td>
+          <td class="px-4 py-2">${items || "-"}</td>
+          <td class="px-4 py-2">₱${parseFloat(order.total_bill).toLocaleString()}</td>
+          <td class="px-4 py-2">
+            <span class="px-2 py-1 text-xs font-semibold ${
+              order.payment_status === "Paid"
+                ? "text-green-700 bg-green-100"
+                : "text-teal-700 bg-teal-100"
+            } rounded-full">
+              ${order.payment_status}
+            </span>
+          </td>
+
+          <td class="px-4 py-2">${order.order_status}</td>
+        </tr>`;
+        })
+        .join("")}
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL -->
+<div id="farmOrderModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
+    <h3 class="text-xl font-bold text-teal-700 mb-3">Order Details</h3>
+    <p><strong>Order ID:</strong> <span id="farmModalOrderID"></span></p>
+    <p><strong>Items:</strong> <span id="farmModalOrderItems"></span></p>
+    <p><strong>Total Bill:</strong> ₱<span id="farmModalOrderTotal"></span></p>
+    <p><strong>Payment Status:</strong> <span id="farmModalOrderPayment"></span></p>
+    <p><strong>Order Status:</strong> <span id="farmModalOrderStatus"></span></p>
+
+    <div class="mt-4 text-right">
+      <button onclick="closeFarmOrderModal()" 
+              class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
     </div>
-  `;
-};
+  </div>
+</div>
+`;
+
 // Room Reservation template
 const roomReservationTemplate = reservation => `
   <div class="p-5 mb-4 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
@@ -1313,57 +1405,69 @@ async function fetchAndRenderFoodOrders(status = null) {
   }
 }
 
-async function fetchAndRenderFarmOrders(statusFilter = null) {
-  const container = document.getElementById('content');
-  if (!container) return;
-  container.innerHTML = `<p class="text-gray-500">Loading farm orders...</p>`;
+let openOrderActionMenuId = null;
+function toggleOrderActionMenu(event, id) {
+  event.stopPropagation();
+  const menu = document.getElementById(`orderActionMenu-${id}`);
+  if (!menu) return;
+
+  if (openOrderActionMenuId && openOrderActionMenuId !== id) {
+    const prev = document.getElementById(`orderActionMenu-${openOrderActionMenuId}`);
+    if (prev) prev.classList.add('hidden');
+  }
+
+  menu.classList.toggle('hidden');
+  openOrderActionMenuId = menu.classList.contains('hidden') ? null : id;
+}
+
+document.addEventListener('click', () => {
+  if (openOrderActionMenuId) {
+    const menu = document.getElementById(`orderActionMenu-${openOrderActionMenuId}`);
+    if (menu) menu.classList.add('hidden');
+    openOrderActionMenuId = null;
+  }
+});
+
+
+async function fetchAndRenderFarmOrders() {
+  const container = document.getElementById("content");
 
   try {
-    const res = await fetch('/api/farmOrder');
-    let data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) {
-      container.innerHTML = `<p class="text-gray-500">No farm orders found.</p>`;
-      return;
-    }
+    const res = await fetch("/api/farmOrder");
+    const data = await res.json();
 
-    // sort by created_at if present
-    data.sort((a, b) => {
-      const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
-      return tb - ta;
-    });
+    window.farmOrdersData = data;
 
-    // filter if requested
-    const display = statusFilter ? data.filter(o => o.order_status === statusFilter) : data;
-
-    if (!display.length) {
-      container.innerHTML = `<p class="text-gray-500">No ${statusFilter ?? ''} orders found.</p>`;
-      return;
-    }
-
-    container.innerHTML = `
-      <h2 class="mb-6 text-2xl font-bold text-teal-700">Farm Orders</h2>
-      <div class="space-y-4">
-        ${display.map(farmOrderCardTemplate).join('')}
-      </div>
-    `;
-
-    // attach click handlers to cards (after render)
-    container.querySelectorAll('.order-item[data-id]').forEach(card => {
-      const id = card.getAttribute('data-id');
-      const order = display.find(o => o.farmOrder_id == id);
-      if (!order) return;
-      card.addEventListener('click', () => {
-        const showButtons = order.order_status === 'Pending';
-        openFarmOrderModal(order, showButtons);
-      });
-    });
-
+    container.innerHTML = farmOrderTableTemplate(data);
   } catch (err) {
-    console.error('Failed to load farm orders:', err);
-    container.innerHTML = `<p class="text-red-500">Failed to load farm orders.</p>`;
+    console.error("Failed to load farm orders:", err);
+    container.innerHTML = `<p class="text-red-500">Failed to load orders</p>`;
   }
 }
+
+
+let FarmOpenOrderActionMenuId = null;
+function toggleOrderActionMenu(event, id) {
+  event.stopPropagation();
+  const menu = document.getElementById(`orderActionMenu-${id}`);
+  if (!menu) return;
+
+  if (openOrderActionMenuId && openOrderActionMenuId !== id) {
+    const prev = document.getElementById(`orderActionMenu-${openOrderActionMenuId}`);
+    if (prev) prev.classList.add('hidden');
+  }
+
+  menu.classList.toggle('hidden');
+  openOrderActionMenuId = menu.classList.contains('hidden') ? null : id;
+}
+
+document.addEventListener('click', () => {
+  if (openOrderActionMenuId) {
+    const menu = document.getElementById(`orderActionMenu-${openOrderActionMenuId}`);
+    if (menu) menu.classList.add('hidden');
+    openOrderActionMenuId = null;
+  }
+});
 
 
 async function fetchAndRenderRoomReservations(status = null) {
@@ -1896,46 +2000,65 @@ function updateOrderStatus(foodOrderId, status) {
   })
   .then(res => res.json())
   .then(data => {
-    showToast(data.message); // optional toast instead of alert
-    foodOrderModal.classList.add('hidden');
+    showToast(data.message || 'Order updated');
 
-    // Update the order card on the page if it exists
-    const card = document.querySelector(`.order-item[data-id="${foodOrderId}"]`);
-    if (card) {
-      // Update status text
-      const statusBadge = card.querySelector('span');
-      if (statusBadge) {
-        statusBadge.textContent = status;
-        if (status === 'Completed') {
-          statusBadge.className = 'px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full';
-        } else if (status === 'Cancelled') {
-          statusBadge.className = 'px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full';
-        } else {
-          statusBadge.className = 'px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full';
-        }
-      }
+    // Close the modal if open
+    const modal = document.getElementById('foodOrderModal');
+    if (modal) modal.classList.add('hidden');
+
+    // Update the table row dynamically
+    const row = document.querySelector(`tr[onclick="openFoodOrderModal('${foodOrderId}')"]`);
+    if (!row) return;
+
+    // Update order_status column
+    row.cells[5].innerText = status;
+
+    // Update payment badge class if needed (optional)
+    const badge = row.cells[3].querySelector('span');
+    if (badge) {
+      if (status === 'Completed') badge.className = 'px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full';
+      else if (status === 'Cancelled') badge.className = 'px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full';
+      else badge.className = 'px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full';
     }
+
+    // Update action menu buttons
+    const menu = document.getElementById(`orderActionMenu-${foodOrderId}`);
+    if (menu) {
+      menu.innerHTML = `<button onclick="deleteFoodOrder('${foodOrderId}')" 
+                          class="block w-full text-left px-3 py-1 hover:bg-gray-100">Remove</button>`;
+    }
+
+    // Also update in window.foodOrdersData
+    const order = window.foodOrdersData.find(o => o.foodOrder_id === foodOrderId);
+    if (order) order.order_status = status;
   })
   .catch(err => console.error(err));
 }
 
 function deleteFoodOrder(foodOrderId) {
-  if (!confirm("Are you sure you want to delete this order?")) return;
+  if (!confirm("Are you sure you want to remove this order?")) return;
 
   fetch(`/api/foodOrder/${foodOrderId}/delete`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'DELETE'
   })
   .then(res => res.json())
   .then(data => {
-    showToast(data.message || 'Order deleted successfully');
-    // Remove the row from the table
+    showToast(data.message || 'Order removed');
+
+    // Remove row from the table
     const row = document.querySelector(`tr[onclick="openFoodOrderModal('${foodOrderId}')"]`);
     if (row) row.remove();
-    document.getElementById('foodOrderModal').classList.add('hidden');
+
+    // Remove from window.foodOrdersData
+    window.foodOrdersData = window.foodOrdersData.filter(o => o.foodOrder_id !== foodOrderId);
+
+    // Close modal if open
+    const modal = document.getElementById('foodOrderModal');
+    if (modal) modal.classList.add('hidden');
   })
   .catch(err => console.error(err));
 }
+
 
 
 function applyFoodOrderFilter() {
@@ -1944,37 +2067,21 @@ function applyFoodOrderFilter() {
 
   let filtered = window.foodOrdersData;
 
-  if (orderStatus) {
-    filtered = filtered.filter(o => o.order_status === orderStatus);
-  }
-
-  if (paymentStatus) {
-    filtered = filtered.filter(o => o.payment_status === paymentStatus);
-  }
+  if (orderStatus) filtered = filtered.filter(o => o.order_status === orderStatus);
+  if (paymentStatus) filtered = filtered.filter(o => o.payment_status === paymentStatus);
 
   const container = document.getElementById("content");
-  container.innerHTML = foodOrdersTableTemplate(filtered);
+  container.innerHTML = foodOrdersTableTemplate(filtered, orderStatus, paymentStatus);
 }
 
+// Farm Order Modals and Functions
 
-// --- Farm Modal elements (IDs must match the modal HTML) ---
-const farmOrderModal = document.getElementById('farmOrderModal');
-const farmModalTitle = document.getElementById('farmModalTitle');
-const farmModalRef = document.getElementById('farmModalRef');
-const farmModalItems = document.getElementById('farmModalItems');
-const farmModalTotal = document.getElementById('farmModalTotal');
-const farmModalOrderStatus = document.getElementById('farmModalOrderStatus');
-const farmModalButtons = document.getElementById('farmModalButtons');
-const farmCloseModal = document.getElementById('farmCloseModal');
-const farmCompleteBtn = document.getElementById('farmCompleteBtn');
-const farmCancelBtn = document.getElementById('farmCancelBtn');
+// Function to open modal for a selected order
+function openFarmOrderModal(orderId) {
+  const order = window.farmOrdersData.find(o => o.farmOrder_id === orderId);
+  if (!order) return;
 
-farmCloseModal?.addEventListener('click', () => farmOrderModal.classList.add('hidden'));
-
-// Open modal for farm order
-function openFarmOrderModal(order, showButtons = true) {
-  farmModalTitle.textContent = `Order #${order.farmOrder_id}`;
-  farmModalRef.textContent = `Reference: ${order.ref_number ?? 'N/A'}`;
+  document.getElementById('farmModalOrderID').innerText = order.farmOrder_id;
 
   const items = [
     { key: 'bangus_order', name: 'Bangus' },
@@ -1982,68 +2089,89 @@ function openFarmOrderModal(order, showButtons = true) {
     { key: 'mudCrab_order', name: 'Mud Crab' },
     { key: 'nativeChicken_order', name: 'Native Chicken' },
     { key: 'nativePork_order', name: 'Native Pork' },
-    { key: 'squash_order', name: 'Squash' }
-  ];
+    { key: 'squash_order', name: 'Squash' },
+  ]
+    .filter(i => order[i.key] > 0)
+    .map(i => `${order[i.key]}x ${i.name}`)
+    .join(', ');
 
-  farmModalItems.innerHTML = items
-    .filter(i => order[i.key] && order[i.key] > 0)
-    .map(i => `<li>${order[i.key]}x ${i.name}</li>`).join('');
+  document.getElementById('farmModalOrderItems').innerText = items || '-';
+  document.getElementById('farmModalOrderTotal').innerText = parseFloat(order.total_bill).toLocaleString();
+  document.getElementById('farmModalOrderPayment').innerText = order.payment_status;
+  document.getElementById('farmModalOrderStatus').innerText = order.order_status;
 
-  farmModalTotal.textContent = `Total Bill: ₱${parseFloat(order.total_bill).toLocaleString()}`;
-  farmModalOrderStatus.textContent = `Order Status: ${order.order_status ?? 'N/A'}`;
-
-  const shouldShowButtons = showButtons && order.order_status === 'Pending';
-  farmModalButtons.style.display = shouldShowButtons ? 'flex' : 'none';
-
-  // set handlers (replace previous handlers if any)
-  farmCompleteBtn.onclick = () => updateFarmOrderStatus(order.farmOrder_id, 'Completed');
-  farmCancelBtn.onclick = () => updateFarmOrderStatus(order.farmOrder_id, 'Cancelled');
-
-  farmOrderModal.classList.remove('hidden');
+  document.getElementById('farmOrderModal').classList.remove('hidden');
 }
 
-function updateFarmOrderStatus(farmOrderId, status) {
-  fetch(`/api/farmOrder/${farmOrderId}/update-status`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ order_status: status })
+
+function closeFoodOrderModal() {
+  document.getElementById('farmOrderModal').classList.add('hidden');
+}
+
+function updateFarmOrderStatus(orderId, status) {
+  fetch(`/api/farmOrder/${orderId}/update-status`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ order_status: status }),
   })
-    .then(r => r.json())
+    .then(res => res.json())
     .then(json => {
-      if (json.message) showToast(json.message);
+      showToast(json.message || "Order updated");
 
-      // update card in DOM
-      const container = document.getElementById('content');
-      const card = container?.querySelector(`.order-item[data-id="${farmOrderId}"]`);
-      if (card) {
-        card.dataset.orderStatus = status;
-        const orderStatusEl = card.querySelector('[data-field="order-status"]');
-        if (orderStatusEl) orderStatusEl.textContent = status;
+      const row = document.querySelector(`tr[onclick="openFarmOrderModal('${orderId}')"]`);
+      if (!row) return;
 
-        // adjust payment/status badge styles if you want:
-        const badge = card.querySelector('span');
-        if (badge) {
-          if (status === 'Completed') badge.className = 'px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full';
-          else if (status === 'Cancelled') badge.className = 'px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full';
-          else badge.className = 'px-2 py-1 text-xs font-semibold text-teal-700 bg-teal-100 rounded-full';
-        }
+      row.cells[5].innerText = status;
+
+      const menu = document.getElementById(`farmOrderActionMenu-${orderId}`);
+      if (menu) {
+        menu.innerHTML = `
+          <button onclick="deleteFarmOrder('${orderId}')"
+                  class="block w-full text-left px-3 py-1 hover:bg-gray-100">
+            Remove
+          </button>`;
       }
 
-      // hide modal and update modal UI
-      farmModalOrderStatus.textContent = `Order Status: ${status}`;
-      farmModalButtons.style.display = 'none';
-      farmOrderModal.classList.add('hidden');
+      const order = window.farmOrdersData.find(o => o.farmOrder_id === orderId);
+      if (order) order.order_status = status;
 
-      // refresh current filter if there is an active one
-      const activeBtn = document.querySelector('#farmOrdersSubmenu button.active');
-      const activeStatus = activeBtn ? activeBtn.dataset.status : null;
-      fetchAndRenderFarmOrders(activeStatus);
-    })
-    .catch(err => {
-      console.error(err);
-      showToast('Failed to update order', 'error');
+      closeFarmOrderModal();
     });
 }
+
+function deleteFarmOrder(orderId) {
+  if (!confirm("Are you sure you want to remove this order?")) return;
+
+  fetch(`/api/farmOrder/${orderId}/delete`, { method: "DELETE" })
+    .then(res => res.json())
+    .then(json => {
+      showToast(json.message || "Order removed");
+
+      const row = document.querySelector(
+        `tr[onclick="openFarmOrderModal('${orderId}')"]`
+      );
+      if (row) row.remove();
+
+      window.farmOrdersData = window.farmOrdersData.filter(o => o.farmOrder_id !== orderId);
+
+      closeFarmOrderModal();
+    });
+}
+
+function applyFarmOrderFilter() {
+  const orderStatus = document.getElementById("filterFarmOrderStatus").value;
+  const paymentStatus = document.getElementById("filterFarmPaymentStatus").value;
+
+  let filtered = window.farmOrdersData;
+
+  if (orderStatus) filtered = filtered.filter(o => o.order_status === orderStatus);
+  if (paymentStatus) filtered = filtered.filter(o => o.payment_status === paymentStatus);
+
+  document.getElementById("content").innerHTML =
+    farmOrderTableTemplate(filtered, orderStatus, paymentStatus);
+}
+
+// Room Reservation Modals and Functions
 
 function openRoomModal(reservation) {
   document.getElementById("roomModalTitle").textContent = `Reservation #${reservation.room_reser_id}`;
@@ -3130,7 +3258,7 @@ document.addEventListener("click", async (e) => {
                   || "N/A";
 
     document.getElementById("modalUser").textContent = review.user_name;
-    document.getElementById("foodModalOrderId").textContent = orderId;
+    document.getElementById("modalOrderId").textContent = orderId;
     document.getElementById("modalStars").textContent = review.stars;
     document.getElementById("modalComment").textContent = review.comment ?? "";
     document.getElementById("modalStatus").textContent = review.review_status;

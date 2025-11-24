@@ -242,4 +242,30 @@ class FarmOrderController extends Controller
 
     return response()->json(['message' => "Order {$order->farmOrder_id} updated to {$status}", 'order' => $order]);
 }
+
+public function deleteFarmOrder($id)
+{
+    try {
+        $order = FarmOrderModel::where('farmOrder_id', $id)->first();
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Farm order not found',
+            ], 404);
+        }
+
+        $order->delete();
+
+        return response()->json([
+            'message' => 'Farm order removed successfully',
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Error deleting farm order',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
+
 }

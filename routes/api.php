@@ -78,6 +78,8 @@ Route::get('/paymentSuccessFarm', [FarmOrderController::class, 'paymentSuccess']
 Route::get('/paymentFailedFarm', [FarmOrderController::class, 'paymentFailed']);
 Route::get('farmOrder', [FarmOrderController::class, 'index']);
 Route::post('farmOrder/{farmOrderId}/update-status', [FarmOrderController::class, 'updateStatus']);
+Route::delete('/farmOrder/{id}/delete', [FarmOrderController::class, 'deleteFarmOrder']);
+
 
 
 // Food Order routes
