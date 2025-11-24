@@ -187,26 +187,81 @@ const farmCardTemplate = item => `
   </div>
 `;
 
-const googleUserCardTemplate = user => `
-  <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
-    <img src="${user.id_photo}" alt="ID of ${user.name}" class="object-cover w-full h-48 mb-4 rounded-xl shadow-sm">
-    
-    <h3 class="text-lg font-semibold text-gray-800 mb-1">${user.name}</h3>
-    <p class="text-sm text-gray-600 mb-4">Email: ${user.email}</p>
+const googleUserTableTemplate = data => `
+<div class="p-6 bg-white rounded-2xl shadow-md">
+  <h2 class="text-2xl font-bold text-teal-700 mb-4">Google Users</h2>
 
-    <div class="flex flex-col gap-2">
-      <button
-        onclick="updateIdStatus(${user.user_id}, 'Validated')"
-        class="px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition text-sm"
-      >Validated</button>
+  <!-- FILTERS -->
+  <div class="flex gap-4 mb-4">
+    <select id="filterStatus" onchange="applyGoogleUserFilter()"
+      class="px-3 py-2 border rounded-lg">
+      <option value="">All Statuses</option>
+      <option value="Pending Validation">Pending Validation</option>
+      <option value="Validated">Validated</option>
+      <option value="Rejected">Rejected</option>
+    </select>
+  </div>
 
-      <button
-        onclick="updateIdStatus(${user.user_id}, 'Rejected')"
-        class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
-      >Rejected</button>
+  <table class="min-w-full border border-gray-200 text-sm text-left">
+    <thead class="bg-gray-100 text-gray-700">
+      <tr>
+        <th class="px-4 py-2">Action</th>
+        <th class="px-4 py-2">Name</th>
+        <th class="px-4 py-2">Email</th>
+        <th class="px-4 py-2">Photo</th>
+        <th class="px-4 py-2">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${data.map(user => `
+      <tr class="border-t hover:bg-gray-50 cursor-pointer relative"
+          onclick="openUserModal(${user.user_id})">
+
+        <!-- ACTION -->
+        <td class="px-4 py-2 relative" onclick="event.stopPropagation()">
+          <button onclick="toggleActionMenu(event, ${user.user_id})"
+                  class="relative z-10 p-2 bg-gray-200 rounded hover:bg-gray-300">⚙️</button>
+
+          <div id="actionMenu-${user.user_id}" class="absolute left-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
+            <button onclick="updateIdStatus(${user.user_id}, 'Validated')" class="block w-full text-left px-3 py-1 hover:bg-green-100">Validate</button>
+            <button onclick="updateIdStatus(${user.user_id}, 'Rejected')" class="block w-full text-left px-3 py-1 hover:bg-red-100">Reject</button>
+          </div>
+        </td>
+
+        <td class="px-4 py-2">${user.name}</td>
+        <td class="px-4 py-2">${user.email}</td>
+        <td class="px-4 py-2">
+          ${user.id_photo 
+            ? `<img src="${user.id_photo}" alt="ID Photo" class="w-16 h-16 object-cover rounded" />`
+            : `<span class="text-gray-400">No Photo</span>`}
+        </td>
+        <td class="px-4 py-2">${user.id_status}</td>
+      </tr>
+      `).join("")}
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL -->
+<div id="userModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
+    <h3 class="text-xl font-bold text-teal-700 mb-3">User Details</h3>
+
+    <p><strong>Name:</strong> <span id="modalUserName"></span></p>
+    <p><strong>Email:</strong> <span id="modalUserEmail"></span></p>
+    <p><strong>Status:</strong> <span id="modalUserStatus"></span></p>
+    <p class="mt-2"><strong>ID Photo:</strong></p>
+    <img id="modalUserPhoto" class="w-full h-auto object-cover rounded mt-1" />
+
+    <div class="mt-4 text-right">
+      <button onclick="closeUserModal()" 
+              class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
     </div>
   </div>
+</div>
 `;
+
+
 
 const reviewManagementTemplate = data => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
@@ -277,7 +332,7 @@ const reviewManagementTemplate = data => `
 </div>
 
 <!-- MODAL -->
-<div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+<div id="reviewModal" class="flex inset-0 hidden items-center justify-center z-50">
   <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
     <h3 class="text-xl font-bold text-teal-700 mb-3">Full Review</h3>
 
@@ -1541,26 +1596,21 @@ document.addEventListener('click', () => {
 });
 
 async function fetchAndRenderGoogleUsers() {
-  const container = document.getElementById('content');
-  if (!container) return;
-
-  container.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+  const container = document.getElementById("content");
 
   try {
-    const res = await fetch('/api/google-users'); // Your API to get users with id_picture & name
-    const users = await res.json();
+    const res = await fetch("/api/google-users");
+    const data = await res.json();
 
-    if (!Array.isArray(users) || users.length === 0) {
-      container.innerHTML = `<p class="text-gray-500">No pending ID approvals.</p>`;
-      return;
-    }
+    window.googleUsersData = data; // store for filtering
+    container.innerHTML = googleUserTableTemplate(data);
 
-    container.innerHTML = users.map(user => googleUserCardTemplate(user)).join('');
   } catch (err) {
-    console.error('Failed to load google users:', err);
-    container.innerHTML = `<p class="text-red-500">Failed to load data</p>`;
+    console.error("Error fetching Google users:", err);
+    container.innerHTML = `<p class="text-red-500">Failed to load users</p>`;
   }
 }
+
 
 
 
@@ -2896,21 +2946,62 @@ async function updateIdStatus(userId, status) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Accept: 'application/json'
+        'Accept': 'application/json',
       },
       body: JSON.stringify({ id_status: status })
     });
 
     const result = await res.json();
-    if (!res.ok) throw new Error(result.message || 'Failed to update status');
-
-    alert(`ID status updated to ${status}`);
-    fetchAndRenderGoogleUsers(); // Refresh cards
+    if (result.message) {
+      // update the local data for instant UI update
+      const user = window.googleUsersData.find(u => u.user_id === userId);
+      if (user) user.id_status = status;
+      applyGoogleUserFilter(); // re-render table
+      alert(`Status updated to ${status}`);
+    }
   } catch (err) {
-    console.error(err);
-    alert('Failed to update ID status. Try again.');
+    console.error("Error updating status:", err);
+    alert("Failed to update status");
   }
 }
+
+
+function applyGoogleUserFilter() {
+  const status = document.getElementById('filterStatus').value;
+  let filtered = window.googleUsersData;
+
+  if (status) {
+    filtered = filtered.filter(user => user.id_status === status);
+  }
+
+  const container = document.getElementById("content");
+  container.innerHTML = googleUserTableTemplate(filtered);
+}
+
+function openUserModal(userId) {
+  const user = window.googleUsersData.find(u => u.user_id === userId);
+  if (!user) return;
+
+  document.getElementById('modalUserName').innerText = user.name;
+  document.getElementById('modalUserEmail').innerText = user.email;
+  document.getElementById('modalUserStatus').innerText = user.id_status;
+
+  const photoEl = document.getElementById('modalUserPhoto');
+  if (user.id_photo) {
+    photoEl.src = user.id_photo;
+    photoEl.classList.remove('hidden');
+  } else {
+    photoEl.src = '';
+    photoEl.classList.add('hidden');
+  }
+
+  document.getElementById('userModal').classList.remove('hidden');
+}
+
+function closeUserModal() {
+  document.getElementById('userModal').classList.add('hidden');
+}
+
 
 // Reviews Functions
 
@@ -2953,6 +3044,10 @@ document.addEventListener("click", async (e) => {
     document.getElementById("reviewModal").classList.remove("hidden");
   }
 });
+
+function closeReviewModal() {
+  document.getElementById("reviewModal").classList.add("hidden");
+}
 
 
 async function applyReviewFilters() {
