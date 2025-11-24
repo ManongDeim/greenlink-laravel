@@ -162,6 +162,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::get('/reviews', [ReviewController::class, 'adminList']);
 Route::post('/reviews/{id}/mark-reviewed', [ReviewController::class, 'markReviewed']);
+Route::delete('/reviews/{id}', [ReviewController::class, 'deleteReview']);
 
 // Approval Routes
 Route::get('/google-users', [ApprovalController::class, 'getGoogleUsers']);

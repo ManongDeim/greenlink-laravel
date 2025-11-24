@@ -104,4 +104,18 @@ public function markReviewed($id)
     return response()->json(['success' => true]);
 }
 
+public function deleteReview($id)
+{
+    $review = DB::table('reviews')->where('id', $id)->first();
+
+    if (!$review) {
+        return response()->json(['error' => 'Review not found'], 404);
+    }
+
+    DB::table('reviews')->where('id', $id)->delete();
+
+    return response()->json(['success' => true]);
+}
+
+
 }

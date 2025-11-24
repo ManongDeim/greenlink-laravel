@@ -240,31 +240,39 @@ const reviewManagementTemplate = data => `
         <th class="px-4 py-2">Order/Reservation ID</th>
         <th class="px-4 py-2">Current Stars</th>
         <th class="px-4 py-2">Comment</th>
+        <th class="px-4 py-2">Review Status</th>
         <th class="px-4 py-2">Review Date</th>
       </tr>
     </thead>
 
     <tbody>
-      ${data.map(item => `
-      <tr class="border-t hover:bg-gray-50 cursor-pointer"
-          onclick="openReviewModal(${item.id})">
+  ${data.map(item => {
+    const orderId = item.food_order_id 
+                  || item.farm_order_id 
+                  || item.room_reservation_id 
+                  || item.event_reservation_id 
+                  || "N/A";
 
-        <!-- ACTION BUTTON -->
+    const actionBtn = item.review_status === "Reviewed"
+      ? `<button class="delete-btn px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${item.id}">Delete</button>`
+      : `<button class="review-btn px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${item.id}">Reviewed</button>`;
+
+    return `
+      <tr class="border-t hover:bg-gray-50 cursor-pointer review-row" data-id="${item.id}">
         <td class="px-4 py-2" onclick="event.stopPropagation()">
-          <button onclick="markReviewReviewed(${item.id})"
-                  class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
-            Reviewed
-          </button>
+          ${actionBtn}
         </td>
-
         <td class="px-4 py-2">${item.user_name}</td>
-        <td class="px-4 py-2">${item.order_id}</td>
+        <td class="px-4 py-2">${orderId}</td>
         <td class="px-4 py-2">${item.stars} ★</td>
         <td class="px-4 py-2">${item.comment ?? ""}</td>
+        <td class="px-4 py-2">${item.review_status}</td> <!-- NEW -->
         <td class="px-4 py-2">${new Date(item.created_at).toLocaleString()}</td>
       </tr>
-      `).join("")}
-    </tbody>
+    `;
+  }).join("")}
+</tbody>
+
   </table>
 </div>
 
@@ -276,6 +284,7 @@ const reviewManagementTemplate = data => `
     <p><strong>User:</strong> <span id="modalUser"></span></p>
     <p><strong>Order ID:</strong> <span id="modalOrderId"></span></p>
     <p><strong>Stars:</strong> <span id="modalStars"></span></p>
+    <p><strong>Status:</strong> <span id="modalStatus"></span></p> <!-- NEW -->
     <p class="mt-2"><strong>Comment:</strong></p>
     <p id="modalComment" class="bg-gray-100 p-2 rounded mt-1"></p>
 
@@ -285,6 +294,7 @@ const reviewManagementTemplate = data => `
     </div>
   </div>
 </div>
+
 `;
 
 
@@ -2904,44 +2914,45 @@ async function updateIdStatus(userId, status) {
 
 // Reviews Functions
 
-async function markReviewReviewed(id) {
-  if (!confirm("Mark this review as reviewed?")) return;
+document.addEventListener("click", async (e) => {
+  const id = e.target.dataset.id;
 
-  try {
-    const res = await fetch(`/api/reviews/${id}/mark-reviewed`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" }
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      alert("Review marked as reviewed!");
-      fetchAndRenderReviews();
-    }
-  } catch (err) {
-    console.error("Error updating review:", err);
+   // MARK AS REVIEWED
+  if (e.target.classList.contains("review-btn")) {
+    await fetch(`/api/reviews/${id}/mark-reviewed`, { method: "POST" });
+    fetchAndRenderReviews(); // reload table
+    return;
   }
-}
 
+  // DELETE REVIEW
+  if (e.target.classList.contains("delete-btn")) {
+    if (!confirm("Are you sure you want to delete this review?")) return;
 
-function openReviewModal(id) {
-  const item = window.reviewData.find(r => r.id === id);
-  if (!item) return;
+    await fetch(`/api/reviews/${id}`, { method: "DELETE" });
+    fetchAndRenderReviews(); // reload table
+    return;
+  }
 
-  document.getElementById("modalUser").innerText = item.user_name;
-  document.getElementById("modalOrderId").innerText = item.order_id;
-  document.getElementById("modalStars").innerText = item.stars + " ★";
-  document.getElementById("modalComment").innerText = item.comment ?? "";
+  // OPEN MODAL ON ROW CLICK
+  const row = e.target.closest(".review-row");
+  if (row) {
+    const review = window.reviewData.find(r => r.id == row.dataset.id);
 
-  document.getElementById("reviewModal").classList.remove("hidden");
-  document.getElementById("reviewModal").classList.add("flex");
-}
+    const orderId = review.food_order_id 
+                  || review.farm_order_id 
+                  || review.room_reservation_id 
+                  || review.event_reservation_id 
+                  || "N/A";
 
-function closeReviewModal() {
-  const modal = document.getElementById("reviewModal");
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
-}
+    document.getElementById("modalUser").textContent = review.user_name;
+    document.getElementById("modalOrderId").textContent = orderId;
+    document.getElementById("modalStars").textContent = review.stars;
+    document.getElementById("modalComment").textContent = review.comment ?? "";
+    document.getElementById("modalStatus").textContent = review.review_status;
+
+    document.getElementById("reviewModal").classList.remove("hidden");
+  }
+});
 
 
 async function applyReviewFilters() {

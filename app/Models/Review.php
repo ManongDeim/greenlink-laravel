@@ -17,6 +17,7 @@ class Review extends Model
         'event_reservation_id',
         'stars',
         'comment',
+        'review_status',
     ];
 
     // Relationships
