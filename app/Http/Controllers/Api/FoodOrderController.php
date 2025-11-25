@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -12,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 use App\Models\KitchenInventory;
 use App\Models\FoodIngredient;
 use App\Models\FoodProduct;
-use App\Models\GoogleUser;
 
 class FoodOrderController extends Controller
 {
@@ -123,4 +121,219 @@ class FoodOrderController extends Controller
     }
 
     // ... Keep the rest of your controller as is (paymentSuccess, paymentFailed, index, delete)
+}
+Updated JS for showing discounted price
+Add this inside your updateModal and confirmOrder functions to show 20% off if user qualifies:
+
+js
+Copy code
+let hasDiscount = false; // Set this dynamically if needed
+
+async function sendOrder(paymentMethod) {
+  // fetch user info to check discount
+  if (!window.userId) {
+    const res = await fetch("https://greenlinklolasayong.site/api/user-info", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
+      window.userId = data.user.id;
+      hasDiscount = data.user.id_status === "Validated"; // check if validated senior/PWD
+    }
+  }
+
+  const orderData = cart.map(item => {
+    let price = getPrice(item.name);
+    if (hasDiscount) price *= 0.8; // apply discount
+    return { name: item.name, qty: item.qty, price };
+  });
+
+  // Calculate total
+  const total = orderData.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+  // Update payment summary
+  let summaryHTML = "";
+  orderData.forEach(item => {
+    summaryHTML += `<div class="flex justify-between">
+      <span>${item.name} x ${item.qty}</span>
+      <span>₱${(item.price * item.qty).toFixed(2)}</span>
+    </div>`;
+  });
+  summaryHTML += `<div class="flex justify-between mt-2 font-bold">
+      <span>Total:</span>
+      <span>₱${total.toFixed(2)}</span>
+  </div>`;
+  if (hasDiscount) {
+    summaryHTML += `<p class="mt-1 font-semibold text-green-600">20% Discount Applied!</p>`;
+  }
+  document.getElementById("paymentSummary").innerHTML = summaryHTML;
+
+  // send to backend
+  fetch("https://greenlinklolasayong.site/api/foodOrder/create-link", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: window.userId, cart: orderData, payment_method: paymentMethod })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.payment_url) window.location.href = data.payment_url;
+    else alert("No payment URL returned.");
+  });
+
+   public function paymentSuccess(Request $request)
+{
+    Log::info("✅ paymentSuccess route hit", [
+        'full_url' => $request->fullUrl(),
+        'ref' => $request->query('ref')
+    ]);
+
+    $refNumber = $request->query('ref');
+
+    if (!$refNumber) {
+        Log::warning("No ref number provided in paymentSuccess");
+        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
+    }
+
+    $order = FoodOrderModel::where('ref_number', $refNumber)->first();
+
+    if (!$order) {
+        Log::warning("Order not found for ref: {$refNumber}");
+        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
+    }
+
+    // Mark payment as paid
+    $order->update(['payment_status' => 'Paid', 'order_status' => 'Pending']);
+
+    // Map: food display name => property on order
+    $orderedItems = [
+        'Smoked Fish'   => $order->smokedFish_order,
+        'Deviled Fish'  => $order->deviledFish_order,
+        'Sea Sig'       => $order->seaSig_order,
+        'Blue Craze'    => $order->blueCraze_order,
+        'Chicken Sheet' => $order->chickenSheet_order,
+        'Black Meal'    => $order->blackMeal_order,
+    ];
+
+    Log::info("ORDERED ITEMS DUMP", $orderedItems);
+
+    DB::transaction(function () use ($orderedItems, $refNumber) {
+
+        foreach ($orderedItems as $foodName => $qtyOrdered) {
+            // ensure numeric qty
+            $qtyOrdered = is_numeric($qtyOrdered) ? (float) $qtyOrdered : 0;
+            if ($qtyOrdered <= 0) continue;
+
+            Log::info("ORDERED ITEMS DUMP", $orderedItems);
+
+            $normalized = trim(mb_strtolower($foodName));
+
+            // robust product lookup: try exact then fallback to case-insensitive/trimmed
+            $foodProduct = FoodProduct::whereRaw('LOWER(TRIM(productName)) = ?', [$normalized])->first();
+
+            if (!$foodProduct) {
+                // Last-ditch: try a LIKE match in case of extra words/punctuation
+                $foodProduct = FoodProduct::where('productName', 'like', '%' . $foodName . '%')->first();
+            }
+
+            if (!$foodProduct) {
+                Log::warning("⚠️ Food product not found for ordered item '{$foodName}' (normalized '{$normalized}') — ref {$refNumber}");
+                continue;
+            }
+
+            Log::info("Found product '{$foodProduct->productName}' (id={$foodProduct->id}) for ordered item '{$foodName}', qtyOrdered={$qtyOrdered}");
+
+            // Use relation or explicit model to get ingredient rows
+            $ingredients = $foodProduct->ingredientsDetails()->get();
+
+            if ($ingredients->isEmpty()) {
+                Log::warning("⚠️ No ingredients defined for food_product_id={$foodProduct->id} ({$foodProduct->productName})");
+                continue;
+            }
+
+            foreach ($ingredients as $ingredientRow) {
+                // ensure numeric quantity_used
+                $quantityUsed = is_numeric($ingredientRow->quantity_used) ? (float) $ingredientRow->quantity_used : 0;
+                if ($quantityUsed <= 0) {
+                    Log::warning("⚠️ Non-positive quantity_used for food_ingredient id={$ingredientRow->id}, food_product_id={$foodProduct->id}");
+                    continue;
+                }
+
+                $deductAmount = $quantityUsed * $qtyOrdered;
+
+                // Prefer relationship to load the KitchenInventory model if set up
+                $inventory = null;
+                if (method_exists($ingredientRow, 'ingredient')) {
+                    $inventory = $ingredientRow->ingredient()->lockForUpdate()->first();
+                }
+
+                // fallback to direct find (locks as well)
+                if (!$inventory) {
+                    $inventory = KitchenInventory::where('id', $ingredientRow->ingredient_id)->lockForUpdate()->first();
+                }
+
+                if ($inventory) {
+                    // ensure numeric current_stock
+                    $current = is_numeric($inventory->current_stock) ? (float) $inventory->current_stock : 0;
+                    $newStock = max(0, $current - $deductAmount);
+
+                    $inventory->current_stock = $newStock;
+                    $inventory->save();
+
+                    Log::info("🧾 Deducted {$deductAmount} {$inventory->unit} from {$inventory->item_name} (id={$inventory->id}). Previous: {$current}, New: {$newStock}");
+                } else {
+                    Log::warning("⚠️ Ingredient ID {$ingredientRow->ingredient_id} for food_product_id={$foodProduct->id} not found in kitchen_inventory (ref {$refNumber})");
+                }
+            }
+        }
+    });
+
+    Log::info("✅ Payment successful and (attempted) inventory updates for {$refNumber}");
+    return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
+}
+
+
+
+
+    // Step 2b: If payment fails
+    public function paymentFailed(Request $request)
+    {
+      Log::info("❌ paymentFailed route hit", [
+        'full_url' => $request->fullUrl(),
+        'ref' => $request->query('ref'),
+    ]);
+
+    $refNumber = $request->query('ref');
+
+    if ($refNumber) {
+        $updated = FoodOrderModel::where('ref_number', $refNumber)
+            ->update([
+                'payment_status' => 'Failed',
+                'order_status' => 'Cancelled'
+            ]);
+
+        Log::info("❌ Payment marked as failed for ref: {$refNumber}, updated rows: {$updated}");
+    } else {
+        Log::warning('⚠️ No ref number in paymentFailed redirect.');
+    }
+
+    return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
+    
+    }
+
+     public function index()
+    {
+       
+    return response()->json(FoodOrderModel::orderBy('created_at', 'desc')->get());
+    }
+
+    public function delete($foodOrderId)
+{
+    $order = FoodOrderModel::where('foodOrder_id', $foodOrderId)->first();
+    if (!$order) {
+        return response()->json(['success' => false, 'message' => 'Order not found'], 404);
+    }
+
+    $order->delete();
+    return response()->json(['success' => true, 'message' => 'Order deleted successfully']);
+}
+
 }
