@@ -112,30 +112,31 @@ class CustomerDashboardController extends Controller
         return response()->json(['success' => true, 'message' => 'Event reservation cancelled']);
     }
 
-    private function refundPayMongoPayment($paymentIntentId, $amount, $reservationId)
-    {
-        Log::info("💳 Initiating refund", [
-            'reservation_id' => $reservationId,
-            'payment_intent_id' => $paymentIntentId,
-            'amount' => $amount
-        ]);
+    private function refundPayMongoPayment($paymentId, $amount, $reservationId)
+{
+    Log::info("💳 Initiating refund", [
+        'reservation_id' => $reservationId,
+        'payment_id' => $paymentId,
+        'amount' => $amount
+    ]);
 
-        $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
-            ->post("https://api.paymongo.com/v1/refunds", [
-                'data' => [
-                    'attributes' => [
-                        'amount' => (int)($amount * 100),
-                        'reason' => 'requested_by_customer',
-                        'payment_intent' => $paymentIntentId
-                    ]
+    $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+        ->post("https://api.paymongo.com/v1/refunds", [
+            'data' => [
+                'attributes' => [
+                    'amount' => (int)($amount * 100),
+                    'reason' => 'requested_by_customer',
+                    'payment' => $paymentId  // <-- must be actual payment ID
                 ]
-            ]);
-
-        Log::info("💳 PayMongo refund response", [
-            'reservation_id' => $reservationId,
-            'response' => $response->json()
+            ]
         ]);
 
-        return $response->ok();
-    }
+    Log::info("💳 PayMongo refund response", [
+        'reservation_id' => $reservationId,
+        'response' => $response->json()
+    ]);
+
+    return $response->ok();
+}
+
 }
