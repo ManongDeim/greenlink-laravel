@@ -1794,6 +1794,17 @@ async function fetchAndRenderKitchen() {
             + Add Item
           </button>
         </div>
+        
+         <!-- 🔍 Search Bar -->
+        <div class="mb-4">
+          <input 
+            id="kitchenSearch"
+            type="text"
+            placeholder="Search ingredient..."
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
+            oninput="filterKitchenInventory()"
+          />
+        </div>
 
         <table class="min-w-full border border-gray-200 text-sm text-left">
           <thead class="bg-gray-100 text-gray-700">
@@ -1847,6 +1858,17 @@ async function fetchAndRenderKitchen() {
     console.error("Failed to load kitchen inventory:", err);
     content.innerHTML = `<p class="text-red-500">Failed to load kitchen inventory</p>`;
   }
+}
+
+// =================== SEARCH FUNCTION ===================
+function filterKitchenInventory() {
+  const searchValue = document.getElementById("kitchenSearch").value.toLowerCase();
+  const rows = document.querySelectorAll("tbody tr");
+
+  rows.forEach(row => {
+    const ingredient = row.children[1].textContent.toLowerCase(); // Ingredient column
+    row.style.display = ingredient.includes(searchValue) ? "" : "none";
+  });
 }
 
 // Toggle action menu
