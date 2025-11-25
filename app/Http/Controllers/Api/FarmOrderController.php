@@ -34,7 +34,7 @@ class FarmOrderController extends Controller
         $hasDiscount = $googleUser && $googleUser->id_status === 'Validated';
 
         // Wrap everything in a transaction to prevent race conditions
-        $order = DB::transaction(function () use ($request, $user) {
+        $order = DB::transaction(function () use ($request, $user, $hasDiscount) {
 
             // Generate unique FARM order ID (safe under concurrency)
             do {
@@ -81,7 +81,7 @@ class FarmOrderController extends Controller
                 if ($hasDiscount) {
                     $subtotal *= 0.8;
                 }
-                
+
                 $orderData['total_bill'] += $subtotal;
 
                 $lineitems[] = [
