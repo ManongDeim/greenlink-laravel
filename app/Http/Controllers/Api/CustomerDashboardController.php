@@ -111,8 +111,7 @@ class CustomerDashboardController extends Controller
         $res->save();
         return response()->json(['success' => true, 'message' => 'Event reservation cancelled']);
     }
-
-    private function refundPayMongoPayment($paymentId, $amount, $reservationId)
+private function refundPayMongoPayment($paymentId, $amount, $reservationId)
 {
     Log::info("💳 Initiating refund", [
         'reservation_id' => $reservationId,
@@ -120,13 +119,16 @@ class CustomerDashboardController extends Controller
         'amount' => $amount
     ]);
 
+    // PayMongo expects amount in cents
+    $amountInCents = (int) ($amount * 100);
+
     $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
-        ->post("https://api.paymongo.com/v1/refunds", [
+        ->post('https://api.paymongo.com/v1/refunds', [
             'data' => [
                 'attributes' => [
-                    'amount' => (int)($amount * 100),
+                    'amount' => $amountInCents,
                     'reason' => 'requested_by_customer',
-                    'payment' => $paymentId  // <-- must be actual payment ID
+                    'payment' => $paymentId
                 ]
             ]
         ]);
@@ -138,5 +140,7 @@ class CustomerDashboardController extends Controller
 
     return $response->ok();
 }
+
+
 
 }
