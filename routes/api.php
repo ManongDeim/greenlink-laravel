@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\HomePageController;
 use \App\Http\Controllers\Api\PaymongoWebhookController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 use App\Models\GoogleUser;
@@ -199,3 +200,5 @@ Route::post('/webhook/paymongo', [PaymongoWebhookController::class, 'handleWebho
 
 Route::get('/authorize-gmail', [GmailController::class, 'authorize']);
 Route::get('/oauth2callback', [GmailController::class, 'oauthCallback']);
+Route::middleware('auth:sanctum')
+    ->get('/notifications-counts', [NotificationController::class, 'getCounts']);
