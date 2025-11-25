@@ -611,3 +611,6 @@ document.addEventListener("DOMContentLoaded", () => {
   hourSelect.addEventListener("change", () => { disablePastMinutes(); });
   minuteSelect.addEventListener("change", () => {});
 });
+
+const notes = document.getElementById("orderNotes").value;
+
