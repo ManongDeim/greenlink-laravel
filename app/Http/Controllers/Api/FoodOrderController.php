@@ -120,65 +120,6 @@ class FoodOrderController extends Controller
         ]);
     }
 
-    // ... Keep the rest of your controller as is (paymentSuccess, paymentFailed, index, delete)
-}
-Updated JS for showing discounted price
-Add this inside your updateModal and confirmOrder functions to show 20% off if user qualifies:
-
-js
-Copy code
-let hasDiscount = false; // Set this dynamically if needed
-
-async function sendOrder(paymentMethod) {
-  // fetch user info to check discount
-  if (!window.userId) {
-    const res = await fetch("https://greenlinklolasayong.site/api/user-info", { credentials: "include" });
-    if (res.ok) {
-      const data = await res.json();
-      window.userId = data.user.id;
-      hasDiscount = data.user.id_status === "Validated"; // check if validated senior/PWD
-    }
-  }
-
-  const orderData = cart.map(item => {
-    let price = getPrice(item.name);
-    if (hasDiscount) price *= 0.8; // apply discount
-    return { name: item.name, qty: item.qty, price };
-  });
-
-  // Calculate total
-  const total = orderData.reduce((sum, i) => sum + i.price * i.qty, 0);
-
-  // Update payment summary
-  let summaryHTML = "";
-  orderData.forEach(item => {
-    summaryHTML += `<div class="flex justify-between">
-      <span>${item.name} x ${item.qty}</span>
-      <span>₱${(item.price * item.qty).toFixed(2)}</span>
-    </div>`;
-  });
-  summaryHTML += `<div class="flex justify-between mt-2 font-bold">
-      <span>Total:</span>
-      <span>₱${total.toFixed(2)}</span>
-  </div>`;
-  if (hasDiscount) {
-    summaryHTML += `<p class="mt-1 font-semibold text-green-600">20% Discount Applied!</p>`;
-  }
-  document.getElementById("paymentSummary").innerHTML = summaryHTML;
-
-  // send to backend
-  fetch("https://greenlinklolasayong.site/api/foodOrder/create-link", {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id: window.userId, cart: orderData, payment_method: paymentMethod })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.payment_url) window.location.href = data.payment_url;
-    else alert("No payment URL returned.");
-  });
-
    public function paymentSuccess(Request $request)
 {
     Log::info("✅ paymentSuccess route hit", [
