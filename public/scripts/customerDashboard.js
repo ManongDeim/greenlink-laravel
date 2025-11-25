@@ -98,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let typeMap = {
       "🍴 Food Orders": 'food',
       "🌾 Farm Orders": 'farm',
-      "🏡 Room Reservations": 'room',
       "📅 Event Reservations": 'event'
     };
 
@@ -134,6 +133,43 @@ document.addEventListener('DOMContentLoaded', () => {
       alert("Error cancelling the order/reservation.");
     }
   }
+
+  document.addEventListener('click', async (e) => {
+  if(e.target.classList.contains('cancel-room-btn')) {
+    const id = e.target.dataset.id;
+    const card = e.target.closest('div');
+
+    const checkIn = new Date(card.querySelector('p:nth-child(3)').innerText.split(': ')[1]);
+    const now = new Date();
+    const diffHours = (checkIn - now) / 36e5;
+
+    const confirmMsg = diffHours >= 24
+      ? "Are you sure? Cancellation is fully refundable."
+      : "Are you sure? Cancellation less than 24 hours before check-in is non-refundable.";
+
+    if(!confirm(confirmMsg)) return;
+
+    try {
+      const res = await fetch(`/api/cancel-room/${id}`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const data = await res.json();
+
+      if(data.success) {
+        alert(data.message);
+        // Optionally remove card from dashboard
+        card.remove();
+      } else {
+        alert(data.message || 'Failed to cancel reservation.');
+      }
+    } catch(err) {
+      console.error(err);
+      alert('Error cancelling reservation.');
+    }
+  }
+});
+
 });
 
 }
@@ -298,8 +334,9 @@ function renderSection(title, data) {
           <p class="text-gray-600">Guests: ${item.pax}</p>
           <p class="text-gray-600">Status: ${item.approval_status ?? 'Pending'}</p>
           <p class="text-gray-600">Payment Status: ${item.payment_status ?? 'Pending'}</p>
+           <button class="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 cancel-room-btn" data-id="${item.room_reser_id}">Cancel</button>
           ${ratingSection(item.event_reservation_id)}
-            ${cancelBtn}
+         
         </div>`;
     }
   }

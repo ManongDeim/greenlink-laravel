@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FoodOrderModel;
@@ -59,11 +61,45 @@ public function cancelFarmOrder($id)
 
 public function cancelRoomReservation($id)
 {
-    $res = RoomModel::where('room_reser_id', $id)->first();
-    if (!$res) return response()->json(['success' => false, 'message' => 'Reservation not found'], 404);
-    $res->status = 'Cancelled';
-    $res->save();
-    return response()->json(['success' => true, 'message' => 'Room reservation cancelled']);
+    $reservation = RoomModel::where('room_reser_id', $id)->first();
+    if (!$reservation) {
+        return response()->json(['success' => false, 'message' => 'Reservation not found'], 404);
+    }
+
+    $checkIn = Carbon::parse($reservation->check_in_date);
+    $now = Carbon::now();
+
+    $hoursDiff = $now->diffInHours($checkIn, false);
+
+    if ($hoursDiff >= 24) {
+        // Fully refundable
+        $reservation->status = 'Cancelled';
+        $reservation->save();
+
+        // Trigger PayMongo refund if payment was already made
+        if ($reservation->payment_status === 'Paid' && $reservation->payment_method === 'Full Payment' && $reservation->paymongo_payment_id) {
+            $refund = $this->refundPayMongoPayment($reservation->paymongo_payment_id, $reservation->total_bill);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reservation cancelled. Full refund will be issued.'
+        ]);
+    } elseif ($hoursDiff < 24 && $hoursDiff > 0) {
+        // Less than 1 day → non-refundable
+        $reservation->status = 'Cancelled';
+        $reservation->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reservation cancelled. Less than 24 hours before check-in, so payment is non-refundable.'
+        ]);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Cannot cancel past reservations.'
+        ]);
+    }
 }
 
 public function cancelEventReservation($id)
@@ -75,4 +111,20 @@ public function cancelEventReservation($id)
     return response()->json(['success' => true, 'message' => 'Event reservation cancelled']);
 }
 
+
+private function refundPayMongoPayment($paymentIntentId, $amount)
+{
+    $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+        ->post("https://api.paymongo.com/v1/refunds", [
+            'data' => [
+                'attributes' => [
+                    'amount' => (int)($amount * 100),
+                    'reason' => 'requested_by_customer',
+                    'payment_intent' => $paymentIntentId
+                ]
+            ]
+        ]);
+
+    return $response->ok();
+}
 }
