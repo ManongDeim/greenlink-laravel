@@ -90,51 +90,71 @@ document.addEventListener('DOMContentLoaded', () => {
     content.innerHTML = "<p class='text-red-600'>Failed to load data.</p>";
   }
 
-  document.addEventListener('click', async (e) => {
-  if (e.target.classList.contains('cancel-btn')) {
-    const id = e.target.dataset.id;
-    const card = e.target.closest('div.p-5');
+ document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.cancel-btn');
+  if (!btn) return; // Exit if not a cancel button
 
-    let typeMap = {
-      "🍴 Food Orders": 'food',
-      "🌾 Farm Orders": 'farm',
-      "🏡 Room Reservations": 'room',
-      "📅 Event Reservations": 'event'
-    };
+  const id = btn.dataset.id;
+  const type = btn.dataset.type; // 'food', 'farm', 'event', or 'room'
+  const card = btn.closest('div.p-5');
 
-    const sectionTitle = card.querySelector('h3').innerText.includes('Food') ? "🍴 Food Orders"
-      : card.querySelector('h3').innerText.includes('Farm') ? "🌾 Farm Orders"
-      : card.querySelector('h3').innerText.includes('Room') ? "🏡 Room Reservations"
-      : "📅 Event Reservations";
+  if (type === 'room') {
+    const checkIn = new Date(card.querySelector('p:nth-child(3)').innerText.split(': ')[1]);
+    const now = new Date();
+    const diffHours = (checkIn - now) / 36e5;
 
-    const typeKey = typeMap[sectionTitle];
+    const confirmMsg = diffHours >= 24
+      ? "Are you sure? Cancellation is fully refundable."
+      : "Are you sure? Cancellation less than 24 hours before check-in is non-refundable.";
 
-    if (!confirm("Are you sure you want to cancel this " + typeKey + "?")) return;
+    if(!confirm(confirmMsg)) return;
 
     try {
-      const res = await fetch(`/api/customer/cancel-${typeKey}/${id}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Accept': 'application/json' },
-      });
-
+      const res = await fetch(`/api/customer/cancel-room/${id}`, { method: 'POST', credentials: 'include' });
       const data = await res.json();
-      if (data.success) {
+      if(data.success) {
         alert(data.message);
-        card.querySelector('.cancel-btn').disabled = true;
-        card.querySelector('.cancel-btn').innerText = "Cancelled ❌";
-        // Optionally update status text on card
-        if (sectionTitle === "🏡 Room Reservations") card.querySelector('p:nth-child(6)').innerText = "Status: Cancelled";
-        else card.querySelector('p:nth-child(4)').innerText = "Status: Cancelled";
+        card.remove();
       } else {
-        alert("Failed to cancel.");
+        alert(data.message || 'Failed to cancel reservation.');
       }
-    } catch (err) {
+    } catch(err) {
       console.error(err);
-      alert("Error cancelling the order/reservation.");
+      alert('Error cancelling reservation.');
     }
+    return; // done
   }
+
+  // For food/farm/event
+  const typeMap = { food: 'food', farm: 'farm', event: 'event' };
+  if (!confirm(`Are you sure you want to cancel this ${type}?`)) return;
+
+  try {
+    const res = await fetch(`/api/customer/cancel-${type}/${id}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await res.json();
+    if(data.success){
+      alert(data.message);
+      btn.disabled = true;
+      btn.innerText = "Cancelled ❌";
+      // Optionally update status text
+      if(type === 'room') card.querySelector('p:nth-child(6)').innerText = "Status: Cancelled";
+      else card.querySelector('p:nth-child(4)').innerText = "Status: Cancelled";
+    } else {
+      alert("Failed to cancel.");
+    }
+  } catch(err){
+    console.error(err);
+    alert("Error cancelling the order/reservation.");
+  }
+
 });
+
+
+
 
 }
 
@@ -257,7 +277,23 @@ function renderSection(title, data) {
       </div>
     `;
 
-     let cancelBtn = `<button class="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 cancel-btn" data-id="${item[type.includes('Food') ? 'foodOrder_id' : type.includes('Farm') ? 'farmOrder_id' : type.includes('Room') ? 'room_reser_id' : 'event_reservation_id']}">Cancel</button>`;
+     let itemId = type.includes('Food') ? item.foodOrder_id
+           : type.includes('Farm') ? item.farmOrder_id
+           : type.includes('Room') ? item.room_reser_id
+           : item.event_reservation_id;
+
+let typeKey = type.includes('Food') ? 'food'
+            : type.includes('Farm') ? 'farm'
+            : type.includes('Room') ? 'room'
+            : 'event';
+
+let cancelBtn = `<button 
+      class="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 cancel-btn" 
+      data-id="${itemId}" 
+      data-type="${typeKey}">
+      Cancel
+</button>`;
+
 
     switch(type) {
       case "🍴 Food Orders":
@@ -299,7 +335,8 @@ function renderSection(title, data) {
           <p class="text-gray-600">Status: ${item.approval_status ?? 'Pending'}</p>
           <p class="text-gray-600">Payment Status: ${item.payment_status ?? 'Pending'}</p>
           ${ratingSection(item.event_reservation_id)}
-            ${cancelBtn}
+          ${cancelBtn}
+         
         </div>`;
     }
   }

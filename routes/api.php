@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\FarmInventoryController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\HomePageController;
+use \App\Http\Controllers\Api\PaymongoWebhookController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 use App\Models\GoogleUser;
@@ -107,11 +108,13 @@ Route::get('/rooms/{id}', function($id) {
     return response()->json($room);
 });
 Route::post('/create-room-payment', [RoomController::class, 'createPaymentLink'])->middleware('auth:sanctum');
-Route::get('/paymentSuccess', [RoomController::class, 'paymentSuccess']);
-Route::get('/paymentFailed', [RoomController::class, 'paymentFailed']);
+Route::get('/room/paymentSuccess', [RoomController::class, 'paymentSuccess']);
+Route::get('/room/paymentFailed', [RoomController::class, 'paymentFailed']);
 Route::get('roomReser', [RoomController::class, 'index']);
 Route::get('/booked-dates', [RoomController::class, 'getBookedDates']);
 Route::post('/roomReservation/{id}/update-status', [RoomController::class, 'updateStatus']);
+Route::post('/room/paymongoWebhook', [RoomController::class, 'paymongoWebhook']);
+
 
 
 // Event Seeder Routes
@@ -134,7 +137,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::post('/customer/cancel-food/{id}', [CustomerDashboardController::class, 'cancelFoodOrder']);
 Route::post('/customer/cancel-farm/{id}', [CustomerDashboardController::class, 'cancelFarmOrder']);
-Route::post('/customer/cancel-room/{id}', [CustomerDashboardController::class, 'cancelRoomReservation']);
+Route::middleware('auth:sanctum')->post('/customer/cancel-room/{roomReserId}', [CustomerDashboardController::class, 'cancelRoomReservation']);
 Route::post('/customer/cancel-event/{id}', [CustomerDashboardController::class, 'cancelEventReservation']);
 
 
@@ -186,3 +189,7 @@ Route::post('/', [HomePageController::class, 'store']);
 Route::put('/{id}', [HomePageController::class, 'update']);
 Route::delete('/{id}', [HomePageController::class, 'destroy']);
 });
+
+//Paymongo
+
+Route::post('/webhook/paymongo', [PaymongoWebhookController::class, 'handleWebhook']);
