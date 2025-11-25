@@ -7,21 +7,6 @@ use App\Models\RoomModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Http;
-use App\Models\GoogleUser;
-
-class RoomController extends Controller
-{
-<?php
-
-namespace App\Http\Controllers\Api;
-
-use App\Http\Controllers\Controller;
-use App\Models\RoomModel;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use App\Models\GoogleUser;
 
@@ -166,50 +151,4 @@ class RoomController extends Controller
     {
         return response()->json(RoomModel::all());
     }
-}
-
-
-      public function index()
-    {
-        return response()->json(RoomModel::all());
-    }
-
-      public function getBookedDates()
-    {
-        $roomId = request()->query('room_id');
-
-    // ✅ Use the reservations table, not RoomModel
-    $query = RoomModel::select('check_in_date', 'check_out_date')
-        ->where('payment_status', 'Paid'); // only include Paid
-
-    if ($roomId) {
-        $query->where('room_id', $roomId);
-    }
-
-    $reservations = $query->get();
-
-    // ✅ Format data for Flatpickr
-    $bookedRanges = $reservations->map(function ($r) {
-        return [
-            'from' => $r->check_in_date,
-            'to' => $r->check_out_date,
-        ];
-    });
-
-    return response()->json($bookedRanges);
-    }
-
-    public function updateStatus($id, Request $request)
-{
-    $reservation = RoomModel::where('room_reser_id', $id)->first();
-
-    if (!$reservation) {
-        return response()->json(['message' => 'Reservation not found'], 404);
-    }
-
-    $reservation->status = $request->status;
-    $reservation->save();
-
-    return response()->json(['message' => 'Status updated successfully']);
-}
 }
