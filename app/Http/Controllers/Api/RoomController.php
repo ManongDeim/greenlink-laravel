@@ -100,23 +100,24 @@ class RoomController extends Controller
 $payload = $request->all();
 Log::info('PayMongo Webhook Received', $payload);
 
+
 $eventType = $payload['data']['attributes']['type'] ?? null;
 $reservation = null;
 $paymentId = null;
 $sessionId = null;
 
 if ($eventType === 'checkout_session.payment.paid') {
-    $sessionData = $payload['data']['attributes']['data'] ?? [];
+    $sessionData = $payload['data']['attributes']['data']['attributes'] ?? [];
     $sessionId = $sessionData['id'] ?? null;
 
     $payments = $sessionData['payments'] ?? [];
-    $paymentId = $payments[0]['id'] ?? null;
+    $paymentId = $payments[0]['attributes']['id'] ?? null; // ✅ use attributes
 
     if ($sessionId) {
         $reservation = RoomModel::where('paymongo_session_id', $sessionId)->first();
     }
 
-    // fallback to description parsing if session ID did not find reservation
+    // fallback: parse description
     if (!$reservation && !empty($payments)) {
         $description = $payments[0]['attributes']['description'] ?? '';
         if ($description) {
@@ -130,7 +131,7 @@ if ($eventType === 'checkout_session.payment.paid') {
 
 } elseif ($eventType === 'payment.paid') {
     $paymentData = $payload['data']['attributes']['data']['attributes'] ?? [];
-    $paymentId = $paymentData['id'] ?? null;
+    $paymentId = $paymentData['id'] ?? null; // sometimes this is already correct
     $description = $paymentData['description'] ?? '';
 
     if ($description) {
@@ -162,13 +163,8 @@ if ($reservation && $paymentId) {
 
 return response()->json(['status' => 'success']);
 
+
 }
-
-
-
-
-
-
 
 
     // 3️⃣ Cancel reservation with refund if eligible
