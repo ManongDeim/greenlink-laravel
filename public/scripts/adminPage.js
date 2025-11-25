@@ -840,6 +840,15 @@ const homeEventsTableTemplate = data => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
   <h2 class="text-2xl font-bold text-teal-700 mb-4">Home Page Events</h2>
 
+  <div class="flex justify-end mb-4">
+    <button id="addHomeEventBtn" 
+        class="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">
+        + Add Home Page Event
+    </button>
+</div>
+
+
+
   <table class="min-w-full border border-gray-200 text-sm text-left">
     <thead class="bg-gray-100 text-gray-700">
       <tr>
@@ -905,6 +914,31 @@ const homeEventsTableTemplate = data => `
     </div>
   </div>
 </div>
+
+<div id="addHomeEventModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center">
+    <div class="bg-white p-6 rounded-xl w-full max-w-lg">
+        
+        <h2 class="text-xl font-bold mb-4">Add Home Page Event</h2>
+
+        <label class="block mb-2">Title</label>
+        <input id="eventTitle" type="text" class="w-full p-2 border rounded mb-3">
+
+        <label class="block mb-2">Description</label>
+        <textarea id="eventDesc" class="w-full p-2 border rounded mb-3"></textarea>
+
+        <label class="block mb-2">Highlights (optional)</label>
+        <textarea id="eventHighlights" class="w-full p-2 border rounded mb-3"></textarea>
+
+        <label class="block mb-2">Event Image</label>
+        <input id="eventImage" type="file" class="w-full p-2 border rounded mb-3">
+
+        <div class="flex justify-end gap-3 mt-4">
+            <button id="closeAddEventModal" class="px-4 py-2 bg-gray-300 rounded">Cancel</button>
+            <button id="saveEventBtn" class="px-4 py-2 bg-teal-600 text-white rounded">Save</button>
+        </div>
+    </div>
+</div>
+
 `;
 
 
@@ -1445,6 +1479,9 @@ async function fetchAndRenderHomeEvents() {
 
     window.homeEventsData = data;
     container.innerHTML = homeEventsTableTemplate(data);
+
+    // 🔥 Attach modal events AFTER rendering
+    attachHomeEventListeners();
 
   } catch (err) {
     console.error("Error fetching home events:", err);
@@ -3555,4 +3592,80 @@ async function deleteEvent(id) {
     console.error(err);
     alert("Failed to delete event");
   }
+}
+
+// OPEN MODAL
+document.getElementById("addHomeEventBtn").onclick = () => {
+    document.getElementById("addHomeEventModal").classList.remove("hidden");
+};
+
+// CLOSE MODAL
+document.getElementById("closeAddEventModal").onclick = () => {
+    document.getElementById("addHomeEventModal").classList.add("hidden");
+};
+
+async function saveHomeEvent() {
+    const title = document.getElementById("eventTitle").value.trim();
+    const desc = document.getElementById("eventDesc").value.trim();
+    const highlights = document.getElementById("eventHighlights").value.trim();
+    const imageFile = document.getElementById("eventImage").files[0];
+
+    if (!title || !desc || !imageFile) {
+        alert("Please fill in all required fields.");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", desc);
+    formData.append("highlights", highlights);
+    formData.append("image_url", imageFile);
+
+    try {
+        console.log("Submitting Home Event:", { title, desc, highlights, imageFile });
+
+        const res = await fetch("/api/home-events", {
+            method: "POST",
+            body: formData,
+        });
+
+        console.log("Raw Response:", res);
+
+        const text = await res.text(); // read as text first
+        console.log("Response text:", text);
+
+        try {
+            const data = JSON.parse(text);
+            console.log("Parsed JSON Response:", data);
+
+            alert("Event added successfully!");
+            document.getElementById("addHomeEventModal").classList.add("hidden");
+            fetchAndRenderHomeEvents();
+        } catch (jsonErr) {
+            console.error("Failed to parse JSON:", jsonErr);
+            alert("Failed to parse response. Check console for details.");
+        }
+
+    } catch (err) {
+        console.error("Error saving event:", err);
+        alert("Failed to save event. Check console for details.");
+    }
+}
+
+
+
+function attachHomeEventListeners() {
+    const addBtn = document.getElementById("addHomeEventBtn");
+    const closeBtn = document.getElementById("closeAddEventModal");
+    const saveBtn = document.getElementById("saveEventBtn");
+
+    if (addBtn) addBtn.onclick = () => {
+        document.getElementById("addHomeEventModal").classList.remove("hidden");
+    };
+
+    if (closeBtn) closeBtn.onclick = () => {
+        document.getElementById("addHomeEventModal").classList.add("hidden");
+    };
+
+    if (saveBtn) saveBtn.onclick = saveHomeEvent;
 }
