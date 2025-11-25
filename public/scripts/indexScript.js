@@ -140,3 +140,41 @@ document.addEventListener("keydown", function (event) {
     window.location.href = "./pages/FarmOrders.html"; // go to another page
   });
 });
+
+async function renderHomeEvents() {
+    const container = document.getElementById('homeSections');
+    try {
+        const res = await fetch('/api/home-events');
+        const events = await res.json();
+
+        container.innerHTML = events.map(event => `
+            <section class="px-6 py-16 text-gray-800 bg-white">
+                <div class="mx-auto max-w-7xl">
+                    <h2 class="mb-12 text-3xl font-bold text-center text-teal-700 md:text-4xl">
+                        ${event.title}
+                    </h2>
+                    ${event.image_url ? `
+                    <div class="flex flex-col gap-10 lg:flex-row lg:items-start">
+                        <div class="w-full lg:w-1/3">
+                            <img class="w-full transition-transform duration-300 rounded-lg shadow-lg hover:scale-105"
+                                 src="${event.image_url}" alt="${event.title}">
+                        </div>
+                        <div class="w-full space-y-4 text-base font-light leading-relaxed text-justify lg:w-2/3 md:text-lg">
+                            ${event.content}
+                        </div>
+                    </div>` : `
+                    <div class="text-base font-light leading-relaxed text-justify md:text-lg">
+                        ${event.content}
+                    </div>`}
+                </div>
+            </section>
+        `).join('');
+
+    } catch (err) {
+        console.error('Failed to load home events:', err);
+        container.innerHTML = `<p class="text-red-500">Failed to load content</p>`;
+    }
+}
+
+// Call on page load
+renderHomeEvents();
