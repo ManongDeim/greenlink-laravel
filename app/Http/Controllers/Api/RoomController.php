@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use App\Models\GoogleUser;
 
 class RoomController extends Controller
 {
@@ -18,6 +19,11 @@ public function createPaymentLink(Request $request)
     if (!$user) {
         return response()->json(['error' => 'Unauthorized'], 401);
     }
+
+    // Check if the user has a validated senior/PWD ID
+$googleUser = GoogleUser::where('user_id', $user->id)->first();
+$hasDiscount = $googleUser && $googleUser->id_status === 'Validated';
+
 
     $validated = $request->validate([
          'room_id' => 'nullable|integer|exists:rooms,id',
@@ -35,10 +41,16 @@ public function createPaymentLink(Request $request)
     $roomReserId = 'ROOM-' . strtoupper(uniqid());
     $refNumber = uniqid('REF-');
 
+    $baseTotal = $validated['total_bill'];
+
+    if ($hasDiscount) {
+    $baseTotal *= 0.8;
+}
+
     // Determine final amount based on payment type
     $finalTotal = $validated['payment_method'] === 'Down Payment'
-         ? round($validated['total_bill'] * 0.5, 2)
-         : round($validated['total_bill'], 2);
+         ? round($baseTotal * 0.5, 2)
+         : round($baseTotal, 2);
 
     // Save initial booking
     $reservation = RoomModel::create([
@@ -89,6 +101,7 @@ public function createPaymentLink(Request $request)
     return response()->json([
         'payment_url' => $checkoutUrl,
         'roomReser_id' => $roomReserId,
+        'hasDiscount' => $hasDiscount,
         'ref_number' => $refNumber
     ]);
 }

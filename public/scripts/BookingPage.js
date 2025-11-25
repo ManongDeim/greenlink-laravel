@@ -256,10 +256,37 @@ function openTermsModal() {
     }
 
      // --- Room Payment (Down / Full) ---
+// Send Room Reservation + login guard with discount
 async function sendRoomPayment(paymentType) {
   if (!window.bookingDetails || !window.bookingDetails.roomName) {
     alert("Booking details are missing. Please fill out the form again.");
     return;
+  }
+
+  // --- Fetch user info for discount ---
+  if (!window.userId) {
+    try {
+      const userRes = await fetch("https://greenlinklolasayong.site/api/user-info", {
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
+
+      if (!userRes.ok) {
+        console.error("Failed to fetch user:", await userRes.text());
+        openLoginModal();
+        return;
+      }
+
+      const data = await userRes.json();
+      window.userId = data.user.id;
+      const hasDiscount = data.user.id_status === "Validated"; // check if senior/PWD
+      window.hasDiscount = hasDiscount;
+      console.log("✅ Retrieved user_id:", window.userId, "Has Discount:", hasDiscount);
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+      openLoginModal();
+      return;
+    }
   }
 
   const checkIn = document.querySelector("input[name='check_in_date']").value;
@@ -272,6 +299,12 @@ async function sendRoomPayment(paymentType) {
 
   const { roomName, fullName, pax, email, phone, total } = window.bookingDetails;
 
+  // Apply discount if applicable
+  let finalTotal = total;
+  if (window.hasDiscount) {
+    finalTotal *= 0.8;
+  }
+
   const data = {
     room_id: window.roomId,
     room: roomName,
@@ -281,7 +314,7 @@ async function sendRoomPayment(paymentType) {
     pax: pax,
     email: email,
     phone_number: phone,
-    total_bill: total, // always full total
+    total_bill: finalTotal, // discounted if eligible
     payment_method: paymentType === "down" ? "Down Payment" : "Full Payment"
   };
 

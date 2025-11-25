@@ -132,6 +132,7 @@ class FarmOrderController extends Controller
         return response()->json([
             'payment_url' => $checkoutUrl,
             'farmrOder_id' => $order->farmOrder_id,
+             'hasDiscount' => $hasDiscount,
             'ref_number' => $order->ref_number
         ]);
     }
