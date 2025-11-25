@@ -81,10 +81,10 @@ document.addEventListener("keydown", function (event) {
   });
 });
 
-  //Cottage Reservation Page
+ //Room Reservation Page for button in carousel
   document.addEventListener("DOMContentLoaded", () => {
   
-  const btn = document.getElementById("roomReser");
+  const btn = document.getElementById("roomReserv");
 
 
   btn.addEventListener("click", () => {
@@ -110,6 +110,18 @@ document.addEventListener("keydown", function (event) {
   document.addEventListener("DOMContentLoaded", () => {
   
   const btn = document.getElementById("foodOrder");
+
+
+  btn.addEventListener("click", () => {
+    window.location.href = "./pages/FoodOrders.html"; // go to another page
+  });
+});
+
+//Food Order Page for button in carousel
+
+  document.addEventListener("DOMContentLoaded", () => {
+  
+  const btn = document.getElementById("foodOrders");
 
 
   btn.addEventListener("click", () => {
