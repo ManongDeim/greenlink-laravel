@@ -96,35 +96,53 @@ class RoomController extends Controller
 
     // 2️⃣ Webhook to handle payment confirmation
     public function paymongoWebhook(Request $request)
-    {
-        $payload = $request->all();
-        Log::info('PayMongo Webhook Received', $payload);
+{
+    $payload = $request->all();
+    Log::info('PayMongo Webhook Received', $payload);
 
-        $eventType = $payload['data']['attributes']['event_type'] ?? null;
+    // Only process relevant event types
+    $eventType = $payload['data']['attributes']['type'] ?? null;
 
-        if (in_array($eventType, ['payment_intent.succeeded', 'checkout.session.completed'])) {
-            $paymentIntentId = $payload['data']['attributes']['payment_intent'] ?? null;
-            $checkoutSessionId = $payload['data']['id'] ?? null;
+    // Handle checkout session paid
+    if ($eventType === 'checkout_session.payment.paid') {
+        // Drill down into the session data
+        $checkoutSessionData = $payload['data']['attributes']['data']['attributes'] ?? null;
+        if (!$checkoutSessionData) {
+            Log::warning("Webhook payload missing checkout session data");
+            return response()->json(['status' => 'ignored']);
+        }
+
+        $checkoutSessionId = $checkoutSessionData['id'] ?? null;
+        $payments = $checkoutSessionData['payments'] ?? [];
+
+        // Get the payment_intent_id from the first payment in the array
+        if (!empty($payments)) {
+            $paymentIntentId = $payments[0]['attributes']['payment_intent_id'] ?? null;
 
             $reservation = RoomModel::where('paymongo_session_id', $checkoutSessionId)->first();
-            if ($reservation) {
+            if ($reservation && $paymentIntentId) {
                 $reservation->paymongo_payment_id = $paymentIntentId;
                 $reservation->payment_status = 'Paid';
                 $reservation->save();
 
                 Log::info("Reservation updated via webhook", [
                     'reservation_id' => $reservation->room_reser_id,
+                    'checkout_session_id' => $checkoutSessionId,
                     'payment_intent_id' => $paymentIntentId
                 ]);
             } else {
-                Log::warning("Reservation not found for webhook", [
-                    'session_id' => $checkoutSessionId
+                Log::warning("Reservation not found or payment intent missing", [
+                    'session_id' => $checkoutSessionId,
+                    'payment_intent_id' => $paymentIntentId
                 ]);
             }
         }
-
-        return response()->json(['status' => 'success']);
     }
+
+    // You can add other event types here if needed, e.g. payment.refunded, payment.failed, etc.
+
+    return response()->json(['status' => 'success']);
+}
 
     // 3️⃣ Cancel reservation with refund if eligible
     public function cancelRoomReservation($id)
