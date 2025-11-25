@@ -119,13 +119,16 @@ private function refundPayMongoPayment($paymentId, $amount, $reservationId)
         'amount' => $amount
     ]);
 
+    // PayMongo expects amount in cents
+    $amountInCents = (int) ($amount * 100);
+
     $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
-        ->post("https://api.paymongo.com/v1/refunds", [
+        ->post('https://api.paymongo.com/v1/refunds', [
             'data' => [
                 'attributes' => [
-                    'amount' => (int)($amount * 100),
+                    'amount' => $amountInCents,
                     'reason' => 'requested_by_customer',
-                    'payment' => $paymentId  // <-- must be actual Payment ID
+                    'payment' => $paymentId
                 ]
             ]
         ]);
@@ -137,6 +140,7 @@ private function refundPayMongoPayment($paymentId, $amount, $reservationId)
 
     return $response->ok();
 }
+
 
 
 }
