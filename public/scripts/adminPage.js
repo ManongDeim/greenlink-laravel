@@ -836,42 +836,74 @@ const eventReservationTemplate = (data, selectedStatus = '') => `
 </div>
 `;
 
-const eventManagementTemplate = data => `
+const homeEventsTableTemplate = data => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-2xl font-bold text-teal-700">Event Management</h2>
-    <button onclick="openAddEventModal()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
-      + Add Event
-    </button>
-  </div>
+  <h2 class="text-2xl font-bold text-teal-700 mb-4">Home Page Events</h2>
 
   <table class="min-w-full border border-gray-200 text-sm text-left">
     <thead class="bg-gray-100 text-gray-700">
       <tr>
         <th class="px-4 py-2">Action</th>
-        <th class="px-4 py-2">Event Name</th>
-        <th class="px-4 py-2">Max Pax</th>
+        <th class="px-4 py-2">Title</th>
+        <th class="px-4 py-2">Description</th>
+        <th class="px-4 py-2">Highlights</th>
+        <th class="px-4 py-2">Image</th>
       </tr>
     </thead>
+
     <tbody>
-      ${data.map(item => `
-      <tr class="border-t hover:bg-gray-50 relative">
-        <td class="px-4 py-2 relative">
-          <button onclick="toggleActionMenu(event, ${item.id})"
+      ${data.map(event => `
+      <tr class="border-t hover:bg-gray-50 cursor-pointer relative"
+          onclick="openEventModal(${event.id})">
+
+        <!-- ACTION MENU -->
+        <td class="px-4 py-2 relative" onclick="event.stopPropagation()">
+          <button onclick="toggleActionMenu(event, ${event.id})"
                   class="relative z-10 p-2 bg-gray-200 rounded hover:bg-gray-300">⚙️</button>
 
-          <div id="actionMenu-${item.id}" class="absolute left-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
-            <button onclick="openEditEventNameModal(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-green-100">Edit Name</button>
-            <button onclick="openEventPaxModal(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-blue-100">Edit Pax</button>
-            <button onclick="removeEvent(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-red-100">Remove</button>
+          <div id="actionMenu-${event.id}" class="absolute left-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
+            <button onclick="editEvent(${event.id})" class="block w-full text-left px-3 py-1 hover:bg-green-100">Edit</button>
+            <button onclick="deleteEvent(${event.id})" class="block w-full text-left px-3 py-1 hover:bg-red-100">Delete</button>
           </div>
         </td>
-        <td class="px-4 py-2">${item.event_name}</td>
-        <td class="px-4 py-2">${item.max_pax}</td>
+
+        <td class="px-4 py-2">${event.title}</td>
+        <td class="px-4 py-2">${event.description.substring(0, 80)}...</td>
+        <td class="px-4 py-2">${event.highlights ? event.highlights.substring(0, 50) : ""}</td>
+
+        <td class="px-4 py-2">
+          ${event.image_url
+            ? `<img src="${event.image_url}" class="w-20 h-20 object-cover rounded" />`
+            : `<span class="text-gray-400">No Image</span>`
+          }
+        </td>
+
       </tr>
       `).join("")}
     </tbody>
   </table>
+</div>
+
+<!-- MODAL -->
+<div id="eventModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
+    <h3 class="text-xl font-bold text-teal-700 mb-3">Event Details</h3>
+
+    <p><strong>Title:</strong> <span id="modalEventTitle"></span></p>
+    <p><strong>Description:</strong></p>
+    <p id="modalEventDescription" class="mb-2"></p>
+
+    <p><strong>Highlights:</strong></p>
+    <p id="modalEventHighlights" class="mb-2"></p>
+
+    <p><strong>Image:</strong></p>
+    <img id="modalEventImage" class="w-full h-auto object-cover rounded mt-2 hidden" />
+
+    <div class="mt-4 text-right">
+      <button onclick="closeEventModal()" 
+              class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+    </div>
+  </div>
 </div>
 `;
 
@@ -1403,6 +1435,23 @@ function replaceRoomPhoto(id) {
 
 
 // ================= Fetch & Render Functions =================
+
+async function fetchAndRenderHomeEvents() {
+  const container = document.getElementById("content");
+
+  try {
+    const res = await fetch("/api/home-events/");
+    const data = await res.json();
+
+    window.homeEventsData = data;
+    container.innerHTML = homeEventsTableTemplate(data);
+
+  } catch (err) {
+    console.error("Error fetching home events:", err);
+    container.innerHTML = `<p class="text-red-500">Failed to load events</p>`;
+  }
+}
+
 async function fetchAndRenderReviews(filters = {}) {
   const container = document.getElementById('content');
   const params = new URLSearchParams(filters);
@@ -2003,6 +2052,7 @@ document.addEventListener("DOMContentLoaded", () => {
     eventManagement: { render: fetchAndRenderEventManagement },
     idApproval:{ render: fetchAndRenderGoogleUsers },
     reviews: { render: fetchAndRenderReviews },
+    homePage:{ render: fetchAndRenderHomeEvents },
   };
 
   // =================== Sidebar Button Logic ===================
@@ -3422,3 +3472,65 @@ async function applyReviewFilters() {
   if (status) filters.status = status;
 
   await fetchAndRenderReviews(filters);}
+
+
+
+  
+
+  function openEventModal(id) {
+  const event = window.homeEventsData.find(e => e.id == id);
+  if (!event) return;
+
+  document.getElementById('modalEventTitle').innerText = event.title;
+  document.getElementById('modalEventDescription').innerText = event.description;
+  document.getElementById('modalEventHighlights').innerText = event.highlights ?? "";
+
+  const img = document.getElementById('modalEventImage');
+  if (event.image_url) {
+    img.src = event.image_url;
+    img.classList.remove('hidden');
+  } else {
+    img.src = "";
+    img.classList.add('hidden');
+  }
+
+  document.getElementById('eventModal').classList.remove('hidden');
+}
+
+function closeEventModal() {
+  document.getElementById('eventModal').classList.add('hidden');
+}
+
+function toggleActionMenu(event, id) {
+  event.stopPropagation();
+
+  document.querySelectorAll("[id^='actionMenu-']").forEach(m => {
+    if (m.id !== `actionMenu-${id}`) m.classList.add("hidden");
+  });
+
+  const menu = document.getElementById(`actionMenu-${id}`);
+  menu.classList.toggle("hidden");
+}
+
+document.addEventListener("click", () => {
+  document.querySelectorAll("[id^='actionMenu-']").forEach(m => m.classList.add("hidden"));
+});
+
+
+function editEvent(id) {
+  alert("Edit event " + id + "\nImplement your edit form here.");
+}
+
+async function deleteEvent(id) {
+  if (!confirm("Delete this event?")) return;
+
+  try {
+    const res = await fetch(`/api/home-events/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Delete failed");
+
+    fetchAndRenderHomeEvents();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to delete event");
+  }
+}
