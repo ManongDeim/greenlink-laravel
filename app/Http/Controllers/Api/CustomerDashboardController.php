@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FoodOrderModel;
@@ -78,8 +79,9 @@ public function cancelRoomReservation($id)
 
         // Trigger PayMongo refund if payment was already made
         if ($reservation->payment_status === 'Paid' && $reservation->payment_method === 'Full Payment' && $reservation->paymongo_payment_id) {
-            $refund = $this->refundPayMongoPayment($reservation->paymongo_payment_id, $reservation->total_bill);
-        }
+    $refundSuccess = $this->refundPayMongoPayment($reservation->paymongo_payment_id, $reservation->total_bill, $reservation->room_reser_id);
+    Log::info("💳 Refund status for reservation {$reservation->room_reser_id}: " . ($refundSuccess ? 'SUCCESS' : 'FAILED'));
+}
 
         return response()->json([
             'success' => true,
@@ -112,8 +114,14 @@ public function cancelEventReservation($id)
 }
 
 
-private function refundPayMongoPayment($paymentIntentId, $amount)
+private function refundPayMongoPayment($paymentIntentId, $amount, $reservationId)
 {
+    Log::info("💳 Initiating refund", [
+        'reservation_id' => $reservationId,
+        'payment_intent_id' => $paymentIntentId,
+        'amount' => $amount
+    ]);
+
     $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
         ->post("https://api.paymongo.com/v1/refunds", [
             'data' => [
@@ -124,6 +132,11 @@ private function refundPayMongoPayment($paymentIntentId, $amount)
                 ]
             ]
         ]);
+
+    Log::info("💳 PayMongo refund response", [
+        'reservation_id' => $reservationId,
+        'response' => $response->json()
+    ]);
 
     return $response->ok();
 }
