@@ -1059,7 +1059,7 @@ const homeEventsTableTemplate = data => `
 </div>
 
 <!-- MODAL -->
-<div id="eventModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+<div id="eventModal" class="fixed flex inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
   <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
     <h3 class="text-xl font-bold text-teal-700 mb-3">Event Details</h3>
 
@@ -1080,7 +1080,7 @@ const homeEventsTableTemplate = data => `
   </div>
 </div>
 
-<div id="addHomeEventModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center">
+<div id="addHomeEventModal" class="fixed flex inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center">
     <div class="bg-white p-6 rounded-xl w-full max-w-lg">
         
         <h2 class="text-xl font-bold mb-4">Add Home Page Event</h2>
