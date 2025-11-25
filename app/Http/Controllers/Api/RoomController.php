@@ -259,44 +259,5 @@ class RoomController extends Controller
     return response()->json(['message' => 'Status updated successfully']);
 }
 
-public function paymongoWebhook(Request $request)
-{
-    $payload = $request->all();
-    Log::info("💳 PayMongo webhook received", ['payload' => $payload]);
-
-    // Only handle successful payments
-    $type = $payload['type'] ?? null;
-
-    if ($type === 'checkout.session.completed') {
-        $session = $payload['data']['object'] ?? null;
-        if (!$session) return response()->json(['success' => false]);
-
-        $sessionId = $session['id'] ?? null;
-        $paymentIntentId = $session['payment_intent']['id'] ?? null;
-
-        if (!$sessionId || !$paymentIntentId) return response()->json(['success' => false]);
-
-        // Find reservation by session ID
-        $reservation = RoomModel::where('paymongo_session_id', $sessionId)->first();
-        if (!$reservation) {
-            Log::warning("Reservation not found for PayMongo session: {$sessionId}");
-            return response()->json(['success' => false]);
-        }
-
-        // Update reservation with payment info
-        $reservation->payment_status = 'Paid';
-        $reservation->paymongo_payment_id = $paymentIntentId;
-        $reservation->save();
-
-        Log::info("💳 Reservation updated with payment ID", [
-            'reservation' => $reservation->room_reser_id,
-            'payment_id' => $paymentIntentId
-        ]);
-
-        return response()->json(['success' => true]);
-    }
-
-    return response()->json(['success' => true]);
-}
 
 }
