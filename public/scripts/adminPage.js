@@ -300,8 +300,8 @@ const reviewManagementTemplate = data => `
       ${data.map(item => {
         const orderId = item.food_order_id || item.farm_order_id || item.room_reservation_id || item.event_reservation_id || 'N/A';
         const actionBtn = item.review_status === 'Reviewed'
-          ? `<button class="delete-btn px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${item.id}">Delete</button>`
-          : `<button class="review-btn px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${item.id}">Reviewed</button>`;
+          ? `<button onclick="deleteReview(${item.id})" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700" >Delete</button>`
+          : `<button onclick="markReviewed(${item.id})" class=" px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Reviewed</button>`;
 
         return `
         <tr class="border-t hover:bg-gray-50 cursor-pointer review-row" data-id="${item.id}">
@@ -3292,16 +3292,44 @@ async function updateIdStatus(userId, status) {
 
 
 function applyGoogleUserFilter() {
-  const status = document.getElementById('filterStatus').value;
-  let filtered = window.googleUsersData;
+console.log("applyGoogleUserFilter called");
 
-  if (status) {
-    filtered = filtered.filter(user => user.id_status === status);
-  }
-
-  const container = document.getElementById("content");
-  container.innerHTML = googleUserTableTemplate(filtered);
+const statusSelect = document.getElementById('filterStatus');
+if (!statusSelect) {
+console.error("Filter select element not found!");
+return;
 }
+
+const status = statusSelect.value;
+console.log("Selected status:", status);
+
+if (!window.googleUsersData) {
+console.error("window.googleUsersData is undefined!");
+return;
+}
+
+let filtered = window.googleUsersData;
+console.log("Original data length:", filtered.length);
+
+if (status) {
+filtered = filtered.filter(user => user.id_status === status);
+console.log("Filtered data length:", filtered.length);
+}
+
+const container = document.getElementById("content");
+if (!container) {
+console.error("Content container not found!");
+return;
+}
+
+// Use the existing template function
+container.innerHTML = googleUserTableTemplate(filtered);
+console.log("Table re-rendered with filtered data");
+
+// Restore select value
+document.getElementById('filterStatus').value = status;
+}
+
 
 function openUserModal(userId) {
   const user = window.googleUsersData.find(u => u.user_id === userId);
@@ -3330,42 +3358,55 @@ function closeUserModal() {
 
 // Reviews Functions
 
-document.addEventListener('click', async (e) => {
-  const id = e.target.dataset.id;
-  const currentFilters = {
-    type: document.getElementById('filterType')?.value,
-    status: document.getElementById('filterStatus')?.value
+async function markReviewed(id) {
+  console.log("Marking as reviewed:", id);
+  await fetch(`/api/reviews/${id}/mark-reviewed`, { method: "POST" });
+  fetchAndRenderReviews(getCurrentFilters());
+}
+
+async function deleteReview(id) {
+  if (!confirm("Are you sure you want to delete this review?")) return;
+  console.log("Deleting review:", id);
+  await fetch(`/api/reviews/${id}`, { method: "DELETE" });
+  fetchAndRenderReviews(getCurrentFilters());
+}
+
+function getCurrentFilters() {
+  const typeInput = document.getElementById("filterType");
+  const statusInput = document.getElementById("filterStatus");
+  return {
+    type: typeInput?.value,
+    status: statusInput?.value
   };
+}
 
-  if (e.target.classList.contains('review-btn')) {
-    const res = await fetch(`/api/reviews/${id}/mark-reviewed`, { method: 'POST' });
-    if (!res.ok) { alert('Failed to mark as reviewed'); return; }
-    await fetchAndRenderReviews(currentFilters);
-    return;
-  }
 
-  if (e.target.classList.contains('delete-btn')) {
-    if (!confirm('Are you sure you want to delete this review?')) return;
-    const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
-    if (!res.ok) { alert('Failed to delete'); return; }
-    await fetchAndRenderReviews(currentFilters);
-    return;
-  }
+document.addEventListener("click", async (e) => {
+  // OPEN MODAL
+  const row = e.target.closest(".review-row");
+  if (row && id) {
+    console.log("Opening modal for row:", id);
+    const review = window.reviewData.find(r => r.id == id);
+    if (!review) {
+      console.warn("Review not found for row:", id);
+      return;
+    }
 
-  const row = e.target.closest('.review-row');
-  if (row) {
-    const review = window.reviewData.find(r => +r.id === +row.dataset.id);
-    const orderId = review.food_order_id || review.farm_order_id || review.room_reservation_id || review.event_reservation_id || 'N/A';
+    const orderId = review.food_order_id || review.farm_order_id || review.room_reservation_id || review.event_reservation_id || "N/A";
 
-    document.getElementById('modalUser').textContent = review.user.name;
-    document.getElementById('modalOrderId').textContent = orderId;
-    document.getElementById('modalStars').textContent = review.stars;
-    document.getElementById('modalStatus').textContent = review.review_status;
-    document.getElementById('modalComment').textContent = review.comment ?? '';
+    document.getElementById("modalUser").textContent = review.user_name || review.user?.name || "Unknown";
+    document.getElementById("modalOrderId").textContent = orderId;
+    document.getElementById("modalStars").textContent = review.stars;
+    document.getElementById("modalStatus").textContent = review.review_status;
+    document.getElementById("modalComment").textContent = review.comment ?? "";
 
-    document.getElementById('reviewModal').classList.remove('hidden');
+    document.getElementById("reviewModal").classList.remove("hidden");
   }
 });
+
+
+
+
 
 function closeReviewModal() {
   document.getElementById('reviewModal').classList.add('hidden');
