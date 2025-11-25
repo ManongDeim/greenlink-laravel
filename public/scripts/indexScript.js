@@ -204,5 +204,12 @@ async function renderHomeEvents() {
     }
 }
 
+
+
+
+
+
+
+
 // Call on page load
 renderHomeEvents();

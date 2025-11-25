@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\KitchenInventory;
 use App\Models\FoodIngredient;
 use App\Models\FoodProduct;
+use App\Models\GoogleUser;
 
 class FoodOrderController extends Controller
 {
@@ -24,8 +25,12 @@ class FoodOrderController extends Controller
             return response()->json(['error' => 'Unauthorized. Please log in first.'], 401);
         }
 
-         // Wrap everything in a transaction to prevent race conditions
-        $order = DB::transaction(function () use ($request, $user) {
+        // Check for validated senior or PWD ID
+        $googleUser = GoogleUser::where('user_id', $user->id)->first();
+        $hasDiscount = $googleUser && $googleUser->id_status === 'Validated';
+
+        // Wrap everything in a transaction to prevent race conditions
+        $order = DB::transaction(function () use ($request, $user, $hasDiscount) {
 
             // Generate unique FOOD order ID (safe under concurrency)
             do {
@@ -38,7 +43,7 @@ class FoodOrderController extends Controller
             // Prepare initial order data
             $orderData = [
                 'foodOrder_id' => $foodOrderId,
-                'user_id' => $user->id, // ✅ taken automatically from logged-in user
+                'user_id' => $user->id,
                 'smokedFish_order' => 0,
                 'deviledFish_order' => 0,
                 'seaSig_order' => 0,
@@ -52,8 +57,6 @@ class FoodOrderController extends Controller
                 'ref_number' => $refNumber,
             ];
 
-            $lineitems = [];
-
             foreach ($request->cart as $item) {
                 switch ($item['name']) {
                     case 'Smoked Fish': $orderData['smokedFish_order'] = $item['qty']; break;
@@ -65,33 +68,30 @@ class FoodOrderController extends Controller
                 }
 
                 $subtotal = $item['price'] * $item['qty'];
-                $orderData['total_bill'] += $subtotal;
 
-                $lineitems[] = [
-                    'currency' => 'PHP',
-                    'amount'   => intval($item['price'] * 100),
-                    'name'     => $item['name'],
-                    'quantity' => $item['qty']
-                ];
+                // Apply 20% discount if user is senior/PWD
+                if ($hasDiscount) {
+                    $subtotal *= 0.8;
+                }
+
+                $orderData['total_bill'] += $subtotal;
             }
 
-            Log::info('Incoming user_id:', ['user_id' => $request->input('user_id')]);
-
-            // Save to DB inside the transaction
-        $orderData['user_id'] = $request->input('user_id');
             return FoodOrderModel::create($orderData);
         });
 
-        // ✅ PayMongo API call
+        // Prepare PayMongo request
         $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
             ->post('https://api.paymongo.com/v1/checkout_sessions', [
                 'data' => [
                     'attributes' => [
-                        'line_items' => array_map(function ($item) {
+                        'line_items' => array_map(function ($item) use ($hasDiscount) {
+                            $price = $item['price'];
+                            if ($hasDiscount) $price *= 0.8;
                             return [
                                 'currency' => 'PHP',
-                                'amount' => intval($item['price'] * 100),
-                                'name' => $item['name'],
+                                'amount'   => intval($price * 100),
+                                'name'     => $item['name'],
                                 'quantity' => $item['qty'],
                             ];
                         }, $request->cart),
@@ -115,9 +115,11 @@ class FoodOrderController extends Controller
         return response()->json([
             'payment_url' => $checkoutUrl,
             'foodOder_id' => $order->foodOrder_id,
-            'ref_number' => $order->ref_number
+            'ref_number' => $order->ref_number,
+            'hasDiscount' => $hasDiscount,
+            'total_bill' => $order->total_bill
         ]);
-    }   
+    }
 
    public function paymentSuccess(Request $request)
 {
