@@ -143,38 +143,56 @@ document.addEventListener("keydown", function (event) {
 
 async function renderHomeEvents() {
     const container = document.getElementById('homeSections');
+
     try {
         const res = await fetch('/api/home-events');
         const events = await res.json();
 
-        container.innerHTML = events.map(event => `
+        container.innerHTML = `
             <section class="px-6 py-16 text-gray-800 bg-white">
                 <div class="mx-auto max-w-7xl">
+                    <!-- Section Title -->
                     <h2 class="mb-12 text-3xl font-bold text-center text-teal-700 md:text-4xl">
-                        ${event.title}
+                        Events
                     </h2>
-                    ${event.image_url ? `
-                    <div class="flex flex-col gap-10 lg:flex-row lg:items-start">
-                        <div class="w-full lg:w-1/3">
-                            <img class="w-full transition-transform duration-300 rounded-lg shadow-lg hover:scale-105"
-                                 src="${event.image_url}" alt="${event.title}">
+
+                    ${events.map(event => `
+                        <div class="flex flex-col gap-10 mb-16 lg:flex-row lg:items-start">
+                            <!-- Event Image -->
+                            ${event.image_url ? `
+                            <div class=" mt-5 w-full lg:w-1/3">
+                                <img class="w-full h-64 object-cover rounded-lg shadow-lg"
+                                     src="${event.image_url}" alt="${event.title}">
+                            </div>` : ''}
+
+                            <!-- Event Description -->
+                            <div class="w-full lg:w-2/3 space-y-4 mt-5 text-base font-light leading-relaxed text-justify md:text-lg">
+                                <h3 class="text-2xl font-semibold text-teal-700 md:text-3xl">${event.title}</h3>
+                                <p>${event.description}</p>
+
+                                ${event.highlights ? `
+                                    <h4 class="text-teal-600 font-semibold mt-4 mb-2">Event Highlights</h4>
+                                    <ul class="pl-5 list-disc space-y-1">
+                                        ${event.highlights.split('\n').map(item => `<li>${item}</li>`).join('')}
+                                    </ul>` : ''}
+                            </div>
                         </div>
-                        <div class="w-full space-y-4 text-base font-light leading-relaxed text-justify lg:w-2/3 md:text-lg">
-                            ${event.content}
-                        </div>
-                    </div>` : `
-                    <div class="text-base font-light leading-relaxed text-justify md:text-lg">
-                        ${event.content}
-                    </div>`}
+                    `).join('')}
                 </div>
             </section>
-        `).join('');
-
+        `;
     } catch (err) {
         console.error('Failed to load home events:', err);
-        container.innerHTML = `<p class="text-red-500">Failed to load content</p>`;
+        container.innerHTML = `<p class="text-red-500 text-center">Failed to load content</p>`;
     }
 }
+
+
+
+
+
+
+
 
 // Call on page load
 renderHomeEvents();
