@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\HomePageEvents as Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 
 class HomePageController extends Controller
 {
@@ -31,20 +32,34 @@ class HomePageController extends Controller
     Log::info("Validation passed");
 
     try {
-        // Handle image upload
         if ($request->hasFile('image_url')) {
             $file = $request->file('image_url');
+
+            // Absolute path to public_html/home_page
             $destinationPath = public_path('home_page');
-            if (!file_exists($destinationPath)) mkdir($destinationPath, 0775, true);
+            Log::info("Destination path for upload: {$destinationPath}");
+
+            // Ensure folder exists
+            if (!File::exists($destinationPath)) {
+                Log::info("Folder does not exist. Creating folder...");
+                File::makeDirectory($destinationPath, 0775, true);
+            }
 
             $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($destinationPath, $filename);
+            Log::info("Filename for uploaded file: {$filename}");
+
+            // Move file
+            $moved = $file->move($destinationPath, $filename);
+            if ($moved) {
+                Log::info("File uploaded successfully to {$destinationPath}/{$filename}");
+            } else {
+                Log::warning("File move failed!");
+            }
 
             $requestData = $request->all();
             $requestData['image_url'] = '/home_page/' . $filename;
 
             $event = Event::create($requestData);
-
             Log::info("Home page event created", ['event_id' => $event->id]);
 
             return response()->json($event);
