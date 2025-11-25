@@ -132,6 +132,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/event-reservations', [CustomerDashboardController::class, 'getEventReservations']);
 });
 
+Route::post('/customer/cancel-food/{id}', [CustomerDashboardController::class, 'cancelFoodOrder']);
+Route::post('/customer/cancel-farm/{id}', [CustomerDashboardController::class, 'cancelFarmOrder']);
+Route::post('/customer/cancel-room/{id}', [CustomerDashboardController::class, 'cancelRoomReservation']);
+Route::post('/customer/cancel-event/{id}', [CustomerDashboardController::class, 'cancelEventReservation']);
+
+
 
 // Kitchen Inventory Routes
 
