@@ -24,6 +24,8 @@ class RoomModel extends Model
         'payment_method',
         'payment_status',
         'ref_number',
+        'paymongo_session_id',
+        'paymongo_payment_id',
         'status'
         ];
 
