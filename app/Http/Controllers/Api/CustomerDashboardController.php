@@ -111,8 +111,7 @@ class CustomerDashboardController extends Controller
         $res->save();
         return response()->json(['success' => true, 'message' => 'Event reservation cancelled']);
     }
-
-    private function refundPayMongoPayment($paymentId, $amount, $reservationId)
+private function refundPayMongoPayment($paymentId, $amount, $reservationId)
 {
     Log::info("💳 Initiating refund", [
         'reservation_id' => $reservationId,
@@ -126,7 +125,7 @@ class CustomerDashboardController extends Controller
                 'attributes' => [
                     'amount' => (int)($amount * 100),
                     'reason' => 'requested_by_customer',
-                    'payment' => $paymentId  // <-- must be actual payment ID
+                    'payment' => $paymentId  // <-- must be actual Payment ID
                 ]
             ]
         ]);
@@ -138,5 +137,6 @@ class CustomerDashboardController extends Controller
 
     return $response->ok();
 }
+
 
 }

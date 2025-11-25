@@ -107,19 +107,21 @@ class RoomController extends Controller
         $checkoutSessionId = $sessionData['id'] ?? null;
 
         $payments = $sessionData['attributes']['payments'] ?? [];
+        $paymentId = $payments[0]['id'] ?? null; // actual payment ID
         $paymentIntentId = $payments[0]['attributes']['payment_intent_id'] ?? null;
 
-        if ($checkoutSessionId && $paymentIntentId) {
+        if ($checkoutSessionId && $paymentId) {
             $reservation = RoomModel::where('paymongo_session_id', $checkoutSessionId)->first();
             if ($reservation) {
-                $reservation->paymongo_payment_id = $paymentIntentId;
+                $reservation->paymongo_payment_id = $paymentId; // store actual payment ID
                 $reservation->payment_status = 'Paid';
                 $reservation->save();
 
                 Log::info("Reservation updated via webhook", [
                     'reservation_id' => $reservation->room_reser_id,
                     'checkout_session_id' => $checkoutSessionId,
-                    'payment_intent_id' => $paymentIntentId
+                    'payment_intent_id' => $paymentIntentId,
+                    'payment_id' => $paymentId
                 ]);
             } else {
                 Log::warning("Reservation not found for webhook", [
@@ -131,6 +133,7 @@ class RoomController extends Controller
 
     return response()->json(['status' => 'success']);
 }
+
 
 
     // 3️⃣ Cancel reservation with refund if eligible
