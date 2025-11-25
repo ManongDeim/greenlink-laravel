@@ -106,32 +106,31 @@ $paymentId = null;
 $sessionId = null;
 
 if ($eventType === 'checkout_session.payment.paid') {
-    // Use 'data' directly without extra 'attributes'
-    $sessionData = $payload['data']['attributes']['data'] ?? [];
+    $sessionData = $payload['data']['attributes']['data']['attributes'] ?? [];
     $sessionId = $sessionData['id'] ?? null;
 
-    // Get payment ID from the first payment in the array
-    $payments = $sessionData['payments'] ?? [];
-    $paymentId = $payments[0]['id'] ?? null;
+    // Get payment ID from first payment
+    if (!empty($sessionData['payments'])) {
+        $paymentId = $sessionData['payments'][0]['id'] ?? null;
+    }
 
     // Find reservation by session ID
     if ($sessionId) {
         $reservation = RoomModel::where('paymongo_session_id', $sessionId)->first();
     }
-
-    // Fallback: find by payment ID if session ID didn't work
-    if (!$reservation && $paymentId) {
-        $reservation = RoomModel::where('paymongo_payment_id', $paymentId)->first();
-    }
-
 } elseif ($eventType === 'payment.paid') {
+    // Payment ID is directly in data.attributes.data.attributes.id
     $paymentData = $payload['data']['attributes']['data']['attributes'] ?? [];
     $paymentId = $paymentData['id'] ?? null;
-    $paymentIntentId = $paymentData['payment_intent_id'] ?? null;
 
-    // Find reservation by payment ID
-    if ($paymentId) {
-        $reservation = RoomModel::where('paymongo_payment_id', $paymentId)->first();
+    // Find reservation by matching description with room_reser_id
+    $description = $paymentData['description'] ?? '';
+    if ($description) {
+        preg_match('/ROOM-[A-Z0-9]+/', $description, $matches);
+        if (!empty($matches)) {
+            $roomReserId = $matches[0];
+            $reservation = RoomModel::where('room_reser_id', $roomReserId)->first();
+        }
     }
 }
 
@@ -156,6 +155,7 @@ if ($reservation && $paymentId) {
 return response()->json(['status' => 'success']);
 
 }
+
 
 
 
