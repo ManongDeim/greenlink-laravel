@@ -7,12 +7,13 @@ use App\Models\RoomModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use App\Models\GoogleUser;
 
 class RoomController extends Controller
 {
-    public function createPaymentLink(Request $request)
+public function createPaymentLink(Request $request)
     {
         $user = Auth::user();
         if (!$user) return response()->json(['error' => 'Unauthorized'], 401);
@@ -148,13 +149,6 @@ class RoomController extends Controller
     }
 
     public function index()
-    {
-        return response()->json(RoomModel::all());
-    }
-}
-
-
-      public function index()
     {
         return response()->json(RoomModel::all());
     }
