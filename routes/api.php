@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\FarmInventoryController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\HomePageController;
+use \App\Http\Controllers\Api\PaymongoWebhookController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 use App\Models\GoogleUser;
@@ -186,3 +187,7 @@ Route::post('/', [HomePageController::class, 'store']);
 Route::put('/{id}', [HomePageController::class, 'update']);
 Route::delete('/{id}', [HomePageController::class, 'destroy']);
 });
+
+//Paymongo
+
+Route::post('/webhook/paymongo', [PaymongoWebhookController::class, 'handle']);

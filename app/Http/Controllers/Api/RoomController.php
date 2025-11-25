@@ -13,161 +13,161 @@ use App\Models\GoogleUser;
 
 class RoomController extends Controller
 {
-public function createPaymentLink(Request $request)
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\RoomModel;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use App\Models\GoogleUser;
+
+class RoomController extends Controller
 {
-    $user = Auth::user();
-    if (!$user) {
-        return response()->json(['error' => 'Unauthorized'], 401);
-    }
+    public function createPaymentLink(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) return response()->json(['error' => 'Unauthorized'], 401);
 
-    // Check if the user has a validated senior/PWD ID
-$googleUser = GoogleUser::where('user_id', $user->id)->first();
-$hasDiscount = $googleUser && $googleUser->id_status === 'Validated';
+        // check senior/PWD
+        $googleUser = GoogleUser::where('user_id', $user->id)->first();
+        $hasDiscount = $googleUser && $googleUser->id_status === 'Validated';
 
-
-    $validated = $request->validate([
-         'room_id' => 'nullable|integer|exists:rooms,id',
-        'room' => 'required|string',
-        'check_in_date' => 'required|date',
-        'check_out_date' => 'required|date|after_or_equal:check_in_date',
-        'full_name' => 'required|string',
-        'email' => 'required|email',
-        'phone_number' => 'required|string',
-        'pax' => 'required|integer|min:1',
-        'total_bill' => 'required|numeric|min:1',
-        'payment_method' => 'required|string|in:Down Payment,Full Payment'
-    ]);
-
-    $roomReserId = 'ROOM-' . strtoupper(uniqid());
-    $refNumber = uniqid('REF-');
-
-    $baseTotal = $validated['total_bill'];
-
-    if ($hasDiscount) {
-    $baseTotal *= 0.8;
-}
-
-    // Determine final amount based on payment type
-    $finalTotal = $validated['payment_method'] === 'Down Payment'
-         ? round($baseTotal * 0.5, 2)
-         : round($baseTotal, 2);
-
-    // Save initial booking
-    $reservation = RoomModel::create([
-        'room_id' => $validated['room_id'] ?? null,
-        'room_reser_id' => $roomReserId,
-        'user_id' => $user->id,
-        'room' => $validated['room'],
-        'check_in_date' => $validated['check_in_date'],
-        'check_out_date' => $validated['check_out_date'],
-        'full_name' => $validated['full_name'],
-        'email' => $validated['email'],
-        'phone_number' => $validated['phone_number'],
-        'pax' => $validated['pax'],
-        'total_bill' => $finalTotal,
-        'payment_method' => $validated['payment_method'],
-        'payment_status' => 'Pending',
-        'ref_number' => $refNumber
-    ]);
-
-    // PayMongo session
-    $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
-        ->post('https://api.paymongo.com/v1/checkout_sessions', [
-            'data' => [
-                'attributes' => [
-                    'line_items' => [[
-                        'name' => $validated['room'],
-                        'amount' => (int)($finalTotal * 100),
-                        'currency' => 'PHP',
-                        'quantity' => 1
-                    ]],
-                    'payment_method_types' => ['gcash'], // or ['card']
-                    'amount' => (int)($finalTotal * 100),
-                    'description' => "Room Reservation: {$validated['room']} ({$roomReserId})",
-                    'remarks' => $refNumber,
-                    'currency' => 'PHP',
-                    'show_line_items' => true,
-                    'show_description' => true,
-                    'success_url' => url("/api/paymentSuccess?ref={$refNumber}"),
-                    'cancel_url' => url("/api/paymentFailed?ref={$refNumber}"),
-                ]
-            ]
+        $validated = $request->validate([
+            'room_id' => 'nullable|integer|exists:rooms,id',
+            'room' => 'required|string',
+            'check_in_date' => 'required|date',
+            'check_out_date' => 'required|date|after_or_equal:check_in_date',
+            'full_name' => 'required|string',
+            'email' => 'required|email',
+            'phone_number' => 'required|string',
+            'pax' => 'required|integer|min:1',
+            'total_bill' => 'required|numeric|min:0',
+            'payment_method' => 'required|string|in:Down Payment,Full Payment'
         ]);
 
-        Log::info('PayMongo response', $response->json());
+        $roomReserId = 'ROOM-' . strtoupper(uniqid());
+        $refNumber = uniqid('REF-');
 
-    $checkoutUrl = $response->json()['data']['attributes']['checkout_url'] ?? null;
+        // apply discount if applicable
+        $baseTotal = $validated['total_bill'];
+        if ($hasDiscount) $baseTotal = round($baseTotal * 0.8, 2);
 
-    return response()->json([
-        'payment_url' => $checkoutUrl,
-        'roomReser_id' => $roomReserId,
-        'hasDiscount' => $hasDiscount,
-        'ref_number' => $refNumber
-    ]);
-}
+        $finalTotal = $validated['payment_method'] === 'Down Payment'
+            ? round($baseTotal * 0.5, 2)
+            : round($baseTotal, 2);
 
+        // create reservation (payment pending)
+        $reservation = RoomModel::create([
+            'room_id' => $validated['room_id'] ?? null,
+            'room_reser_id' => $roomReserId,
+            'user_id' => $user->id,
+            'room' => $validated['room'],
+            'check_in_date' => $validated['check_in_date'],
+            'check_out_date' => $validated['check_out_date'],
+            'full_name' => $validated['full_name'],
+            'email' => $validated['email'],
+            'phone_number' => $validated['phone_number'],
+            'pax' => $validated['pax'],
+            'total_bill' => $finalTotal,
+            'payment_method' => $validated['payment_method'],
+            'payment_status' => 'Pending',
+            'ref_number' => $refNumber,
+            'status' => 'Pending'
+        ]);
 
-    // ✅ Handle successful payment
+        // Create PayMongo checkout session
+        try {
+            $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+                ->post('https://api.paymongo.com/v1/checkout_sessions', [
+                    'data' => [
+                        'attributes' => [
+                            'line_items' => [[
+                                'name' => $validated['room'],
+                                'amount' => (int)($finalTotal * 100),
+                                'currency' => 'PHP',
+                                'quantity' => 1
+                            ]],
+                            'payment_method_types' => ['gcash'],
+                            'amount' => (int)($finalTotal * 100),
+                            'description' => "Room Reservation: {$validated['room']} ({$roomReserId})",
+                            'remarks' => $refNumber,
+                            'currency' => 'PHP',
+                            'show_line_items' => true,
+                            'show_description' => true,
+                            'success_url' => url("/api/paymentSuccess?ref={$refNumber}"),
+                            'cancel_url' => url("/api/paymentFailed?ref={$refNumber}"),
+                        ]
+                    ]
+                ]);
+
+            $respJson = $response->json();
+            Log::info('PayMongo create session response', ['resp' => $respJson, 'reservation' => $reservation->room_reser_id]);
+
+            // Save checkout/session id if returned (helps later mapping from webhook)
+            $sessionId = $respJson['data']['id'] ?? null;
+            if ($sessionId) {
+                $reservation->paymongo_session_id = $sessionId;
+                $reservation->save();
+            }
+
+            $checkoutUrl = $respJson['data']['attributes']['checkout_url'] ?? null;
+
+            return response()->json([
+                'payment_url' => $checkoutUrl,
+                'roomReser_id' => $roomReserId,
+                'hasDiscount' => $hasDiscount,
+                'ref_number' => $refNumber
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('PayMongo session error', ['err' => $e->getMessage()]);
+            return response()->json(['error' => 'Failed to create payment session'], 500);
+        }
+    }
+
+    // Payment redirect will still mark Paid for UX, but authoritative payment mapping happens in webhook
     public function paymentSuccess(Request $request)
-{
-     // Grab the ref number from query
-    $ref = $request->query('ref');
+    {
+        $ref = $request->query('ref');
+        Log::info('Payment redirect hit', ['ref' => $ref, 'full_url' => $request->fullUrl()]);
 
-    // Log incoming redirect (for debugging)
-    Log::info('Payment redirect hit', [
-        'ref' => $ref,
-        'full_url' => $request->fullUrl()
-    ]);
+        $reservation = RoomModel::where('ref_number', $ref)->first();
+        if (!$reservation) {
+            Log::warning("Reservation not found for ref: {$ref}");
+            return redirect('/pages/paymentFailed.html');
+        }
 
-    // Find the reservation by ref_number
-    $reservation = RoomModel::where('ref_number', $ref)->first();
+        // Mark as Paid on redirect (best-effort) — proper payment id is set by webhook
+        $statusMap = ['Down Payment' => 'Down Paid', 'Full Payment' => 'Paid'];
+        $paymentStatus = $statusMap[$reservation->payment_method] ?? 'Paid';
+        $reservation->update(['payment_status' => $paymentStatus]);
 
-    // If no reservation found, redirect to failed page
-    if (!$reservation) {
-        Log::warning("Reservation not found for ref: {$ref}");
+        Log::info('Reservation marked payment status (redirect)', ['reservation' => $reservation->room_reser_id, 'payment_status' => $paymentStatus]);
+
+        return redirect('/pages/paymentSuccess.html');
+    }
+
+    public function paymentFailed(Request $request)
+    {
+        $ref = $request->query('ref');
+        Log::info('Payment failed redirect', ['ref' => $ref]);
+        $reservation = RoomModel::where('ref_number', $ref)->first();
+        if ($reservation) {
+            $reservation->update(['payment_status' => 'Failed']);
+        }
         return redirect('/pages/paymentFailed.html');
     }
 
-     $statusMap = [
-    'Down Payment' => 'Down Paid',
-    'Full Payment' => 'Paid',
-];
-    $paymentStatus = $statusMap[$reservation->payment_method] ?? 'Paid';
-    // Update payment_status to Paid
-    $reservation->update(['payment_status' => $paymentStatus]);
-    Log::info("Reservation updated to Paid for ref: {$ref}");
-
-    // Redirect to success page
-    return redirect('/pages/paymentSuccess.html');
-}
-
-public function paymentFailed(Request $request)
-{
-     // Grab the ref number from query
-    $ref = $request->query('ref');
-
-    // Log incoming redirect (for debugging)
-    Log::info('Payment redirect hit', [
-        'ref' => $ref,
-        'full_url' => $request->fullUrl()
-    ]);
-
-    // Find the reservation by ref_number
-    $reservation = RoomModel::where('ref_number', $ref)->first();
-
-    // If no reservation found, redirect to failed page
-    if (!$reservation) {
-        Log::warning("Reservation not found for ref: {$ref}");
-        return redirect('/pages/paymentFailed.html');
+    public function index()
+    {
+        return response()->json(RoomModel::all());
     }
-
-    // Update payment_status to Paid
-    $reservation->update(['payment_status' => 'Failed']);
-    Log::info("Reservation updated to Paid for ref: {$ref}");
-
-    // Redirect to success page
-    return redirect('/pages/paymentFailed.html');
 }
+
 
       public function index()
     {
