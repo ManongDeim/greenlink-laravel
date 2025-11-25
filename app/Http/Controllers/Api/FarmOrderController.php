@@ -11,6 +11,7 @@ use App\Models\FarmInventory;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\GoogleUser;
 
 
 class FarmOrderController extends Controller
@@ -28,8 +29,12 @@ class FarmOrderController extends Controller
             return response()->json(['error' => 'Unauthorized. Please log in first.'], 401);
         }
 
+        // Check for validated senior or PWD ID
+        $googleUser = GoogleUser::where('user_id', $user->id)->first();
+        $hasDiscount = $googleUser && $googleUser->id_status === 'Validated';
+
         // Wrap everything in a transaction to prevent race conditions
-        $order = DB::transaction(function () use ($request, $user) {
+        $order = DB::transaction(function () use ($request, $user, $hasDiscount) {
 
             // Generate unique FARM order ID (safe under concurrency)
             do {
@@ -68,7 +73,15 @@ class FarmOrderController extends Controller
                     case 'Squash': $orderData['squash_order'] = $item['qty']; break;
                 }
 
+                
+
                 $subtotal = $item['price'] * $item['qty'];
+
+                // Apply 20% discount if user is senior/PWD
+                if ($hasDiscount) {
+                    $subtotal *= 0.8;
+                }
+
                 $orderData['total_bill'] += $subtotal;
 
                 $lineitems[] = [
@@ -119,6 +132,7 @@ class FarmOrderController extends Controller
         return response()->json([
             'payment_url' => $checkoutUrl,
             'farmrOder_id' => $order->farmOrder_id,
+             'hasDiscount' => $hasDiscount,
             'ref_number' => $order->ref_number
         ]);
     }

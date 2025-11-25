@@ -187,77 +187,59 @@ function confirmOrder() {
 
 // Send to Laravel + Log in guard
 
+let hasDiscount = false; // Set this dynamically if needed
+
 async function sendOrder(paymentMethod) {
-  console.log("sendOrder triggered with:", paymentMethod);
-
- if (!window.userId) {
-    try {
-      const userRes = await fetch("https://greenlinklolasayong.site/api/user-info", {
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-        },
-      });
-   
-      
-
-      if (!userRes.ok) {
-        console.error("Failed to fetch user:", await userRes.text());
-        openLoginModal();
-        return;
-      }
-
-      const data = await userRes.json();
-
+  // fetch user info to check discount
+  if (!window.userId) {
+    const res = await fetch("https://greenlinklolasayong.site/api/user-info", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
       window.userId = data.user.id;
-      console.log("✅ Retrieved user_id:", window.userId);
-    } catch (err) {
-      console.error("Error fetching user info:", err);
-      openLoginModal();
-      return;
+      hasDiscount = data.user.id_status === "Validated"; // check if validated senior/PWD
     }
   }
 
-  if (!window.isLoggedIn) {
-    openLoginModal();
-    return;
+  const orderData = cart.map(item => {
+    let price = getPrice(item.name);
+    if (hasDiscount) price *= 0.8; // apply discount
+    return { name: item.name, qty: item.qty, price };
+  });
+
+  // Calculate total
+  const total = orderData.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+  // Update payment summary
+  let summaryHTML = "";
+  orderData.forEach(item => {
+    summaryHTML += `<div class="flex justify-between">
+      <span>${item.name} x ${item.qty}</span>
+      <span>₱${(item.price * item.qty).toFixed(2)}</span>
+    </div>`;
+  });
+  summaryHTML += `<div class="mt-2 flex justify-between font-bold">
+      <span>Total:</span>
+      <span>₱${total.toFixed(2)}</span>
+  </div>`;
+  if (hasDiscount) {
+    summaryHTML += `<p class="text-green-600 mt-1 font-semibold">20% Discount Applied!</p>`;
   }
+  document.getElementById("paymentSummary").innerHTML = summaryHTML;
 
-  const orderData = cart.map((item) => ({
-    name: item.name,
-    qty: item.qty,
-    price: getPrice(item.name),
-  }));
-
-  console.log("Sending order with user_id:", window.userId);
-
+  // send to backend
   fetch("https://greenlinklolasayong.site/api/foodOrder/create-link", {
     method: "POST",
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      user_id: window.userId,
-      cart: orderData,
-      payment_method: paymentMethod,
-    }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: window.userId, cart: orderData, payment_method: paymentMethod })
   })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("PayMongo response:", data);
-      if (data.payment_url) {
-        window.location.href = data.payment_url;
-      } else {
-        showAlert("No payment URL returned.");
-      }
-    })
-    .catch((err) => {
-      console.error("Error:", err);
-      showAlert("Failed to place order.");
-    });
+  .then(res => res.json())
+  .then(data => {
+    if (data.payment_url) window.location.href = data.payment_url;
+    else alert("No payment URL returned.");
+  });
 }
+
 
 // Price list
 function getPrice(itemName) {
@@ -611,3 +593,6 @@ document.addEventListener("DOMContentLoaded", () => {
   hourSelect.addEventListener("change", () => { disablePastMinutes(); });
   minuteSelect.addEventListener("change", () => {});
 });
+
+const notes = document.getElementById("orderNotes").value;
+

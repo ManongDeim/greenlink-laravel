@@ -89,6 +89,53 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error(error);
     content.innerHTML = "<p class='text-red-600'>Failed to load data.</p>";
   }
+
+  document.addEventListener('click', async (e) => {
+  if (e.target.classList.contains('cancel-btn')) {
+    const id = e.target.dataset.id;
+    const card = e.target.closest('div.p-5');
+
+    let typeMap = {
+      "🍴 Food Orders": 'food',
+      "🌾 Farm Orders": 'farm',
+      "🏡 Room Reservations": 'room',
+      "📅 Event Reservations": 'event'
+    };
+
+    const sectionTitle = card.querySelector('h3').innerText.includes('Food') ? "🍴 Food Orders"
+      : card.querySelector('h3').innerText.includes('Farm') ? "🌾 Farm Orders"
+      : card.querySelector('h3').innerText.includes('Room') ? "🏡 Room Reservations"
+      : "📅 Event Reservations";
+
+    const typeKey = typeMap[sectionTitle];
+
+    if (!confirm("Are you sure you want to cancel this " + typeKey + "?")) return;
+
+    try {
+      const res = await fetch(`/api/customer/cancel-${typeKey}/${id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' },
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        card.querySelector('.cancel-btn').disabled = true;
+        card.querySelector('.cancel-btn').innerText = "Cancelled ❌";
+        // Optionally update status text on card
+        if (sectionTitle === "🏡 Room Reservations") card.querySelector('p:nth-child(6)').innerText = "Status: Cancelled";
+        else card.querySelector('p:nth-child(4)').innerText = "Status: Cancelled";
+      } else {
+        alert("Failed to cancel.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error cancelling the order/reservation.");
+    }
+  }
+});
+
 }
 
 function renderSection(title, data) {
@@ -210,6 +257,8 @@ function renderSection(title, data) {
       </div>
     `;
 
+     let cancelBtn = `<button class="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 cancel-btn" data-id="${item[type.includes('Food') ? 'foodOrder_id' : type.includes('Farm') ? 'farmOrder_id' : type.includes('Room') ? 'room_reser_id' : 'event_reservation_id']}">Cancel</button>`;
+
     switch(type) {
       case "🍴 Food Orders":
         return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
@@ -218,6 +267,7 @@ function renderSection(title, data) {
           <p class="text-gray-600">Payment: ${item.payment_method} (${item.payment_status})</p>
           <p class="text-gray-600">Status: ${item.order_status ?? 'N/A'}</p>
           ${ratingSection(item.foodOrder_id)}
+            ${cancelBtn}
         </div>`;
       case "🌾 Farm Orders":
         return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
@@ -226,6 +276,7 @@ function renderSection(title, data) {
           <p class="text-gray-600">Payment: ${item.payment_method} (${item.payment_status})</p>
           <p class="text-gray-600">Status: ${item.order_status ?? 'N/A'}</p>
           ${ratingSection(item.farmOrder_id)}
+            ${cancelBtn}
         </div>`;
       case "🏡 Room Reservations":
         return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
@@ -236,6 +287,7 @@ function renderSection(title, data) {
           <p class="text-gray-600">Total: ₱${item.total_bill}</p>
           <p class="text-gray-600">Payment: ${item.payment_method ?? 'N/A'} (${item.payment_status ?? 'N/A'})</p>
           ${ratingSection(item.room_reser_id)}
+            ${cancelBtn}
         </div>`;
       case "📅 Event Reservations":
         return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
@@ -247,6 +299,7 @@ function renderSection(title, data) {
           <p class="text-gray-600">Status: ${item.approval_status ?? 'Pending'}</p>
           <p class="text-gray-600">Payment Status: ${item.payment_status ?? 'Pending'}</p>
           ${ratingSection(item.event_reservation_id)}
+            ${cancelBtn}
         </div>`;
     }
   }

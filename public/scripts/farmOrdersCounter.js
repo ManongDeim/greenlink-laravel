@@ -201,7 +201,9 @@ async function sendOrder(paymentMethod) {
       const data = await userRes.json();
 
       window.userId = data.user.id;
-      console.log("✅ Retrieved user_id:", window.userId);
+      const hasDiscount = data.user.id_status === "Validated"; // check if validated senior/PWD
+      window.hasDiscount = hasDiscount;
+      console.log("✅ Retrieved user_id:", window.userId, "Has Discount:", hasDiscount);
     } catch (err) {
       console.error("Error fetching user info:", err);
       openLoginModal();
@@ -214,11 +216,11 @@ async function sendOrder(paymentMethod) {
     return;
   }
 
-  const orderData = cart.map((item) => ({
-    name: item.name,
-    qty: item.qty,
-    price: getPrice(item.name),
-  }));
+  const orderData = cart.map(item => {
+    let price = getPrice(item.name);
+    if (window.hasDiscount) price *= 0.8; // apply discount
+    return { name: item.name, qty: item.qty, price };
+  });
 
   console.log("Sending order with user_id:", window.userId);
 

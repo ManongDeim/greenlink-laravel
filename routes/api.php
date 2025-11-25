@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\KitchenInventoryController;
 use App\Http\Controllers\Api\FarmInventoryController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ApprovalController;
+use App\Http\Controllers\Api\HomePageController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 use App\Models\GoogleUser;
@@ -131,6 +132,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/event-reservations', [CustomerDashboardController::class, 'getEventReservations']);
 });
 
+Route::post('/customer/cancel-food/{id}', [CustomerDashboardController::class, 'cancelFoodOrder']);
+Route::post('/customer/cancel-farm/{id}', [CustomerDashboardController::class, 'cancelFarmOrder']);
+Route::post('/customer/cancel-room/{id}', [CustomerDashboardController::class, 'cancelRoomReservation']);
+Route::post('/customer/cancel-event/{id}', [CustomerDashboardController::class, 'cancelEventReservation']);
+
+
 
 // Kitchen Inventory Routes
 
@@ -172,3 +179,10 @@ Route::delete('/reviews/{id}', [ReviewController::class, 'deleteReview']);
 Route::get('/google-users', [ApprovalController::class, 'getGoogleUsers']);
 Route::post('/google-users/{id}/update-id-status', [ApprovalController::class, 'updateIdStatus']);
 
+// Home Page Events Route
+Route::prefix('home-events')->group(function () {
+Route::get('/', [HomePageController::class, 'index']);
+Route::post('/', [HomePageController::class, 'store']);
+Route::put('/{id}', [HomePageController::class, 'update']);
+Route::delete('/{id}', [HomePageController::class, 'destroy']);
+});
