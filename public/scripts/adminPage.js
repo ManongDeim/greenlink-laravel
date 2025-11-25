@@ -189,7 +189,7 @@ const farmCardTemplate = item => `
 
 const googleUserTableTemplate = data => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
-  <h2 class="text-2xl font-bold text-teal-700 mb-4">Google Users</h2>
+  <h2 class="text-2xl font-bold text-teal-700 mb-4">PWD/ Senior Citizen Approval</h2>
 
   <!-- FILTERS -->
   <div class="flex gap-4 mb-4">
@@ -202,6 +202,15 @@ const googleUserTableTemplate = data => `
     </select>
   </div>
 
+  <!-- SEARCH -->
+  <div class="mb-4">
+    <input id="googleUserSearch"
+           type="text"
+           placeholder="Search users..."
+           class="w-full px-3 py-2 border rounded-lg"
+           oninput="filterGoogleUsers()">
+  </div>
+
   <table class="min-w-full border border-gray-200 text-sm text-left">
     <thead class="bg-gray-100 text-gray-700">
       <tr>
@@ -212,7 +221,7 @@ const googleUserTableTemplate = data => `
         <th class="px-4 py-2">Status</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="googleUserTableBody">
       ${data.map(user => `
       <tr class="border-t hover:bg-gray-50 cursor-pointer relative"
           onclick="openUserModal(${user.user_id})">
@@ -242,8 +251,8 @@ const googleUserTableTemplate = data => `
   </table>
 </div>
 
-<!-- MODAL -->
-<div id="userModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+<!-- ID Discount MODAL -->
+<div id="userModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
   <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
     <h3 class="text-xl font-bold text-teal-700 mb-3">User Details</h3>
 
@@ -261,8 +270,22 @@ const googleUserTableTemplate = data => `
 </div>
 `;
 
+// ================ GLOBAL SEARCH FUNCTION FOR GOOGLE USERS =================
+function filterGoogleUsers() {
+  const query = document.getElementById('googleUserSearch').value.toLowerCase();
+  const tableBody = document.getElementById('googleUserTableBody');
+
+  tableBody.querySelectorAll('tr').forEach(row => {
+    const name = row.children[1].textContent.toLowerCase();
+    const email = row.children[2].textContent.toLowerCase();
+    const status = row.children[4].textContent.toLowerCase();
+
+    row.style.display = name.includes(query) || email.includes(query) || status.includes(query) ? '' : 'none';
+  });
+}
 
 
+// Reviews customer
 const reviewManagementTemplate = data => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
   <h2 class="text-2xl font-bold text-teal-700 mb-4">User Reviews</h2>
@@ -284,6 +307,15 @@ const reviewManagementTemplate = data => `
     </select>
   </div>
 
+  <!-- SEARCH -->
+  <div class="mb-4">
+    <input id="reviewSearch"
+           type="text"
+           placeholder="Search reviews..."
+           class="w-full px-3 py-2 border rounded-lg"
+           oninput="filterReviews()">
+  </div>
+
   <table class="min-w-full border border-gray-200 text-sm text-left">
     <thead class="bg-gray-100 text-gray-700">
       <tr>
@@ -296,12 +328,12 @@ const reviewManagementTemplate = data => `
         <th class="px-4 py-2">Review Date</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="reviewTableBody">
       ${data.map(item => {
         const orderId = item.food_order_id || item.farm_order_id || item.room_reservation_id || item.event_reservation_id || 'N/A';
         const actionBtn = item.review_status === 'Reviewed'
-          ? `<button onclick="deleteReview(${item.id})" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700" >Delete</button>`
-          : `<button onclick="markReviewed(${item.id})" class=" px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Reviewed</button>`;
+          ? `<button onclick="deleteReview(${item.id})" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>`
+          : `<button onclick="markReviewed(${item.id})" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Reviewed</button>`;
 
         return `
         <tr class="border-t hover:bg-gray-50 cursor-pointer review-row" data-id="${item.id}">
@@ -335,15 +367,34 @@ const reviewManagementTemplate = data => `
 </div>
 `;
 
+// ================ GLOBAL SEARCH FUNCTION =================
+function filterReviews() {
+  const query = document.getElementById('reviewSearch').value.toLowerCase();
+  const tableBody = document.getElementById('reviewTableBody');
+
+  tableBody.querySelectorAll('tr').forEach(row => {
+    const user = row.children[1].textContent.toLowerCase();
+    const orderId = row.children[2].textContent.toLowerCase();
+    const stars = row.children[3].textContent.toLowerCase();
+    const comment = row.children[4].textContent.toLowerCase();
+    const status = row.children[5].textContent.toLowerCase();
+    const reviewDate = row.children[6].textContent.toLowerCase();
+
+    row.style.display =
+      user.includes(query) || orderId.includes(query) || stars.includes(query) ||
+      comment.includes(query) || status.includes(query) || reviewDate.includes(query)
+        ? ''
+        : 'none';
+  });
+}
 
 
-
-
+// FoodOrders Template
 const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPaymentStatus = '') => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
   <h2 class="text-2xl font-bold text-teal-700 mb-4">Food Orders</h2>
 
- <!-- FILTERS -->
+  <!-- FILTERS -->
   <div class="flex gap-4 mb-4">
     <select id="filterOrderStatus" onchange="applyFoodOrderFilter()"
       class="px-3 py-2 border rounded-lg">
@@ -361,6 +412,15 @@ const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPayment
     </select>
   </div>
 
+  <!-- SEARCH -->
+  <div class="mb-4">
+    <input id="foodOrdersSearch" 
+           type="text" 
+           placeholder="Search orders..." 
+           class="w-full px-3 py-2 border rounded-lg"
+           oninput="filterFoodOrders()">
+  </div>
+
   <table class="min-w-full border border-gray-200 text-sm text-left">
     <thead class="bg-gray-100 text-gray-700">
       <tr>
@@ -373,7 +433,7 @@ const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPayment
       </tr>
     </thead>
 
-    <tbody>
+    <tbody id="foodOrdersTableBody">
       ${data.map(order => {
         const items = [
           { key: 'smokedFish_order', name: 'Smoked Fish' },
@@ -445,6 +505,26 @@ const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPayment
 </div>
 `;
 
+// ================== GLOBAL FUNCTION ==================
+function filterFoodOrders() {
+  const query = document.getElementById('foodOrdersSearch').value.toLowerCase();
+  const tableBody = document.getElementById('foodOrdersTableBody');
+  
+  tableBody.querySelectorAll('tr').forEach(row => {
+    const orderID = row.children[1].textContent.toLowerCase();
+    const items = row.children[2].textContent.toLowerCase();
+    const paymentStatus = row.children[4].textContent.toLowerCase();
+    const orderStatus = row.children[5].textContent.toLowerCase();
+    
+    row.style.display = 
+      orderID.includes(query) || items.includes(query) || paymentStatus.includes(query) || orderStatus.includes(query)
+      ? ''
+      : 'none';
+  });
+}
+
+
+
 
 // Farm order table template
 const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentStatus = '') => `
@@ -467,6 +547,15 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
     </select>
   </div>
 
+  <!-- SEARCH -->
+  <div class="mb-4">
+    <input id="farmOrdersSearch" 
+           type="text" 
+           placeholder="Search farm orders..." 
+           class="w-full px-3 py-2 border rounded-lg"
+           oninput="filterFarmOrders()">
+  </div>
+
   <table class="min-w-full border border-gray-200 text-sm text-left">
     <thead class="bg-gray-100 text-gray-700">
       <tr>
@@ -479,7 +568,7 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
       </tr>
     </thead>
 
-    <tbody>
+    <tbody id="farmOrdersTableBody">
       ${data
         .map((order) => {
           const items = [
@@ -561,6 +650,24 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
 </div>
 `;
 
+// ================== GLOBAL FUNCTION ==================
+function filterFarmOrders() {
+  const query = document.getElementById('farmOrdersSearch').value.toLowerCase();
+  const tableBody = document.getElementById('farmOrdersTableBody');
+
+  tableBody.querySelectorAll('tr').forEach(row => {
+    const orderID = row.children[1].textContent.toLowerCase();
+    const items = row.children[2].textContent.toLowerCase();
+    const paymentStatus = row.children[4].textContent.toLowerCase();
+    const orderStatus = row.children[5].textContent.toLowerCase();
+
+    row.style.display =
+      orderID.includes(query) || items.includes(query) || paymentStatus.includes(query) || orderStatus.includes(query)
+        ? ''
+        : 'none';
+  });
+}
+
 // Room Reservation template
 const roomReservationTableTemplate = (data, selectedStatus = '', selectedPayment = '') => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
@@ -585,6 +692,15 @@ const roomReservationTableTemplate = (data, selectedStatus = '', selectedPayment
     </select>
   </div>
 
+  <!-- SEARCH -->
+  <div class="mb-4">
+    <input id="roomReservationSearch" 
+           type="text" 
+           placeholder="Search reservations..." 
+           class="w-full px-3 py-2 border rounded-lg"
+           oninput="filterRoomReservations()">
+  </div>
+
   <table class="min-w-full border border-gray-200 text-sm text-left">
     <thead class="bg-gray-100 text-gray-700">
       <tr>
@@ -598,10 +714,9 @@ const roomReservationTableTemplate = (data, selectedStatus = '', selectedPayment
       </tr>
     </thead>
 
-    <tbody>
+    <tbody id="roomReservationTableBody">
       ${data.map(res => `
-        <tr class="border-t hover:bg-gray-50 cursor-pointer"
-            onclick="openRoomModal('${res.room_reser_id}')">
+        <tr class="border-t hover:bg-gray-50 cursor-pointer" onclick="openRoomModal('${res.room_reser_id}')">
 
           <!-- ACTION MENU -->
           <td class="px-4 py-2 relative" onclick="event.stopPropagation()">
@@ -665,6 +780,28 @@ const roomReservationTableTemplate = (data, selectedStatus = '', selectedPayment
 </div>
 `;
 
+// ================ GLOBAL SEARCH FUNCTION =================
+function filterRoomReservations() {
+  const query = document.getElementById('roomReservationSearch').value.toLowerCase();
+  const tableBody = document.getElementById('roomReservationTableBody');
+
+  tableBody.querySelectorAll('tr').forEach(row => {
+    const resID = row.children[1].textContent.toLowerCase();
+    const guest = row.children[2].textContent.toLowerCase();
+    const room = row.children[3].textContent.toLowerCase();
+    const payment = row.children[4].textContent.toLowerCase();
+    const status = row.children[5].textContent.toLowerCase();
+    const checkin = row.children[6].textContent.toLowerCase();
+
+    row.style.display =
+      resID.includes(query) || guest.includes(query) || room.includes(query) ||
+      payment.includes(query) || status.includes(query) || checkin.includes(query)
+        ? ''
+        : 'none';
+  });
+}
+
+
 const roomCardTemplate = item => `
   <div class="p-5 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-gray-100 hover:shadow-lg transition w-full">
     <img id="room-photo-${item.id}" src="${item.image}" alt="${item.room_name}" 
@@ -727,7 +864,6 @@ const roomCardTemplate = item => `
   </div>
 `;
 
-
 // Event Reservation template
 const eventReservationTemplate = (data, selectedStatus = '') => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
@@ -746,6 +882,15 @@ const eventReservationTemplate = (data, selectedStatus = '') => `
     </select>
   </div>
 
+  <!-- SEARCH -->
+  <div class="mb-4">
+    <input id="eventReservationSearch"
+           type="text"
+           placeholder="Search reservations..."
+           class="w-full px-3 py-2 border rounded-lg"
+           oninput="filterEventReservations()">
+  </div>
+
   <table class="w-full text-sm border">
     <thead class="bg-gray-100">
       <tr>
@@ -758,14 +903,13 @@ const eventReservationTemplate = (data, selectedStatus = '') => `
       </tr>
     </thead>
 
-    <tbody>
+    <tbody id="eventReservationTableBody">
       ${data.map(res => `
         <tr class="border-b hover:bg-gray-50 cursor-pointer"
             onclick="openEventReservationModal('${res.event_reservation_id}')">
 
           <!-- ACTION MENU -->
-          <td class="px-4 py-2 relative"
-              onclick="event.stopPropagation()">
+          <td class="px-4 py-2 relative" onclick="event.stopPropagation()">
 
             <button onclick="toggleEventReservationActionMenu(event, '${res.event_reservation_id}')"
                     class="p-2 bg-gray-200 rounded">⚙️</button>
@@ -835,6 +979,27 @@ const eventReservationTemplate = (data, selectedStatus = '') => `
   </div>
 </div>
 `;
+
+// ================ GLOBAL SEARCH FUNCTION =================
+function filterEventReservations() {
+  const query = document.getElementById('eventReservationSearch').value.toLowerCase();
+  const tableBody = document.getElementById('eventReservationTableBody');
+
+  tableBody.querySelectorAll('tr').forEach(row => {
+    const resID = row.children[1].textContent.toLowerCase();
+    const guest = row.children[2].textContent.toLowerCase();
+    const eventType = row.children[3].textContent.toLowerCase();
+    const status = row.children[4].textContent.toLowerCase();
+    const start = row.children[5].textContent.toLowerCase();
+
+    row.style.display =
+      resID.includes(query) || guest.includes(query) || eventType.includes(query) ||
+      status.includes(query) || start.includes(query)
+        ? ''
+        : 'none';
+  });
+}
+
 
 const homeEventsTableTemplate = data => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
@@ -939,6 +1104,45 @@ const homeEventsTableTemplate = data => `
     </div>
 </div>
 
+`;
+
+const eventManagementTemplate = data => `
+<div class="p-6 bg-white rounded-2xl shadow-md">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold text-teal-700">Event Management</h2>
+    <button onclick="openAddEventModal()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+      + Add Event
+    </button>
+  </div>
+
+  <table class="min-w-full border border-gray-200 text-sm text-left">
+    <thead class="bg-gray-100 text-gray-700">
+      <tr>
+        <th class="px-4 py-2">Action</th>
+        <th class="px-4 py-2">Event Name</th>
+        <th class="px-4 py-2">Max Pax</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${data.map(item => `
+      <tr class="border-t hover:bg-gray-50 relative">
+        <td class="px-4 py-2 relative">
+          <button onclick="toggleActionMenu(event, ${item.id})"
+                  class="relative z-10 p-2 bg-gray-200 rounded hover:bg-gray-300">⚙️</button>
+
+          <div id="actionMenu-${item.id}" class="absolute left-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
+            <button onclick="openEditEventNameModal(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-green-100">Edit Name</button>
+            <button onclick="openEventPaxModal(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-blue-100">Edit Pax</button>
+            <button onclick="removeEvent(${item.id})" class="block w-full text-left px-3 py-1 hover:bg-red-100">Remove</button>
+          </div>
+        </td>
+        <td class="px-4 py-2">${item.event_name}</td>
+        <td class="px-4 py-2">${item.max_pax}</td>
+      </tr>
+      `).join("")}
+    </tbody>
+  </table>
+</div>
 `;
 
 
@@ -1940,7 +2144,8 @@ document.addEventListener('click', () => {
   }
 });
 
-// =================== Farm Inventory ===================
+// =========================Farm Inventory ====================
+
 async function fetchAndRenderFarm() {
   const content = document.getElementById("content");
   content.innerHTML = `<p class="text-gray-500">Loading...</p>`;
@@ -1959,6 +2164,14 @@ async function fetchAndRenderFarm() {
           </button>
         </div>
 
+        <!-- Search Box -->
+        <div class="mb-4 flex items-center gap-2">
+          <input id="farmSearch" 
+                 type="text" 
+                 placeholder="Search items..." 
+                 class="px-3 py-2 border rounded w-full text-sm">
+        </div>
+
         <table class="min-w-full border border-gray-200 text-sm text-left">
           <thead class="bg-gray-100 text-gray-700">
             <tr>
@@ -1973,7 +2186,7 @@ async function fetchAndRenderFarm() {
               <th class="px-4 py-2">Last Updated</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="farmTableBody">
             ${data.map(item => `
               <tr class="border-t hover:bg-gray-50 relative">
                 <td class="px-4 py-2 relative">
@@ -2004,10 +2217,9 @@ async function fetchAndRenderFarm() {
                 <td class="px-4 py-2">${item.unit ?? '—'}</td>
                 <td class="px-4 py-2">${item.unit_conversion ?? '1'}</td>
                 <td class="px-4 py-2">
-                ${
-                item.unit_cost !== null && item.unit_cost !== "" && !isNaN(item.unit_cost)
-                ? "₱" + Number(item.unit_cost).toFixed(2)
-                 : "—"
+                  ${item.unit_cost !== null && item.unit_cost !== "" && !isNaN(item.unit_cost)
+                    ? "₱" + Number(item.unit_cost).toFixed(2)
+                    : "—"
                   }
                 </td>
                 <td class="px-4 py-2 font-medium ${
@@ -2024,11 +2236,34 @@ async function fetchAndRenderFarm() {
         </table>
       </div>
     `;
-  } catch (err) {
-    console.error("Failed to load farm inventory:", err);
-    content.innerHTML = `<p class="text-red-500">Failed to load farm inventory</p>`;
+
+    // --- Instant search functionality ---
+    const searchInput = document.getElementById("farmSearch");
+    const tableBody = document.getElementById("farmTableBody");
+
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.toLowerCase();
+
+      tableBody.querySelectorAll("tr").forEach(row => {
+        const itemName = row.children[1].textContent.toLowerCase();
+        const status = row.children[7].textContent.toLowerCase();
+        const unit = row.children[4].textContent.toLowerCase();
+
+        // Show row if query matches any column
+        row.style.display =
+          itemName.includes(query) || status.includes(query) || unit.includes(query)
+            ? ""
+            : "none";
+      });
+    });
+
+  } catch (error) {
+    console.error("Error fetching farm inventory:", error);
+    content.innerHTML = `<p class="text-red-500">Failed to load farm inventory.</p>`;
   }
 }
+
+
 
 // Fetch and Render Event Management
 
