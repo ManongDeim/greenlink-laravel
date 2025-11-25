@@ -143,36 +143,64 @@ document.addEventListener("keydown", function (event) {
 
 async function renderHomeEvents() {
     const container = document.getElementById('homeSections');
+
     try {
         const res = await fetch('/api/home-events');
         const events = await res.json();
 
-        container.innerHTML = events.map(event => `
-            <section class="px-6 py-16 text-gray-800 bg-white">
-                <div class="mx-auto max-w-7xl">
-                    <h2 class="mb-12 text-3xl font-bold text-center text-teal-700 md:text-4xl">
-                        ${event.title}
-                    </h2>
-                    ${event.image_url ? `
-                    <div class="flex flex-col gap-10 lg:flex-row lg:items-start">
-                        <div class="w-full lg:w-1/3">
-                            <img class="w-full transition-transform duration-300 rounded-lg shadow-lg hover:scale-105"
-                                 src="${event.image_url}" alt="${event.title}">
-                        </div>
-                        <div class="w-full space-y-4 text-base font-light leading-relaxed text-justify lg:w-2/3 md:text-lg">
-                            ${event.content}
-                        </div>
-                    </div>` : `
-                    <div class="text-base font-light leading-relaxed text-justify md:text-lg">
-                        ${event.content}
-                    </div>`}
-                </div>
-            </section>
-        `).join('');
+        container.innerHTML = `
+<section class="px-6 py-16 text-gray-800 bg-white">
+    <div class="mx-auto max-w-7xl">
+        
+        <!-- Section Title -->
+        <h2 class="mb-12 text-3xl font-bold text-center text-teal-700 md:text-4xl">
+            Events
+        </h2>
 
-    } catch (err) {
-        console.error('Failed to load home events:', err);
-        container.innerHTML = `<p class="text-red-500">Failed to load content</p>`;
+        <!-- 3 Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            ${events.map(event => `
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col">
+
+                    <!-- Image -->
+                    ${event.image_url ? `
+                        <img src="${event.image_url}" 
+                             alt="${event.title}" 
+                             class="w-full h-56 object-contain">
+                    ` : ''}
+
+                    <!-- Content -->
+                    <div class="p-6 space-y-3">
+                        <h3 class="text-2xl font-semibold text-teal-700">
+                            ${event.title}
+                        </h3>
+
+                        <p class="text-gray-700 leading-relaxed text-base">
+                            ${event.description}
+                        </p>
+
+                        ${event.highlights ? `
+                        <div>
+                            <h4 class="text-teal-600 font-semibold mb-1">Event Highlights</h4>
+                            <ul class="list-disc pl-5 space-y-1 text-gray-700">
+                                ${event.highlights
+                                    .split('\\n')
+                                    .map(item => `<li>${item}</li>`)
+                                    .join('')}
+                            </ul>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                </div>
+            `).join('')}
+        </div>
+
+    </div>
+</section>
+        `;
+    } catch (error) {
+        console.error('Error fetching events:', error);
     }
 }
 
