@@ -166,63 +166,6 @@ return response()->json(['status' => 'success']);
 
 }
 
-
-    // 3️⃣ Cancel reservation with refund if eligible
-    public function cancelRoomReservation($id)
-    {
-        $reservation = RoomModel::where('room_reser_id', $id)->first();
-        if (!$reservation) return response()->json(['success' => false, 'message' => 'Reservation not found'], 404);
-
-        $checkIn = Carbon::parse($reservation->check_in_date);
-        $hoursDiff = Carbon::now()->diffInHours($checkIn, false);
-
-        $reservation->status = 'Cancelled';
-        $reservation->save();
-
-        if ($hoursDiff >= 24 && $reservation->paymongo_payment_id) {
-            $refundSuccess = $this->refundPayMongoPayment(
-                $reservation->paymongo_payment_id,
-                $reservation->total_bill,
-                $reservation->room_reser_id
-            );
-            Log::info("💳 Refund status for {$reservation->room_reser_id}: " . ($refundSuccess ? 'SUCCESS' : 'FAILED'));
-        }
-
-        $message = $hoursDiff >= 24
-            ? 'Reservation cancelled. Full refund will be issued.'
-            : 'Reservation cancelled. Less than 24 hours before check-in, so payment is non-refundable.';
-
-        return response()->json(['success' => true, 'message' => $message]);
-    }
-
-    // 4️⃣ Refund helper
-    private function refundPayMongoPayment($paymentIntentId, $amount, $reservationId)
-    {
-        Log::info("💳 Initiating refund", [
-            'reservation_id' => $reservationId,
-            'payment_intent_id' => $paymentIntentId,
-            'amount' => $amount
-        ]);
-
-        $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
-            ->post("https://api.paymongo.com/v1/refunds", [
-                'data' => [
-                    'attributes' => [
-                        'amount' => (int)($amount * 100),
-                        'reason' => 'requested_by_customer',
-                        'payment_intent' => $paymentIntentId
-                    ]
-                ]
-            ]);
-
-        Log::info("💳 PayMongo refund response", [
-            'reservation_id' => $reservationId,
-            'response' => $response->json()
-        ]);
-
-        return $response->ok();
-    }
-
     // Payment redirect will still mark Paid for UX, but authoritative payment mapping happens in webhook
     public function paymentSuccess(Request $request)
     {
