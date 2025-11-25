@@ -174,7 +174,7 @@ Route::get('/google-users', [ApprovalController::class, 'getGoogleUsers']);
 Route::post('/google-users/{id}/update-id-status', [ApprovalController::class, 'updateIdStatus']);
 
 // Home Page Events Route
-Route::prefix('api/home-events')->group(function () {
+Route::prefix('home-events')->group(function () {
 Route::get('/', [HomePageController::class, 'index']);
 Route::post('/', [HomePageController::class, 'store']);
 Route::put('/{id}', [HomePageController::class, 'update']);

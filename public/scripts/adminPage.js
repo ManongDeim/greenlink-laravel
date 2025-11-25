@@ -1440,7 +1440,7 @@ async function fetchAndRenderHomeEvents() {
   const container = document.getElementById("content");
 
   try {
-    const res = await fetch("/api/home-events/");
+    const res = await fetch("/api/home-events");
     const data = await res.json();
 
     window.homeEventsData = data;
