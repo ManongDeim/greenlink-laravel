@@ -267,11 +267,9 @@ const reviewManagementTemplate = data => `
 <div class="p-6 bg-white rounded-2xl shadow-md">
   <h2 class="text-2xl font-bold text-teal-700 mb-4">User Reviews</h2>
 
-  
   <!-- FILTERS -->
   <div class="flex gap-4 mb-4">
-    <select id="filterType" onchange="applyReviewFilters()"
-      class="px-3 py-2 border rounded-lg">
+    <select id="filterType" onchange="applyReviewFilters()" class="px-3 py-2 border rounded-lg">
       <option value="">All Types</option>
       <option value="food">Food</option>
       <option value="farm">Farm</option>
@@ -279,8 +277,7 @@ const reviewManagementTemplate = data => `
       <option value="event">Event</option>
     </select>
 
-    <select id="filterStatus" onchange="applyReviewFilters()"
-      class="px-3 py-2 border rounded-lg">
+    <select id="filterStatus" onchange="applyReviewFilters()" class="px-3 py-2 border rounded-lg">
       <option value="">All Status</option>
       <option value="Not Reviewed">Not Reviewed</option>
       <option value="Reviewed">Reviewed</option>
@@ -299,35 +296,25 @@ const reviewManagementTemplate = data => `
         <th class="px-4 py-2">Review Date</th>
       </tr>
     </thead>
-
     <tbody>
-  ${data.map(item => {
-    const orderId = item.food_order_id 
-                  || item.farm_order_id 
-                  || item.room_reservation_id 
-                  || item.event_reservation_id 
-                  || "N/A";
+      ${data.map(item => {
+        const orderId = item.food_order_id || item.farm_order_id || item.room_reservation_id || item.event_reservation_id || 'N/A';
+        const actionBtn = item.review_status === 'Reviewed'
+          ? `<button class="delete-btn px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${item.id}">Delete</button>`
+          : `<button class="review-btn px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${item.id}">Reviewed</button>`;
 
-    const actionBtn = item.review_status === "Reviewed"
-      ? `<button class="delete-btn px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${item.id}">Delete</button>`
-      : `<button class="review-btn px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${item.id}">Reviewed</button>`;
-
-    return `
-      <tr class="border-t hover:bg-gray-50 cursor-pointer review-row" data-id="${item.id}">
-        <td class="px-4 py-2" onclick="event.stopPropagation()">
-          ${actionBtn}
-        </td>
-        <td class="px-4 py-2">${item.user_name}</td>
-        <td class="px-4 py-2">${orderId}</td>
-        <td class="px-4 py-2">${item.stars} ★</td>
-        <td class="px-4 py-2">${item.comment ?? ""}</td>
-        <td class="px-4 py-2">${item.review_status}</td> <!-- NEW -->
-        <td class="px-4 py-2">${new Date(item.created_at).toLocaleString()}</td>
-      </tr>
-    `;
-  }).join("")}
-</tbody>
-
+        return `
+        <tr class="border-t hover:bg-gray-50 cursor-pointer review-row" data-id="${item.id}">
+          <td class="px-4 py-2" onclick="event.stopPropagation()">${actionBtn}</td>
+          <td class="px-4 py-2">${item.user.name}</td>
+          <td class="px-4 py-2">${orderId}</td>
+          <td class="px-4 py-2">${item.stars} ★</td>
+          <td class="px-4 py-2">${item.comment ?? ''}</td>
+          <td class="px-4 py-2">${item.review_status}</td>
+          <td class="px-4 py-2">${new Date(item.created_at).toLocaleString()}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
   </table>
 </div>
 
@@ -335,21 +322,17 @@ const reviewManagementTemplate = data => `
 <div id="reviewModal" class="flex inset-0 hidden items-center justify-center z-50">
   <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
     <h3 class="text-xl font-bold text-teal-700 mb-3">Full Review</h3>
-
     <p><strong>User:</strong> <span id="modalUser"></span></p>
     <p><strong>Order ID:</strong> <span id="modalOrderId"></span></p>
     <p><strong>Stars:</strong> <span id="modalStars"></span></p>
-    <p><strong>Status:</strong> <span id="modalStatus"></span></p> <!-- NEW -->
+    <p><strong>Status:</strong> <span id="modalStatus"></span></p>
     <p class="mt-2"><strong>Comment:</strong></p>
     <p id="modalComment" class="bg-gray-100 p-2 rounded mt-1"></p>
-
     <div class="mt-4 text-right">
-      <button onclick="closeReviewModal()" 
-              class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+      <button onclick="closeReviewModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
     </div>
   </div>
 </div>
-
 `;
 
 
@@ -746,21 +729,111 @@ const roomCardTemplate = item => `
 
 
 // Event Reservation template
-const eventReservationTemplate = reservation => `
-  <div class="p-5 mb-4 transition bg-white border border-gray-200 shadow-md cursor-pointer order-item rounded-2xl hover:shadow-lg hover:border-teal-500 w-full"
-       data-id="${reservation.event_reservation_id}">
-    <div class="flex items-center justify-between">
-      <h3 class="text-lg font-bold text-gray-800">Reservation #${reservation.event_reservation_id}</h3>
-    </div>
-    <ul class="mt-2 text-sm text-gray-700 list-disc list-inside">
-      <li>Event Type: ${reservation.event_type}</li>
-      <li>Guest: ${reservation.full_name}</li>
-      <li>Check-in: ${reservation.start_datetime}</li>
-      <li>Check-out: ${reservation.end_datetime}</li>
-    </ul>
-    <p class="mt-2 text-sm text-gray-700 font-semibold">Things to Bring: ${reservation.to_bring}</p>
-    <p id="event-status-${reservation.event_reservation_id}" class="mt-2 text-sm text-gray-700 font-semibold">Status: ${reservation.approval_status}</p>
+const eventReservationTemplate = (data, selectedStatus = '') => `
+<div class="p-6 bg-white rounded-2xl shadow-md">
+  <h2 class="text-2xl font-bold text-teal-700 mb-4">Event Reservations</h2>
+
+  <!-- FILTER -->
+  <div class="flex gap-4 mb-4">
+    <select id="filterEventStatus" onchange="applyEventReservationFilter()" class="px-3 py-2 border rounded-lg">
+      <option value="" ${selectedStatus === '' ? 'selected' : ''}>All Status</option>
+      <option value="Pending" ${selectedStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+      <option value="Approved" ${selectedStatus === 'Approved' ? 'selected' : ''}>Approved</option>
+      <option value="Started" ${selectedStatus === 'Started' ? 'selected' : ''}>Started</option>
+      <option value="Ended" ${selectedStatus === 'Ended' ? 'selected' : ''}>Ended</option>
+      <option value="Cancelled" ${selectedStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+      <option value="Disapproved" ${selectedStatus === 'Disapproved' ? 'selected' : ''}>Disapproved</option>
+    </select>
   </div>
+
+  <table class="w-full text-sm border">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2">Action</th>
+        <th class="px-4 py-2">Reservation ID</th>
+        <th class="px-4 py-2">Guest</th>
+        <th class="px-4 py-2">Event Type</th>
+        <th class="px-4 py-2">Status</th>
+        <th class="px-4 py-2">Start</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      ${data.map(res => `
+        <tr class="border-b hover:bg-gray-50 cursor-pointer"
+            onclick="openEventReservationModal('${res.event_reservation_id}')">
+
+          <!-- ACTION MENU -->
+          <td class="px-4 py-2 relative"
+              onclick="event.stopPropagation()">
+
+            <button onclick="toggleEventReservationActionMenu(event, '${res.event_reservation_id}')"
+                    class="p-2 bg-gray-200 rounded">⚙️</button>
+
+            <div id="eventReservationActionMenu-${res.event_reservation_id}"
+                 class="absolute left-0 top-full mt-2 w-40 bg-white border rounded shadow hidden z-50">
+
+              ${
+                res.approval_status === "Pending"
+                ? `
+                  <button onclick="updateEventReservationStatus('${res.event_reservation_id}','Approved')"
+                          class='block w-full text-left px-3 py-1 hover:bg-green-100'>Approve</button>
+                  <button onclick="updateEventReservationStatus('${res.event_reservation_id}','Disapproved')"
+                          class='block w-full text-left px-3 py-1 hover:bg-red-100'>Disapprove</button>
+                  <button onclick="updateEventReservationStatus('${res.event_reservation_id}','Cancelled')"
+                          class='block w-full text-left px-3 py-1 hover:bg-gray-100'>Cancel</button>
+                `
+                : res.approval_status === "Approved"
+                ? `
+                  <button onclick="updateEventReservationStatus('${res.event_reservation_id}','Started')"
+                          class='block w-full text-left px-3 py-1 hover:bg-blue-100'>Start</button>
+                  <button onclick="updateEventReservationStatus('${res.event_reservation_id}','Ended')"
+                          class='block w-full text-left px-3 py-1 hover:bg-gray-100'>End</button>
+                `
+                : res.approval_status === "Started"
+                ? `
+                  <button onclick="updateEventReservationStatus('${res.event_reservation_id}','Ended')"
+                          class='block w-full text-left px-3 py-1 hover:bg-gray-100'>End</button>
+                `
+                : ``
+              }
+
+            </div>
+          </td>
+
+          <td class="px-4 py-2">#${res.event_reservation_id}</td>
+          <td class="px-4 py-2">${res.full_name}</td>
+          <td class="px-4 py-2">${res.event_type}</td>
+          <td class="px-4 py-2" id="eventstatus-${res.event_reservation_id}">${res.approval_status}</td>
+          <td class="px-4 py-2">${res.start_datetime}</td>
+        </tr>
+      `).join("")}
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL -->
+<div id="eventReservationModal"
+     class="fixed inset-0 hidden bg-black bg-opacity-40 flex items-center justify-center z-50">
+
+  <div class="bg-white w-96 p-6 rounded-lg shadow-lg">
+    <h2 class="text-xl font-bold mb-3 text-teal-700">Event Reservation</h2>
+
+    <p><strong>Reference:</strong> <span id="eventModalRef"></span></p>
+    <p><strong>Name:</strong> <span id="eventModalName"></span></p>
+    <p><strong>Event Type:</strong> <span id="eventModalType"></span></p>
+    <p><strong>Start:</strong> <span id="eventModalStart"></span></p>
+    <p><strong>End:</strong> <span id="eventModalEnd"></span></p>
+    <p><strong>Phone:</strong> <span id="eventModalPhone"></span></p>
+    <p><strong>To Bring:</strong> <span id="eventModalBring"></span></p>
+    <p><strong>Status:</strong> <span id="eventModalStatus"></span></p>
+
+    <button onclick="closeEventReservationModal()"
+            class="mt-4 w-full py-2 bg-teal-600 text-white rounded">
+      Close
+    </button>
+  </div>
+</div>
 `;
 
 const eventManagementTemplate = data => `
@@ -1330,18 +1403,23 @@ function replaceRoomPhoto(id) {
 
 
 // ================= Fetch & Render Functions =================
-async function fetchAndRenderReviews() {
-  const container = document.getElementById("content");
+async function fetchAndRenderReviews(filters = {}) {
+  const container = document.getElementById('content');
+  const params = new URLSearchParams(filters);
 
   try {
-    const res = await fetch("/api/reviews");
+    const res = await fetch(`/api/reviews?${params.toString()}`);
     const data = await res.json();
 
     container.innerHTML = reviewManagementTemplate(data);
     window.reviewData = data;
 
+    // Restore selected filters
+    if (filters.type) document.getElementById('filterType').value = filters.type;
+    if (filters.status) document.getElementById('filterStatus').value = filters.status;
   } catch (err) {
-    console.error("Error loading reviews:", err);
+    console.error('Error loading reviews:', err);
+    container.innerHTML = '<p class="text-red-500">Failed to load reviews</p>';
   }
 }
 
@@ -1604,33 +1682,50 @@ document.addEventListener("click", () => {
 
 async function fetchAndRenderEventReservations(status = null) {
   const container = document.getElementById("content");
+
   try {
     const res = await fetch("/api/event-reservations");
-    const data = await res.json();
+    let data = await res.json();
 
-    // Filter by status
+    data.sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime));
+
     const filtered = status ? data.filter(r => r.approval_status === status) : data;
 
-    // Render each reservation card
-    container.innerHTML = filtered.map(eventReservationTemplate).join("");
+    window.eventReservationsData = data;
 
-    // ✅ Store the fetched data on the container for later reference
-    container.dataset.eventReservations = JSON.stringify(data);
+    container.innerHTML = eventReservationTemplate(filtered, status);
 
-    // ✅ Add click handlers for each card
-    document.querySelectorAll(".order-item").forEach(card => {
-      card.addEventListener("click", () => {
-        const id = card.dataset.id;
-        const allReservations = JSON.parse(container.dataset.eventReservations);
-        const reservation = allReservations.find(r => r.event_reservation_id == id);
-        if (reservation) openEventModal(reservation);
-      });
-    });
   } catch (err) {
-    console.error("Error fetching room reservations:", err);
-    container.innerHTML = `<p class="text-red-500">Failed to load room reservations</p>`;
+    console.error("Failed fetching event reservations:", err);
+    container.innerHTML = `<p class="text-red-500">Failed to load data.</p>`;
   }
 }
+
+let openEventReservationMenuId = null;
+
+function toggleEventReservationActionMenu(event, id) {
+  event.stopPropagation();
+
+  const menu = document.getElementById(`eventReservationActionMenu-${id}`);
+
+  if (openEventReservationMenuId && openEventReservationMenuId !== id) {
+    document.getElementById(
+      `eventReservationActionMenu-${openEventReservationMenuId}`
+    )?.classList.add("hidden");
+  }
+
+  menu.classList.toggle("hidden");
+  openEventReservationMenuId = menu.classList.contains("hidden") ? null : id;
+}
+
+document.addEventListener("click", () => {
+  if (openEventReservationMenuId) {
+    document.getElementById(
+      `eventReservationActionMenu-${openEventReservationMenuId}`
+    )?.classList.add("hidden");
+    openEventReservationMenuId = null;
+  }
+});
 
 
 // =================== Kitchen Inventory ===================
@@ -2292,82 +2387,28 @@ function applyRoomReservationFilter() {
 
 
 
-function openEventModal(reservation) {
-  document.getElementById("eventModalTitle").textContent = `Reservation #${reservation.event_reservation_id}`;
-  document.getElementById("eventModalRef").textContent = `Guest: ${reservation.full_name}`;
-  document.getElementById("eventModalItems").innerHTML = `
-    <li>Event: ${reservation.event_type}</li>
-    <li>Start: ${reservation.start_datetime}</li>
-    <li>End: ${reservation.end_datetime}</li>
-    <li>Phone: ${reservation.phone_number}</li>
-    <li>Things to Bring: ${reservation.to_bring}</li>
-    <li>Status: ${reservation.approval_status}</li>
-  `;
+function openEventReservationModal(id) {
+  const res = window.eventReservationsData.find(r => r.event_reservation_id == id);
+  if (!res) return;
 
-  const modalButtons = document.getElementById("eventModalButtons");
-
-  // 🔥 FIRST HIDE ALL BUTTONS
-  const buttons = [
-    "approveBtn",
-    "disapproveBtn",
-    "cancelEventBtn",
-    "startEventBtn",
-    "endEventBtn"
-  ];
-  buttons.forEach(id => {
-    document.getElementById(id).style.display = "none";
-  });
-
-  // 🔥 NOW SHOW BUTTONS BASED ON STATUS
-  const status = reservation.approval_status;
-
-  if (["Dissaproved", "Cancelled", "Ended"].includes(status)) {
-    modalButtons.style.display = "none";   // nothing to show
-  } 
-  
-  else if (status === "Pending") {
-    modalButtons.style.display = "flex";
-    document.getElementById("approveBtn").style.display = "block";
-    document.getElementById("disapproveBtn").style.display = "block";
-    document.getElementById("cancelEventBtn").style.display = "block";
-
-    document.getElementById("approveBtn").onclick = () =>
-      updateEventStatus(reservation.event_reservation_id, "Approved");
-    document.getElementById("disapproveBtn").onclick = () =>
-      updateEventStatus(reservation.event_reservation_id, "Disapproved");
-    document.getElementById("cancelEventBtn").onclick = () =>
-      updateEventStatus(reservation.event_reservation_id, "Cancelled");
-  }
-
-  else if (status === "Approved") {
-    modalButtons.style.display = "flex";
-    document.getElementById("startEventBtn").style.display = "block";
-    document.getElementById("endEventBtn").style.display = "block";
-
-    document.getElementById("startEventBtn").onclick = () =>
-      updateEventStatus(reservation.event_reservation_id, "Started");
-    document.getElementById("endEventBtn").onclick = () =>
-      updateEventStatus(reservation.event_reservation_id, "Ended");
-  }
-
-  else if (status === "Started") {
-    modalButtons.style.display = "flex";
-    document.getElementById("endEventBtn").style.display = "block";
-
-    document.getElementById("endEventBtn").onclick = () =>
-      updateEventStatus(reservation.event_reservation_id, "Ended");
-  }
+  document.getElementById("eventModalRef").innerText = res.event_reservation_id;
+  document.getElementById("eventModalName").innerText = res.full_name;
+  document.getElementById("eventModalType").innerText = res.event_type;
+  document.getElementById("eventModalStart").innerText = res.start_datetime;
+  document.getElementById("eventModalEnd").innerText = res.end_datetime;
+  document.getElementById("eventModalPhone").innerText = res.phone_number;
+  document.getElementById("eventModalBring").innerText = res.to_bring;
+  document.getElementById("eventModalStatus").innerText = res.approval_status;
 
   document.getElementById("eventReservationModal").classList.remove("hidden");
 }
 
-
-document.getElementById("closeEventModal").addEventListener("click", () => {
+function closeEventReservationModal() {
   document.getElementById("eventReservationModal").classList.add("hidden");
-});
+}
 
-function updateEventStatus(event_reservation_id, status) {
-  fetch(`/api/eventReservation/${event_reservation_id}/update-status`, {
+function updateEventReservationStatus(id, status) {
+  fetch(`/api/eventReservation/${id}/update-status`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status })
@@ -2375,25 +2416,26 @@ function updateEventStatus(event_reservation_id, status) {
     .then(res => res.json())
     .then(data => {
       showToast(data.message);
-      document.getElementById("eventReservationModal").classList.add("hidden");
 
-      const statusEl = document.getElementById(`event-status-${event_reservation_id}`);
-      if (statusEl) {
-        statusEl.textContent = `Status: ${status}`;
-      }
+      const el = document.getElementById(`eventstatus-${id}`);
+      if (el) el.innerText = status;
 
-      const container = document.getElementById("content");
-      if (container.dataset.eventReservations) {
-        let list = JSON.parse(container.dataset.eventReservations);
-        let record = list.find(r => r.event_reservation_id == event_reservation_id);
-        if (record) record.approval_status = status;
-        container.dataset.eventReservations = JSON.stringify(list);
-      }
+      const obj = window.eventReservationsData.find(r => r.event_reservation_id == id);
+      if (obj) obj.approval_status = status;
+
+      // ⭐ INSTANT RELOAD WITH CURRENT FILTER
+      const selected = document.getElementById("filterEventStatus").value;
+      fetchAndRenderEventReservations(selected === "" ? null : selected);
     })
-    .catch(err => console.error(err));
-
-    
+    .catch(err => console.error("Update failed:", err));
 }
+
+function applyEventReservationFilter() {
+  const status = document.getElementById("filterEventStatus").value;
+  fetchAndRenderEventReservations(status === "" ? null : status);
+}
+
+
 
 
 // Kitchen Inventory Modal
@@ -3288,73 +3330,54 @@ function closeUserModal() {
 
 // Reviews Functions
 
-document.addEventListener("click", async (e) => {
+document.addEventListener('click', async (e) => {
   const id = e.target.dataset.id;
+  const currentFilters = {
+    type: document.getElementById('filterType')?.value,
+    status: document.getElementById('filterStatus')?.value
+  };
 
-   // MARK AS REVIEWED
-  if (e.target.classList.contains("review-btn")) {
-    await fetch(`/api/reviews/${id}/mark-reviewed`, { method: "POST" });
-    fetchAndRenderReviews(); // reload table
+  if (e.target.classList.contains('review-btn')) {
+    const res = await fetch(`/api/reviews/${id}/mark-reviewed`, { method: 'POST' });
+    if (!res.ok) { alert('Failed to mark as reviewed'); return; }
+    await fetchAndRenderReviews(currentFilters);
     return;
   }
 
-  // DELETE REVIEW
-  if (e.target.classList.contains("delete-btn")) {
-    if (!confirm("Are you sure you want to delete this review?")) return;
-
-    await fetch(`/api/reviews/${id}`, { method: "DELETE" });
-    fetchAndRenderReviews(); // reload table
+  if (e.target.classList.contains('delete-btn')) {
+    if (!confirm('Are you sure you want to delete this review?')) return;
+    const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+    if (!res.ok) { alert('Failed to delete'); return; }
+    await fetchAndRenderReviews(currentFilters);
     return;
   }
 
-  // OPEN MODAL ON ROW CLICK
-  const row = e.target.closest(".review-row");
+  const row = e.target.closest('.review-row');
   if (row) {
-    const review = window.reviewData.find(r => r.id == row.dataset.id);
+    const review = window.reviewData.find(r => +r.id === +row.dataset.id);
+    const orderId = review.food_order_id || review.farm_order_id || review.room_reservation_id || review.event_reservation_id || 'N/A';
 
-    const orderId = review.food_order_id 
-                  || review.farm_order_id 
-                  || review.room_reservation_id 
-                  || review.event_reservation_id 
-                  || "N/A";
+    document.getElementById('modalUser').textContent = review.user.name;
+    document.getElementById('modalOrderId').textContent = orderId;
+    document.getElementById('modalStars').textContent = review.stars;
+    document.getElementById('modalStatus').textContent = review.review_status;
+    document.getElementById('modalComment').textContent = review.comment ?? '';
 
-    document.getElementById("modalUser").textContent = review.user_name;
-    document.getElementById("modalOrderId").textContent = orderId;
-    document.getElementById("modalStars").textContent = review.stars;
-    document.getElementById("modalComment").textContent = review.comment ?? "";
-    document.getElementById("modalStatus").textContent = review.review_status;
-
-    document.getElementById("reviewModal").classList.remove("hidden");
+    document.getElementById('reviewModal').classList.remove('hidden');
   }
 });
 
 function closeReviewModal() {
-  document.getElementById("reviewModal").classList.add("hidden");
+  document.getElementById('reviewModal').classList.add('hidden');
 }
 
 
 async function applyReviewFilters() {
-  const type = document.getElementById("filterType").value;
-  const status = document.getElementById("filterStatus").value;
+  const type = document.getElementById('filterType')?.value;
+  const status = document.getElementById('filterStatus')?.value;
 
-  const params = new URLSearchParams();
-  if (type) params.append("type", type);
-  if (status) params.append("status", status);
+  const filters = {};
+  if (type) filters.type = type;
+  if (status) filters.status = status;
 
-  const container = document.getElementById("content");
-
-  try {
-    const res = await fetch(`/api/reviews?${params.toString()}`);
-    const data = await res.json();
-
-    container.innerHTML = reviewManagementTemplate(data);
-    window.reviewData = data;
-
-    // Restore selected filters after rerender
-    document.getElementById("filterType").value = type;
-    document.getElementById("filterStatus").value = status;
-
-  } catch (err) {
-    console.error("Error applying filters:", err);
-  }
-}
+  await fetchAndRenderReviews(filters);}

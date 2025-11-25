@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Review;
-use Illuminate\Support\Facades\DB;
 
 class ReviewController extends Controller
 {
@@ -22,9 +21,9 @@ class ReviewController extends Controller
             'user_id' => $request->user()->id,
             'stars' => $request->stars,
             'comment' => $request->comment,
+            'review_status' => 'Not Reviewed', // default
         ];
 
-        // Map the review to the correct column
         switch ($request->type) {
             case 'food':
                 $data['food_order_id'] = $request->id;
@@ -49,73 +48,44 @@ class ReviewController extends Controller
     }
 
     public function adminList(Request $request)
-{
-    $type = $request->query('type');      // food, farm, room, event, null
-    $status = $request->query('status');  // Reviewed, Not Reviewed, null
+    {
+        $type = $request->query('type');
+        $status = $request->query('status');
 
-    $query = DB::table('reviews')
-        ->join('users', 'users.id', '=', 'reviews.user_id')
-        ->select(
-            'reviews.*',
-            'users.name as user_name',
-            DB::raw('COALESCE(food_order_id, farm_order_id, room_reservation_id, event_reservation_id) AS order_id')
-        );
+        $query = Review::with('user')
+            ->select('reviews.*');
 
-    // ⭐ Filter by type
-    if ($type === 'food') {
-        $query->whereNotNull('food_order_id');
-    }
-    if ($type === 'farm') {
-        $query->whereNotNull('farm_order_id');
-    }
-    if ($type === 'room') {
-        $query->whereNotNull('room_reservation_id');
-    }
-    if ($type === 'event') {
-        $query->whereNotNull('event_reservation_id');
+        if ($type === 'food') $query->whereNotNull('food_order_id');
+        if ($type === 'farm') $query->whereNotNull('farm_order_id');
+        if ($type === 'room') $query->whereNotNull('room_reservation_id');
+        if ($type === 'event') $query->whereNotNull('event_reservation_id');
+
+        if ($status === 'Reviewed') $query->where('review_status', 'Reviewed');
+        else if ($status === 'Not Reviewed') $query->where('review_status', 'Not Reviewed');
+
+        $query->orderBy('created_at', 'DESC');
+
+        return response()->json($query->get());
     }
 
-    // ⭐ Filter by status
-    if ($status === 'Reviewed') {
-        $query->where('review_status', 'Reviewed');
-    } 
-    else if ($status === 'Not Reviewed') {
-        $query->where('review_status', 'Not Reviewed');
+    public function markReviewed($id)
+    {
+        $review = Review::find($id);
+        if (!$review) return response()->json(['error' => 'Review not found'], 404);
+
+        $review->review_status = 'Reviewed';
+        $review->save();
+
+        return response()->json(['success' => true]);
     }
 
-    $query->orderBy('reviews.created_at', 'DESC');
+    public function deleteReview($id)
+    {
+        $review = Review::find($id);
+        if (!$review) return response()->json(['error' => 'Review not found'], 404);
 
-    return response()->json($query->get());
-}
+        $review->delete();
 
-
-public function markReviewed($id)
-{
-    $review = DB::table('reviews')->where('id', $id)->first();
-
-    if (!$review) {
-        return response()->json(['error' => 'Review not found'], 404);
+        return response()->json(['success' => true]);
     }
-
-    DB::table('reviews')->where('id', $id)->update([
-        'review_status' => 'Reviewed'
-    ]);
-
-    return response()->json(['success' => true]);
-}
-
-public function deleteReview($id)
-{
-    $review = DB::table('reviews')->where('id', $id)->first();
-
-    if (!$review) {
-        return response()->json(['error' => 'Review not found'], 404);
-    }
-
-    DB::table('reviews')->where('id', $id)->delete();
-
-    return response()->json(['success' => true]);
-}
-
-
 }

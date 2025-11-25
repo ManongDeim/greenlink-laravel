@@ -20,29 +20,13 @@ class Review extends Model
         'review_status',
     ];
 
-    // Relationships
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    protected $attributes = [
+        'review_status' => 'Not Reviewed',
+    ];
 
-    public function foodOrder()
-    {
-        return $this->belongsTo(FoodOrderModel::class, 'food_order_id');
-    }
-
-    public function farmOrder()
-    {
-        return $this->belongsTo(FarmOrderModel::class, 'farm_order_id');
-    }
-
-    public function roomReservation()
-    {
-        return $this->belongsTo(RoomModel::class, 'room_reservation_id');
-    }
-
-    public function eventReservation()
-    {
-        return $this->belongsTo(EventModel::class, 'event_reservation_id');
-    }
+    public function user() { return $this->belongsTo(User::class); }
+    public function foodOrder() { return $this->belongsTo(FoodOrderModel::class, 'food_order_id'); }
+    public function farmOrder() { return $this->belongsTo(FarmOrderModel::class, 'farm_order_id'); }
+    public function roomReservation() { return $this->belongsTo(RoomModel::class, 'room_reservation_id'); }
+    public function eventReservation() { return $this->belongsTo(EventModel::class, 'event_reservation_id'); }
 }
