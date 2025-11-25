@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\HomePageController;
 use \App\Http\Controllers\Api\PaymongoWebhookController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 use App\Models\GoogleUser;
@@ -193,3 +194,6 @@ Route::delete('/{id}', [HomePageController::class, 'destroy']);
 //Paymongo
 
 Route::post('/webhook/paymongo', [PaymongoWebhookController::class, 'handleWebhook']);
+
+Route::middleware('auth:sanctum')
+    ->get('/notifications-counts', [NotificationController::class, 'getCounts']);
