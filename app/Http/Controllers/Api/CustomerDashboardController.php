@@ -63,32 +63,91 @@ public function cancelFarmOrder($id)
 public function cancelRoomReservation($id)
 {
     $reservation = RoomModel::where('room_reser_id', $id)->first();
+
     if (!$reservation) {
+        Log::warning("❌ Cancel failed — reservation not found", ['reservation_id' => $id]);
         return response()->json(['success' => false, 'message' => 'Reservation not found'], 404);
     }
 
+    Log::info("📌 Cancel request received", [
+        'reservation_id' => $reservation->room_reser_id,
+        'payment_status' => $reservation->payment_status,
+        'payment_method' => $reservation->payment_method,
+        'paymongo_payment_id' => $reservation->paymongo_payment_id,
+        'check_in' => $reservation->check_in_date
+    ]);
+
     $checkIn = Carbon::parse($reservation->check_in_date);
     $now = Carbon::now();
-
     $hoursDiff = $now->diffInHours($checkIn, false);
 
+    Log::info("⏱ Hours until check-in", [
+        'reservation_id' => $reservation->room_reser_id,
+        'hours_diff' => $hoursDiff
+    ]);
+
+    /* ----------------------------------------
+      FULLY REFUNDABLE (24+ hours)
+    ----------------------------------------- */
     if ($hoursDiff >= 24) {
-        // Fully refundable
+
         $reservation->status = 'Cancelled';
         $reservation->save();
 
-        // Trigger PayMongo refund if payment was already made
-        if ($reservation->payment_status === 'Paid' && $reservation->payment_method === 'Full Payment' && $reservation->paymongo_payment_id) {
-    $refundSuccess = $this->refundPayMongoPayment($reservation->paymongo_payment_id, $reservation->total_bill, $reservation->room_reser_id);
-    Log::info("💳 Refund status for reservation {$reservation->room_reser_id}: " . ($refundSuccess ? 'SUCCESS' : 'FAILED'));
-}
+        Log::info("🔄 Eligible for FULL REFUND", [
+            'reservation_id' => $reservation->room_reser_id
+        ]);
+
+        // Debug all refund conditions
+        Log::info("🔍 Refund condition check", [
+            'payment_status_match' => $reservation->payment_status === 'Paid',
+            'payment_method_match' => $reservation->payment_method === 'Full Payment',
+            'has_payment_id' => !empty($reservation->paymongo_payment_id),
+            'payment_status' => $reservation->payment_status,
+            'payment_method' => $reservation->payment_method,
+            'paymongo_payment_id' => $reservation->paymongo_payment_id
+        ]);
+
+        if (
+            $reservation->payment_status === 'Paid' &&
+            $reservation->payment_method === 'Full Payment' &&
+            !empty($reservation->paymongo_payment_id)
+        ) {
+            Log::info("💰 Refund TRIGGERED", [
+                'reservation_id' => $reservation->room_reser_id
+            ]);
+
+            $refundSuccess = $this->refundPayMongoPayment(
+                $reservation->paymongo_payment_id,
+                $reservation->total_bill,
+                $reservation->room_reser_id
+            );
+
+            Log::info("💳 Refund RESULT", [
+                'reservation_id' => $reservation->room_reser_id,
+                'success' => $refundSuccess
+            ]);
+        } else {
+            Log::warning("⚠️ Refund NOT triggered — condition failed", [
+                'reservation_id' => $reservation->room_reser_id
+            ]);
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Reservation cancelled. Full refund will be issued.'
         ]);
-    } elseif ($hoursDiff < 24 && $hoursDiff > 0) {
-        // Less than 1 day → non-refundable
+    }
+
+    /* ----------------------------------------
+      NON-REFUNDABLE (within 24 hours)
+    ----------------------------------------- */
+    else if ($hoursDiff < 24 && $hoursDiff > 0) {
+
+        Log::info("🚫 Cancellation inside 24 hours — NO REFUND", [
+            'reservation_id' => $reservation->room_reser_id
+        ]);
+
         $reservation->status = 'Cancelled';
         $reservation->save();
 
@@ -96,13 +155,23 @@ public function cancelRoomReservation($id)
             'success' => true,
             'message' => 'Reservation cancelled. Less than 24 hours before check-in, so payment is non-refundable.'
         ]);
-    } else {
+    }
+
+    /* ----------------------------------------
+      PAST RESERVATION
+    ----------------------------------------- */
+    else {
+        Log::warning("⛔ Cancellation denied — past reservation", [
+            'reservation_id' => $reservation->room_reser_id
+        ]);
+
         return response()->json([
             'success' => false,
             'message' => 'Cannot cancel past reservations.'
         ]);
     }
 }
+
 
 public function cancelEventReservation($id)
 {
