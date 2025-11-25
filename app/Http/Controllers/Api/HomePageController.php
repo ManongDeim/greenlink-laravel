@@ -29,14 +29,12 @@ class HomePageController extends Controller
         'highlights' => 'nullable|string',
     ]);
 
-    Log::info("Validation passed");
-
     try {
         if ($request->hasFile('image_url')) {
             $file = $request->file('image_url');
 
-            // Absolute path to public_html/home_page
-            $destinationPath = public_path('home_page');
+            // Absolute path to public_html/home_page (one level above Laravel folder)
+            $destinationPath = realpath(base_path('../')) . '/home_page';
             Log::info("Destination path for upload: {$destinationPath}");
 
             // Ensure folder exists
@@ -57,7 +55,7 @@ class HomePageController extends Controller
             }
 
             $requestData = $request->all();
-            $requestData['image_url'] = '/home_page/' . $filename;
+            $requestData['image_url'] = '/home_page/' . $filename; // This is the URL for your front-end
 
             $event = Event::create($requestData);
             Log::info("Home page event created", ['event_id' => $event->id]);
