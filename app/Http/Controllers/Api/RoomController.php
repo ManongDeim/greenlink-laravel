@@ -68,8 +68,8 @@ class RoomController extends Controller
                             'amount' => (int)($finalTotal * 100),
                             'currency' => 'PHP',
                             'description' => "Room Reservation: {$validated['room']} ({$roomReserId})",
-                            'success_url' => url("/api/paymentSuccess?ref={$refNumber}"),
-                            'cancel_url' => url("/api/paymentFailed?ref={$refNumber}"),
+                            'success_url' => url("/api/room/paymentSuccess?ref={$refNumber}"),
+                            'cancel_url' => url("/api/room/paymentFailed?ref={$refNumber}"),
                         ]
                     ]
                 ]);
