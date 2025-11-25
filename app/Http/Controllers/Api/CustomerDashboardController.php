@@ -14,6 +14,9 @@ use App\Models\EventModel;
 
 class CustomerDashboardController extends Controller
 {
+
+ 
+
     public function getFoodOrders(Request $request) {
         $user = $request->user();
         $orders = FoodOrderModel::where('user_id', $user->id)->orderBy('id', 'desc')->get();
@@ -56,51 +59,47 @@ class CustomerDashboardController extends Controller
         return response()->json(['success' => true, 'message' => 'Farm order cancelled']);
     }
 
-    public function cancelRoomReservation($id)
-{
-    $reservation = RoomModel::where('room_reser_id', $id)->first();
-    if (!$reservation) {
-        return response()->json(['success' => false, 'message' => 'Reservation not found'], 404);
-    }
+     public function cancelRoomReservation($roomReserId)
+    {
+        $user = Auth::user();
+        if (!$user) return response()->json(['error' => 'Unauthorized'], 401);
 
-    $checkIn = \Carbon\Carbon::parse($reservation->check_in_date);
-    $now = \Carbon\Carbon::now();
-    $hoursDiff = $now->diffInHours($checkIn, false);
+        $reservation = RoomModel::where('room_reser_id', $roomReserId)
+            ->where('user_id', $user->id)
+            ->first();
 
-    if ($hoursDiff < 0) {
-        return response()->json(['success' => false, 'message' => 'Cannot cancel past reservations.']);
-    }
+        if (!$reservation) {
+            return response()->json(['success' => false, 'message' => 'Reservation not found'], 404);
+        }
 
-    $reservation->status = 'Cancelled';
-    $reservation->save();
+        $checkIn = Carbon::parse($reservation->check_in_date);
+        $hoursDiff = Carbon::now()->diffInHours($checkIn, false);
 
-    $fullRefund = $hoursDiff >= 24;
+        $reservation->status = 'Cancelled';
+        $reservation->save();
 
-    // Trigger refund if fully refundable and payment exists
-    if ($fullRefund && $reservation->payment_status === 'Paid' && $reservation->paymongo_payment_id) {
-        $refundSuccess = $this->refundPayMongoPayment(
-            $reservation->paymongo_payment_id,
-            $reservation->total_bill,
-            $reservation->room_reser_id
-        );
+        $message = '';
 
-        Log::info("💳 Refund status for reservation {$reservation->room_reser_id}: " . ($refundSuccess ? 'SUCCESS' : 'FAILED'));
+        // Refund logic if fully refundable
+        if ($hoursDiff >= 24 && $reservation->paymongo_payment_id) {
+            $refundSuccess = $this->refundPayMongoPayment(
+                $reservation->paymongo_payment_id,
+                $reservation->total_bill,
+                $reservation->room_reser_id
+            );
+
+            Log::info("💳 Refund status for {$reservation->room_reser_id}: " . ($refundSuccess ? 'SUCCESS' : 'FAILED'));
+            $message = 'Reservation cancelled. Full refund will be issued.';
+        } else {
+            $message = 'Reservation cancelled. Less than 24 hours before check-in, so payment is non-refundable.';
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Reservation cancelled. Full refund will be issued.'
+            'message' => $message,
+            'reservation' => $reservation
         ]);
     }
-
-    $message = $fullRefund
-        ? 'Reservation cancelled. Refund will be issued.'
-        : 'Reservation cancelled. Less than 24 hours before check-in, so payment is non-refundable.';
-
-    return response()->json([
-        'success' => true,
-        'message' => $message
-    ]);
-}
 
 
     public function cancelEventReservation($id)
@@ -112,34 +111,30 @@ class CustomerDashboardController extends Controller
         return response()->json(['success' => true, 'message' => 'Event reservation cancelled']);
     }
 
-    private function refundPayMongoPayment($paymentId, $amount, $reservationId)
+    private function refundPayMongoPayment($paymentIntentId, $amount, $reservationId)
     {
         Log::info("💳 Initiating refund", [
             'reservation_id' => $reservationId,
-            'payment_id' => $paymentId,
+            'payment_intent_id' => $paymentIntentId,
             'amount' => $amount
         ]);
 
-        try {
-            $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
-                ->post("https://api.paymongo.com/v1/refunds", [
-                    'data' => [
-                        'attributes' => [
-                            'amount' => (int)($amount * 100),
-                            'reason' => 'requested_by_customer',
-                            'payment_intent' => $paymentId // PayMongo expects payment_intent ID
-                        ]
+        $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+            ->post("https://api.paymongo.com/v1/refunds", [
+                'data' => [
+                    'attributes' => [
+                        'amount' => (int)($amount * 100),
+                        'reason' => 'requested_by_customer',
+                        'payment_intent' => $paymentIntentId
                     ]
-                ]);
+                ]
+            ]);
 
-            $resp = $response->json();
-            Log::info("💳 PayMongo refund response", ['reservation_id' => $reservationId, 'response' => $resp, 'status' => $response->status()]);
+        Log::info("💳 PayMongo refund response", [
+            'reservation_id' => $reservationId,
+            'response' => $response->json()
+        ]);
 
-            return $response->ok();
-
-        } catch (\Exception $ex) {
-            Log::error("💳 Refund exception", ['reservation_id' => $reservationId, 'error' => $ex->getMessage()]);
-            return false;
-        }
+        return $response->ok();
     }
 }

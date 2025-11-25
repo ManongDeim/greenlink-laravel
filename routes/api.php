@@ -108,12 +108,12 @@ Route::get('/rooms/{id}', function($id) {
     return response()->json($room);
 });
 Route::post('/create-room-payment', [RoomController::class, 'createPaymentLink'])->middleware('auth:sanctum');
-Route::get('/paymentSuccess', [RoomController::class, 'paymentSuccess']);
-Route::get('/paymentFailed', [RoomController::class, 'paymentFailed']);
+Route::get('/room/paymentSuccess', [RoomController::class, 'paymentSuccess']);
+Route::get('/room/paymentFailed', [RoomController::class, 'paymentFailed']);
 Route::get('roomReser', [RoomController::class, 'index']);
 Route::get('/booked-dates', [RoomController::class, 'getBookedDates']);
 Route::post('/roomReservation/{id}/update-status', [RoomController::class, 'updateStatus']);
-Route::post('/paymongo/webhook', [RoomController::class, 'paymongoWebhook']);
+Route::post('/room/paymongoWebhook', [RoomController::class, 'paymongoWebhook']);
 
 
 
@@ -137,7 +137,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::post('/customer/cancel-food/{id}', [CustomerDashboardController::class, 'cancelFoodOrder']);
 Route::post('/customer/cancel-farm/{id}', [CustomerDashboardController::class, 'cancelFarmOrder']);
-Route::post('/customer/cancel-room/{id}', [CustomerDashboardController::class, 'cancelRoomReservation']);
+Route::middleware('auth:sanctum')->post('/customer/cancel-room/{roomReserId}', [CustomerDashboardController::class, 'cancelRoomReservation']);
 Route::post('/customer/cancel-event/{id}', [CustomerDashboardController::class, 'cancelEventReservation']);
 
 

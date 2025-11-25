@@ -13,14 +13,10 @@ use App\Models\GoogleUser;
 
 class RoomController extends Controller
 {
-public function createPaymentLink(Request $request)
+  public function createPaymentLink(Request $request)
     {
         $user = Auth::user();
         if (!$user) return response()->json(['error' => 'Unauthorized'], 401);
-
-        // check senior/PWD
-        $googleUser = GoogleUser::where('user_id', $user->id)->first();
-        $hasDiscount = $googleUser && $googleUser->id_status === 'Validated';
 
         $validated = $request->validate([
             'room_id' => 'nullable|integer|exists:rooms,id',
@@ -37,16 +33,8 @@ public function createPaymentLink(Request $request)
 
         $roomReserId = 'ROOM-' . strtoupper(uniqid());
         $refNumber = uniqid('REF-');
+        $finalTotal = $validated['total_bill']; // Add discount logic here if needed
 
-        // apply discount if applicable
-        $baseTotal = $validated['total_bill'];
-        if ($hasDiscount) $baseTotal = round($baseTotal * 0.8, 2);
-
-        $finalTotal = $validated['payment_method'] === 'Down Payment'
-            ? round($baseTotal * 0.5, 2)
-            : round($baseTotal, 2);
-
-        // create reservation (payment pending)
         $reservation = RoomModel::create([
             'room_id' => $validated['room_id'] ?? null,
             'room_reser_id' => $roomReserId,
@@ -65,7 +53,6 @@ public function createPaymentLink(Request $request)
             'status' => 'Pending'
         ]);
 
-        // Create PayMongo checkout session
         try {
             $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
                 ->post('https://api.paymongo.com/v1/checkout_sessions', [
@@ -77,13 +64,10 @@ public function createPaymentLink(Request $request)
                                 'currency' => 'PHP',
                                 'quantity' => 1
                             ]],
-                            'payment_method_types' => ['gcash'],
+                            'payment_method_types' => ['gcash', 'card'],
                             'amount' => (int)($finalTotal * 100),
-                            'description' => "Room Reservation: {$validated['room']} ({$roomReserId})",
-                            'remarks' => $refNumber,
                             'currency' => 'PHP',
-                            'show_line_items' => true,
-                            'show_description' => true,
+                            'description' => "Room Reservation: {$validated['room']} ({$roomReserId})",
                             'success_url' => url("/api/paymentSuccess?ref={$refNumber}"),
                             'cancel_url' => url("/api/paymentFailed?ref={$refNumber}"),
                         ]
@@ -91,21 +75,16 @@ public function createPaymentLink(Request $request)
                 ]);
 
             $respJson = $response->json();
-            Log::info('PayMongo create session response', ['resp' => $respJson, 'reservation' => $reservation->room_reser_id]);
-
-            // Save checkout/session id if returned (helps later mapping from webhook)
             $sessionId = $respJson['data']['id'] ?? null;
+
             if ($sessionId) {
                 $reservation->paymongo_session_id = $sessionId;
                 $reservation->save();
             }
 
-            $checkoutUrl = $respJson['data']['attributes']['checkout_url'] ?? null;
-
             return response()->json([
-                'payment_url' => $checkoutUrl,
+                'payment_url' => $respJson['data']['attributes']['checkout_url'] ?? null,
                 'roomReser_id' => $roomReserId,
-                'hasDiscount' => $hasDiscount,
                 'ref_number' => $refNumber
             ]);
 
@@ -113,6 +92,94 @@ public function createPaymentLink(Request $request)
             Log::error('PayMongo session error', ['err' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to create payment session'], 500);
         }
+    }
+
+    // 2️⃣ Webhook to handle payment confirmation
+    public function paymongoWebhook(Request $request)
+    {
+        $payload = $request->all();
+        Log::info('PayMongo Webhook Received', $payload);
+
+        $eventType = $payload['data']['attributes']['event_type'] ?? null;
+
+        if (in_array($eventType, ['payment_intent.succeeded', 'checkout.session.completed'])) {
+            $paymentIntentId = $payload['data']['attributes']['payment_intent'] ?? null;
+            $checkoutSessionId = $payload['data']['id'] ?? null;
+
+            $reservation = RoomModel::where('paymongo_session_id', $checkoutSessionId)->first();
+            if ($reservation) {
+                $reservation->paymongo_payment_id = $paymentIntentId;
+                $reservation->payment_status = 'Paid';
+                $reservation->save();
+
+                Log::info("Reservation updated via webhook", [
+                    'reservation_id' => $reservation->room_reser_id,
+                    'payment_intent_id' => $paymentIntentId
+                ]);
+            } else {
+                Log::warning("Reservation not found for webhook", [
+                    'session_id' => $checkoutSessionId
+                ]);
+            }
+        }
+
+        return response()->json(['status' => 'success']);
+    }
+
+    // 3️⃣ Cancel reservation with refund if eligible
+    public function cancelRoomReservation($id)
+    {
+        $reservation = RoomModel::where('room_reser_id', $id)->first();
+        if (!$reservation) return response()->json(['success' => false, 'message' => 'Reservation not found'], 404);
+
+        $checkIn = Carbon::parse($reservation->check_in_date);
+        $hoursDiff = Carbon::now()->diffInHours($checkIn, false);
+
+        $reservation->status = 'Cancelled';
+        $reservation->save();
+
+        if ($hoursDiff >= 24 && $reservation->paymongo_payment_id) {
+            $refundSuccess = $this->refundPayMongoPayment(
+                $reservation->paymongo_payment_id,
+                $reservation->total_bill,
+                $reservation->room_reser_id
+            );
+            Log::info("💳 Refund status for {$reservation->room_reser_id}: " . ($refundSuccess ? 'SUCCESS' : 'FAILED'));
+        }
+
+        $message = $hoursDiff >= 24
+            ? 'Reservation cancelled. Full refund will be issued.'
+            : 'Reservation cancelled. Less than 24 hours before check-in, so payment is non-refundable.';
+
+        return response()->json(['success' => true, 'message' => $message]);
+    }
+
+    // 4️⃣ Refund helper
+    private function refundPayMongoPayment($paymentIntentId, $amount, $reservationId)
+    {
+        Log::info("💳 Initiating refund", [
+            'reservation_id' => $reservationId,
+            'payment_intent_id' => $paymentIntentId,
+            'amount' => $amount
+        ]);
+
+        $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+            ->post("https://api.paymongo.com/v1/refunds", [
+                'data' => [
+                    'attributes' => [
+                        'amount' => (int)($amount * 100),
+                        'reason' => 'requested_by_customer',
+                        'payment_intent' => $paymentIntentId
+                    ]
+                ]
+            ]);
+
+        Log::info("💳 PayMongo refund response", [
+            'reservation_id' => $reservationId,
+            'response' => $response->json()
+        ]);
+
+        return $response->ok();
     }
 
     // Payment redirect will still mark Paid for UX, but authoritative payment mapping happens in webhook
