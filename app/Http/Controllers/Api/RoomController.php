@@ -101,38 +101,59 @@ class RoomController extends Controller
     Log::info('PayMongo Webhook Received', $payload);
 
     $eventType = $payload['data']['attributes']['type'] ?? null;
+    $reservation = null;
+    $paymentId = null;
+    $sessionId = null;
+    $paymentIntentId = null;
 
     if ($eventType === 'checkout_session.payment.paid') {
-        $sessionData = $payload['data']['attributes']['data'] ?? [];
-        $checkoutSessionId = $sessionData['id'] ?? null;
+        $sessionData = $payload['data']['attributes']['data']['attributes'] ?? [];
+        $sessionId = $sessionData['id'] ?? null;
 
-        $payments = $sessionData['attributes']['payments'] ?? [];
-        $paymentId = $payments[0]['id'] ?? null; // actual payment ID
-        $paymentIntentId = $payments[0]['attributes']['payment_intent_id'] ?? null;
-
-        if ($checkoutSessionId && $paymentId) {
-            $reservation = RoomModel::where('paymongo_session_id', $checkoutSessionId)->first();
-            if ($reservation) {
-                $reservation->paymongo_payment_id = $paymentId; // store actual payment ID
-                $reservation->payment_status = 'Paid';
-                $reservation->save();
-
-                Log::info("Reservation updated via webhook", [
-                    'reservation_id' => $reservation->room_reser_id,
-                    'checkout_session_id' => $checkoutSessionId,
-                    'payment_intent_id' => $paymentIntentId,
-                    'payment_id' => $paymentId
-                ]);
-            } else {
-                Log::warning("Reservation not found for webhook", [
-                    'checkout_session_id' => $checkoutSessionId
-                ]);
-            }
+        // Extract payment ID from the first payment
+        $payments = $sessionData['payments'] ?? [];
+        if (!empty($payments)) {
+            $paymentId = $payments[0]['id'] ?? null;
+            $paymentIntentId = $payments[0]['attributes']['payment_intent_id'] ?? null;
         }
+
+        if ($sessionId) {
+            $reservation = RoomModel::where('paymongo_session_id', $sessionId)->first();
+        }
+    } elseif ($eventType === 'payment.paid') {
+        $paymentData = $payload['data']['attributes']['data']['attributes'] ?? [];
+        $paymentId = $paymentData['id'] ?? null;
+        $paymentIntentId = $paymentData['payment_intent_id'] ?? null;
+
+        if ($paymentIntentId) {
+            $reservation = RoomModel::where('paymongo_payment_intent_id', $paymentIntentId)->first();
+        }
+    }
+
+    if ($reservation && $paymentId) {
+        $reservation->paymongo_payment_id = $paymentId;
+        $reservation->paymongo_payment_intent_id = $paymentIntentId ?? $reservation->paymongo_payment_intent_id;
+        $reservation->payment_status = 'Paid';
+        $reservation->save();
+
+        Log::info("Reservation updated via webhook", [
+            'reservation_id' => $reservation->room_reser_id,
+            'checkout_session_id' => $reservation->paymongo_session_id,
+            'payment_intent_id' => $reservation->paymongo_payment_intent_id,
+            'payment_id' => $paymentId
+        ]);
+    } else {
+        Log::warning('Reservation or payment_id missing for webhook event', [
+            'eventType' => $eventType,
+            'paymentId' => $paymentId,
+            'sessionId' => $sessionId,
+            'paymentIntentId' => $paymentIntentId
+        ]);
     }
 
     return response()->json(['status' => 'success']);
 }
+
 
 
 
