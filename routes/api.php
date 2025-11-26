@@ -19,7 +19,11 @@ use App\Http\Controllers\Api\FarmInventoryController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\HomePageController;
-use \App\Http\Controllers\Api\PaymongoWebhookController;
+use App\Http\Controllers\Api\PaymongoWebhookController;
+use App\Models\FoodOrderModel;
+use App\Models\FarmOrderModel;
+use App\Models\RoomModel;
+use App\Models\Review;
 use App\Models\EventAdminModel;
 use App\Models\RoomSeederModel;
 use App\Models\GoogleUser;
@@ -205,8 +209,8 @@ Route::get('/notifications-counts', function () {
 
     $food = FoodOrderModel::where('order_status', 'Pending')->count();
     $farm = FarmOrderModel::where('order_status', 'Pending')->count();
-    $room = RoomReservationModel::where('status', 'Pending')->count();
-    $event = EventAdminModel::where('status', 'Pending')->count();
+    $room = RoomModel::where('status', 'Pending')->count();
+    $event = EventAdminModel::where('approval_status', 'Pending')->count();
     $approval = GoogleUser::where('is_status', 'Pending Validation')->count();
     $review = Review::where('review_status', 'Not Reviewed')->count();
 
