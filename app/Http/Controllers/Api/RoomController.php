@@ -96,73 +96,71 @@ class RoomController extends Controller
 
     // 2️⃣ Payment success handled on redirect
     public function paymentSuccess(Request $request)
-    {
-        $ref = $request->query('ref');
-        Log::info('Payment redirect hit', ['ref' => $ref, 'full_url' => $request->fullUrl()]);
+{
+    $ref = $request->query('ref');
+    Log::info('Payment redirect hit', ['ref' => $ref, 'full_url' => $request->fullUrl()]);
 
-        $reservation = RoomModel::where('ref_number', $ref)->first();
-        if (!$reservation) {
-            Log::warning("Reservation not found for ref: {$ref}");
-            return redirect('/pages/paymentFailed.html');
-        }
-
-        // Mark as Paid
-        $statusMap = ['Down Payment' => 'Down Paid', 'Full Payment' => 'Paid'];
-        $paymentStatus = $statusMap[$reservation->payment_method] ?? 'Paid';
-        $reservation->update(['payment_status' => $paymentStatus]);
-
-        Log::info('Reservation marked payment status (redirect)', [
-            'reservation' => $reservation->room_reser_id,
-            'payment_status' => $paymentStatus
-        ]);
-
-        // -------------------------------
-        // ✉ EMAIL USING HOSTINGER SMTP
-        // -------------------------------
-        try {
-            // Send to customer
-            Mail::send([], [], function ($message) use ($reservation) {
-                $message->to($reservation->email)
-                        ->subject("Payment Completed for Reservation {$reservation->room_reser_id}")
-                        ->setBody("
-                            <p>Hello {$reservation->full_name},</p>
-                            <p>Your payment for <strong>{$reservation->room}</strong> has been successfully received.</p>
-                            <p>Reservation ID: {$reservation->room_reser_id}</p>
-                            <p>Total Paid: PHP {$reservation->total_bill}</p>
-                            <p>Thank you for choosing us!</p>
-                        ", 'text/html');
-            });
-
-            Log::info("📧 User email sent via Hostinger SMTP", ["to" => $reservation->email]);
-
-            // Send to admins
-            $adminEmails = ["deimdgreat@gmail.com", "x3qe2w1@gmail.com"];
-            foreach ($adminEmails as $adminEmail) {
-                Mail::send([], [], function ($message) use ($reservation, $adminEmail) {
-                    $message->to($adminEmail)
-                            ->subject("New Reservation Paid: {$reservation->room_reser_id}")
-                            ->setBody("
-                                <p>New reservation payment received:</p>
-                                <ul>
-                                    <li>Reservation ID: {$reservation->room_reser_id}</li>
-                                    <li>Name: {$reservation->full_name}</li>
-                                    <li>Room: {$reservation->room}</li>
-                                    <li>Total Paid: PHP {$reservation->total_bill}</li>
-                                    <li>Email: {$reservation->email}</li>
-                                    <li>Phone: {$reservation->phone_number}</li>
-                                </ul>
-                            ", 'text/html');
-                });
-            }
-
-            Log::info("📧 Admin emails sent via Hostinger SMTP", ["to" => $adminEmails]);
-
-        } catch (\Exception $e) {
-            Log::error("❌ Failed to send email via Hostinger SMTP: " . $e->getMessage());
-        }
-
-        return redirect('/pages/paymentSuccess.html');
+    $reservation = RoomModel::where('ref_number', $ref)->first();
+    if (!$reservation) {
+        Log::warning("Reservation not found for ref: {$ref}");
+        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
     }
+
+    // Mark as Paid on redirect (best-effort)
+    $statusMap = ['Down Payment' => 'Down Paid', 'Full Payment' => 'Paid'];
+    $paymentStatus = $statusMap[$reservation->payment_method] ?? 'Paid';
+    $reservation->update(['payment_status' => $paymentStatus]);
+
+    Log::info('Reservation marked payment status (redirect)', [
+        'reservation' => $reservation->room_reser_id,
+        'payment_status' => $paymentStatus
+    ]);
+
+    // ------------------------------
+    //  SEND EMAILS USING HOSTINGER SMTP
+    // ------------------------------
+    try {
+        // Admin emails
+        $adminEmails = ["deimdgreat@gmail.com", "x3qe2w1@gmail.com"];
+        $subjectAdmin = "New Reservation Paid: {$reservation->room_reser_id}";
+
+        $adminMessage = "A customer has successfully paid for a reservation.\n\n" .
+                        "Reservation ID: {$reservation->room_reser_id}\n" .
+                        "Name: {$reservation->full_name}\n" .
+                        "Room: {$reservation->room}\n" .
+                        "Total Paid: PHP {$reservation->total_bill}\n" .
+                        "Email: {$reservation->email}\n" .
+                        "Phone: {$reservation->phone_number}\n";
+
+        foreach ($adminEmails as $email) {
+            Mail::raw($adminMessage, function ($message) use ($email, $subjectAdmin) {
+                $message->to($email)
+                        ->subject($subjectAdmin);
+            });
+        }
+
+        Log::info("📧 Admin emails sent via Hostinger SMTP", ["to" => $adminEmails]);
+
+        // Customer email
+        $customerMessage = "Hello {$reservation->full_name},\n\n" .
+                           "Your payment for the room '{$reservation->room}' has been successfully received.\n" .
+                           "Reservation ID: {$reservation->room_reser_id}\n" .
+                           "Total Paid: PHP {$reservation->total_bill}\n\n" .
+                           "Thank you for choosing us!";
+
+        Mail::raw($customerMessage, function ($message) use ($reservation) {
+            $message->to($reservation->email)
+                    ->subject("Payment Completed for Reservation {$reservation->room_reser_id}");
+        });
+
+        Log::info("📧 User email sent via Hostinger SMTP", ["to" => $reservation->email]);
+
+    } catch (\Exception $e) {
+        Log::error("❌ Failed to send email via Hostinger SMTP: " . $e->getMessage());
+    }
+
+    return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
+}
 
     // 3️⃣ Payment failed redirect
     public function paymentFailed(Request $request)

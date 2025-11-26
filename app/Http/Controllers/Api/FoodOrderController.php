@@ -12,7 +12,6 @@ use App\Models\KitchenInventory;
 use App\Models\FoodIngredient;
 use App\Models\FoodProduct;
 use App\Models\GoogleUser;
-use App\Http\Controllers\Api\RoomModel;
 use Illuminate\Support\Facades\Mail;
 
 class FoodOrderController extends Controller
@@ -125,71 +124,157 @@ class FoodOrderController extends Controller
 
 public function paymentSuccess(Request $request)
 {
-    $ref = $request->query('ref');
-    Log::info('Payment redirect hit', ['ref' => $ref, 'full_url' => $request->fullUrl()]);
+    Log::info("✅ paymentSuccess route hit", [
+        'full_url' => $request->fullUrl(),
+        'ref' => $request->query('ref')
+    ]);
 
-    $reservation = DB::where('ref_number', $ref)->first();
-    if (!$reservation) {
-        Log::warning("Reservation not found for ref: {$ref}");
+    $refNumber = $request->query('ref');
+
+    if (!$refNumber) {
+        Log::warning("No ref number provided in paymentSuccess");
         return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
     }
 
-    // Mark as Paid on redirect (best-effort)
-    $statusMap = ['Down Payment' => 'Down Paid', 'Full Payment' => 'Paid'];
-    $paymentStatus = $statusMap[$reservation->payment_method] ?? 'Paid';
-    $reservation->update(['payment_status' => $paymentStatus]);
+    $order = FoodOrderModel::where('ref_number', $refNumber)->first();
 
-    Log::info('Reservation marked payment status (redirect)', [
-        'reservation' => $reservation->room_reser_id,
-        'payment_status' => $paymentStatus
-    ]);
+    if (!$order) {
+        Log::warning("Order not found for ref: {$refNumber}");
+        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
+    }
+
+    // Mark payment as paid
+    $order->update(['payment_status' => 'Paid', 'order_status' => 'Pending']);
+
+    // ORDERED ITEMS
+    $orderedItems = [
+        'Smoked Fish'   => $order->smokedFish_order,
+        'Deviled Fish'  => $order->deviledFish_order,
+        'Sea Sig'       => $order->seaSig_order,
+        'Blue Craze'    => $order->blueCraze_order,
+        'Chicken Sheet' => $order->chickenSheet_order,
+        'Black Meal'    => $order->blackMeal_order,
+    ];
+
+    Log::info("ORDERED ITEMS DUMP", $orderedItems);
 
     // ------------------------------
-    //  SEND EMAILS USING HOSTINGER SMTP
+    //  SEND EMAILS
     // ------------------------------
     try {
-        // Admin emails
-        $adminEmails = ["deimdgreat@gmail.com", "x3qe2w1@gmail.com"];
-        $subjectAdmin = "New Reservation Paid: {$reservation->room_reser_id}";
+        // 1️⃣ Admin emails
+        $adminEmails = [
+            "greenlinklolasayong@gmail.com",
+            "deimdgreat@gmail.com",
+        ];
 
-        $adminMessage = "A customer has successfully paid for a reservation.\n\n" .
-                        "Reservation ID: {$reservation->room_reser_id}\n" .
-                        "Name: {$reservation->full_name}\n" .
-                        "Room: {$reservation->room}\n" .
-                        "Total Paid: PHP {$reservation->total_bill}\n" .
-                        "Email: {$reservation->email}\n" .
-                        "Phone: {$reservation->phone_number}\n";
+        $subjectAdmin = "New Food Order Payment – Ref {$order->ref_number}";
+        $messageBody = "A customer has successfully paid for a food order.\n\n" .
+                       "Reference Number: {$order->ref_number}\n" .
+                       "Order ID: {$order->foodOrder_id}\n" .
+                       "Total Amount: ₱" . number_format($order->total_bill, 2) . "\n\n" .
+                       "Ordered Items:\n";
+
+        foreach ($orderedItems as $name => $qty) {
+            if ($qty > 0) {
+                $messageBody .= "- {$name}: {$qty}\n";
+            }
+        }
+
+        Log::info("📧 Sending admin emails...", ['emails' => $adminEmails]);
 
         foreach ($adminEmails as $email) {
-            Mail::raw($adminMessage, function ($message) use ($email, $subjectAdmin) {
+            Mail::raw($messageBody, function ($message) use ($email, $subjectAdmin) {
                 $message->to($email)
                         ->subject($subjectAdmin);
             });
         }
 
-        Log::info("📧 Admin emails sent via Hostinger SMTP", ["to" => $adminEmails]);
+        // 2️⃣ Customer email
+        if ($order->user_id) {
+            $user = $order->user; // assumes FoodOrderModel has 'user' relationship
+            if ($user && $user->email) {
+                $customerEmail = $user->email;
+                $subjectCustomer = "Your Food Order Payment – Ref {$order->ref_number}";
+                $customerMessage = "Hello {$user->name},\n\n" .
+                                   "Thank you for your payment! Here are your order details:\n\n" .
+                                   "Reference Number: {$order->ref_number}\n" .
+                                   "Order ID: {$order->foodOrder_id}\n" .
+                                   "Total Amount: ₱" . number_format($order->total_bill, 2) . "\n\n" .
+                                   "Ordered Items:\n";
 
-        // Customer email
-        $customerMessage = "Hello {$reservation->full_name},\n\n" .
-                           "Your payment for the room '{$reservation->room}' has been successfully received.\n" .
-                           "Reservation ID: {$reservation->room_reser_id}\n" .
-                           "Total Paid: PHP {$reservation->total_bill}\n\n" .
-                           "Thank you for choosing us!";
+                foreach ($orderedItems as $name => $qty) {
+                    if ($qty > 0) {
+                        $customerMessage .= "- {$name}: {$qty}\n";
+                    }
+                }
 
-        Mail::raw($customerMessage, function ($message) use ($reservation) {
-            $message->to($reservation->email)
-                    ->subject("Payment Completed for Reservation {$reservation->room_reser_id}");
-        });
+                Mail::raw($customerMessage, function ($message) use ($customerEmail, $subjectCustomer) {
+                    $message->to($customerEmail)
+                            ->subject($subjectCustomer);
+                });
 
-        Log::info("📧 User email sent via Hostinger SMTP", ["to" => $reservation->email]);
+                Log::info("📧 Customer email sent to {$customerEmail}");
+            }
+        }
 
     } catch (\Exception $e) {
-        Log::error("❌ Failed to send email via Hostinger SMTP: " . $e->getMessage());
+        Log::error("❌ Failed to send email: " . $e->getMessage());
     }
+
+    // ------------------------------
+    //  INVENTORY DEDUCTION
+    // ------------------------------
+    DB::transaction(function () use ($orderedItems, $refNumber) {
+        foreach ($orderedItems as $foodName => $qtyOrdered) {
+            $qtyOrdered = is_numeric($qtyOrdered) ? (float) $qtyOrdered : 0;
+            if ($qtyOrdered <= 0) continue;
+
+            $normalized = trim(mb_strtolower($foodName));
+
+            $foodProduct = FoodProduct::whereRaw('LOWER(TRIM(productName)) = ?', [$normalized])->first();
+
+            if (!$foodProduct) {
+                $foodProduct = FoodProduct::where('productName', 'like', '%' . $foodName . '%')->first();
+            }
+
+            if (!$foodProduct) {
+                Log::warning("⚠️ Food product not found for '{$foodName}' — ref {$refNumber}");
+                continue;
+            }
+
+            $ingredients = $foodProduct->ingredientsDetails()->get();
+
+            if ($ingredients->isEmpty()) {
+                Log::warning("⚠️ No ingredients for product_id={$foodProduct->id}");
+                continue;
+            }
+
+            foreach ($ingredients as $ingredientRow) {
+                $quantityUsed = is_numeric($ingredientRow->quantity_used) ? (float) $ingredientRow->quantity_used : 0;
+                if ($quantityUsed <= 0) continue;
+
+                $deductAmount = $quantityUsed * $qtyOrdered;
+
+                $inventory = KitchenInventory::where('id', $ingredientRow->ingredient_id)->lockForUpdate()->first();
+
+                if ($inventory) {
+                    $current = is_numeric($inventory->current_stock) ? (float) $inventory->current_stock : 0;
+                    $inventory->current_stock = max(0, $current - $deductAmount);
+                    $inventory->save();
+
+                    Log::info("🧾 Deducted {$deductAmount} {$inventory->unit} from {$inventory->item_name}");
+                } else {
+                    Log::warning("⚠️ Ingredient not found in inventory (ID {$ingredientRow->ingredient_id})");
+                }
+            }
+        }
+    });
+
+    Log::info("✅ Payment success processing completed for {$refNumber}");
 
     return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
 }
-
 
 
 
