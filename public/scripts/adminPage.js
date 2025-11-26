@@ -488,7 +488,7 @@ const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPayment
 </div>
 
 <!-- MODAL -->
-<div id="foodOrderModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+<div id="foodOrderModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex items-center justify-center">
   <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
     <h3 class="text-xl font-bold text-teal-700 mb-3">Order Details</h3>
     <p><strong>Order ID:</strong> <span id="foodModalOrderID"></span></p>
@@ -633,7 +633,7 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
 </div>
 
 <!-- MODAL -->
-<div id="farmOrderModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+<div id="farmOrderModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex items-center justify-center">
   <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
     <h3 class="text-xl font-bold text-teal-700 mb-3">Order Details</h3>
     <p><strong>Order ID:</strong> <span id="farmModalOrderID"></span></p>
@@ -3959,3 +3959,4 @@ setInterval(checkNotifications, 5000);
 checkNotifications();
 
 
+    
