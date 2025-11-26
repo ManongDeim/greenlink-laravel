@@ -436,7 +436,7 @@ document.getElementById("confirmBtn").addEventListener("click", async function (
   document.getElementById("successPopup").classList.remove("hidden");
 }
 
-function closeSuccessPopup() {
+window.closeSuccessPopup = function() {
   document.getElementById("successPopup").classList.add("hidden");
 }
 
@@ -467,9 +467,26 @@ function closeSuccessPopup() {
 });
 
 // 🧩 Helper: Combine date + time into MySQL DATETIME
-function combineDateTime(date, time) {
-  return `${date} ${time}:00`;
+function combineDateTime(date, time12h) {
+  if (!date || !time12h) return null;
+
+  // Make sure time12h is like "02:30 PM"
+  const [time, modifier] = time12h.split(' ');
+  let [hours, minutes] = time.split(':').map(Number);
+
+  if (modifier.toUpperCase() === 'PM' && hours < 12) hours += 12;
+  if (modifier.toUpperCase() === 'AM' && hours === 12) hours = 0;
+
+  // Convert back to 12-hour format with AM/PM for Laravel
+  let hh = hours % 12;
+  hh = hh === 0 ? 12 : hh; // 12-hour format
+  const mm = minutes.toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+
+  return `${date} ${hh.toString().padStart(2, '0')}:${mm} ${ampm}`;
 }
+
+
 
 // 🧩 Helper: Get event name from global eventData
 function getEventName(eventId) {
