@@ -139,3 +139,15 @@ Route::middleware('auth')->group(function () {
    Route::post('/profile-update', [ProfileController::class, 'updateProfile']);
    Route::post('/submit-id', [ProfileController::class, 'submitID']);
 });
+
+Route::get('/test-email', function() {
+    try {
+        \Illuminate\Support\Facades\Mail::raw('This is a test email!', function ($message) {
+            $message->to('your-personal-email@gmail.com')
+                    ->subject('Test Email from Hostinger SMTP');
+        });
+        return 'Email sent!';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
