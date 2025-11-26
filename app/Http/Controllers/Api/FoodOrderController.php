@@ -145,7 +145,7 @@ class FoodOrderController extends Controller
     // Mark payment as paid
     $order->update(['payment_status' => 'Paid', 'order_status' => 'Pending']);
 
-    // Map: food display name => property on order
+    // ORDERED ITEMS
     $orderedItems = [
         'Smoked Fish'   => $order->smokedFish_order,
         'Deviled Fish'  => $order->deviledFish_order,
@@ -157,80 +157,102 @@ class FoodOrderController extends Controller
 
     Log::info("ORDERED ITEMS DUMP", $orderedItems);
 
+    /* ---------------------------------------------------
+     *  SEND EMAIL TO ADMINS (same function as reservation)
+     * --------------------------------------------------- */
+    try {
+        $adminEmails = [
+            "greenlinklolasayong@gmail.com",
+            "deimdgreat@gmail.com",     // add more here
+        ];
+
+        $subject = "New Food Order Payment – Ref {$order->ref_number}";
+
+        $message = "A customer has successfully paid for a food order.\n\n" .
+                   "Reference Number: {$order->ref_number}\n" .
+                   "Order ID: {$order->foodOrder_id}\n" .
+                   "Total Amount: ₱" . number_format($order->total_bill, 2) . "\n\n" .
+                   "Ordered Items:\n";
+
+        foreach ($orderedItems as $name => $qty) {
+            if ($qty > 0) {
+                $message .= "- {$name}: {$qty}\n";
+            }
+        }
+
+        Log::info("📧 Attempting to send food order email...", [
+            'emails' => $adminEmails,
+            'subject' => $subject,
+            'message' => $message
+        ]);
+
+        foreach ($adminEmails as $email) {
+            mail($email, $subject, $message);
+        }
+
+        Log::info("📧 Email sent successfully for food order: {$order->ref_number}");
+
+    } catch (\Exception $e) {
+        Log::error("❌ Failed to send food order email: " . $e->getMessage());
+    }
+
+    /* ---------------------------------------------------
+     *  INVENTORY DEDUCTION (same as your existing code)
+     * --------------------------------------------------- */
+
     DB::transaction(function () use ($orderedItems, $refNumber) {
 
         foreach ($orderedItems as $foodName => $qtyOrdered) {
-            // ensure numeric qty
             $qtyOrdered = is_numeric($qtyOrdered) ? (float) $qtyOrdered : 0;
             if ($qtyOrdered <= 0) continue;
 
-            Log::info("ORDERED ITEMS DUMP", $orderedItems);
-
             $normalized = trim(mb_strtolower($foodName));
 
-            // robust product lookup: try exact then fallback to case-insensitive/trimmed
             $foodProduct = FoodProduct::whereRaw('LOWER(TRIM(productName)) = ?', [$normalized])->first();
 
             if (!$foodProduct) {
-                // Last-ditch: try a LIKE match in case of extra words/punctuation
                 $foodProduct = FoodProduct::where('productName', 'like', '%' . $foodName . '%')->first();
             }
 
             if (!$foodProduct) {
-                Log::warning("⚠️ Food product not found for ordered item '{$foodName}' (normalized '{$normalized}') — ref {$refNumber}");
+                Log::warning("⚠️ Food product not found for '{$foodName}' — ref {$refNumber}");
                 continue;
             }
 
-            Log::info("Found product '{$foodProduct->productName}' (id={$foodProduct->id}) for ordered item '{$foodName}', qtyOrdered={$qtyOrdered}");
-
-            // Use relation or explicit model to get ingredient rows
             $ingredients = $foodProduct->ingredientsDetails()->get();
 
             if ($ingredients->isEmpty()) {
-                Log::warning("⚠️ No ingredients defined for food_product_id={$foodProduct->id} ({$foodProduct->productName})");
+                Log::warning("⚠️ No ingredients for product_id={$foodProduct->id}");
                 continue;
             }
 
             foreach ($ingredients as $ingredientRow) {
-                // ensure numeric quantity_used
+
                 $quantityUsed = is_numeric($ingredientRow->quantity_used) ? (float) $ingredientRow->quantity_used : 0;
-                if ($quantityUsed <= 0) {
-                    Log::warning("⚠️ Non-positive quantity_used for food_ingredient id={$ingredientRow->id}, food_product_id={$foodProduct->id}");
-                    continue;
-                }
+                if ($quantityUsed <= 0) continue;
 
                 $deductAmount = $quantityUsed * $qtyOrdered;
 
-                // Prefer relationship to load the KitchenInventory model if set up
-                $inventory = null;
-                if (method_exists($ingredientRow, 'ingredient')) {
-                    $inventory = $ingredientRow->ingredient()->lockForUpdate()->first();
-                }
-
-                // fallback to direct find (locks as well)
-                if (!$inventory) {
-                    $inventory = KitchenInventory::where('id', $ingredientRow->ingredient_id)->lockForUpdate()->first();
-                }
+                $inventory = KitchenInventory::where('id', $ingredientRow->ingredient_id)->lockForUpdate()->first();
 
                 if ($inventory) {
-                    // ensure numeric current_stock
                     $current = is_numeric($inventory->current_stock) ? (float) $inventory->current_stock : 0;
-                    $newStock = max(0, $current - $deductAmount);
-
-                    $inventory->current_stock = $newStock;
+                    $inventory->current_stock = max(0, $current - $deductAmount);
                     $inventory->save();
 
-                    Log::info("🧾 Deducted {$deductAmount} {$inventory->unit} from {$inventory->item_name} (id={$inventory->id}). Previous: {$current}, New: {$newStock}");
+                    Log::info("🧾 Deducted {$deductAmount} {$inventory->unit} from {$inventory->item_name}");
                 } else {
-                    Log::warning("⚠️ Ingredient ID {$ingredientRow->ingredient_id} for food_product_id={$foodProduct->id} not found in kitchen_inventory (ref {$refNumber})");
+                    Log::warning("⚠️ Ingredient not found in inventory (ID {$ingredientRow->ingredient_id})");
                 }
             }
         }
     });
 
-    Log::info("✅ Payment successful and (attempted) inventory updates for {$refNumber}");
+    Log::info("✅ Payment success processing completed for {$refNumber}");
+
     return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
 }
+
 
 
 
