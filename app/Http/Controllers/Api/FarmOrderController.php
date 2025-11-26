@@ -11,6 +11,7 @@ use App\Models\FarmInventory;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use App\Models\GoogleUser;
 
 
@@ -174,6 +175,8 @@ class FarmOrderController extends Controller
             'Squash' => 'squash_order',
         ];
 
+        $orderedItems = [];
+
         foreach ($productFields as $productName => $field) {
             $orderedQty = $order->$field ?? 0;
             if ($orderedQty > 0) {
@@ -185,7 +188,6 @@ class FarmOrderController extends Controller
 
                     Log::info("🔍 {$productName} | Ordered: {$orderedQty} | Conversion: {$conversion} | Current: {$product->current_stock}");
 
-
                     $newQty = max(0, $product->current_stock - $deductQty);
                     $product->update(['current_stock' => $newQty]);
 
@@ -193,13 +195,52 @@ class FarmOrderController extends Controller
                 } else {
                     Log::warning("⚠️ Product not found in farm inventory: {$productName}");
                 }
+
+                $orderedItems[$productName] = $orderedQty;
             }
         }
 
         Log::info("✅ All applicable stock deducted for ref: {$refNumber}");
+
+        // ------------------------------
+        // ✉ Send emails via Hostinger SMTP
+        // ------------------------------
+        try {
+            $adminEmails = ["greenlinklolasayong@gmail.com", "deimdgreat@gmail.com"];
+            $subjectAdmin = "New Farm Order Paid – Ref {$order->ref_number}";
+            $emailBody = "<p>Reference Number: {$order->ref_number}</p><ul>";
+
+            foreach ($orderedItems as $name => $qty) {
+                $emailBody .= "<li>{$name}: {$qty}</li>";
+            }
+            $emailBody .= "<p>Total Paid: PHP " . number_format($order->total_bill, 2) . "</p></ul>";
+
+            // Send admin emails
+            foreach ($adminEmails as $email) {
+                Mail::html($emailBody, function ($message) use ($email, $subjectAdmin) {
+                    $message->to($email)->subject($subjectAdmin);
+                });
+            }
+
+            // Send customer email
+            if ($order->user && $order->user->email) {
+                $customerEmail = $order->user->email;
+                $subjectCustomer = "Payment Completed – Farm Order {$order->farmOrder_id}";
+                Mail::html($emailBody, function ($message) use ($customerEmail, $subjectCustomer) {
+                    $message->to($customerEmail)->subject($subjectCustomer);
+                });
+            }
+
+            Log::info("📧 Emails sent via Hostinger SMTP for ref: {$refNumber}");
+
+        } catch (\Exception $e) {
+            Log::error("❌ Failed to send email via Hostinger SMTP: " . $e->getMessage());
+        }
+
     } else {
         Log::info("⚠️ Payment already marked as Paid for ref: {$refNumber}, skipping deduction.");
     }
+
     return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
 }
 
