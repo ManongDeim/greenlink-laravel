@@ -30,6 +30,7 @@ if (user.id_status === "Validated" || user.id_status === "Submission Validated")
         // Show image only
         idUpload.classList.add("hidden");
         statusBox.classList.add("hidden");
+        submitIDBtn.classList.add("hidden");
 
         const idPhotoContainer = document.getElementById("idPhotoContainer");
         const idPhotoPreview = document.getElementById("idPhotoPreview");
