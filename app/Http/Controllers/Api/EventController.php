@@ -18,11 +18,11 @@ class EventController extends Controller
             return response()->json(['message' => 'Unauthorized. Please log in.'], 401);
         }
 
-        // Validate input using 12-hour format with AM/PM
+        // Validate input (accepts any valid date, including 12-hour format)
         $validated = $request->validate([
             'event_id' => 'required|integer',
-            'start_datetime' => 'required|date_format:Y-m-d h:i A', // 12-hour format
-            'end_datetime' => 'required|date_format:Y-m-d h:i A|after_or_equal:start_datetime',
+            'start_datetime' => 'required|date',
+            'end_datetime' => 'required|date|after_or_equal:start_datetime',
             'full_name' => 'required|string|max:255',
             'event_type' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -31,7 +31,7 @@ class EventController extends Controller
             'to_bring' => 'nullable|string',
         ]);
 
-        // Convert 12-hour format to 24-hour format before saving
+        // Convert start and end datetime to 24-hour format for DB
         $startDatetime24 = date('Y-m-d H:i:s', strtotime($validated['start_datetime']));
         $endDatetime24 = date('Y-m-d H:i:s', strtotime($validated['end_datetime']));
 
