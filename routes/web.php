@@ -143,7 +143,7 @@ Route::middleware('auth')->group(function () {
 Route::get('/test-email', function() {
     try {
         \Illuminate\Support\Facades\Mail::raw('This is a test email!', function ($message) {
-            $message->to('your-personal-email@gmail.com')
+            $message->to('deimdgreat@gmail.com')
                     ->subject('Test Email from Hostinger SMTP');
         });
         return 'Email sent!';
