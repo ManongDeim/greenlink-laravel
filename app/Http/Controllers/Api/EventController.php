@@ -12,17 +12,16 @@ class EventController extends Controller
 {
     public function store(Request $request)
     {
-        // Ensure the user is authenticated
         $user = Auth::user();
         if (!$user) {
             return response()->json(['message' => 'Unauthorized. Please log in.'], 401);
         }
 
-        // Validate input (accepts any valid date, including 12-hour format)
+        // Validate input using explicit 12-hour format
         $validated = $request->validate([
             'event_id' => 'required|integer',
-            'start_datetime' => 'required|date',
-            'end_datetime' => 'required|date|after_or_equal:start_datetime',
+            'start_datetime' => 'required|date_format:Y-m-d h:i A',
+            'end_datetime' => 'required|date_format:Y-m-d h:i A|after_or_equal:start_datetime',
             'full_name' => 'required|string|max:255',
             'event_type' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -31,13 +30,12 @@ class EventController extends Controller
             'to_bring' => 'nullable|string',
         ]);
 
-        // Convert start and end datetime to 24-hour format for DB
+        // Convert 12-hour AM/PM to 24-hour format for DB
         $startDatetime24 = date('Y-m-d H:i:s', strtotime($validated['start_datetime']));
         $endDatetime24 = date('Y-m-d H:i:s', strtotime($validated['end_datetime']));
 
-        // Create the reservation
         $reservation = EventModel::create([
-            'user_id' => $user->id, // automatically gets logged-in user's ID
+            'user_id' => $user->id,
             'event_id' => $validated['event_id'],
             'start_datetime' => $startDatetime24,
             'end_datetime' => $endDatetime24,
