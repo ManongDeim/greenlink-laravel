@@ -211,7 +211,7 @@ Route::get('/notifications-counts', function () {
     $farm = FarmOrderModel::where('order_status', 'Pending')->count();
     $room = RoomModel::where('status', 'Pending')->count();
     $event = EventAdminModel::where('approval_status', 'Pending')->count();
-    $approval = GoogleUser::where('is_status', 'Pending Validation')->count();
+    $approval = GoogleUser::where('id_status', 'Pending Validation')->count();
     $review = Review::where('review_status', 'Not Reviewed')->count();
 
     return response()->json([
