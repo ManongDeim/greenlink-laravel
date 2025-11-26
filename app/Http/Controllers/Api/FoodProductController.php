@@ -12,9 +12,24 @@ use App\Models\KitchenInventory;
 class FoodProductController extends Controller
 {
      public function index()
-    {
-        return response()->json(FoodProduct::all());
-    }
+{
+    $foods = FoodProduct::with('ingredients')->get();
+
+    $foods = $foods->map(function ($food) {
+
+        $restockCount = $food->ingredients->filter(function ($ingredient) {
+            return $ingredient->status === 'Restock Needed';
+        })->count();
+
+        // ✅ Rule: If 3 or more ingredients are Restock Needed → Unavailable
+        $food->availability = $restockCount >= 3 ? 'Unavailable' : 'Available';
+
+        return $food;
+    });
+
+    return response()->json($foods);
+}
+
 
         public function getIngredients()
 {

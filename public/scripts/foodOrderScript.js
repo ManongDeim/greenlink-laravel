@@ -641,3 +641,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const notes = document.getElementById("orderNotes").value;
 
+foods.forEach(food => {
+  const card = document.createElement("div");
+
+  card.className = "food-card";
+
+  if (food.availability === "Unavailable") {
+      card.classList.add("opacity-50", "pointer-events-none");
+  }
+
+  card.innerHTML = `
+    <h3>${food.name}</h3>
+    <p>Status: ${food.availability}</p>
+  `;
+
+  foodContainer.appendChild(card);
+});
