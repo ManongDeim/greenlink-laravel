@@ -281,11 +281,11 @@ if (fullnameInput.value.trim() === "") {
   // Pax
 if (paxInput.value.trim() === '' || isNaN(paxInput.value) || paxInput.value <= 0) {
   paxError.classList.remove('hidden');
-  paxInput.classList.add('border-red-500');
+  paxInput.classList.add('border-yellow-500');
   isValid = false;
 } else {
   paxError.classList.add('hidden');
-  paxInput.classList.remove('border-red-500');
+  paxInput.classList.remove('border-yellow-500');
 }
 
 // Event Type
@@ -383,7 +383,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedType = eventData.find((e) => e.id == select.value);
     if (selectedType) {
       paxInput.max = selectedType.max_pax; // ✅ set HTML max attribute
-      paxError.textContent = `Maximum allowed pax: ${selectedType.max_pax}`;
+      paxError.textContent = `Maximum pax: ${selectedType.max_pax}`;
       paxError.classList.remove("hidden");
       paxInput.value = ""; // reset pax input
     }
@@ -401,14 +401,17 @@ document.addEventListener("DOMContentLoaded", function () {
   if (val < 0) {
     paxInput.value = 0;
     paxError.textContent = "Pax cannot be negative";
+    paxError.classList.remove("text-black-600");
+    paxError.classList.add("text-red-600");
     paxError.classList.remove("hidden");
     return;
   }
 
   // ✅ Prevent exceeding max
   if (val > max) {
-    paxInput.value = max;
-    paxError.textContent = `Maximum allowed pax: ${max}`;
+    paxError.textContent = `⚠️ Maximum pax exceeded: ${max}`;
+    paxError.classList.remove("text-black-600");
+    paxError.classList.add("text-yellow-600");
     paxError.classList.remove("hidden");
   } else {
     paxError.classList.add("hidden");
