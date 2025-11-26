@@ -96,117 +96,186 @@ class RoomController extends Controller
     }
 
     // 2️⃣ Webhook to handle payment confirmation
-  public function paymongoWebhook(Request $request)
+ public function paymongoWebhook(Request $request)
 {
+    // =============================
+    // 📌 LOG RAW WEBHOOK PAYLOAD
+    // =============================
+    Log::info("🔥 PayMongo Webhook Hit", [
+        "raw" => $request->all()
+    ]);
+
     $payload = $request->all();
-    Log::info('PayMongo Webhook Received', $payload);
 
     $eventType = $payload['data']['attributes']['type'] ?? null;
+    Log::info("📌 Event Type Detected", ["type" => $eventType]);
+
     $reservation = null;
     $paymentId = null;
     $sessionId = null;
 
+    // ===============================================================
+    // 📌 1. CHECKOUT SESSION PAID EVENT
+    // ===============================================================
     if ($eventType === 'checkout_session.payment.paid') {
+
+        Log::info("➡ Processing checkout_session.payment.paid event");
+
         $sessionData = $payload['data']['attributes']['data'] ?? [];
         $sessionId = $sessionData['id'] ?? null;
 
         $payments = $sessionData['payments'] ?? [];
         $paymentId = $payments[0]['id'] ?? null;
 
+        Log::info("📌 Checkout Session Data Extracted", [
+            "sessionId" => $sessionId,
+            "paymentId" => $paymentId
+        ]);
+
+        // Try finding by session ID
         if ($sessionId) {
             $reservation = RoomModel::where('paymongo_session_id', $sessionId)->first();
+            Log::info("🔍 Reservation Lookup by sessionId", [
+                "found" => $reservation ? true : false
+            ]);
         }
 
-        // fallback to description parsing
+        // Fallback: find using description
         if (!$reservation && !empty($payments)) {
             $description = $payments[0]['attributes']['description'] ?? '';
-            if ($description) {
-                preg_match('/ROOM-[A-Z0-9]+/', $description, $matches);
-                if (!empty($matches)) {
-                    $roomReserId = $matches[0];
-                    $reservation = RoomModel::where('room_reser_id', $roomReserId)->first();
-                }
-            }
-        }
-    } elseif ($eventType === 'payment.paid') {
-        $paymentData = $payload['data']['attributes']['data']['attributes'] ?? [];
-        $paymentId = $paymentData['id'] ?? null;
-        $description = $paymentData['description'] ?? '';
 
-        if ($description) {
+            Log::info("🔍 Fallback: Searching using description", [
+                "description" => $description
+            ]);
+
             preg_match('/ROOM-[A-Z0-9]+/', $description, $matches);
+
             if (!empty($matches)) {
                 $roomReserId = $matches[0];
                 $reservation = RoomModel::where('room_reser_id', $roomReserId)->first();
+                Log::info("🔍 Fallback lookup result", [
+                    "roomReserId" => $roomReserId,
+                    "found" => $reservation ? true : false
+                ]);
             }
         }
     }
 
-    if ($reservation && $paymentId) {
-        $reservation->paymongo_payment_id = $paymentId;
-        $reservation->payment_status = 'Paid';
-        $reservation->save();
+    // ===============================================================
+    // 📌 2. NORMAL PAYMENT PAID EVENT
+    // ===============================================================
+    elseif ($eventType === 'payment.paid') {
 
-        Log::info("Reservation updated via webhook", [
-            'reservation_id' => $reservation->room_reser_id,
-            'paymongo_session_id' => $reservation->paymongo_session_id,
-            'paymongo_payment_id' => $reservation->paymongo_payment_id
+        Log::info("➡ Processing payment.paid event");
+
+        $paymentData = $payload['data']['attributes']['data']['attributes'] ?? [];
+        $paymentId = $paymentData['id'] ?? null;
+        $description = $paymentData['description'] ?? null;
+
+        Log::info("📌 Payment Data Extracted", [
+            "paymentId" => $paymentId,
+            "description" => $description
         ]);
 
-        // =============================
-        // ✅ Send email notifications
-        // =============================
-        $mailHelper = new GlobalMailHelper();
+        if ($description) {
+            preg_match('/ROOM-[A-Z0-9]+/', $description, $matches);
 
-        // 1️⃣ Notify the user
-        $userEmail = $reservation->email;
-        $userSubject = "Payment Completed for Reservation {$reservation->room_reser_id}";
-        $userBody = "
-            <p>Hello {$reservation->full_name},</p>
-            <p>Your payment for <strong>{$reservation->room}</strong> has been successfully received.</p>
-            <p>Reservation ID: {$reservation->room_reser_id}</p>
-            <p>Total Paid: PHP {$reservation->total_bill}</p>
-            <p>Thank you for choosing us!</p>
-        ";
-        $mailHelper->sendMail($userEmail, $userSubject, $userBody);
-          Log::info("User email sent", [
-            'to' => $userEmail,
-            'reservation_id' => $reservation->room_reser_id
+            if (!empty($matches)) {
+                $roomReserId = $matches[0];
+
+                $reservation = RoomModel::where('room_reser_id', $roomReserId)->first();
+                Log::info("🔍 Description Lookup Result", [
+                    "roomReserId" => $roomReserId,
+                    "found" => $reservation ? true : false
+                ]);
+            }
+        }
+    }
+
+    // ===============================================================
+    // 📌 HANDLE INVALID CASES
+    // ===============================================================
+    if (!$reservation || !$paymentId) {
+
+        Log::warning("⚠ Missing reservation or payment ID", [
+            "eventType" => $eventType,
+            "paymentId" => $paymentId,
+            "sessionId" => $sessionId
         ]);
 
-        
+        return response()->json(['status' => 'ignored'], 400);
+    }
 
-        // 2️⃣ Notify the admin
-        $adminEmail = ["deimdgreat@gmail.com", "x3qe2w1@gmail.com"]; // <-- replace with actual admin email
-        $adminSubject = "New Reservation Paid: {$reservation->room_reser_id}";
-        $adminBody = "
-            <p>New reservation payment received:</p>
-            <ul>
-                <li>Reservation ID: {$reservation->room_reser_id}</li>
-                <li>Name: {$reservation->full_name}</li>
-                <li>Room: {$reservation->room}</li>
-                <li>Total Paid: PHP {$reservation->total_bill}</li>
-                <li>Email: {$reservation->email}</li>
-                <li>Phone: {$reservation->phone_number}</li>
-            </ul>
-        ";
-        $mailHelper->sendMail($adminEmail, $adminSubject, $adminBody);
+    // ===============================================================
+    // 📌 UPDATE RESERVATION
+    // ===============================================================
+    $reservation->paymongo_payment_id = $paymentId;
+    $reservation->payment_status = 'Paid';
+    $reservation->save();
 
-         Log::info("Admin email sent", [
-            'to' => $adminEmail,
-            'reservation_id' => $reservation->room_reser_id
-        ]);
+    Log::info("✅ Reservation Updated Successfully", [
+        "reservation_id" => $reservation->room_reser_id,
+        "paymentId" => $paymentId,
+        "sessionId" => $sessionId
+    ]);
 
-    } else {
-        Log::warning('Reservation or payment_id missing for webhook event', [
-            'eventType' => $eventType,
-            'paymentId' => $paymentId,
-            'sessionId' => $sessionId
+    // ===============================================================
+    // 📌 SEND EMAIL NOTIFICATIONS
+    // ===============================================================
+
+    $mailHelper = new GlobalMailHelper();
+
+    // -------------------------
+    // 1️⃣ Send email to USER
+    // -------------------------
+    $userEmail = $reservation->email;
+
+    $userSubject = "Payment Completed for Reservation {$reservation->room_reser_id}";
+    $userBody = "
+        <p>Hello {$reservation->full_name},</p>
+        <p>Your payment for <strong>{$reservation->room}</strong> has been successfully received.</p>
+        <p>Reservation ID: {$reservation->room_reser_id}</p>
+        <p>Total Paid: PHP {$reservation->total_bill}</p>
+        <p>Thank you for choosing us!</p>
+    ";
+
+    $mailHelper->sendMail($userEmail, $userSubject, $userBody);
+
+    Log::info("📧 User Email Sent", [
+        "to" => $userEmail,
+        "reservation_id" => $reservation->room_reser_id
+    ]);
+
+    // -------------------------
+    // 2️⃣ Send email to ADMINS
+    // -------------------------
+    $adminEmails = ["deimdgreat@gmail.com", "x3qe2w1@gmail.com"];
+
+    $adminSubject = "New Reservation Paid: {$reservation->room_reser_id}";
+    $adminBody = "
+        <p>New reservation payment received:</p>
+        <ul>
+            <li>Reservation ID: {$reservation->room_reser_id}</li>
+            <li>Name: {$reservation->full_name}</li>
+            <li>Room: {$reservation->room}</li>
+            <li>Total Paid: PHP {$reservation->total_bill}</li>
+            <li>Email: {$reservation->email}</li>
+            <li>Phone: {$reservation->phone_number}</li>
+        </ul>
+    ";
+
+    foreach ($adminEmails as $admin) {
+        $mailHelper->sendMail($admin, $adminSubject, $adminBody);
+
+        Log::info("📧 Admin Email Sent", [
+            "to" => $admin,
+            "reservation_id" => $reservation->room_reser_id
         ]);
     }
 
     return response()->json(['status' => 'success']);
 }
+
 
     // Payment redirect will still mark Paid for UX, but authoritative payment mapping happens in webhook
     public function paymentSuccess(Request $request)
