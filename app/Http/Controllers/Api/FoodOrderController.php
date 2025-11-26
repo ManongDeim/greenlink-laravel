@@ -12,6 +12,7 @@ use App\Models\KitchenInventory;
 use App\Models\FoodIngredient;
 use App\Models\FoodProduct;
 use App\Models\GoogleUser;
+use Illuminate\Support\Facades\Mail;
 
 class FoodOrderController extends Controller
 {
@@ -121,7 +122,7 @@ class FoodOrderController extends Controller
         ]);
     }
 
-   public function paymentSuccess(Request $request)
+public function paymentSuccess(Request $request)
 {
     Log::info("✅ paymentSuccess route hit", [
         'full_url' => $request->fullUrl(),
@@ -157,51 +158,74 @@ class FoodOrderController extends Controller
 
     Log::info("ORDERED ITEMS DUMP", $orderedItems);
 
-    /* ---------------------------------------------------
-     *  SEND EMAIL TO ADMINS (same function as reservation)
-     * --------------------------------------------------- */
+    // ------------------------------
+    //  SEND EMAILS
+    // ------------------------------
     try {
+        // 1️⃣ Admin emails
         $adminEmails = [
             "greenlinklolasayong@gmail.com",
-            "deimdgreat@gmail.com",     // add more here
+            "deimdgreat@gmail.com",
         ];
 
-        $subject = "New Food Order Payment – Ref {$order->ref_number}";
-
-        $message = "A customer has successfully paid for a food order.\n\n" .
-                   "Reference Number: {$order->ref_number}\n" .
-                   "Order ID: {$order->foodOrder_id}\n" .
-                   "Total Amount: ₱" . number_format($order->total_bill, 2) . "\n\n" .
-                   "Ordered Items:\n";
+        $subjectAdmin = "New Food Order Payment – Ref {$order->ref_number}";
+        $messageBody = "A customer has successfully paid for a food order.\n\n" .
+                       "Reference Number: {$order->ref_number}\n" .
+                       "Order ID: {$order->foodOrder_id}\n" .
+                       "Total Amount: ₱" . number_format($order->total_bill, 2) . "\n\n" .
+                       "Ordered Items:\n";
 
         foreach ($orderedItems as $name => $qty) {
             if ($qty > 0) {
-                $message .= "- {$name}: {$qty}\n";
+                $messageBody .= "- {$name}: {$qty}\n";
             }
         }
 
-        Log::info("📧 Attempting to send food order email...", [
-            'emails' => $adminEmails,
-            'subject' => $subject,
-            'message' => $message
-        ]);
+        Log::info("📧 Sending admin emails...", ['emails' => $adminEmails]);
 
         foreach ($adminEmails as $email) {
-            mail($email, $subject, $message);
+            Mail::raw($messageBody, function ($message) use ($email, $subjectAdmin) {
+                $message->to($email)
+                        ->subject($subjectAdmin);
+            });
         }
 
-        Log::info("📧 Email sent successfully for food order: {$order->ref_number}");
+        // 2️⃣ Customer email
+        if ($order->user_id) {
+            $user = $order->user; // assumes FoodOrderModel has 'user' relationship
+            if ($user && $user->email) {
+                $customerEmail = $user->email;
+                $subjectCustomer = "Your Food Order Payment – Ref {$order->ref_number}";
+                $customerMessage = "Hello {$user->name},\n\n" .
+                                   "Thank you for your payment! Here are your order details:\n\n" .
+                                   "Reference Number: {$order->ref_number}\n" .
+                                   "Order ID: {$order->foodOrder_id}\n" .
+                                   "Total Amount: ₱" . number_format($order->total_bill, 2) . "\n\n" .
+                                   "Ordered Items:\n";
+
+                foreach ($orderedItems as $name => $qty) {
+                    if ($qty > 0) {
+                        $customerMessage .= "- {$name}: {$qty}\n";
+                    }
+                }
+
+                Mail::raw($customerMessage, function ($message) use ($customerEmail, $subjectCustomer) {
+                    $message->to($customerEmail)
+                            ->subject($subjectCustomer);
+                });
+
+                Log::info("📧 Customer email sent to {$customerEmail}");
+            }
+        }
 
     } catch (\Exception $e) {
-        Log::error("❌ Failed to send food order email: " . $e->getMessage());
+        Log::error("❌ Failed to send email: " . $e->getMessage());
     }
 
-    /* ---------------------------------------------------
-     *  INVENTORY DEDUCTION (same as your existing code)
-     * --------------------------------------------------- */
-
+    // ------------------------------
+    //  INVENTORY DEDUCTION
+    // ------------------------------
     DB::transaction(function () use ($orderedItems, $refNumber) {
-
         foreach ($orderedItems as $foodName => $qtyOrdered) {
             $qtyOrdered = is_numeric($qtyOrdered) ? (float) $qtyOrdered : 0;
             if ($qtyOrdered <= 0) continue;
@@ -227,7 +251,6 @@ class FoodOrderController extends Controller
             }
 
             foreach ($ingredients as $ingredientRow) {
-
                 $quantityUsed = is_numeric($ingredientRow->quantity_used) ? (float) $ingredientRow->quantity_used : 0;
                 if ($quantityUsed <= 0) continue;
 
@@ -252,6 +275,7 @@ class FoodOrderController extends Controller
 
     return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
 }
+
 
 
 
