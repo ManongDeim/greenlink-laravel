@@ -421,7 +421,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-
 document.addEventListener("DOMContentLoaded", () => {
   const pickupDate = document.getElementById("pickupDate");
   const hourSelect = document.getElementById("hourSelect");
@@ -429,9 +428,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const periodSelect = document.getElementById("periodSelect");
 
   const OPEN_HOUR = 7;   // 7 AM
-  const CLOSE_HOUR = 20; // 8 PM (20:00)
+  const CLOSE_HOUR = 20; // 8 PM
 
-  // ✅ FIX 1: Get today's date using LOCAL time (not UTC)
+  // Get local today date
   function getLocalDateString() {
     const now = new Date();
     const y = now.getFullYear();
@@ -441,9 +440,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const todayStr = getLocalDateString();
-  pickupDate.min = todayStr; // <-- Now 25 is NOT allowed
+  pickupDate.min = todayStr;
 
-  // ✅ FIX 2: Correct date parsing to LOCAL, not UTC
+  // Parse date as local
   function parseLocalDate(dateStr) {
     const [y, m, d] = dateStr.split("-").map(Number);
     return new Date(y, m - 1, d);
@@ -509,13 +508,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!pickupDate.value) return;
 
     const now = new Date();
-    const selectedDate = parseLocalDate(pickupDate.value); // FIXED
+    const selectedDate = parseLocalDate(pickupDate.value);
     const isToday = selectedDate.toDateString() === now.toDateString();
     const ampm = periodSelect.value;
 
     Array.from(hourSelect.options).forEach(opt => {
       const hour24 = convertTo24(opt.value, ampm);
-
       if (
         hour24 < OPEN_HOUR ||
         hour24 > CLOSE_HOUR ||
@@ -529,23 +527,48 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    // Check if current period has any available hours
     const hasAvailable = Array.from(hourSelect.options).some(o => !o.disabled && o.value !== "");
-    if (!hasAvailable && isToday) {
-      const altPeriod = ampm === "AM" ? "PM" : "AM";
-      periodSelect.value = altPeriod;
-      populateHours();
 
-      const altHasAvailable = Array.from(hourSelect.options).some(o => !o.disabled && o.value !== "");
-      if (altHasAvailable) {
-        showToast(`⛔ Selected period has no available times. Switched to ${altPeriod}.`);
-      } else {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        pickupDate.value = tomorrow.toISOString().split("T")[0];
-        periodSelect.value = "AM";
-        populateHours();
-        showToast("⛔ All times today are booked. Date moved to tomorrow.");
-      }
+    if (!hasAvailable) {
+      const altPeriod = ampm === "AM" ? "PM" : "AM";
+
+      // Check if the other period has available hours
+      periodSelect.value = altPeriod;
+      const altHours = altPeriod === "AM" ? [7,8,9,10,11] : [12,1,2,3,4,5,6,7,8];
+      hourSelect.innerHTML = "";
+      const placeholder = document.createElement("option");
+      placeholder.textContent = "HH";
+      placeholder.value = "";
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      hourSelect.appendChild(placeholder);
+
+      altHours.forEach(h => {
+        const opt = document.createElement("option");
+        opt.value = h;
+        opt.textContent = h;
+        hourSelect.appendChild(opt);
+      });
+
+      // Disable past hours in new period
+      Array.from(hourSelect.options).forEach(opt => {
+        const hour24 = convertTo24(opt.value, altPeriod);
+        if (
+          hour24 < OPEN_HOUR ||
+          hour24 > CLOSE_HOUR ||
+          (isToday && hour24 < now.getHours())
+        ) {
+          opt.disabled = true;
+          opt.classList.add("opacity-40");
+        } else {
+          opt.disabled = false;
+          opt.classList.remove("opacity-40");
+        }
+      });
+
+      // Grey out the original period
+      showToast(`⛔ No available times in ${ampm}, switched to ${altPeriod}`);
     }
   }
 
@@ -553,14 +576,13 @@ document.addEventListener("DOMContentLoaded", () => {
     populateMinutes();
     if (!pickupDate.value || !hourSelect.value) return;
 
-    const selectedDate = parseLocalDate(pickupDate.value); // FIXED
+    const selectedDate = parseLocalDate(pickupDate.value);
     const now = new Date();
     const isToday = selectedDate.toDateString() === now.toDateString();
     const selectedHour24 = convertTo24(hourSelect.value, periodSelect.value);
 
     Array.from(minuteSelect.options).forEach(opt => {
       const minuteVal = parseInt(opt.value);
-
       if (isToday && selectedHour24 === now.getHours() && minuteVal < now.getMinutes()) {
         opt.disabled = true;
         opt.classList.add("opacity-40");
@@ -600,3 +622,4 @@ document.addEventListener("DOMContentLoaded", () => {
   periodSelect.addEventListener("change", populateHours);
   hourSelect.addEventListener("change", disablePastMinutes);
 });
+
