@@ -391,20 +391,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // When user types pax
   paxInput.addEventListener("input", function () {
-    const selectedType = eventData.find((e) => e.id == select.value);
-    if (!selectedType) return;
+  const selectedType = eventData.find((e) => e.id == select.value);
+  if (!selectedType) return;
 
-    const max = parseInt(selectedType.max_pax);
-    const val = parseInt(paxInput.value);
+  const max = parseInt(selectedType.max_pax);
+  let val = parseInt(paxInput.value);
 
-    if (val > max) {
-      paxInput.value = max; // ✅ enforce limit
-      paxError.textContent = `Maximum allowed pax: ${max}`;
-      paxError.classList.remove("hidden");
-    } else {
-      paxError.classList.add("hidden");
-    }
-  });
+  // ✅ Prevent negative numbers
+  if (val < 0) {
+    paxInput.value = 0;
+    paxError.textContent = "Pax cannot be negative";
+    paxError.classList.remove("hidden");
+    return;
+  }
+
+  // ✅ Prevent exceeding max
+  if (val > max) {
+    paxInput.value = max;
+    paxError.textContent = `Maximum allowed pax: ${max}`;
+    paxError.classList.remove("hidden");
+  } else {
+    paxError.classList.add("hidden");
+  }
+});
 
   fetchEvents();
 });
