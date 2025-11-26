@@ -169,6 +169,12 @@ class RoomController extends Controller
             <p>Thank you for choosing us!</p>
         ";
         $mailHelper->sendMail($userEmail, $userSubject, $userBody);
+          Log::info("User email sent", [
+            'to' => $userEmail,
+            'reservation_id' => $reservation->room_reser_id
+        ]);
+
+        
 
         // 2️⃣ Notify the admin
         $adminEmail = ["deimdgreat@gmail.com", "x3qe2w1@gmail.com"]; // <-- replace with actual admin email
@@ -185,6 +191,11 @@ class RoomController extends Controller
             </ul>
         ";
         $mailHelper->sendMail($adminEmail, $adminSubject, $adminBody);
+
+         Log::info("Admin email sent", [
+            'to' => $adminEmail,
+            'reservation_id' => $reservation->room_reser_id
+        ]);
 
     } else {
         Log::warning('Reservation or payment_id missing for webhook event', [
