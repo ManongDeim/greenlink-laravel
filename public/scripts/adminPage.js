@@ -3904,3 +3904,58 @@ function attachHomeEventListeners() {
 
     if (saveBtn) saveBtn.onclick = saveHomeEvent;
 }
+
+// Notication
+
+// ✅ Store previous counts to detect new activity
+let prevCounts = { food: 0, farm: 0, room: 0, event: 0, approval: 0, review: 0};
+
+// ✅ Fetch notification counts from backend
+async function checkNotifications() {
+  try {
+    const res = await fetch('/api/notifications-counts');
+    const counts = await res.json();
+
+    updateBadge('badgeFood', counts.food);
+    updateBadge('badgeFarm', counts.farm);
+    updateBadge('badgeRoom', counts.room);
+    updateBadge('badgeEvent', counts.event);
+    updateBadge('badgeApproval', counts.approval);
+    updateBadge('badgeReview', counts.review);
+
+
+    // ✅ Show toast only when new items arrive
+    if (counts.food > prevCounts.food) showToast("New Food Order Received!");
+    if (counts.farm > prevCounts.farm) showToast("New Farm Order Received!");
+    if (counts.room > prevCounts.room) showToast("New Room Reservation!");
+    if (counts.event > prevCounts.event) showToast("New Event Reservation!");
+    if (counts.approval > prevCounts.approval) showToast("New ID Approval Request!");
+    if (counts.review > prevCounts.review) showToast("New Customer Review!");
+
+    prevCounts = counts;
+
+  } catch (err) {
+    console.error("Notification check failed:", err);
+  }
+}
+
+// ✅ Update badge element
+function updateBadge(id, count) {
+  const badge = document.getElementById(id);
+  if (!badge) return;
+
+  if (count > 0) {
+    badge.textContent = count;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+// ✅ Run repeatedly every 5 seconds
+setInterval(checkNotifications, 5000);
+
+// ✅ Run immediately on page load
+checkNotifications();
+
+

@@ -198,3 +198,24 @@ Route::post('/webhook/paymongo', [PaymongoWebhookController::class, 'handleWebho
 
 Route::get('/oauth2callback', [GmailController::class, 'oauthCallback']);
 Route::get('/authorize-gmail', [GmailController::class, 'authorize']);
+
+// Notification
+
+Route::get('/notifications-counts', function () {
+
+    $food = FoodOrderModel::where('order_status', 'Pending')->count();
+    $farm = FarmOrderModel::where('order_status', 'Pending')->count();
+    $room = RoomReservationModel::where('status', 'Pending')->count();
+    $event = EventAdminModel::where('status', 'Pending')->count();
+    $approval = GoogleUser::where('is_status', 'Pending Validation')->count();
+    $review = Review::where('review_status', 'Not Reviewed')->count();
+
+    return response()->json([
+        'food' => $food,
+        'farm' => $farm,
+        'room' => $room,
+        'event' => $event,
+        'approval' => $approval
+        'review' => $review     
+    ]);
+});
