@@ -215,7 +215,7 @@ Route::get('/notifications-counts', function () {
         'farm' => $farm,
         'room' => $room,
         'event' => $event,
-        'approval' => $approval
-        'review' => $review     
+        'approval' => $approval,
+        'review' => $review,
     ]);
 });
