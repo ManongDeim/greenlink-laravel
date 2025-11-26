@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\FoodProductController;
 use App\Http\Controllers\Api\RoomSeederController;
 use App\Http\Controllers\Api\KitchenInventoryController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\GmailController;
 use App\Models\FoodOrderModel;
 use App\Models\KitchenInventory;
 
@@ -36,6 +37,11 @@ require __DIR__.'/auth.php';
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.redirect');
 
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+
+//Google
+
+Route::get('/oauth2callback', [GmailController::class, 'oauthCallback']);
+Route::get('/authorize-gmail', [GmailController::class, 'authorize']);
 
 Route::get('/api/user', function () {
     if (Auth::check()) {

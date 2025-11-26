@@ -198,11 +198,6 @@ Route::delete('/{id}', [HomePageController::class, 'destroy']);
 
 Route::post('/webhook/paymongo', [PaymongoWebhookController::class, 'handleWebhook']);
 
-//Google
-
-Route::get('/oauth2callback', [GmailController::class, 'oauthCallback']);
-Route::get('/authorize-gmail', [GmailController::class, 'authorize']);
-
 // Notification
 
 Route::get('/notifications-counts', function () {
