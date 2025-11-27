@@ -134,14 +134,37 @@ function removeItem(index) {
 
 // Confirm order
 function confirmOrder() {
-   if (cart.length === 0) {
+  if (cart.length === 0) {
     showAlert("Your cart is empty!");
     return;
   }
 
+  // 1. Get Date and Time values
+  const date = document.getElementById("pickupDate").value;
+  const hour = document.getElementById("hourSelect").value;
+  const minute = document.getElementById("minuteSelect").value;
+  const period = document.getElementById("periodSelect").value; // AM or PM
+
+  if (!date || !hour || !minute) {
+    alert("Please select both date and time before confirming.");
+    return;
+  }
+
+  // 2. Convert to 24-hour format for the Database
+  let hour24 = parseInt(hour);
+  if (period === "PM" && hour24 !== 12) hour24 += 12;
+  if (period === "AM" && hour24 === 12) hour24 = 0;
+
+  // Format: YYYY-MM-DD HH:mm:ss
+  const scheduledDateTime = `${date} ${String(hour24).padStart(2, '0')}:${minute}:00`;
+
+  // 3. Store this in a global variable or window object so sendOrder can access it
+  window.currentScheduledTime = scheduledDateTime;
+
+  // Show Summary
   let summary = "";
   let total = 0;
-  
+
   cart.forEach(item => {
     let price = getPrice(item.name);
     let itemTotal = price * item.qty;
@@ -153,29 +176,19 @@ function confirmOrder() {
       </div>`;
   });
 
-   summary += `
+  summary += `
     <div class="mt-2 flex justify-between font-bold">
       <span>Total:</span>
       <span>₱${total.toFixed(2)}</span>
+    </div>
+    <div class="mt-2 text-sm text-gray-600 text-center border-t pt-2">
+      Pickup: ${date} @ ${hour}:${minute} ${period}
     </div>`;
 
-    document.getElementById("paymentSummary").innerHTML = summary;
+  document.getElementById("paymentSummary").innerHTML = summary;
 
-    const date = document.getElementById("pickupDate").value;
-    const hour = document.getElementById("hourSelect").value;
-    const minute = document.getElementById("minuteSelect").value;
-    const time = `${hour}:${minute}`;
-
-    if (!date || !hour || !minute) {
-      alert("Please select both date and time before confirming.");
-      return;
-    }
-
-    alert(`Order confirmed!\nDate: ${date}\nTime: ${time}`);
-
-    closeModal();
-    document.getElementById("paymentModal").classList.remove("hidden");
-    
+  closeModal(); // Close Cart Modal
+  document.getElementById("paymentModal").classList.remove("hidden"); // Open Payment Modal
 }
 
 
@@ -224,19 +237,20 @@ async function sendOrder(paymentMethod) {
 
   console.log("Sending order with user_id:", window.userId);
 
-  fetch("https://greenlinklolasayong.site/api/farmOrder/create-link", {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      user_id: window.userId,
-      cart: orderData,
-      payment_method: paymentMethod,
-    }),
-  })
+ fetch("https://greenlinklolasayong.site/api/farmOrder/create-link", {
+  method: "POST",
+  credentials: "include",
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+  body: JSON.stringify({
+    user_id: window.userId,
+    cart: orderData,
+    payment_method: paymentMethod,
+    scheduled_datetime: window.currentScheduledTime // <--- ADD THIS
+  }),
+})
     .then((res) => res.json())
     .then((data) => {
       console.log("PayMongo response:", data);

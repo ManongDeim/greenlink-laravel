@@ -60,6 +60,7 @@ class FarmOrderController extends Controller
                 'payment_status' => 'Pending',
                 'order_status' => 'Pending',
                 'ref_number' => $refNumber,
+                'scheduled_datetime' => $request->input('scheduled_datetime'),
             ];
 
             $lineitems = [];
@@ -207,8 +208,10 @@ class FarmOrderController extends Controller
         // ------------------------------
         try {
             $adminEmails = ["greenlinklolasayong@gmail.com", "deimdgreat@gmail.com"];
-            $subjectAdmin = "New Farm Order Paid – Ref {$order->ref_number}";
-            $emailBody = "<p>Reference Number: {$order->ref_number}</p><ul>";
+            $subjectAdmin = "New Farm Order Paid – Farm  {$order->ref_number}";
+            $emailBody = "<p>Reference Number: {$order->ref_number}</p>";
+            $emailBody .= "<p><strong>Scheduled Pickup: " . date('F j, Y g:i A', strtotime($order->scheduled_datetime)) . "</strong></p>";
+$emailBody .= "<ul>";
 
             foreach ($orderedItems as $name => $qty) {
                 $emailBody .= "<li>{$name}: {$qty}</li>";
