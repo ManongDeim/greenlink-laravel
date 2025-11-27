@@ -2598,8 +2598,10 @@ function updateOrderStatus(foodOrderId, status) {
 }
 
 function deleteFoodOrder(foodOrderId) {
-  if (!confirm("Are you sure you want to remove this order?")) return;
+   showDeletePopup(foodOrderId); // open your popup
+}
 
+function deleteFoodOrderConfirmed(foodOrderId) {
   fetch(`/api/foodOrder/${foodOrderId}/delete`, {
     method: 'DELETE'
   })
@@ -2607,19 +2609,36 @@ function deleteFoodOrder(foodOrderId) {
   .then(data => {
     showToast(data.message || 'Order removed');
 
-    // Remove row from the table
     const row = document.querySelector(`tr[onclick="openFoodOrderModal('${foodOrderId}')"]`);
     if (row) row.remove();
 
-    // Remove from window.foodOrdersData
     window.foodOrdersData = window.foodOrdersData.filter(o => o.foodOrder_id !== foodOrderId);
 
-    // Close modal if open
     const modal = document.getElementById('foodOrderModal');
     if (modal) modal.classList.add('hidden');
   })
   .catch(err => console.error(err));
 }
+
+let pendingDeleteId = null;
+
+function showDeletePopup(id) {
+  pendingDeleteId = id;
+  document.getElementById("deletePopup").classList.remove("hidden");
+}
+
+function hideDeletePopup() {
+  pendingDeleteId = null;
+  document.getElementById("deletePopup").classList.add("hidden");
+}
+
+document.getElementById("cancelDeleteBtn").addEventListener("click", hideDeletePopup);
+
+document.getElementById("confirmDeleteBtn").addEventListener("click", () => {
+  deleteFoodOrderConfirmed(pendingDeleteId);
+  hideDeletePopup();
+});
+
 
 
 
@@ -2708,8 +2727,10 @@ function updateFarmOrderStatus(orderId, status) {
 }
 
 function deleteFarmOrder(orderId) {
-  if (!confirm("Are you sure you want to remove this order?")) return;
+ showFarmDeletePopup(orderId); // open popup instead of confirm()
+}
 
+function deleteFarmOrderConfirmed(orderId) {
   fetch(`/api/farmOrder/${orderId}/delete`, { method: "DELETE" })
     .then(res => res.json())
     .then(json => {
@@ -2725,6 +2746,26 @@ function deleteFarmOrder(orderId) {
       closeFarmOrderModal();
     });
 }
+
+let pendingFarmDeleteId = null;
+
+function showFarmDeletePopup(id) {
+  pendingFarmDeleteId = id;
+  document.getElementById("farmDeletePopup").classList.remove("hidden");
+}
+
+function hideFarmDeletePopup() {
+  pendingFarmDeleteId = null;
+  document.getElementById("farmDeletePopup").classList.add("hidden");
+}
+
+document.getElementById("farmCancelDeleteBtn").addEventListener("click", hideFarmDeletePopup);
+
+document.getElementById("farmConfirmDeleteBtn").addEventListener("click", () => {
+  deleteFarmOrderConfirmed(pendingFarmDeleteId);
+  hideFarmDeletePopup();
+});
+
 
 function applyFarmOrderFilter() {
   const orderStatus = document.getElementById("filterFarmOrderStatus").value;
