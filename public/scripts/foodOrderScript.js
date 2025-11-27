@@ -139,24 +139,40 @@ function removeItem(index) {
 }
 
 // Confirm order
+// Replace your existing confirmOrder function with this:
 function confirmOrder() {
   const orderType = document.querySelector('input[name="orderType"]:checked')?.value;
   const date = document.getElementById('pickupDate').value;
   const hour = document.getElementById('hourSelect').value;
   const minute = document.getElementById('minuteSelect').value;
-  const time = `${hour}:${minute}`;
+  const period = document.getElementById('periodSelect').value; // AM/PM
+  const notes = document.getElementById('orderNotes').value;
 
   if (!orderType || !date || !hour || !minute) {
     alert("Please select order type, date, and time before confirming.");
     return;
   }
 
-  // ✅ Proceed to payment summary modal
   if (cart.length === 0) {
     showAlert("Your cart is empty!");
     return;
   }
 
+  // Convert to 24-hour format for MySQL
+  let hour24 = parseInt(hour);
+  if (period === "PM" && hour24 !== 12) hour24 += 12;
+  if (period === "AM" && hour24 === 12) hour24 = 0;
+
+  const scheduledDateTime = `${date} ${String(hour24).padStart(2, '0')}:${minute}:00`;
+
+  // ✅ Store these details globally so sendOrder can access them
+  window.orderDetails = {
+    scheduled_datetime: scheduledDateTime,
+    order_type: orderType, // 'dinein' or 'pickup'
+    notes: notes
+  };
+
+  // Build Summary HTML
   let summary = "";
   let total = 0;
 
@@ -171,8 +187,14 @@ function confirmOrder() {
     </div>`;
   });
 
+  // Display Date/Time/Type in Summary
   summary += `
-    <div class="mt-2 flex justify-between font-bold">
+    <div class="mt-2 border-t pt-2 text-sm text-gray-600">
+        <p><strong>Type:</strong> ${orderType.toUpperCase()}</p>
+        <p><strong>Date:</strong> ${date} @ ${hour}:${minute} ${period}</p>
+        ${notes ? `<p><strong>Note:</strong> ${notes}</p>` : ''}
+    </div>
+    <div class="mt-2 flex justify-between font-bold text-lg">
       <span>Total:</span>
       <span>₱${total.toFixed(2)}</span>
     </div>`;
@@ -231,8 +253,16 @@ async function sendOrder(paymentMethod) {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id: window.userId, cart: orderData, payment_method: paymentMethod })
-  })
+    body: JSON.stringify({ 
+        user_id: window.userId, 
+        cart: orderData, 
+        payment_method: paymentMethod,
+        // ✅ Add new fields here:
+        scheduled_datetime: window.orderDetails.scheduled_datetime,
+        order_type: window.orderDetails.order_type,
+        notes: window.orderDetails.notes
+    })
+})
   .then(res => res.json())
   .then(data => {
     if (data.payment_url) window.location.href = data.payment_url;

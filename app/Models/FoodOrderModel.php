@@ -26,7 +26,10 @@ class FoodOrderModel extends Model
         'payment_method',
         'payment_status',
         'order_status',
-        'ref_number'
+        'ref_number',
+        'scheduled_datetime',
+        'order_type',
+        'notes'
     ];
 
       public function user() {

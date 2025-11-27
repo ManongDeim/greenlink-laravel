@@ -56,6 +56,9 @@ class FoodOrderController extends Controller
                 'payment_status' => 'Pending',
                 'order_status' => 'Pending',
                 'ref_number' => $refNumber,
+                'scheduled_datetime' => $request->input('scheduled_datetime'),
+                'order_type' => $request->input('order_type'),
+                'notes' => $request->input('notes'),
             ];
 
             foreach ($request->cart as $item) {
@@ -172,6 +175,9 @@ public function paymentSuccess(Request $request)
         $messageBody = "A customer has successfully paid for a food order.\n\n" .
                        "Reference Number: {$order->ref_number}\n" .
                        "Order ID: {$order->foodOrder_id}\n" .
+                       "Order Type: " . ucfirst($order->order_type) . "\n" .
+                       "Schedule: " . $order->scheduled_datetime . "\n" .
+                       "Notes: " . ($order->notes ?? 'None') . "\n\n" .
                        "Total Amount: ₱" . number_format($order->total_bill, 2) . "\n\n" .
                        "Ordered Items:\n";
 
@@ -200,6 +206,9 @@ public function paymentSuccess(Request $request)
                                    "Thank you for your payment! Here are your order details:\n\n" .
                                    "Reference Number: {$order->ref_number}\n" .
                                    "Order ID: {$order->foodOrder_id}\n" .
+                                   "Order Type: " . ucfirst($order->order_type) . "\n" .
+                                   "Schedule: " . $order->scheduled_datetime . "\n" .
+                                   "Notes: " . ($order->notes ?? 'None') . "\n\n" .
                                    "Total Amount: ₱" . number_format($order->total_bill, 2) . "\n\n" .
                                    "Ordered Items:\n";
 
