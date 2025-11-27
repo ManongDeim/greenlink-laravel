@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Helpers\GlobalMailHelper;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
@@ -14,41 +15,31 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Models\GoogleUser;
 
-
 class FarmOrderController extends Controller
-{       
-
-
-     public function createPaymentLink(Request $request)
+{
+    public function createPaymentLink(Request $request)
     {
         Log::info('Incoming request:', $request->all());
 
-        // ✅ Get authenticated user automatically
         $user = Auth::user();
-
         if (!$user) {
             return response()->json(['error' => 'Unauthorized. Please log in first.'], 401);
         }
 
-        // Check for validated senior or PWD ID
         $googleUser = GoogleUser::where('user_id', $user->id)->first();
         $hasDiscount = $googleUser && $googleUser->id_status === 'Validated';
 
-        // Wrap everything in a transaction to prevent race conditions
+        // 1. Save to Database
         $order = DB::transaction(function () use ($request, $user, $hasDiscount) {
-
-            // Generate unique FARM order ID (safe under concurrency)
             do {
-                $farmOrderId = 'FARM-'. mt_rand(1,99999);
+                $farmOrderId = 'FARM-' . mt_rand(1, 99999);
             } while (FarmOrderModel::where('farmOrder_id', $farmOrderId)->exists());
 
-            // Generate unique reference number for PayMongo
             $refNumber = uniqid('REF-');
 
-            // Prepare initial order data
             $orderData = [
                 'farmOrder_id' => $farmOrderId,
-                'user_id' => $user->id, // ✅ taken automatically from logged-in user
+                'user_id' => $user->id,
                 'bangus_order' => 0,
                 'eggs_order' => 0,
                 'mudCrab_order' => 0,
@@ -56,14 +47,12 @@ class FarmOrderController extends Controller
                 'nativePork_order' => 0,
                 'squash_order' => 0,
                 'total_bill' => 0,
-                'payment_method' => 'GCash',
+                'payment_method' => $request->payment_method, // 'Cash' or 'GCash'
                 'payment_status' => 'Pending',
                 'order_status' => 'Pending',
                 'ref_number' => $refNumber,
                 'scheduled_datetime' => $request->input('scheduled_datetime'),
             ];
-
-            $lineitems = [];
 
             foreach ($request->cart as $item) {
                 switch ($item['name']) {
@@ -74,99 +63,85 @@ class FarmOrderController extends Controller
                     case 'Native Pork': $orderData['nativePork_order'] = $item['qty']; break;
                     case 'Squash': $orderData['squash_order'] = $item['qty']; break;
                 }
-
-                
-
                 $subtotal = $item['price'] * $item['qty'];
-
-                // Apply 20% discount if user is senior/PWD
-                if ($hasDiscount) {
-                    $subtotal *= 0.8;
-                }
-
+                if ($hasDiscount) $subtotal *= 0.8;
                 $orderData['total_bill'] += $subtotal;
-
-                $lineitems[] = [
-                    'currency' => 'PHP',
-                    'amount'   => intval($item['price'] * 100),
-                    'name'     => $item['name'],
-                    'quantity' => $item['qty']
-                ];
             }
 
-            Log::info('Incoming user_id:', ['user_id' => $request->input('user_id')]);
-
-            // Save to DB inside the transaction
-        $orderData['user_id'] = $request->input('user_id');
             return FarmOrderModel::create($orderData);
         });
 
-        // ✅ PayMongo API call
-        $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
-            ->post('https://api.paymongo.com/v1/checkout_sessions', [
-                'data' => [
-                    'attributes' => [
-                        'line_items' => array_map(function ($item) {
-                            return [
-                                'currency' => 'PHP',
-                                'amount' => intval($item['price'] * 100),
-                                'name' => $item['name'],
-                                'quantity' => $item['qty'],
-                            ];
-                        }, $request->cart),
-                        'payment_method_types' => ['gcash'],
-                        'amount' => intval($order->total_bill * 100),
-                        'description' => "Farm Order Ref: {$order->ref_number}",
-                        'remarks' => $order->ref_number,
-                        'currency' => 'PHP',
-                        'show_line_items' => true,
-                        'show_description' => true,
-                        'success_url' => 'https://greenlinklolasayong.site/api/paymentSuccessFarm?ref=' . $order->ref_number,
-                        'cancel_url' => 'https://greenlinklolasayong.site/api/paymentFailedFarm?ref=' . $order->ref_number,
-                    ]
-                ]
+        // 2. Logic Branch: Cash vs PayMongo
+        if ($request->payment_method === 'Cash') {
+            // For Cash: Process immediately
+            $this->processOrderFulfillment($order);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cash order placed successfully',
+                'farmOrder_id' => $order->farmOrder_id,
+                'ref_number' => $order->ref_number,
+                'total_bill' => $order->total_bill
             ]);
+        } 
+        else {
+            // For PayMongo
+            $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+                ->post('https://api.paymongo.com/v1/checkout_sessions', [
+                    'data' => [
+                        'attributes' => [
+                            'line_items' => array_map(function ($item) use ($hasDiscount) {
+                                $price = $item['price'];
+                                if ($hasDiscount) $price *= 0.8;
+                                return [
+                                    'currency' => 'PHP',
+                                    'amount' => intval($price * 100),
+                                    'name' => $item['name'],
+                                    'quantity' => $item['qty'],
+                                ];
+                            }, $request->cart),
+                            'payment_method_types' => ['gcash'],
+                            'amount' => intval($order->total_bill * 100),
+                            'description' => "Farm Order Ref: {$order->ref_number}",
+                            'remarks' => $order->ref_number,
+                            'currency' => 'PHP',
+                            'success_url' => 'https://greenlinklolasayong.site/api/paymentSuccessFarm?ref=' . $order->ref_number,
+                            'cancel_url' => 'https://greenlinklolasayong.site/api/paymentFailedFarm?ref=' . $order->ref_number,
+                        ]
+                    ]
+                ]);
 
-        $checkoutUrl = $response->json()['data']['attributes']['checkout_url'] ?? null;
+            $checkoutUrl = $response->json()['data']['attributes']['checkout_url'] ?? null;
 
-        Log::info('PayMongo response', $response->json());
-
-        return response()->json([
-            'payment_url' => $checkoutUrl,
-            'farmrOder_id' => $order->farmOrder_id,
-             'hasDiscount' => $hasDiscount,
-            'ref_number' => $order->ref_number
-        ]);
+            return response()->json([
+                'payment_url' => $checkoutUrl,
+                'farmOder_id' => $order->farmOrder_id,
+                'hasDiscount' => $hasDiscount,
+                'ref_number' => $order->ref_number
+            ]);
+        }
     }
 
-   public function paymentSuccess(Request $request)
-{
-    Log::info("✅ paymentSuccess route hit", [
-        'full_url' => $request->fullUrl(),
-        'ref' => $request->query('ref')
-    ]);
+    public function paymentSuccess(Request $request)
+    {
+        $refNumber = $request->query('ref');
+        if (!$refNumber) return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
 
-    $refNumber = $request->query('ref');
+        $order = FarmOrderModel::where('ref_number', $refNumber)->first();
+        if (!$order) return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
 
-    if (!$refNumber) {
-        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
+        if ($order->payment_status !== 'Paid') {
+            $order->update(['payment_status' => 'Paid', 'order_status' => 'Pending']);
+            $this->processOrderFulfillment($order); // Reuse logic
+        }
+
+        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
     }
 
-    $order = FarmOrderModel::where('ref_number', $refNumber)->first();
-
-    if (!$order) {
-        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
-    }
-
-    if ($order->payment_status !== 'Paid') {
-        $order->update([
-            'payment_status' => 'Paid',
-            'order_status' => 'Pending'
-        ]);
-
-        Log::info("Payment marked successful for ref: {$refNumber}");
-
-        // ✅ Store product names & order fields dynamically
+    // --- Private Helper to handle Inventory & Emails (Shared) ---
+    private function processOrderFulfillment($order)
+    {
+        // 1. Map columns to product names
         $productFields = [
             'Bangus' => 'bangus_order',
             'Egg' => 'eggs_order',
@@ -178,152 +153,86 @@ class FarmOrderController extends Controller
 
         $orderedItems = [];
 
+        // 2. Deduct Inventory
         foreach ($productFields as $productName => $field) {
             $orderedQty = $order->$field ?? 0;
             if ($orderedQty > 0) {
                 $product = FarmInventory::where('item_name', $productName)->first();
-
                 if ($product) {
-                    $conversion = $product->unit_conversion ?? 1; // defaults to 1:1
+                    $conversion = $product->unit_conversion ?? 1;
                     $deductQty = $orderedQty * $conversion;
-
-                    Log::info("🔍 {$productName} | Ordered: {$orderedQty} | Conversion: {$conversion} | Current: {$product->current_stock}");
-
                     $newQty = max(0, $product->current_stock - $deductQty);
                     $product->update(['current_stock' => $newQty]);
-
-                    Log::info("✅ Deducted {$deductQty} ({$conversion} per order) from {$productName}, new stock: {$newQty}");
-                } else {
-                    Log::warning("⚠️ Product not found in farm inventory: {$productName}");
                 }
-
                 $orderedItems[$productName] = $orderedQty;
             }
         }
 
-        Log::info("✅ All applicable stock deducted for ref: {$refNumber}");
-
-        // ------------------------------
-        // ✉ Send emails via Hostinger SMTP
-        // ------------------------------
+        // 3. Send Emails
         try {
             $adminEmails = ["greenlinklolasayong@gmail.com", "deimdgreat@gmail.com"];
-            $subjectAdmin = "New Farm Order Paid – Farm  {$order->ref_number}";
+            $subjectAdmin = "New Farm Order ({$order->payment_method}) – {$order->ref_number}";
+            
             $emailBody = "<p>Reference Number: {$order->ref_number}</p>";
+            $emailBody .= "<p>Payment Method: {$order->payment_method} ({$order->payment_status})</p>";
             $emailBody .= "<p><strong>Scheduled Pickup: " . date('F j, Y g:i A', strtotime($order->scheduled_datetime)) . "</strong></p>";
-$emailBody .= "<ul>";
-
+            $emailBody .= "<ul>";
             foreach ($orderedItems as $name => $qty) {
                 $emailBody .= "<li>{$name}: {$qty}</li>";
             }
-            $emailBody .= "<p>Total Paid: PHP " . number_format($order->total_bill, 2) . "</p></ul>";
+            $emailBody .= "<p>Total Bill: PHP " . number_format($order->total_bill, 2) . "</p></ul>";
 
-            // Send admin emails
             foreach ($adminEmails as $email) {
                 Mail::html($emailBody, function ($message) use ($email, $subjectAdmin) {
                     $message->to($email)->subject($subjectAdmin);
                 });
             }
 
-            // Send customer email
             if ($order->user && $order->user->email) {
                 $customerEmail = $order->user->email;
-                $subjectCustomer = "Payment Completed – Farm Order {$order->farmOrder_id}";
-                Mail::html($emailBody, function ($message) use ($customerEmail, $subjectCustomer) {
-                    $message->to($customerEmail)->subject($subjectCustomer);
+                Mail::html($emailBody, function ($message) use ($customerEmail, $order) {
+                    $message->to($customerEmail)->subject("Farm Order Confirmation – {$order->ref_number}");
                 });
             }
-
-            Log::info("📧 Emails sent via Hostinger SMTP for ref: {$refNumber}");
-
         } catch (\Exception $e) {
-            Log::error("❌ Failed to send email via Hostinger SMTP: " . $e->getMessage());
+            Log::error("❌ Failed to send email: " . $e->getMessage());
         }
-
-    } else {
-        Log::info("⚠️ Payment already marked as Paid for ref: {$refNumber}, skipping deduction.");
+        
+        Log::info("✅ Order fulfillment completed for {$order->ref_number}");
     }
 
-    return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentSuccess.html');
-}
-
-
-
-    // Step 2b: If payment fails
     public function paymentFailed(Request $request)
     {
-      Log::info("❌ paymentFailed route hit", [
-        'full_url' => $request->fullUrl(),
-        'ref' => $request->query('ref'),
-    ]);
-
-    $refNumber = $request->query('ref');
-
-    if ($refNumber) {
-        $updated = FarmOrderModel::where('ref_number', $refNumber)
-            ->update([
-                'payment_status' => 'Failed',
-                'order_status' => 'Cancelled'
-            ]);
-
-        Log::info("❌ Payment marked as failed for ref: {$refNumber}, updated rows: {$updated}");
-    } else {
-        Log::warning('⚠️ No ref number in paymentFailed redirect.');
+        $refNumber = $request->query('ref');
+        if ($refNumber) {
+            FarmOrderModel::where('ref_number', $refNumber)->update(['payment_status' => 'Failed', 'order_status' => 'Cancelled']);
+        }
+        return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
     }
 
-    return redirect()->away($request->getSchemeAndHttpHost() . '/pages/paymentFailed.html');
-    
-    }
-
-      public function index()
+    public function index()
     {
         return response()->json(FarmOrderModel::all());
     }
 
-
     public function updateStatus(Request $request, $farmOrderId)
-{
-    $status = $request->input('order_status');
-
-    if (!in_array($status, ['Pending','Completed','Cancelled'])) {
-        return response()->json(['error' => 'Invalid status'], 400);
-    }
-
-    $order = FarmOrderModel::where('farmOrder_id', $farmOrderId)->first();
-
-    if (!$order) {
-        return response()->json(['error' => 'Order not found'], 404);
-    }
-
-    $order->order_status = $status;
-    $order->save();
-
-    return response()->json(['message' => "Order {$order->farmOrder_id} updated to {$status}", 'order' => $order]);
-}
-
-public function deleteFarmOrder($id)
-{
-    try {
-        $order = FarmOrderModel::where('farmOrder_id', $id)->first();
-
-        if (!$order) {
-            return response()->json([
-                'message' => 'Farm order not found',
-            ], 404);
+    {
+        $status = $request->input('order_status');
+        if (!in_array($status, ['Pending', 'Completed', 'Cancelled'])) {
+            return response()->json(['error' => 'Invalid status'], 400);
         }
-
-        $order->delete();
-
-        return response()->json([
-            'message' => 'Farm order removed successfully',
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Error deleting farm order',
-            'error' => $e->getMessage(),
-        ], 500);
+        $order = FarmOrderModel::where('farmOrder_id', $farmOrderId)->first();
+        if (!$order) return response()->json(['error' => 'Order not found'], 404);
+        $order->order_status = $status;
+        $order->save();
+        return response()->json(['message' => "Order updated", 'order' => $order]);
     }
-}
 
+    public function deleteFarmOrder($id)
+    {
+        $order = FarmOrderModel::where('farmOrder_id', $id)->first();
+        if (!$order) return response()->json(['message' => 'Farm order not found'], 404);
+        $order->delete();
+        return response()->json(['message' => 'Farm order removed successfully'], 200);
+    }
 }
