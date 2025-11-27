@@ -263,12 +263,12 @@ function renderSection(title, data) {
 
 
   // --- Create Card with rating section ---
-  function createCard(item, type) {
-    const ratingSection = (id) => `
+function createCard(item, type) {
+  const ratingSection = (id) => `
       <div class="mt-3">
         <p class="text-gray-700 font-medium">Rate your experience:</p>
         <div class="flex space-x-1 mt-1 stars" data-id="${id}" data-type="${type}">
-          ${[1,2,3,4,5].map(n => `<span class="cursor-pointer text-gray-300 hover:text-yellow-400 text-xl">&#9733;</span>`).join('')}
+          ${[1, 2, 3, 4, 5].map(n => `<span class="cursor-pointer text-gray-300 hover:text-yellow-400 text-xl">&#9733;</span>`).join('')}
         </div>
         <div class="mt-2 hidden feedback-section">
           <textarea class="w-full border rounded p-2 mt-1 text-gray-700" placeholder="Write a comment (optional)"></textarea>
@@ -277,69 +277,94 @@ function renderSection(title, data) {
       </div>
     `;
 
-     let itemId = type.includes('Food') ? item.foodOrder_id
-           : type.includes('Farm') ? item.farmOrder_id
-           : type.includes('Room') ? item.room_reser_id
-           : item.event_reservation_id;
+  // 1. Identify IDs and Type Keys
+  let itemId, typeKey, currentStatus;
 
-let typeKey = type.includes('Food') ? 'food'
-            : type.includes('Farm') ? 'farm'
-            : type.includes('Room') ? 'room'
-            : 'event';
+  if (type.includes('Food')) {
+    itemId = item.foodOrder_id;
+    typeKey = 'food';
+    currentStatus = item.order_status; // Column: order_status
+  } else if (type.includes('Farm')) {
+    itemId = item.farmOrder_id;
+    typeKey = 'farm';
+    currentStatus = item.order_status; // Column: order_status
+  } else if (type.includes('Room')) {
+    itemId = item.room_reser_id;
+    typeKey = 'room';
+    currentStatus = item.status; // Column: status
+  } else {
+    itemId = item.event_reservation_id;
+    typeKey = 'event';
+    currentStatus = item.approval_status; // Column: approval_status
+  }
 
-let cancelBtn = `<button 
-      class="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 cancel-btn" 
-      data-id="${itemId}" 
-      data-type="${typeKey}">
-      Cancel
-</button>`;
+  // Ensure status has a fallback
+  const statusDisplay = currentStatus || 'Pending';
 
+  // 2. Logic to Hide Cancel Button if Cancelled, Completed, or Rejected
+  let cancelBtn = '';
+  const nonCancellable = ['Cancelled', 'Completed', 'Rejected', 'Checked-out', 'Approved']; // Add 'Approved' here if you don't want them to cancel approved events
 
-    switch(type) {
-      case "🍴 Food Orders":
-        return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
+  // Check if current status is effectively "finished" or already cancelled
+  // We normalize to lowercase for comparison to be safe
+  if (!nonCancellable.some(s => s.toLowerCase() === statusDisplay.toLowerCase())) {
+    cancelBtn = `<button 
+          class="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 cancel-btn" 
+          data-id="${itemId}" 
+          data-type="${typeKey}">
+          Cancel
+    </button>`;
+  } else {
+    // Optional: Show a disabled button or text indicating it's done
+    // cancelBtn = `<span class="mt-2 inline-block px-3 py-1 bg-gray-300 text-gray-600 rounded cursor-not-allowed">${statusDisplay}</span>`;
+  }
+
+  // 3. Render HTML
+  switch (type) {
+    case "🍴 Food Orders":
+      return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
           <h3 class="text-lg font-semibold text-teal-700">Order #${item.foodOrder_id}</h3>
           <p class="text-gray-600 mt-2">Total: ₱${item.total_bill}</p>
           <p class="text-gray-600">Payment: ${item.payment_method} (${item.payment_status})</p>
-          <p class="text-gray-600">Status: ${item.order_status ?? 'N/A'}</p>
+          <p class="text-gray-600 font-medium">Status: ${statusDisplay}</p>
           ${ratingSection(item.foodOrder_id)}
-            ${cancelBtn}
+          ${cancelBtn}
         </div>`;
-      case "🌾 Farm Orders":
-        return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
+    case "🌾 Farm Orders":
+      return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
           <h3 class="text-lg font-semibold text-teal-700">Farm Order #${item.farmOrder_id}</h3>
           <p class="text-gray-600 mt-2">Total: ₱${item.total_bill}</p>
           <p class="text-gray-600">Payment: ${item.payment_method} (${item.payment_status})</p>
-          <p class="text-gray-600">Status: ${item.order_status ?? 'N/A'}</p>
+          <p class="text-gray-600 font-medium">Status: ${statusDisplay}</p>
           ${ratingSection(item.farmOrder_id)}
-            ${cancelBtn}
+          ${cancelBtn}
         </div>`;
-      case "🏡 Room Reservations":
-        return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
+    case "🏡 Room Reservations":
+      return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
           <h3 class="text-lg font-semibold text-teal-700">${item.room}</h3>
           <p class="text-gray-600">Reservation ID: <span class="font-medium">${item.room_reser_id}</span></p>
           <p class="text-gray-600 mt-2">Check-in: ${item.check_in_date}</p>
           <p class="text-gray-600">Check-out: ${item.check_out_date}</p>
           <p class="text-gray-600">Total: ₱${item.total_bill}</p>
           <p class="text-gray-600">Payment: ${item.payment_method ?? 'N/A'} (${item.payment_status ?? 'N/A'})</p>
+          <p class="text-gray-600 font-medium">Status: ${statusDisplay}</p>
           ${ratingSection(item.room_reser_id)}
-            ${cancelBtn}
+          ${cancelBtn}
         </div>`;
-      case "📅 Event Reservations":
-        return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
+    case "📅 Event Reservations":
+      return `<div class="p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition">
           <h3 class="text-lg font-semibold text-teal-700">${item.event_type}</h3>
           <p class="text-gray-600">Reservation ID: <span class="font-medium">${item.event_reservation_id}</span></p>
           <p class="text-gray-600 mt-2">From: ${item.start_datetime}</p>
           <p class="text-gray-600">To: ${item.end_datetime}</p>
           <p class="text-gray-600">Guests: ${item.pax}</p>
-          <p class="text-gray-600">Status: ${item.approval_status ?? 'Pending'}</p>
           <p class="text-gray-600">Payment Status: ${item.payment_status ?? 'Pending'}</p>
+          <p class="text-gray-600 font-medium">Status: ${statusDisplay}</p>
           ${ratingSection(item.event_reservation_id)}
           ${cancelBtn}
-         
         </div>`;
-    }
   }
+}
   function renderFilteredCards(title) {
   const container = document.getElementById("sectionCards");
   let items = window.currentSectionData;
