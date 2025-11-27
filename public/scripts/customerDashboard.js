@@ -98,63 +98,46 @@ document.addEventListener('DOMContentLoaded', () => {
   const type = btn.dataset.type; // 'food', 'farm', 'event', or 'room'
   const card = btn.closest('div.p-5');
 
-  if (type === 'room') {
-    const checkIn = new Date(card.querySelector('p:nth-child(3)').innerText.split(': ')[1]);
-    const now = new Date();
-    const diffHours = (checkIn - now) / 36e5;
-
-    const confirmMsg = diffHours >= 24
-      ? "Are you sure? Cancellation is fully refundable."
-      : "Are you sure? Cancellation less than 24 hours before check-in is non-refundable.";
-
-    if(!confirm(confirmMsg)) return;
-
-    try {
-      const res = await fetch(`/api/customer/cancel-room/${id}`, { method: 'POST', credentials: 'include' });
-      const data = await res.json();
-      if(data.success) {
-        alert(data.message);
-        card.remove();
-      } else {
-        alert(data.message || 'Failed to cancel reservation.');
-      }
-    } catch(err) {
-      console.error(err);
-      alert('Error cancelling reservation.');
-    }
-    return; // done
-  }
-
-  // For food/farm/event
-  const typeMap = { food: 'food', farm: 'farm', event: 'event' };
+  // 1. Unified Confirmation (Simple)
   if (!confirm(`Are you sure you want to cancel this ${type}?`)) return;
 
   try {
+    // 2. Unified API Call
+    // This dynamically handles: cancel-room, cancel-food, cancel-farm, cancel-event
     const res = await fetch(`/api/customer/cancel-${type}/${id}`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Accept': 'application/json' },
     });
+
     const data = await res.json();
-    if(data.success){
+
+    if (data.success) {
       alert(data.message);
-      btn.disabled = true;
-      btn.innerText = "Cancelled ❌";
-      // Optionally update status text
-      if(type === 'room') card.querySelector('p:nth-child(6)').innerText = "Status: Cancelled";
-      else card.querySelector('p:nth-child(4)').innerText = "Status: Cancelled";
+
+      // 3. Update the UI Status text safely
+      // Instead of relying on nth-child (which breaks if you add a line), 
+      // we scan for the paragraph that starts with "Status:"
+      const allParagraphs = card.querySelectorAll('p');
+      for (let p of allParagraphs) {
+        if (p.innerText.trim().startsWith('Status:')) {
+          p.innerText = "Status: Cancelled";
+          p.classList.add('text-red-600'); // Optional: make it red so it's obvious
+          break; 
+        }
+      }
+
+      // 4. Remove the cancel button so they can't click it again
+      btn.remove();
+
     } else {
-      alert("Failed to cancel.");
+      alert(data.message || "Failed to cancel.");
     }
-  } catch(err){
+  } catch (err) {
     console.error(err);
     alert("Error cancelling the order/reservation.");
   }
-
 });
-
-
-
 
 }
 
