@@ -1,3 +1,9 @@
+function formatDateTime(dateString) {
+  if (!dateString) return '<span class="text-gray-400 italic">Not Scheduled</span>';
+  const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+  return new Date(dateString).toLocaleDateString('en-US', options);
+}
+
 // 🔔 Global Toast Function
 function showToast(message, type = "success") {
   // Remove old toast if it exists
@@ -394,7 +400,6 @@ const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPayment
 <div class="p-6 bg-white rounded-2xl shadow-md">
   <h2 class="text-2xl font-bold text-teal-700 mb-4">Food Orders</h2>
 
-  <!-- FILTERS -->
   <div class="flex gap-4 mb-4">
     <select id="filterOrderStatus" onchange="applyFoodOrderFilter()"
       class="px-3 py-2 border rounded-lg">
@@ -412,7 +417,6 @@ const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPayment
     </select>
   </div>
 
-  <!-- SEARCH -->
   <div class="mb-4">
     <input id="foodOrdersSearch" 
            type="text" 
@@ -426,7 +430,7 @@ const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPayment
       <tr>
         <th class="px-4 py-2">Action</th>
         <th class="px-4 py-2">Order ID</th>
-        <th class="px-4 py-2">Items</th>
+        <th class="px-4 py-2">Type</th> <th class="px-4 py-2">Scheduled</th> <th class="px-4 py-2">Items</th>
         <th class="px-4 py-2">Total Bill</th>
         <th class="px-4 py-2">Payment Status</th>
         <th class="px-4 py-2">Order Status</th>
@@ -471,9 +475,24 @@ const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPayment
             </div>
           </td>
 
-          <td class="px-4 py-2">${order.foodOrder_id}</td>
-          <td class="px-4 py-2">${items || '-'}</td>
-          <td class="px-4 py-2">₱${parseFloat(order.total_bill).toLocaleString()}</td>
+          <td class="px-4 py-2 font-mono text-xs">${order.foodOrder_id}</td>
+
+          <td class="px-4 py-2">
+            <span class="px-2 py-1 text-xs font-bold rounded uppercase ${
+              order.order_type === 'pickup' 
+              ? 'bg-orange-100 text-orange-800' 
+              : 'bg-blue-100 text-blue-800'
+            }">
+              ${order.order_type || 'Dine-in'}
+            </span>
+          </td>
+
+          <td class="px-4 py-2 font-medium text-teal-800">
+            ${window.formatDateTime ? window.formatDateTime(order.scheduled_datetime) : order.scheduled_datetime}
+          </td>
+
+          <td class="px-4 py-2 text-gray-600">${items || '-'}</td>
+          <td class="px-4 py-2 font-bold">₱${parseFloat(order.total_bill).toLocaleString()}</td>
           <td class="px-4 py-2">
             <span class="px-2 py-1 text-xs font-semibold ${order.payment_status === 'Paid' ? 'text-green-700 bg-green-100' : 'text-teal-700 bg-teal-100'} rounded-full">
               ${order.payment_status}
@@ -487,24 +506,33 @@ const foodOrdersTableTemplate = (data, selectedOrderStatus = '', selectedPayment
   </table>
 </div>
 
-<!-- MODAL -->
 <div id="foodOrderModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex items-center justify-center">
-  <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
+  <div class="bg-white p-6 rounded-xl w-96 shadow-xl relative">
     <h3 class="text-xl font-bold text-teal-700 mb-3">Order Details</h3>
-    <p><strong>Order ID:</strong> <span id="foodModalOrderID"></span></p>
-    <p><strong>Items:</strong> <span id="modalOrderItems"></span></p>
-    <p><strong>Total Bill:</strong> ₱<span id="modalOrderTotal"></span></p>
-    <p><strong>Payment Status:</strong> <span id="modalOrderPayment"></span></p>
-    <p><strong>Order Status:</strong> <span id="modalOrderStatus"></span></p>
+    
+    <div class="space-y-2 text-sm text-gray-700">
+        <p><strong>Order ID:</strong> <span id="foodModalOrderID"></span></p>
+        
+        <p><strong>Type:</strong> <span id="foodModalOrderType" class="uppercase font-bold"></span></p>
+        <p><strong>Schedule:</strong> <span id="foodModalOrderTime" class="text-teal-700 font-bold"></span></p>
 
-    <div class="mt-4 text-right">
+        <p><strong>Items:</strong> <span id="modalOrderItems"></span></p>
+        <p><strong>Total Bill:</strong> ₱<span id="modalOrderTotal"></span></p>
+        <p><strong>Payment Status:</strong> <span id="modalOrderPayment"></span></p>
+        <p><strong>Order Status:</strong> <span id="modalOrderStatus"></span></p>
+
+        <div id="foodModalNotesSection" class="hidden mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-gray-700 italic">
+           <strong>Note:</strong> <span id="foodModalNotes"></span>
+        </div>
+    </div>
+
+    <div class="mt-6 text-right">
       <button onclick="closeFoodOrderModal()" 
-              class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+              class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition">Close</button>
     </div>
   </div>
 </div>
 `;
-
 // ================== GLOBAL FUNCTION ==================
 function filterFoodOrders() {
   const query = document.getElementById('foodOrdersSearch').value.toLowerCase();
@@ -531,7 +559,6 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
 <div class="p-6 bg-white rounded-2xl shadow-md">
   <h2 class="text-2xl font-bold text-teal-700 mb-4">Farm Orders</h2>
 
-  <!-- FILTERS -->
   <div class="flex gap-4 mb-4">
     <select id="filterFarmOrderStatus" onchange="applyFarmOrderFilter()" class="px-3 py-2 border rounded-lg">
       <option value="" ${selectedOrderStatus === '' ? 'selected' : ''}>All Order Status</option>
@@ -547,7 +574,6 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
     </select>
   </div>
 
-  <!-- SEARCH -->
   <div class="mb-4">
     <input id="farmOrdersSearch" 
            type="text" 
@@ -561,7 +587,7 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
       <tr>
         <th class="px-4 py-2">Action</th>
         <th class="px-4 py-2">Order ID</th>
-        <th class="px-4 py-2">Items</th>
+        <th class="px-4 py-2">Scheduled Pickup</th> <th class="px-4 py-2">Items</th>
         <th class="px-4 py-2">Total Bill</th>
         <th class="px-4 py-2">Payment Status</th>
         <th class="px-4 py-2">Order Status</th>
@@ -593,7 +619,6 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
 
             <div id="farmOrderActionMenu-${order.farmOrder_id}"
                  class="absolute left-0 top-full mt-2 w-36 bg-white border rounded shadow-lg hidden z-50">
-
               ${
                 order.order_status === "Pending"
                   ? `
@@ -611,9 +636,14 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
             </div>
           </td>
 
-          <td class="px-4 py-2">${order.farmOrder_id}</td>
-          <td class="px-4 py-2">${items || "-"}</td>
-          <td class="px-4 py-2">₱${parseFloat(order.total_bill).toLocaleString()}</td>
+          <td class="px-4 py-2 font-mono text-xs">${order.farmOrder_id}</td>
+          
+          <td class="px-4 py-2 font-medium text-teal-800">
+            ${formatDateTime(order.scheduled_datetime)}
+          </td>
+
+          <td class="px-4 py-2 text-gray-600">${items || "-"}</td>
+          <td class="px-4 py-2 font-bold">₱${parseFloat(order.total_bill).toLocaleString()}</td>
           <td class="px-4 py-2">
             <span class="px-2 py-1 text-xs font-semibold ${
               order.payment_status === "Paid"
@@ -632,19 +662,24 @@ const farmOrderTableTemplate = (data, selectedOrderStatus = '', selectedPaymentS
   </table>
 </div>
 
-<!-- MODAL -->
 <div id="farmOrderModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex items-center justify-center">
-  <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
+  <div class="bg-white p-6 rounded-xl w-96 shadow-xl relative">
     <h3 class="text-xl font-bold text-teal-700 mb-3">Order Details</h3>
-    <p><strong>Order ID:</strong> <span id="farmModalOrderID"></span></p>
-    <p><strong>Items:</strong> <span id="farmModalOrderItems"></span></p>
-    <p><strong>Total Bill:</strong> ₱<span id="farmModalOrderTotal"></span></p>
-    <p><strong>Payment Status:</strong> <span id="farmModalOrderPayment"></span></p>
-    <p><strong>Order Status:</strong> <span id="farmModalOrderStatus"></span></p>
+    
+    <div class="space-y-2 text-sm text-gray-700">
+        <p><strong>Order ID:</strong> <span id="farmModalOrderID"></span></p>
+        
+        <p><strong>Scheduled Pickup:</strong> <span id="farmModalOrderTime" class="font-bold text-teal-700"></span></p>
+        
+        <p><strong>Items:</strong> <span id="farmModalOrderItems"></span></p>
+        <p><strong>Total Bill:</strong> ₱<span id="farmModalOrderTotal"></span></p>
+        <p><strong>Payment Status:</strong> <span id="farmModalOrderPayment"></span></p>
+        <p><strong>Order Status:</strong> <span id="farmModalOrderStatus"></span></p>
+    </div>
 
-    <div class="mt-4 text-right">
+    <div class="mt-6 text-right">
       <button onclick="closeFarmOrderModal()" 
-              class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+              class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition">Close</button>
     </div>
   </div>
 </div>
@@ -2467,36 +2502,55 @@ function validateFloatInput(input) {
 
 // Function to open modal for a selected order
 function openFoodOrderModal(orderId) {
+  // Find the specific order from the global data
   const order = window.foodOrdersData.find(o => o.foodOrder_id === orderId);
-  if (!order) return;
 
-  document.getElementById('foodModalOrderID').innerText = order.foodOrder_id;
+  if (order) {
+    document.getElementById("foodModalOrderID").textContent = order.foodOrder_id;
+    
+    // Process Items
+    const items = [
+       { key: 'smokedFish_order', name: 'Smoked Fish' },
+       { key: 'deviledFish_order', name: 'Deviled Fish' },
+       { key: 'seaSig_order', name: 'SeaSig' },
+       { key: 'blueCraze_order', name: 'Blue Craze' },
+       { key: 'chickenSheet_order', name: 'Chicken Sheet' },
+       { key: 'blackMeal_order', name: 'Black Meal' }
+    ]
+    .filter(i => order[i.key] && order[i.key] > 0)
+    .map(i => `${order[i.key]}x ${i.name}`)
+    .join(', ');
 
-  const items = [
-    { key: 'smokedFish_order', name: 'Smoked Fish' },
-    { key: 'deviledFish_order', name: 'Deviled Fish' },
-    { key: 'seaSig_order', name: 'SeaSig' },
-    { key: 'blueCraze_order', name: 'Blue Craze' },
-    { key: 'chickenSheet_order', name: 'Chicken Sheet' },
-    { key: 'blackMeal_order', name: 'Black Meal' }
-  ]
-  .filter(i => order[i.key] && order[i.key] > 0)
-  .map(i => `${order[i.key]}x ${i.name}`)
-  .join(', ');
+    document.getElementById("modalOrderItems").textContent = items || "No items";
+    document.getElementById("modalOrderTotal").textContent = parseFloat(order.total_bill).toLocaleString();
+    document.getElementById("modalOrderPayment").textContent = order.payment_status;
+    document.getElementById("modalOrderStatus").textContent = order.order_status;
 
-  document.getElementById('modalOrderItems').innerText = items || '-';
-  document.getElementById('modalOrderTotal').innerText = parseFloat(order.total_bill).toLocaleString();
-  document.getElementById('modalOrderPayment').innerText = order.payment_status;
-  document.getElementById('modalOrderStatus').innerText = order.order_status;
+    // ✅ NEW: Fill Type and Time
+    document.getElementById("foodModalOrderType").textContent = order.order_type || "Dine-in";
+    // Check if formatDateTime exists, otherwise just show raw string
+    const timeString = window.formatDateTime ? window.formatDateTime(order.scheduled_datetime) : order.scheduled_datetime;
+    document.getElementById("foodModalOrderTime").innerHTML = timeString; 
 
-  document.getElementById('foodOrderModal').classList.remove('hidden');
+    // ✅ NEW: Handle Notes
+    const noteBox = document.getElementById("foodModalNotesSection");
+    const noteText = document.getElementById("foodModalNotes");
+    
+    if (order.notes && order.notes.trim() !== "") {
+        noteText.textContent = order.notes;
+        noteBox.classList.remove("hidden");
+    } else {
+        noteBox.classList.add("hidden");
+    }
+
+    // Show Modal
+    document.getElementById("foodOrderModal").classList.remove("hidden");
+  }
 }
-
 
 function closeFoodOrderModal() {
-  document.getElementById('foodOrderModal').classList.add('hidden');
+  document.getElementById("foodOrderModal").classList.add("hidden");
 }
-
 
 
 // Update order status
@@ -2586,34 +2640,40 @@ function applyFoodOrderFilter() {
 
 // Function to open modal for a selected order
 function openFarmOrderModal(orderId) {
+  // Find the specific order from the global data
   const order = window.farmOrdersData.find(o => o.farmOrder_id === orderId);
-  if (!order) return;
 
-  document.getElementById('farmModalOrderID').innerText = order.farmOrder_id;
+  if (order) {
+    document.getElementById("farmModalOrderID").textContent = order.farmOrder_id;
+    
+    // Format Items
+    const items = [
+      { key: "bangus_order", name: "Bangus" },
+      { key: "eggs_order", name: "Eggs" },
+      { key: "mudCrab_order", name: "Mud Crab" },
+      { key: "nativeChicken_order", name: "Native Chicken" },
+      { key: "nativePork_order", name: "Native Pork" },
+      { key: "squash_order", name: "Squash" },
+    ]
+    .filter((i) => order[i.key] && order[i.key] > 0)
+    .map((i) => `${order[i.key]}x ${i.name}`)
+    .join(", ");
 
-  const items = [
-    { key: 'bangus_order', name: 'Bangus' },
-    { key: 'eggs_order', name: 'Eggs' },
-    { key: 'mudCrab_order', name: 'Mud Crab' },
-    { key: 'nativeChicken_order', name: 'Native Chicken' },
-    { key: 'nativePork_order', name: 'Native Pork' },
-    { key: 'squash_order', name: 'Squash' },
-  ]
-    .filter(i => order[i.key] > 0)
-    .map(i => `${order[i.key]}x ${i.name}`)
-    .join(', ');
+    document.getElementById("farmModalOrderItems").textContent = items || "No items";
+    document.getElementById("farmModalOrderTotal").textContent = parseFloat(order.total_bill).toLocaleString();
+    document.getElementById("farmModalOrderPayment").textContent = order.payment_status;
+    document.getElementById("farmModalOrderStatus").textContent = order.order_status;
 
-  document.getElementById('farmModalOrderItems').innerText = items || '-';
-  document.getElementById('farmModalOrderTotal').innerText = parseFloat(order.total_bill).toLocaleString();
-  document.getElementById('farmModalOrderPayment').innerText = order.payment_status;
-  document.getElementById('farmModalOrderStatus').innerText = order.order_status;
+    // ✅ Fill the new Time Field
+    document.getElementById("farmModalOrderTime").textContent = formatDateTime(order.scheduled_datetime); // Removed HTML tags for textContent
 
-  document.getElementById('farmOrderModal').classList.remove('hidden');
+    // Show Modal
+    document.getElementById("farmOrderModal").classList.remove("hidden");
+  }
 }
 
-
 function closeFarmOrderModal() {
-  document.getElementById('farmOrderModal').classList.add('hidden');
+  document.getElementById("farmOrderModal").classList.add("hidden");
 }
 
 function updateFarmOrderStatus(orderId, status) {
