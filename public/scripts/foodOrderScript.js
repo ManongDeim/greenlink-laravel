@@ -407,35 +407,63 @@ document.addEventListener("keydown", function (event) {
     const products = await response.json();
     const grid = document.getElementById('productGrid');
 
-    
-    products.forEach((product, index) => {
+    products.forEach((product) => {
       productData[product.productName] = parseFloat(product.price); 
       const counterId = `counter_${product.id}`;
       window.counters[counterId] = 0;
 
+      const isUnavailable = product.availability === "Unavailable";
+
       const card = document.createElement('div');
-      card.className = "overflow-hidden transition bg-white shadow-md rounded-xl w-80 hover:shadow-xl";
+      card.className = `
+        overflow-hidden transition bg-white shadow-md rounded-xl w-80 hover:shadow-xl relative
+        ${isUnavailable ? "opacity-50 pointer-events-none grayscale" : ""}
+      `;
+
       card.innerHTML = `
+        ${isUnavailable 
+          ? `<span class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded z-10">Unavailable</span>` 
+          : ""
+        }
+
         <img src="${product.productPicture}" alt="${product.productName}" class="object-cover w-full h-48">
         <div class="p-4">
           <h3 class="text-lg font-semibold">${product.productName}</h3>
           <p class="text-gray-500">₱${product.price}</p>
+
           <div class="flex items-center mt-4 space-x-4">
             <div class="flex items-center space-x-4">
-              <button type="button" class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full hover:bg-teal-600 hover:text-white" onclick="decrementCounter('${counterId}')">−</button>
-              <span id="${counterId}" class="w-10 py-1 text-lg font-semibold text-center bg-gray-100 rounded-lg">0</span>
-              <button type="button" class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full hover:bg-teal-600 hover:text-white" onclick="incrementCounter('${counterId}')">+</button>
+              <button type="button"
+                class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full
+                ${isUnavailable ? "cursor-not-allowed" : "hover:bg-teal-600 hover:text-white"}"
+                onclick="decrementCounter('${counterId}')">−</button>
+
+              <span id="${counterId}" 
+                class="w-10 py-1 text-lg font-semibold text-center bg-gray-100 rounded-lg">0</span>
+
+              <button type="button"
+                class="flex items-center justify-center w-10 h-10 text-lg font-bold bg-gray-200 rounded-full
+                ${isUnavailable ? "cursor-not-allowed" : "hover:bg-teal-600 hover:text-white"}"
+                onclick="incrementCounter('${counterId}')">+</button>
             </div>
-            <button type="button" class="px-4 py-2 text-white bg-teal-600 rounded-lg shadow hover:bg-teal-700" onclick="addItem('${product.productName}', '${counterId}', ${product.price})">Add Item</button>
+
+            <button type="button"
+              class="px-4 py-2 text-white rounded-lg shadow
+              ${isUnavailable ? "bg-gray-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"}"
+              onclick="${isUnavailable ? "" : `addItem('${product.productName}', '${counterId}')`}">
+              ${isUnavailable ? "Unavailable" : "Add Item"}
+            </button>
           </div>
         </div>
       `;
+
       grid.appendChild(card);
     });
   } catch (error) {
     console.error('Failed to load products:', error);
   }
 });
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const pickupDate = document.getElementById("pickupDate");
@@ -641,19 +669,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const notes = document.getElementById("orderNotes").value;
 
-foods.forEach(food => {
-  const card = document.createElement("div");
-
-  card.className = "food-card";
-
-  if (food.availability === "Unavailable") {
-      card.classList.add("opacity-50", "pointer-events-none");
-  }
-
-  card.innerHTML = `
-    <h3>${food.name}</h3>
-    <p>Status: ${food.availability}</p>
-  `;
-
-  foodContainer.appendChild(card);
-});
