@@ -11,9 +11,17 @@ use App\Models\FarmProduct;
 class FarmProductController extends Controller
 {
     public function index()
-    {
-        return response()->json(FarmProduct::all());
-    }
+{
+    $products = FarmProduct::leftJoin('farm_inventory', 'farm_products.productName', '=', 'farm_inventory.item_name')
+        ->select(
+            'farm_products.*',
+            'farm_inventory.status as inventory_status'
+        )
+        ->get();
+
+    return response()->json($products);
+}
+
 
      public function editName(Request $request, $id)
     {

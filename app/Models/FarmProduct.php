@@ -17,7 +17,6 @@ class FarmProduct extends Model
         'farmProduct_id',
         'productName',
         'productPicture',
-        'qty',
         'price',
         'measurement',
     ];
