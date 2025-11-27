@@ -201,20 +201,34 @@ Route::post('/webhook/paymongo', [PaymongoWebhookController::class, 'handleWebho
 // Notification
 
 Route::get('/notifications-counts', function () {
+    try {
+        // Count pending items
+        $food = FoodOrderModel::where('order_status', 'Pending')->count();
+        $farm = FarmOrderModel::where('order_status', 'Pending')->count();
+        $room = RoomModel::where('status', 'Pending')->count();
+        
+        // Note: Ensure 'EventModel' is the correct name (checked from previous turns)
+        $event = EventAdminModel::where('approval_status', 'Pending')->count(); 
+        
+        $approval = GoogleUser::where('id_status', 'Pending Validation')->count();
+        
+        // Note: Ensure 'Review' is the correct model name
+        $review = Review::where('review_status', 'Not Reviewed')->count();
 
-    $food = FoodOrderModel::where('order_status', 'Pending')->count();
-    $farm = FarmOrderModel::where('order_status', 'Pending')->count();
-    $room = RoomModel::where('status', 'Pending')->count();
-    $event = EventAdminModel::where('approval_status', 'Pending')->count();
-    $approval = GoogleUser::where('id_status', 'Pending Validation')->count();
-    $review = Review::where('review_status', 'Not Reviewed')->count();
+        // Debug Log
+        // Log::info("🔔 Notification Check: Food=$food, Farm=$farm");
 
-    return response()->json([
-        'food' => $food,
-        'farm' => $farm,
-        'room' => $room,
-        'event' => $event,
-        'approval' => $approval,
-        'review' => $review,
-    ]);
+        return response()->json([
+            'food' => $food,
+            'farm' => $farm,
+            'room' => $room,
+            'event' => $event,
+            'approval' => $approval,
+            'review' => $review,
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error("❌ Notification Error: " . $e->getMessage());
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
 });

@@ -2483,6 +2483,10 @@ pageManagementBtn.addEventListener('click', () => {
   pageManagementSubmenu.classList.toggle('hidden');
 });
 
+// Run immediately
+    checkNotifications();
+    // Run every 5 seconds
+    setInterval(checkNotifications, 5000);
 });
 
 
@@ -4006,17 +4010,26 @@ function attachHomeEventListeners() {
     if (saveBtn) saveBtn.onclick = saveHomeEvent;
 }
 
-// Notication
+// --- LIVE NOTIFICATIONS SYSTEM ---
 
-// ✅ Store previous counts to detect new activity
-let prevCounts = { food: 0, farm: 0, room: 0, event: 0, approval: 0, review: 0};
+// Store counts
+let prevCounts = { food: 0, farm: 0, room: 0, event: 0, approval: 0, review: 0 };
+let isFirstLoad = true; // Prevent toast spam on page refresh
 
-// ✅ Fetch notification counts from backend
+// 1. Fetch from Backend
 async function checkNotifications() {
   try {
     const res = await fetch('/api/notifications-counts');
-    const counts = await res.json();
+    
+    if (!res.ok) {
+        console.warn("⚠️ Notification API error:", res.status);
+        return;
+    }
 
+    const counts = await res.json();
+    console.log("🔔 Live Counts:", counts); // Debugging
+
+    // Update UI Badges
     updateBadge('badgeFood', counts.food);
     updateBadge('badgeFarm', counts.farm);
     updateBadge('badgeRoom', counts.room);
@@ -4024,40 +4037,53 @@ async function checkNotifications() {
     updateBadge('badgeApproval', counts.approval);
     updateBadge('badgeReview', counts.review);
 
+    // Show Toasts (Only if NOT first load AND count increased)
+    if (!isFirstLoad) {
+        if (counts.food > prevCounts.food) showToast("🔔 New Food Order Received!");
+        if (counts.farm > prevCounts.farm) showToast("🔔 New Farm Order Received!");
+        if (counts.room > prevCounts.room) showToast("🔔 New Room Reservation!");
+        if (counts.event > prevCounts.event) showToast("🔔 New Event Reservation!");
+        if (counts.approval > prevCounts.approval) showToast("🔔 New ID Approval Request!");
+        if (counts.review > prevCounts.review) showToast("🔔 New Review Posted!");
+    }
 
-    // ✅ Show toast only when new items arrive
-    if (counts.food > prevCounts.food) showToast("New Food Order Received!");
-    if (counts.farm > prevCounts.farm) showToast("New Farm Order Received!");
-    if (counts.room > prevCounts.room) showToast("New Room Reservation!");
-    if (counts.event > prevCounts.event) showToast("New Event Reservation!");
-    if (counts.approval > prevCounts.approval) showToast("New ID Approval Request!");
-    if (counts.review > prevCounts.review) showToast("New Customer Review!");
-
+    // Update state
     prevCounts = counts;
+    isFirstLoad = false;
 
   } catch (err) {
-    console.error("Notification check failed:", err);
+    console.error("❌ Notification check failed:", err);
   }
 }
 
-// ✅ Update badge element
+// 2. Helper to toggle badge visibility
 function updateBadge(id, count) {
   const badge = document.getElementById(id);
-  if (!badge) return;
+  if (!badge) {
+      // console.warn(`Badge element #${id} not found in HTML`);
+      return;
+  }
 
   if (count > 0) {
     badge.textContent = count;
     badge.classList.remove('hidden');
+    // Optional: Add bounce effect
+    badge.classList.add('animate-bounce'); 
   } else {
     badge.classList.add('hidden');
+    badge.classList.remove('animate-bounce');
   }
 }
 
-// ✅ Run repeatedly every 5 seconds
-setInterval(checkNotifications, 5000);
-
-// ✅ Run immediately on page load
-checkNotifications();
-
+if (typeof showToast === 'undefined') {
+    window.showToast = function(message) {
+        // Create simple toast if your main one isn't loaded
+        const div = document.createElement('div');
+        div.className = "fixed bottom-5 right-5 bg-teal-800 text-white px-6 py-3 rounded-lg shadow-xl z-50 animate-bounce";
+        div.innerText = message;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 4000);
+    }
+}
 
     

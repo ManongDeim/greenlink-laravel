@@ -204,10 +204,12 @@ function confirmOrder() {
 
 // Send to Laravel + login guard
 async function sendOrder(paymentMethod) {
-    console.log("sendOrder triggered with:", paymentMethod);
+    console.group("🚀 Debug: sendOrder Initiated");
+    console.log("1. Payment Method Selected:", paymentMethod);
 
     // 1. Login Check
     if (!window.userId) {
+        console.log("2. User ID missing, fetching info...");
         try {
             const userRes = await fetch("/api/user-info", {
                 credentials: "include",
@@ -217,26 +219,30 @@ async function sendOrder(paymentMethod) {
             });
 
             if (!userRes.ok) {
-                console.error("Failed to fetch user:", await userRes.text());
+                console.error("❌ Failed to fetch user:", await userRes.text());
                 openLoginModal();
+                console.groupEnd();
                 return;
             }
 
             const data = await userRes.json();
             window.userId = data.user.id;
             window.hasDiscount = (data.user.id_status === "Validated");
-            console.log("✅ Retrieved user_id:", window.userId, "Has Discount:", window.hasDiscount);
+            console.log("✅ User ID Retrieved:", window.userId);
         } catch (err) {
-            console.error("Error fetching user info:", err);
+            console.error("❌ Error fetching user info:", err);
             openLoginModal();
+            console.groupEnd();
             return;
         }
+    } else {
+        console.log("2. User ID already present:", window.userId);
     }
 
-    // 2. Prepare Order Data
+    // 2. Prepare Payload
     const orderData = cart.map(item => {
         let price = getPrice(item.name);
-        if (window.hasDiscount) price *= 0.8; // apply discount
+        if (window.hasDiscount) price *= 0.8;
         return {
             name: item.name,
             qty: item.qty,
@@ -244,9 +250,19 @@ async function sendOrder(paymentMethod) {
         };
     });
 
-    console.log("Sending order with user_id:", window.userId);
+    const payload = {
+        user_id: window.userId,
+        cart: orderData,
+        payment_method: paymentMethod,
+        scheduled_datetime: window.currentScheduledTime
+    };
 
+    console.log("3. Payload prepared:", payload);
+
+    // 3. Send Fetch Request
     try {
+        console.log("4. Sending POST request to /api/farmOrder/create-link...");
+        
         const res = await fetch("/api/farmOrder/create-link", {
             method: "POST",
             credentials: "include",
@@ -254,32 +270,31 @@ async function sendOrder(paymentMethod) {
                 "Content-Type": "application/json",
                 Accept: "application/json",
             },
-            body: JSON.stringify({
-                user_id: window.userId,
-                cart: orderData,
-                payment_method: paymentMethod,
-                scheduled_datetime: window.currentScheduledTime
-            }),
+            body: JSON.stringify(payload),
         });
 
+        console.log("5. HTTP Response Status:", res.status);
+        
         const data = await res.json();
-        console.log("API Response:", data);
+        console.log("6. API Response Body:", data);
 
-        // 3. Handle Response
+        // 4. Handle Response
         if (paymentMethod === 'Cash' && data.success) {
-            // Cash Success
+            console.log("✅ Cash Success Condition Met. Redirecting...");
             window.location.href = "../pages/paymentSuccess.html";
         } else if (data.payment_url) {
-            // PayMongo Success
+            console.log("✅ PayMongo Success Condition Met. Redirecting...");
             window.location.href = data.payment_url;
         } else {
+            console.warn("⚠️ Response success was false or missing URL:", data);
             showAlert(data.message || "No payment URL returned.");
         }
 
     } catch (err) {
-        console.error("Error:", err);
+        console.error("❌ Fetch/Network Error:", err);
         showAlert("Failed to place order.");
     }
+    console.groupEnd();
 }
 
 // Price list helper
@@ -365,24 +380,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // PayMongo Button
+    // DEBUGGING: Check if buttons exist
     const paymongoBtn = document.getElementById("paymongoBtn");
+    const cashBtn = document.getElementById("cashBtn");
+
+    console.log("Buttons Check:", { 
+        paymongoBtn: paymongoBtn ? "Found" : "Missing", 
+        cashBtn: cashBtn ? "Found" : "Missing" 
+    });
+
+    // PayMongo Button Listener
     if (paymongoBtn) {
         paymongoBtn.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            // Auth check handled in sendOrder, but basic check here:
-            // if (!window.userId) ... 
+            console.log("🖱️ PayMongo Button Clicked");
             sendOrder("PayMongo");
         });
     }
 
-    // Cash Button
-    const cashBtn = document.getElementById("cashBtn");
+    // Cash Button Listener
     if (cashBtn) {
         cashBtn.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (!confirm("Proceed with Cash Payment? You will pay at the farm.")) return;
+            console.log("🖱️ Cash Button Clicked");
+            if (!confirm("Proceed with Cash Payment? You will pay at the farm.")) {
+                console.log("❌ Cash Confirmation Cancelled");
+                return;
+            }
             sendOrder("Cash");
         });
     }
