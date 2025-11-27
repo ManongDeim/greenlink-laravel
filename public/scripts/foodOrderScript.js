@@ -1,6 +1,7 @@
  let productData = {};
 let userId = null;
 window.counters = {};
+window.orderDetails = null;
  
  function incrementCounter(id) {
       if (!window.counters[id]) window.counters[id] = 0;
@@ -139,40 +140,43 @@ function removeItem(index) {
 }
 
 // Confirm order
-// Replace your existing confirmOrder function with this:
+// Replace your existing confirmOrder() function entirely
 function confirmOrder() {
   const orderType = document.querySelector('input[name="orderType"]:checked')?.value;
   const date = document.getElementById('pickupDate').value;
   const hour = document.getElementById('hourSelect').value;
   const minute = document.getElementById('minuteSelect').value;
-  const period = document.getElementById('periodSelect').value; // AM/PM
+  const period = document.getElementById('periodSelect').value; 
   const notes = document.getElementById('orderNotes').value;
 
+  // 1. Validation
   if (!orderType || !date || !hour || !minute) {
     alert("Please select order type, date, and time before confirming.");
     return;
   }
-
   if (cart.length === 0) {
     showAlert("Your cart is empty!");
     return;
   }
 
-  // Convert to 24-hour format for MySQL
+  // 2. Format Time for MySQL (YYYY-MM-DD HH:mm:ss)
   let hour24 = parseInt(hour);
   if (period === "PM" && hour24 !== 12) hour24 += 12;
   if (period === "AM" && hour24 === 12) hour24 = 0;
+  
+  const formattedTime = `${String(hour24).padStart(2, '0')}:${minute}:00`;
+  const scheduledDateTime = `${date} ${formattedTime}`;
 
-  const scheduledDateTime = `${date} ${String(hour24).padStart(2, '0')}:${minute}:00`;
-
-  // ✅ Store these details globally so sendOrder can access them
+  // 3. ✅ SAVE TO GLOBAL VARIABLE
   window.orderDetails = {
     scheduled_datetime: scheduledDateTime,
-    order_type: orderType, // 'dinein' or 'pickup'
+    order_type: orderType,
     notes: notes
   };
 
-  // Build Summary HTML
+  console.log("Details Saved:", window.orderDetails); // Debugging Log
+
+  // 4. Update Payment Summary HTML
   let summary = "";
   let total = 0;
 
@@ -180,14 +184,9 @@ function confirmOrder() {
     let price = getPrice(item.name);
     let itemTotal = price * item.qty;
     total += itemTotal;
-
-    summary += `<div class="flex justify-between">
-      <span>${item.name} x ${item.qty}</span>
-      <span>₱${itemTotal.toFixed(2)}</span>
-    </div>`;
+    summary += `<div class="flex justify-between"><span>${item.name} x ${item.qty}</span><span>₱${itemTotal.toFixed(2)}</span></div>`;
   });
 
-  // Display Date/Time/Type in Summary
   summary += `
     <div class="mt-2 border-t pt-2 text-sm text-gray-600">
         <p><strong>Type:</strong> ${orderType.toUpperCase()}</p>
@@ -195,15 +194,14 @@ function confirmOrder() {
         ${notes ? `<p><strong>Note:</strong> ${notes}</p>` : ''}
     </div>
     <div class="mt-2 flex justify-between font-bold text-lg">
-      <span>Total:</span>
-      <span>₱${total.toFixed(2)}</span>
+      <span>Total:</span><span>₱${total.toFixed(2)}</span>
     </div>`;
 
   document.getElementById("paymentSummary").innerHTML = summary;
 
-  closeModal();
-  document.getElementById("paymentModal").classList.remove("hidden");
-  document.body.classList.add("overflow-hidden");
+  // 5. Switch Modals
+  closeModal(); // Close Cart Modal
+  document.getElementById("paymentModal").classList.remove("hidden"); // Open Payment Modal
 }
 
 
@@ -211,63 +209,66 @@ function confirmOrder() {
 
 let hasDiscount = false; // Set this dynamically if needed
 
+// Replace your existing sendOrder() function entirely
 async function sendOrder(paymentMethod) {
-  // fetch user info to check discount
+  
+  // 1. Login Check
   if (!window.userId) {
-    const res = await fetch("https://greenlinklolasayong.site/api/user-info", { credentials: "include" });
-    if (res.ok) {
-      const data = await res.json();
-      window.userId = data.user.id;
-      hasDiscount = data.user.id_status === "Validated"; // check if validated senior/PWD
-    }
+    try {
+      const res = await fetch("https://greenlinklolasayong.site/api/user-info", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        window.userId = data.user.id;
+        hasDiscount = data.user.id_status === "Validated"; 
+      } else {
+        openLoginModal();
+        return;
+      }
+    } catch(e) { console.error(e); openLoginModal(); return; }
   }
 
-  const orderData = cart.map(item => {
+  // 2. Check if order details exist
+  if (!window.orderDetails) {
+    alert("Error: Order details missing. Please try checkout again.");
+    closePaymentModal();
+    return;
+  }
+
+  // 3. Prepare Cart Items
+  const orderCart = cart.map(item => {
     let price = getPrice(item.name);
-    if (hasDiscount) price *= 0.8; // apply discount
+    if (hasDiscount) price *= 0.8; 
     return { name: item.name, qty: item.qty, price };
   });
 
-  // Calculate total
-  const total = orderData.reduce((sum, i) => sum + i.price * i.qty, 0);
-
-  // Update payment summary
-  let summaryHTML = "";
-  orderData.forEach(item => {
-    summaryHTML += `<div class="flex justify-between">
-      <span>${item.name} x ${item.qty}</span>
-      <span>₱${(item.price * item.qty).toFixed(2)}</span>
-    </div>`;
+  console.log("Sending Data:", {
+    user_id: window.userId,
+    cart: orderCart,
+    ...window.orderDetails // Debugging Log
   });
-  summaryHTML += `<div class="mt-2 flex justify-between font-bold">
-      <span>Total:</span>
-      <span>₱${total.toFixed(2)}</span>
-  </div>`;
-  if (hasDiscount) {
-    summaryHTML += `<p class="text-green-600 mt-1 font-semibold">20% Discount Applied!</p>`;
-  }
-  document.getElementById("paymentSummary").innerHTML = summaryHTML;
 
-  // send to backend
+  // 4. Send to Laravel
   fetch("https://greenlinklolasayong.site/api/foodOrder/create-link", {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ 
-        user_id: window.userId, 
-        cart: orderData, 
-        payment_method: paymentMethod,
-        // ✅ Add new fields here:
-        scheduled_datetime: window.orderDetails.scheduled_datetime,
-        order_type: window.orderDetails.order_type,
-        notes: window.orderDetails.notes
+    body: JSON.stringify({
+      user_id: window.userId,
+      cart: orderCart,
+      payment_method: paymentMethod,
+      // Pass the extra fields
+      scheduled_datetime: window.orderDetails.scheduled_datetime,
+      order_type: window.orderDetails.order_type,
+      notes: window.orderDetails.notes
     })
-})
+  })
   .then(res => res.json())
   .then(data => {
+    console.log("Response:", data);
     if (data.payment_url) window.location.href = data.payment_url;
     else alert("No payment URL returned.");
-  });
+  })
+  .catch(err => console.error("Fetch Error:", err));
 }
 
 
