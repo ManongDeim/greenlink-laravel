@@ -3813,12 +3813,37 @@ async function markReviewed(id) {
   fetchAndRenderReviews(getCurrentFilters());
 }
 
-async function deleteReview(id) {
-  if (!confirm("Are you sure you want to delete this review?")) return;
+function deleteReview(id) {
+  showReviewDeletePopup(id);
+}
+
+async function deleteReviewConfirmed(id) {
   console.log("Deleting review:", id);
   await fetch(`/api/reviews/${id}`, { method: "DELETE" });
+
+  // Refresh UI
   fetchAndRenderReviews(getCurrentFilters());
 }
+
+let pendingReviewDeleteId = null;
+
+function showReviewDeletePopup(id) {
+  pendingReviewDeleteId = id;
+  document.getElementById("reviewDeletePopup").classList.remove("hidden");
+}
+
+function hideReviewDeletePopup() {
+  pendingReviewDeleteId = null;
+  document.getElementById("reviewDeletePopup").classList.add("hidden");
+}
+
+document.getElementById("cancelReviewDeleteBtn").addEventListener("click", hideReviewDeletePopup);
+
+document.getElementById("confirmReviewDeleteBtn").addEventListener("click", () => {
+  deleteReviewConfirmed(pendingReviewDeleteId);
+  hideReviewDeletePopup();
+});
+
 
 function getCurrentFilters() {
   const typeInput = document.getElementById("filterType");
@@ -4079,7 +4104,7 @@ if (typeof showToast === 'undefined') {
     window.showToast = function(message) {
         // Create simple toast if your main one isn't loaded
         const div = document.createElement('div');
-        div.className = "fixed bottom-5 right-5 bg-teal-800 text-white px-6 py-3 rounded-lg shadow-xl z-50 animate-bounce";
+        div.className = "fixed z-50 px-6 py-3 text-white bg-teal-800 rounded-lg shadow-xl bottom-5 right-5 animate-bounce";
         div.innerText = message;
         document.body.appendChild(div);
         setTimeout(() => div.remove(), 4000);
