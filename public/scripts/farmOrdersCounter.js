@@ -412,9 +412,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
           ${
             isUnavailable
-              ? `<div class="absolute inset-0 flex items-center justify-center bg-black/60 text-white font-bold text-lg">
-                   UNAVAILABLE
-                 </div>`
+              ? `<span class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded z-10">Unavailable</span>`
               : ""
           }
         </div>
