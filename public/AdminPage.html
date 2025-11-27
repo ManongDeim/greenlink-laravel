@@ -42,25 +42,57 @@
         </button>
         
         <!-- Food Orders -->
-<button data-section="foodOrders" id="foodOrdersBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
-  🛒 Food Orders <span id="badgeFood" class="hidden notif-badge">0</span>    
+<button data-section="foodOrders" id="foodOrdersBtn" 
+  class="relative flex items-center justify-between w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+  
+  <div class="flex items-center gap-2">
+    <span>🛒</span> <span>Food Orders</span>
+  </div>
+
+  <span id="badgeFood" 
+    class="hidden flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-600 rounded-full shadow-sm">
+    0
+  </span>    
 </button>
 
-
-<!-- Farm Orders -->
 <button data-section="farmOrders" id="farmOrdersBtn"
-  class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
-  🚜 Farm Orders <span id="badgeFarm" class="hidden notif-badge">0</span>  
+  class="relative flex items-center justify-between w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+  
+  <div class="flex items-center gap-2">
+    <span>🚜</span> <span>Farm Orders</span>
+  </div>
+
+  <span id="badgeFarm" 
+    class="hidden flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-600 rounded-full shadow-sm">
+    0
+  </span>
 </button>
 
+<button data-section="room" id="roomReservationsBtn" 
+  class="relative flex items-center justify-between w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+  
+  <div class="flex items-center gap-2">
+    <span>🏡</span> <span>Room Reservation</span>
+  </div>
 
-        <button data-section="room" id="roomReservationsBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
-          🏡 Room Reservation <span id="badgeRoom" class="hidden notif-badge">0</span>  
-        </button>
+  <span id="badgeRoom" 
+    class="hidden flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-600 rounded-full shadow-sm">
+    0
+  </span>
+</button>
         
-        <button data-section="event" id="eventReservationsBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
-          📅 Event Reservation <span id="badgeEvent" class="hidden notif-badge">0</span>  
-        </button>
+<button data-section="event" id="eventReservationsBtn" 
+  class="relative flex items-center justify-between w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+  
+  <div class="flex items-center gap-2">
+    <span>📅</span> <span>Event Reservation</span>
+  </div>
+
+  <span id="badgeEvent" 
+    class="hidden flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-600 rounded-full shadow-sm">
+    0
+  </span>
+</button>
 
       
 
@@ -85,13 +117,31 @@
     </div>
 
     
-        <button data-section="idApproval" id="idApprovalBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
-          🪪 PWD/Senior Citizen Approval <span id="badgeApproval" class="hidden notif-badge">0</span>  
-        </button>
+        <button data-section="idApproval" id="idApprovalBtn" 
+  class="relative flex items-center justify-between w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+  
+  <div class="flex items-center gap-2">
+    <span>🪪</span> <span>PWD/Senior Approval</span>
+  </div>
 
-        <button data-section="reviews" id="idApprovalBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
-          📝 Customer Reviews <span id="badgeReviews" class="hidden notif-badge">0</span>  
-        </button> 
+  <span id="badgeApproval" 
+    class="hidden flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-600 rounded-full shadow-sm">
+    0
+  </span>
+</button>
+
+<button data-section="reviews" id="reviewsBtn" 
+  class="relative flex items-center justify-between w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
+  
+  <div class="flex items-center gap-2">
+    <span>📝</span> <span>Customer Reviews</span>
+  </div>
+
+  <span id="badgeReview" 
+    class="hidden flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-600 rounded-full shadow-sm">
+    0
+  </span>
+</button>
 
         <button data-section="homePage" id="idApprovalBtn" class="flex items-center w-full px-4 py-2 text-gray-700 transition bg-gray-100 border border-transparent rounded-lg sidebar-btn hover:bg-gray-200 hover:border-gray-400">
           🛖 Home Page Events

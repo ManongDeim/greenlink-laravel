@@ -210,7 +210,10 @@ Route::get('/notifications-counts', function () {
         // Note: Ensure 'EventModel' is the correct name (checked from previous turns)
         $event = EventAdminModel::where('approval_status', 'Pending')->count(); 
         
-        $approval = GoogleUser::where('id_status', 'Pending Validation')->count();
+       $approval = GoogleUser::where('id_status', 'Pending Validation')
+                              ->whereNotNull('id_photo') 
+                              ->where('id_photo', '!=', '') 
+                              ->count();
         
         // Note: Ensure 'Review' is the correct model name
         $review = Review::where('review_status', 'Not Reviewed')->count();
