@@ -132,6 +132,19 @@
 
     <!-- Modals -->
     
+<div id="idPopup" 
+     class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-[9999]">
+  <div class="p-6 text-center bg-white rounded-lg shadow-lg w-80">
+    <p id="idPopupMessage" class="mb-4 text-gray-800"></p>
+    <button onclick="closeIdPopup()" 
+            class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+      OK
+    </button>
+  </div>
+</div>
+
+
+    
 <!-- Reservation Pop-Up -->
   <div id="reservationModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-white/30 backdrop-blur-md">
     <!-- Pop-Up Content -->

@@ -101,14 +101,17 @@ try {
     if (data.user.avatar) avatarPreview.src = data.user.avatar;
     updateDropdownName(data.user.name, data.user.avatar);
     console.log("👤 Updated dropdown and preview");
-
-    alert("Profile updated successfully!");
+    
+    showIdPopup("Profile updated successfully!");
   } else {
     console.warn("⚠️ Update failed:", data.message);
+    showIdPopup("Profile update failed: " + data.message);
   }
 } catch (err) {
   console.error("💥 Error during profile update:", err);
+  showIdPopup("Profile update failed. Check console for details.");
 }
+
 
 });
 
@@ -150,35 +153,36 @@ try {
   });
   const data = await res.json();
 
-  if (data.success) {
-    idUpload.classList.add("hidden");
-    submitIDBtn.classList.add("hidden");
-    statusBox.classList.remove("hidden");
+ if (data.success) {
+  idUpload.classList.add("hidden");
+  submitIDBtn.classList.add("hidden");
+  statusBox.classList.remove("hidden");
 
-    const user = data.user;
-    let statusText = user.id_status === "Pending Validation"
-      ? "Pending Validation"
-      : user.id_status === "Validated"
-      ? "Submission Validated"
-      : "Submission Rejected";
+  const user = data.user;
+  let statusText = user.id_status === "Pending Validation"
+    ? "Pending Validation"
+    : user.id_status === "Validated"
+    ? "Submission Validated"
+    : "Submission Rejected";
 
-    statusBox.innerHTML = `Status: <span class="font-medium">${statusText}</span>`;
+  statusBox.innerHTML = `Status: <span class="font-medium">${statusText}</span>`;
 
-    if (user.id_status === "Validated" && user.id_photo) {
-      const img = document.createElement("img");
-      img.src = user.id_photo;
-      img.className = "object-cover w-40 h-40 mt-2 border rounded-lg";
-      img.alt = "Validated ID";
-      statusBox.appendChild(img);
-    }
-
-    alert("Your ID has been submitted.");
-  } else {
-    alert("Upload failed: " + data.message);
+  if (user.id_status === "Validated" && user.id_photo) {
+    const img = document.createElement("img");
+    img.src = user.id_photo;
+    img.className = "object-cover w-40 h-40 mt-2 border rounded-lg";
+    img.alt = "Validated ID";
+    statusBox.appendChild(img);
   }
+
+  // ✅ FIXED: Add message
+  showIdPopup("Your ID has been submitted.");
+} else {
+  showIdPopup("Upload failed: " + data.message);
+}
 } catch (err) {
   console.error("💥 Error uploading ID:", err);
-  alert("Upload failed. Check console for details.");
+  showIdPopup("Upload failed. Check console for details.");
 }
 
 });
@@ -198,6 +202,14 @@ if (avatarImg && newAvatar) avatarImg.src = newAvatar;
 
 });
 
+function showIdPopup(message) {
+  document.getElementById("idPopupMessage").textContent = message;
+  document.getElementById("idPopup").classList.remove("hidden");
+}
+
+function closeIdPopup() {
+  document.getElementById("idPopup").classList.add("hidden");
+}
 
 function openReserModal() {
       document.getElementById('reservationModal').classList.remove('hidden');
