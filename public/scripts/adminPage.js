@@ -4085,5 +4085,3 @@ if (typeof showToast === 'undefined') {
         setTimeout(() => div.remove(), 4000);
     }
 }
-
-    
